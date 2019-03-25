@@ -1,0 +1,36 @@
+{
+  "mages": [
+    {
+      "name":"Guérisseur",
+      "hasCollectAbility": false,
+      "collectAbility": {
+        "type": "exclusive",
+        "collectList": ["life", "death"]
+      },
+      "hasPowers": true,
+      "powerList" : [
+        {
+          "cost": {
+            "selfTap": true,
+            "calm": 1,
+            "gold": 1
+          },
+          "reward": {
+            "selfUntap": false,
+            "untap": true,
+            "life": 2,
+          }
+        }
+      ],
+      "isDragon": false,
+      "isCreature": false,
+      "placementCost": {
+
+      },
+      "hasVictoryPoint": {
+        "basePoints": 0,
+        "conditionalPoints": "gold",
+      },
+    }
+  ]
+}
