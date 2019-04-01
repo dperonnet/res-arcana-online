@@ -1,34 +1,28 @@
-html, body, #root {
-  height: 100%;
-}
-
-body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
-    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-* {
-  margin: 0;
-  padding: 0;
-}
-
 .container {
+  padding: 0;
+	height: 100%;
+  min-height: 100%;
+	display: flex;
+	flex-direction: column;
+}
+
+.playContainer {
   position:absolute;
-  width:100%;
   height:100%;
+  width:100%;
 
   display: flex;
   flex-direction:column;
 }
 
 .topPanel {
+	display: flex;
+	flex-direction: column;
   width: 100%;
   height: 150px;
   color: #c1c1c1;
   background: #1f282d;
+  padding: 15px;
 }
 
 .centerPanel {
@@ -49,10 +43,13 @@ body {
   color: #c1c1c1;
   background: #1f282d;
   display:block;
+  padding: 15px;
 }
 
 .playersBoardPannel {
-
+  flex:1;
+  background: #ccc;
+  padding: 15px;
 }
 
 .card {
@@ -88,4 +85,8 @@ body {
 img {
   border-radius: 5px 5px 0 0;
   width: 100%;
+}
+
+.red {
+  background: red;
 }

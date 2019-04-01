@@ -1,0 +1,78 @@
+.formPanel {
+  border-width: .2rem .2rem 0;
+  border-radius: 8px 8px 0 0;
+  position: relative;
+  color: #212529;
+  padding: 1rem;
+  border: .2rem solid #ececec;
+  border-radius: 8px;
+  margin: 20px auto;
+}
+
+.quantifier {
+  width: 45px !important;
+  text-align: center;
+  flex: 0 1 auto !important;
+}
+
+.essenceList {
+    display: inline-flex;
+    margin: 0 10px;
+}
+
+.essenceList .input-group-append {
+    line-height: normal;
+    height: 25px;
+    width: 25px;
+    margin-top: 3px;
+}
+
+.essenceList .input-group-append{
+  margin-top: 0;
+}
+.essenceList .btn {
+    margin: 5px 0;
+    padding: 0;
+    width: 20px;
+    height: 20px;
+}
+.essenceList .btn span {
+  margin-top: -4px;
+  display: block;
+}
+.essenceList .input-group-prepend {
+  margin-right: 2px;
+}
+.help-card-min {
+    background-image: url("../image/help-card-min.png");
+    background-repeat: no-repeat;
+    display: block;
+    width: 32px;
+    height: 32px;
+    background-size: 500px;
+    padding-top: 1px;
+    padding-left: 10px;
+    font-weight: bold;
+    font-size: larger;
+    color: ghostwhite;
+}
+
+.elan {
+  background-position: -23px -31px;
+}
+
+.life {
+  background-position: -65px -31px;
+}
+
+.calm {
+  background-position: -110px -31px;
+}
+
+.death {
+  background-position: -154px -31px;
+}
+
+.gold {
+  background-position: -199px -31px;
+}
