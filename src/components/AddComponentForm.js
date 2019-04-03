@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
-import { Button, Form, InputGroup, FormControl} from 'react-bootstrap'
+import { Button, ButtonToolbar, Form, InputGroup, FormControl} from 'react-bootstrap'
 import '../assets/style/form.css';
+import { COMPONENTS_TYPE } from './DatabaseEditor'
 
 export default class AddComponentForm extends Component {
   createEvent(a,b,c,d) {
@@ -15,13 +16,7 @@ export default class AddComponentForm extends Component {
   }
 
   render() {
-    const componentsType = [
-      {id: "artefact", name:"Artefact"},
-      {id: "mage", name:"Mage"},
-      {id: "magicItem", name:"Magic Item"},
-      {id: "monument", name:"Monument"},
-      {id: "placeOfPower", name:"Place of Power"}
-    ];
+    const componentsType = JSON.parse(JSON.stringify(COMPONENTS_TYPE));
 
     return (
       <div className="formPanel">
@@ -72,6 +67,10 @@ export default class AddComponentForm extends Component {
               onChange={this.props.onChange}/>
           </InputGroup>
 
+          <ButtonToolbar>
+            <Button onClick={this.props.onSave}>Save to LocalStorage</Button>
+            <Button onClick={this.props.onDelete}>Delete</Button>
+          </ButtonToolbar>
         </form>
       </div>
     );

@@ -10,17 +10,24 @@ export default class Game extends Component {
       options: {
         cardSize: "smallCard",
         playerNumber : 0,
-      }
+      },
+      history: [],
     };
   }
 
   handlePlayerSetup(i) {
     const options = {...this.state.options};
     options.playerNumber = i;
-    this.setState({options});
+    const firstTurn = initGameComponents(i);
+    const history = this.state.history.slice(this.state.history.length-1, 0, firstTurn);
+    console.log(this.state);
+    this.setState({options: options, history: history});
   }
 
   render() {
+    const history = this.state.history;
+    const currentTurn = history.length > 0 ? history[history.length - 1] : null;
+
     return (
       <div className="container">
         <div className="topPanel">
@@ -33,6 +40,7 @@ export default class Game extends Component {
           <CommonBoard />
           <PlayersBoard
             options={this.state.options}
+            turn={currentTurn}
           />
         </div>
       </div>
@@ -41,10 +49,6 @@ export default class Game extends Component {
 }
 
 class PlayerSetup extends Component {
-  constructor(props) {
-    super(props);
-  }
-
   render() {
     const playerNumbers = [2,3,4];
     const selectPlayers = playerNumbers.map((key, index) => {
@@ -85,6 +89,23 @@ function PlayerButton(props) {
   );
 }
 
+function initGameComponents(playerNumber) {
+  let monuments = Array(8).fill(null);
+  let placesOfPower = Array(5).fill(null);
+  let magicItems = Array(8).fill(null);
+  let commonBoard = {
+    monuments: monuments,
+    placesOfPower: placesOfPower,
+    magicItems: magicItems
+  };
+  let playerBoards = Array(playerNumber).fill(null);
+  let gameComponents = {
+    commonBoard: commonBoard,
+    playerBoards: playerBoards
+  }
+  return gameComponents;
+}
+
 class PlayersBoard extends Component {
   constructor(props) {
     super(props);
@@ -92,13 +113,9 @@ class PlayersBoard extends Component {
     this.passAction = this.passAction.bind(this);
   }
 
-  playAction(event) {
+  playAction(event) {}
 
-  }
-
-  passAction(event) {
-
-  }
+  passAction(event) {}
 
   render() {
     const playerNumber = this.props.options.playerNumber;
@@ -109,6 +126,7 @@ class PlayersBoard extends Component {
         <span> playerNumber = {playerNumber} !</span>
         {players.map((player, index) => (
           <PlayerBoard
+            key={index}
             player={player}
             playAction={this.playAction}
             passAction={this.passAction} />

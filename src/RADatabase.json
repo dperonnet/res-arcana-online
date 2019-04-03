@@ -1,0 +1,136 @@
+{
+  "artefactList": [{
+    "componentName": "Poutre",
+    "componentType": "artefact",
+    "hasStandardCollectAbility": true,
+    "standardCollectAbility": {
+      "multipleCollectOptions": true,
+      "essenceList": {
+        "elan": 0,
+        "life": 3,
+        "calm": 0,
+        "death": 1,
+        "gold": 0,
+        "any": 0,
+        "anyButGold": 0,
+        "anyButDeathGold": 0
+      }
+    },
+    "hasSpecificCollectAbility": false,
+    "specificCollectAbility": {},
+    "hasPowers": true,
+    "powerList" : [
+      {
+        "cost": {
+          "selfTap": true,
+          "calm": 1,
+          "gold": 1
+        },
+        "reward": {
+          "selfUntap": false,
+          "untap": true,
+          "life": 2
+        }
+      }
+    ],
+    "isDragon": false,
+    "isCreature": false,
+    "placementCost": {
+
+    },
+    "hasVictoryPoint": {
+      "basePoints": 0,
+      "conditionalPoints": "gold"
+    }
+  },{
+    "componentName": "Lance",
+    "componentType": "artefact",
+    "hasStandardCollectAbility": false,
+    "standardCollectAbility": {
+      "multipleCollectOptions": false,
+      "essenceList": {
+        "elan": 0,
+        "life": 0,
+        "calm": 0,
+        "death": 0,
+        "gold": 0,
+        "any": 0,
+        "anyButGold": 0,
+        "anyButDeathGold": 0
+      }
+    },
+    "hasSpecificCollectAbility": true,
+    "specificCollectAbility": {},
+    "hasPowers": true,
+    "powerList" : [
+      {
+        "cost": {
+          "selfTap": true,
+          "calm": 1,
+          "gold": 1
+        },
+        "reward": {
+          "selfUntap": false,
+          "untap": true,
+          "life": 2
+        }
+      }
+    ],
+    "isDragon": false,
+    "isCreature": false,
+    "placementCost": {
+
+    },
+    "hasVictoryPoint": {
+      "basePoints": 0,
+      "conditionalPoints": "gold"
+    }
+  }],
+  "mageList": [{
+    "componentName": "Guérisseur",
+    "componentType": "mage",
+    "hasStandardCollectAbility": true,
+    "standardCollectAbility": {
+      "multipleCollectOptions": true,
+      "essenceList": {
+        "elan": 1,
+        "life": 0,
+        "calm": 0,
+        "death": 0,
+        "gold": 0,
+        "any": 0,
+        "anyButGold": 2,
+        "anyButDeathGold": 0
+      }
+    },
+    "hasSpecificCollectAbility": false,
+    "specificCollectAbility": {},
+    "hasPowers": true,
+    "powerList" : [
+      {
+        "cost": {
+          "selfTap": true,
+          "calm": 1,
+          "gold": 1
+        },
+        "reward": {
+          "selfUntap": false,
+          "untap": true,
+          "life": 2
+        }
+      }
+    ],
+    "isDragon": false,
+    "isCreature": false,
+    "placementCost": {
+
+    },
+    "hasVictoryPoint": {
+      "basePoints": 0,
+      "conditionalPoints": "gold"
+    }
+  }],
+  "magicItemList": [],
+  "monumentList": [],
+  "placeOfPowerList": []
+}

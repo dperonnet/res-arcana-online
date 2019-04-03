@@ -7,7 +7,7 @@ export class Card extends React.Component {
     const classes = `card ${this.props.options.cardSize}`;
     return (
       <div className={classes}>
-        <img src={card} />
+        <img src={card} alt=""/>
       </div>
     );
   }
