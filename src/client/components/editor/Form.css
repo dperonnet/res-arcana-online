@@ -56,7 +56,7 @@ h2 {
   margin-right: 2px;
 }
 .help-card-min {
-    background-image: url("../image/help-card-min.png");
+    background-image: url("../../assets/image/help-card-min.png");
     background-repeat: no-repeat;
     display: block;
     width: 32px;

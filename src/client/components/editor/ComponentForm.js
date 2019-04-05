@@ -1,9 +1,9 @@
 import React, { Component } from 'react'
 import { Button, ButtonToolbar, Form, InputGroup, FormControl} from 'react-bootstrap'
-import '../assets/style/form.css';
-import { COMPONENTS_TYPE } from './DatabaseEditor'
+import { COMPONENTS_TYPE } from './EditorConstants'
+import './Form.css';
 
-export default class AddComponentForm extends Component {
+export default class ComponentForm extends Component {
   createEvent(a,b,c,d) {
     return {
       target: {
