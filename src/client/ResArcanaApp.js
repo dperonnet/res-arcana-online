@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import DatabaseEditor from './components/editor/DatabaseEditor';
-import Game from './components/game/Game';
+import DashBoard from './components/game/DashBoard';
 import './assets/style/index.css';
 
 export default class ResArcanaApp extends Component {
@@ -14,6 +14,6 @@ export default class ResArcanaApp extends Component {
 
   render() {
     const { mode } = this.state;
-    return mode === 'editor' ? <DatabaseEditor /> : <Game />;
+    return mode === 'editor' ? <DatabaseEditor /> : <DashBoard />;
   }
 }
