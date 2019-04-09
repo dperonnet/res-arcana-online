@@ -1,11 +1,10 @@
 import React, { Component } from 'react';
-import GameBoard from './GameBoard';
-import LoginPanel from './components/LoginPanel'
-import '../../assets/style/dashboard.css';
+import LoginPanel from './LoginPanel'
+import './dashboard.css';
 
 export default class DashBoard extends Component {
   render() {
-    const { history, options } = this.props;
+    const { options } = this.props;
     return (
       <div className="container">
         <LoginPanel

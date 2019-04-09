@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Button, Col, InputGroup, Form, FormControl } from 'react-bootstrap'
-import { VERIFY_USER } from '../../../../server/Events';
+import { VERIFY_USER } from '../../../server/Events';
 
 export default class LoginForm extends Component {
   constructor(props){
@@ -27,12 +27,11 @@ export default class LoginForm extends Component {
   }
 
   setUser = ({user, isUser})=>{
-    console.log(user, isUser);
     if(isUser){
       this.setError("User name taken");
     }else{
+      this.setError("");
       this.props.setUser(user);
-        this.setError("");
     }
   }
 

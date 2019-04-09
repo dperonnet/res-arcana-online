@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
 import io from 'socket.io-client';
-import { LOGOUT, USER_CONNECTED } from '../../../../server/Events';
+import { LOGOUT, USER_CONNECTED } from '../../../server/Events';
 import LoginForm from './LoginForm';
-import LogoutForm from './LogoutForm'
 import ChatContainer from './chats/ChatContainer'
 
 const socketUrl = "http://127.0.0.1:3231"
@@ -10,14 +9,22 @@ const socketUrl = "http://127.0.0.1:3231"
 export default class LoginPanel extends Component {
   constructor(props){
     super(props);
+    this.state = {
+      socket:null,
+      user:null
+    };
+  }
+
+  componentWillMount() {
+		this.initSocket();
+	}
+
+  initSocket = ()=>{
     const socket = io(socketUrl);
     socket.on('connect', ()=>{
       console.log("Connected");
-    })
-    this.state = {
-      socket:socket,
-      user:null
-    }
+    });
+    this.setState({socket});
   }
 
   setUser = (user)=>{
@@ -38,21 +45,18 @@ export default class LoginPanel extends Component {
 
   render() {
     const { socket, user } = this.state;
-    console.log(user);
     return (
-      <>
+			<div className="container">
         {
-          socket ? (
-            !user ?
-              <LoginForm
-                socket={socket}
-                setUser={this.setUser}
-              />
-            :
-              <ChatContainer socket={socket} user={user} logout={this.logout} />
-          ) : null
+          !user ?
+            <LoginForm
+              socket={socket}
+              setUser={this.setUser}
+            />
+          :
+            <ChatContainer socket={socket} user={user} logout={this.logout} />
         }
-      </>
+      </div>
     );
   }
 }
