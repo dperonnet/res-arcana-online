@@ -2,9 +2,23 @@ import React, { Component } from 'react';
 import { FaAngleDown, FaEject, FaListUl, FaSearch } from 'react-icons/fa';
 
 export default class SideBar extends Component {
+  constructor(props){
+    super(props);
+    this.state = {
+      reciever:""
+    }
+  }
+
+  handleSubmit = (e)=>{
+    e.preventDefault();
+    const { reciever } = this.state;
+    const { onSendPrivateMessage } = this.props;
+    onSendPrivateMessage(reciever);
+  }
 
   render() {
     const { activeChat, chats, logout, setActiveChat, user } = this.props;
+    const { reciever } = this.state;
     return (
       <div id="side-bar">
         <div className="heading">
@@ -13,23 +27,27 @@ export default class SideBar extends Component {
             <FaListUl />
           </div>
         </div>
-        <div className="search">
+        <form onSubmit={this.handleSubmit} className="search">
           <i className="search-icon"><FaSearch /></i>
-          <input placeholder="Search" type="text" />
+          <input
+            placeholder="Search"
+            type="text"
+            value={reciever}
+            onChange={(e)=>{this.setState({reciever:e.target.value})}}/>
           <div className="plus"></div>
-        </div>
+        </form>
         <div
          className="users"
          ref='users'
          onClick={(e)=>{ (e.target === this.refs.user) && setActiveChat(null) }}>
-         
+
            {
              chats.map((chat)=>{
                if(chat.name){
                  const lastMessage = chat.messages[chat.messages.length - 1];
-                 const user = chat.users.find(({name})=>{
-                   return name !== this.props.name
-                 }) || { name:"Community" };
+                 const chatSideName = chat.users.find((name)=>{
+                   return name !== user.name
+                 }) || "Community";
                  const classNames = (activeChat && activeChat.id === chat.id) ? 'active' : '';
 
                  return (
@@ -38,9 +56,9 @@ export default class SideBar extends Component {
                     className={`user ${classNames}`}
                     onClick={ ()=>{ setActiveChat(chat) } }
                     >
-                    <div className="user-photo">{user.name[0].toUpperCase()}</div>
+                    <div className="user-photo">{chatSideName[0].toUpperCase()}</div>
                     <div className="user-info">
-                      <div className="name">{user.name}</div>
+                      <div className="name">{chatSideName}</div>
                       {lastMessage && <div className="last-message">{lastMessage.message}</div>}
                     </div>
 

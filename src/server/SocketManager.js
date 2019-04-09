@@ -1,6 +1,6 @@
 const io = require('./server.js').io;
 
-const { COMMUNITY_CHAT, LOGOUT, MESSAGE_RECIEVED, MESSAGE_SENT,
+const { COMMUNITY_CHAT, LOGOUT, MESSAGE_RECIEVED, MESSAGE_SENT, PRIVATE_MESSAGE,
   TYPING, USER_CONNECTED, USER_DISCONNECTED, VERIFY_USER } = require('./Events');
 
 const { createChat, createMessage, createUser } = require('./Factories');
@@ -20,11 +20,12 @@ module.exports = function(socket) {
     if(isUser(connectedUsers, nickname)){
       callback({isUser:true, user:null});
     }else{
-      callback({isUser:false, user:createUser({name:nickname})});
+      callback({isUser:false, user:createUser({name:nickname, socketId:socket.id})});
     }
   });
 
   socket.on(USER_CONNECTED, (user)=>{
+    user.socketId = socket.id;
     connectedUsers = addUser(connectedUsers, user);
     socket.user = user;
 
@@ -61,6 +62,14 @@ module.exports = function(socket) {
 		sendTypingFromUser(chatId, isTyping);
 	});
 
+	socket.on(PRIVATE_MESSAGE, ({reciever, sender})=>{
+		if(reciever in connectedUsers){
+      const newChat = createChat({name:`${reciever}&${sender}`, users:[reciever, sender]});
+      const recieverSocket = connectedUsers[reciever].socketId;
+      socket.to(recieverSocket).emit(PRIVATE_MESSAGE, newChat);
+      socket.emit(PRIVATE_MESSAGE, newChat);
+    }
+	});
 }
 
 function sendTypingToChat(user){

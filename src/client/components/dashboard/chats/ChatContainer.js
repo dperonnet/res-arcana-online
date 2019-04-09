@@ -3,7 +3,7 @@ import ChatHeading from './ChatHeading';
 import Messages from './Messages';
 import MessageInput from './MessageInput';
 import SideBar from './SideBar';
-import { COMMUNITY_CHAT, MESSAGE_RECIEVED, MESSAGE_SENT, TYPING } from '../../../../server/Events';
+import { COMMUNITY_CHAT, MESSAGE_RECIEVED, MESSAGE_SENT, PRIVATE_MESSAGE, TYPING } from '../../../../server/Events';
 
 export default class ChatContainer extends Component {
   constructor(props){
@@ -18,6 +18,20 @@ export default class ChatContainer extends Component {
   componentDidMount() {
     const { socket } = this.props;
     socket.emit(COMMUNITY_CHAT, this.resetChat);
+    this.initSocket(socket);
+  }
+
+  initSocket = (socket)=>{
+    socket.emit(COMMUNITY_CHAT, this.resetChat);
+    socket.on(PRIVATE_MESSAGE, this.addChat);
+    socket.on('connect', ()=>{
+      socket.emit(COMMUNITY_CHAT, this.resetChat)
+    });
+  }
+
+  sendOpenPrivateMessage = (reciever)=>{
+    const { socket, user } = this.props;
+    socket.emit(PRIVATE_MESSAGE, {reciever, sender:user.name});
   }
 
   resetChat = (chat)=>{
@@ -97,6 +111,7 @@ export default class ChatContainer extends Component {
             user={user}
             activeChat={activeChat}
             setActiveChat={this.setActiveChat}
+            onSendPrivateMessage={this.sendOpenPrivateMessage}
             />
             <div className="chat-room-container">
               {
