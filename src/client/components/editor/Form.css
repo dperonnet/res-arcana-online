@@ -2,8 +2,10 @@ h2 {
     color: #666;
 }
 
-.formContainer {
-  padding: 0 15px !important;
+.editor {
+  padding: 15px !important;
+  background-color: rgba(196,196,196,.8);
+  width: 100%;
 }
 
 .formPanel {

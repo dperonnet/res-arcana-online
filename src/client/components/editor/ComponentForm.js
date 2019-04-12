@@ -35,7 +35,7 @@ export default class ComponentForm extends Component {
 
           <div className="mb-3">
             {componentsType.map((type, index) => (
-              <Form.Check custom inline type="radio" name="componentType"
+              <Form.Check inline type="radio" name="componentType"
                 key={index} id={type.id} value={type.id} label={type.name}
                 checked={this.props.component.componentType === type.id}
                 onChange={this.props.onChange}
@@ -44,7 +44,7 @@ export default class ComponentForm extends Component {
           </div>
 
           <InputGroup className="mb-3">
-            <Form.Check custom inline type="checkbox" name="hasStandardCollectAbility"
+            <Form.Check inline type="checkbox" name="hasStandardCollectAbility"
               id="hasStandardCollectAbility" label="Has standard collect ability"
               value={this.props.component.hasStandardCollectAbility}
               checked={this.props.component.hasStandardCollectAbility}
@@ -60,7 +60,7 @@ export default class ComponentForm extends Component {
            }
 
           <InputGroup className="mb-3">
-            <Form.Check custom inline type="checkbox" name="hasSpecificCollectAbility"
+            <Form.Check inline type="checkbox" name="hasSpecificCollectAbility"
               id="hasSpecificCollectAbility" label="Has specific collect ability"
               value={this.props.component.hasSpecificCollectAbility}
               checked={this.props.component.hasSpecificCollectAbility}
@@ -68,8 +68,8 @@ export default class ComponentForm extends Component {
           </InputGroup>
 
           <ButtonToolbar>
-            <Button onClick={this.props.onSave}>Save to LocalStorage</Button>
-            <Button onClick={this.props.onDelete}>Delete</Button>
+            <Button variant="secondary" onClick={this.props.onSave}>Save to LocalStorage</Button>
+            <Button variant="secondary" onClick={this.props.onDelete}>Delete</Button>
           </ButtonToolbar>
         </form>
       </div>
@@ -122,14 +122,14 @@ class EssencePanel extends Component {
     const components = essenceList.map((type, index) => (
       <div className="essenceList" key={index} >
         <InputGroup.Prepend >
-          <Button variant="outline-secondary" id={'raise'+type+'Essence'}
+          <Button variant="secondary" id={'raise'+type+'Essence'}
            onClick={() => this.decrement(type)}><span>-</span></Button>
         </InputGroup.Prepend>
           <InputGroup.Prepend>
             <InputGroup.Text className={"help-card-min "+type} id={type+'Essence'}>{essenceListFromProps[type]}</InputGroup.Text>
           </InputGroup.Prepend>
         <InputGroup.Append>
-          <Button variant="outline-secondary" id={'lower'+type+'CollectOptions'}
+          <Button variant="secondary" id={'lower'+type+'CollectOptions'}
            onClick={() => this.increment(type)}><span>+</span></Button>
         </InputGroup.Append>
       </div>
@@ -139,7 +139,7 @@ class EssencePanel extends Component {
         { this.props.hasStandardCollectAbility ===true ?
           <div>
             <div className="mb-3">
-              <Button variant="outline-secondary" id={'clearCollectOptions'}
+              <Button variant="secondary" id={'clearCollectOptions'}
                 onClick={(e) => this.clearCollectOptions()}><span>Reset</span></Button>
             </div>
             <div className="mb-3">
@@ -147,7 +147,7 @@ class EssencePanel extends Component {
             </div>
             <div className="mb-3">
               <InputGroup className="mb-3">
-                <Form.Check custom inline type="checkbox" name="multipleCollectOptions"
+                <Form.Check inline type="checkbox" name="multipleCollectOptions"
                   id="multipleCollectOptions" label="Choose one"
                   value={this.props.standardCollectAbility.multipleCollectOptions}
                   checked={this.props.standardCollectAbility.multipleCollectOptions}

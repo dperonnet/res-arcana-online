@@ -1,0 +1,32 @@
+.sidebar.expanded {
+    width: 200px;
+}
+
+.sidebar {
+    position: fixed;
+    left: 0;
+    top: 40px;
+    bottom: 0;
+    background-color: rgba(34,34,34,.8);
+    z-index: 999;
+    overflow-y: auto;
+    color: #c1c2c3;
+}
+.pull-right {
+    float: right!important;
+}
+.userlist {
+    text-align: center;
+    padding-top: 5px;
+    padding-bottom: 20px;
+    font-weight: 700;
+}
+.user-row {
+    text-align: left;
+    font-weight: 400;
+    padding-top: 5px;
+    padding-left: 10px;
+}
+.user-row:hover {
+    background-color: rgba(91,192,222,.2);
+}

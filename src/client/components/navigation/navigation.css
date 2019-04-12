@@ -1,0 +1,9 @@
+.navbar {
+  padding: 0rem 1rem;
+  background-color: rgba(34,34,34,.8);
+  border-bottom: 1px solid #F5B041;
+}
+
+.dropdown-item.active, .dropdown-item:active {
+  background-color: rgba(34,34,34,.8);
+}

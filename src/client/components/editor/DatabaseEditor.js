@@ -142,41 +142,43 @@ export default class DatabaseEditor extends Component {
     const { currentComponent, jsonDatabase, selectedComponent } = this.state;
     const jsonCurrentComponent = this.getJsonFromObject(currentComponent);
     return (
-      <Container className="formContainer">
-        <Row>
-          <Col>
-            <Row>
-              <Col>
-                <h2>Database management</h2>
-                <DatabaseContent
-                  datas={jsonDatabase}
-                  selected={selectedComponent}
-                  onSelect={this.selectComponent}
-                  onLoad={this.loadJsonDatabase}
-                  onClear={this.clearLocalStorage}
-                />
-              </Col>
-            </Row>
-            <Row>
-              <Col>
-                <h2>Current component setting</h2>
-                <ComponentForm
-                  component={currentComponent}
-                  onChange={this.handleFormChange}
-                  onChangeByName={this.handleFormChangeByName}
-                  onSave={this.saveToLocalStorage}
-                  onDelete={this.deleteFromLocalStorage}
-                />
-              </Col>
-            </Row>
-          </Col>
-          <Col>
-            <h2>Current component JSON</h2>
-            <pre className="formPanel">
-              {jsonCurrentComponent}
-            </pre>
-          </Col>
-        </Row>
+      <Container>
+        <div className="editor">
+          <Row>
+            <Col>
+              <Row>
+                <Col>
+                  <h2>Database management</h2>
+                  <DatabaseContent
+                    datas={jsonDatabase}
+                    selected={selectedComponent}
+                    onSelect={this.selectComponent}
+                    onLoad={this.loadJsonDatabase}
+                    onClear={this.clearLocalStorage}
+                  />
+                </Col>
+              </Row>
+              <Row>
+                <Col>
+                  <h2>Current component setting</h2>
+                  <ComponentForm
+                    component={currentComponent}
+                    onChange={this.handleFormChange}
+                    onChangeByName={this.handleFormChangeByName}
+                    onSave={this.saveToLocalStorage}
+                    onDelete={this.deleteFromLocalStorage}
+                  />
+                </Col>
+              </Row>
+            </Col>
+            <Col>
+              <h2>Current component JSON</h2>
+              <pre className="formPanel">
+                {jsonCurrentComponent}
+              </pre>
+            </Col>
+          </Row>
+        </div>
       </Container>
     );
   }
