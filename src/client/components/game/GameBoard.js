@@ -1,28 +1,40 @@
 import React, { Component } from 'react';
-import PlayersBoard from './PlayersBoard';
+import { Client } from "boardgame.io/react";
+import { ResArcana } from './Game';
+import { ResArcanaBoard } from './Board';
 
-export default class GameBoard extends Component {
+const ResArcanaClient = Client({
+  game: ResArcana,
+  board: ResArcanaBoard,
+  debug: true,
+  multiplayer: { server: "localhost:8000" },
+  numPlayers: 3
+});
+
+export class GameBoard extends Component {
+  state = { playerID: null };
+
   render() {
-    const { history, options } = this.props;
-    const currentTurn = history && history.length > 0 ? history[history.length - 1] : null;
+    if (this.state.playerID === null) {
+      return (
+        <div>
+          <p>Play as</p>
+          <button onClick={() => this.setState({ playerID: "0" })}>
+            Player 0
+          </button>
+          <button onClick={() => this.setState({ playerID: "1" })}>
+            Player 1
+          </button>
+          <button onClick={() => this.setState({ playerID: "2" })}>
+            Player 2
+          </button>
+        </div>
+      );
+    }
     return (
-      <>
-        <CommonBoard />
-        <PlayersBoard
-          options={options}
-          turn={currentTurn}
-        />
-      </>
+      <div>
+        <ResArcanaClient playerID={this.state.playerID} />
+      </div>
     );
   }
-}
-
-function CommonBoard() {
-  return (
-    <div className="commonBoardPannel">
-      <div>Santé</div>
-      <div>Habitation</div>
-      <div>Auto</div>
-    </div>
-  );
 }

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import DatabaseEditor from './components/editor/DatabaseEditor';
 import DashBoard from './components/dashboard/DashBoard';
-import GameBoard from './components/game/GameBoard';
+import { GameBoard } from './components/game/GameBoard';
 import Navigation from './components/navigation/Navigation';
 import { BrowserRouter as Router, Route } from "react-router-dom";
 import './assets/style/index.css';

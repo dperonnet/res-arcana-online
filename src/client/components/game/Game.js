@@ -1,62 +1,66 @@
-import React, { Component } from 'react';
-import PlayerSetup from './settings/PlayerSetup';
-import GameBoard from './GameBoard';
-import './Game.css';
+import { Game, TurnOrder  } from 'boardgame.io/core';
 
-export default class Game extends Component {
-  static initGameComponents(playerNumber) {
-    const monuments = Array(8).fill(null);
-    const placesOfPower = Array(5).fill(null);
-    const magicItems = Array(8).fill(null);
-    const commonBoard = {
-      monuments,
-      placesOfPower,
-      magicItems
-    };
-    const playerBoards = Array(playerNumber).fill(null);
-    const gameComponents = {
-      commonBoard,
-      playerBoards
-    };
-    return gameComponents;
-  }
+export const ResArcana = Game({
+  name: "res-arcana",
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      options: {
-        cardSize: 'smallCard',
-        playerNumber: 0,
+  ctx: {
+    currentPlayer: '2',
+    actionPlayers: ['0'],
+    playOrder: ['2', '1', '0'],
+    playOrderPos: 0
+  },
+
+  setup: (G, ctx) => ({
+      artefacts:[
+        {name:"A", value:1},
+        {name:"B", value:0},
+        {name:"C", value:2},
+        {name:"D", value:3},
+        {name:"E", value:0},
+        {name:"F", value:1},
+        {name:"G", value:1},
+        {name:"H", value:1}
+      ]
+    }),
+
+    moves: {
+      pickArtefact: (G, artefactName) => {
+        console.log(artefactName);
+        let artefactIndex = G.artefacts.findIndex(
+          artefact => artefact.name === artefactName
+        );
+        let artefact = copy(G.artefacts[artefactIndex]);
+        G.artefacts.splice(artefactIndex, 1);
+        G.artefactInPLay.push(artefact);
+        return { ...G};
       },
-      history: [],
-    };
-  }
+      pass: G => {
+        G.passed = true;
+      },
+    },
 
-  handlePlayerSetup(i) {
-    const firstTurn = Game.initGameComponents(i);
-    const { options, history } = this.state;
-    options.playerNumber = i;
-    const newHistory = history.slice(history.length - 1, 0, firstTurn);
-    this.setState({ options, history: newHistory });
-  }
+    flow: {
+      startingPhase: 'pickArtefact',
+      turnOrder: TurnOrder.DEFAULT,
 
-  render() {
-    const { history, options } = this.state;
-    return (
-      <div className="container">
-        <div className="topPanel">
-          <PlayerSetup
-            onClick={i => this.handlePlayerSetup(i)}
-            options={options}
-          />
-        </div>
-        <div className="centerPanel">
-          <GameBoard
-            options={options}
-            history={history}
-          />
-        </div>
-      </div>
-    );
-  }
+      phases: {
+        pickArtefact: {
+          allowedMoves: ['pickItem'],
+          endPhaseIf: G => G.passed,
+          next: 'pickArtefact',
+        }
+      },
+    },
+});
+
+function initGameComponents() {
+  const magicItems = ["A","B","C","D","E","F","G","H"];
+  const gameComponents = {
+    magicItems
+  };
+  return gameComponents;
+}
+
+function copy(value){
+  return JSON.parse(JSON.stringify(value));
 }
