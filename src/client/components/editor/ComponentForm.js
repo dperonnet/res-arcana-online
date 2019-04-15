@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Button, ButtonToolbar, Form, InputGroup, FormControl} from 'react-bootstrap'
+import { Button, ButtonToolbar, Form, InputGroup} from 'react-bootstrap'
 import { COMPONENTS_TYPE } from './EditorConstants'
 import './Form.css';
 
@@ -25,7 +25,7 @@ export default class ComponentForm extends Component {
             <InputGroup.Prepend>
               <InputGroup.Text id="componentName">Component Name</InputGroup.Text>
             </InputGroup.Prepend>
-            <FormControl
+            <Form.Control
               placeholder="Name"
               name="componentName"
               value={this.props.component.componentName}

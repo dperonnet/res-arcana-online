@@ -7,3 +7,6 @@
 .dropdown-item.active, .dropdown-item:active {
   background-color: rgba(34,34,34,.8);
 }
+.ml-auto {
+  margin-left: auto!important;
+}

@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import io from 'socket.io-client';
 import { LOGOUT, USER_CONNECTED, VERIFY_USER } from '../../../server/Events';
-import LoginForm from './LoginForm';
+import { Nav, Navbar } from 'react-bootstrap';
+import { LinkContainer } from "react-router-bootstrap";
 
 const socketUrl = "http://127.0.0.1:3231"
 
@@ -59,13 +60,15 @@ export default class LoginPanel extends Component {
   render() {
     const { socket, user } = this.state;
     return (
-			<>
-        <LoginForm
-          socket={socket}
-          setUser={this.setUser}
-        />
-        }
-      </>
+      user === null ?
+        <>
+          <LinkContainer to="/signIn"><Nav.Link>Login</Nav.Link></LinkContainer>
+          <LinkContainer to="/register"><Nav.Link>Register</Nav.Link></LinkContainer>
+        </>
+           :
+        <>
+          <Navbar.Text>{user}</Navbar.Text>
+        </>
     );
   }
 }

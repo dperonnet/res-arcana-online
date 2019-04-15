@@ -3,13 +3,6 @@ import { Game, TurnOrder  } from 'boardgame.io/core';
 export const ResArcana = Game({
   name: "res-arcana",
 
-  ctx: {
-    currentPlayer: '2',
-    actionPlayers: ['0'],
-    playOrder: ['2', '1', '0'],
-    playOrderPos: 0
-  },
-
   setup: (G, ctx) => ({
       artefacts:[
         {name:"A", value:1},
@@ -20,19 +13,19 @@ export const ResArcana = Game({
         {name:"F", value:1},
         {name:"G", value:1},
         {name:"H", value:1}
-      ]
+      ],
+      artefactInPLay:[],
+      passed:false,
     }),
 
     moves: {
-      pickArtefact: (G, artefactName) => {
-        console.log(artefactName);
+      pickArtefact: (G, ctx, artefactName) => {
         let artefactIndex = G.artefacts.findIndex(
           artefact => artefact.name === artefactName
         );
         let artefact = copy(G.artefacts[artefactIndex]);
         G.artefacts.splice(artefactIndex, 1);
         G.artefactInPLay.push(artefact);
-        return { ...G};
       },
       pass: G => {
         G.passed = true;
@@ -45,7 +38,7 @@ export const ResArcana = Game({
 
       phases: {
         pickArtefact: {
-          allowedMoves: ['pickItem'],
+          allowedMoves: ['pickArtefact'],
           endPhaseIf: G => G.passed,
           next: 'pickArtefact',
         }
@@ -53,14 +46,25 @@ export const ResArcana = Game({
     },
 });
 
-function initGameComponents() {
+function initGameComponents(playerNumber) {
+  //const magicItems = Array(8).fill(null);
   const magicItems = ["A","B","C","D","E","F","G","H"];
-  const gameComponents = {
+  const monuments = Array(8).fill(null);
+  const placesOfPower = Array(5).fill(null);
+  const commonBoard = {
+    monuments,
+    placesOfPower,
     magicItems
+  };
+  const playerBoards = Array(playerNumber).fill(null);
+  const gameComponents = {
+    commonBoard,
+    playerBoards
   };
   return gameComponents;
 }
 
 function copy(value){
+  console.log(value);
   return JSON.parse(JSON.stringify(value));
 }

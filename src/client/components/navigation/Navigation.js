@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Nav, Navbar, NavDropdown } from 'react-bootstrap';
 import { LinkContainer } from "react-router-bootstrap";
-import LoginForm from './login/LoginForm';
+import LoginNav from './LoginNav';
 import './navigation.css';
 
 export default class Navigation extends Component {
@@ -23,14 +23,13 @@ export default class Navigation extends Component {
               <LinkContainer to="/"><NavDropdown.Item>Privacy Policy</NavDropdown.Item></LinkContainer>
             </NavDropdown>
           </Nav>
-          <Navbar.Text>
-            70 games
-          </Navbar.Text>
           <Nav>
-
+            <Navbar.Text>
+              {Math.floor(Math.random() * 39) + 70  } games
+            </Navbar.Text>
+            <LoginNav />
           </Nav>
         </Navbar.Collapse>
-        <LoginForm />
       </Navbar>
     );
   }

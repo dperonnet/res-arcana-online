@@ -17,6 +17,7 @@ export class ResArcanaBoard extends Component {
     if (this.isActive(id)) {
       console.log("pickArtefact ",id);
       this.props.moves.pickArtefact(id);
+      console.log("call endTurn ");
       this.props.events.endTurn();
     }
   };

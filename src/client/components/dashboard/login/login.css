@@ -1,0 +1,29 @@
+
+.login {
+    width: 480px;
+    margin: 50px auto;
+    background-color: rgba(196,196,196,.8);
+    border: .2rem solid  #F5B041;
+    border-radius: 8px;
+    padding: 20px;
+    justify-content:center;
+    align-items:center;
+}
+
+.register {
+    height: 340px;
+}
+
+.login h2 {
+  text-align: center;
+  color: #444;
+}
+
+.login .btn-primary.disabled, .login .btn-primary:disabled {
+    color: #fff;
+    background-color: #666;
+    border-color: #666;
+  }
+.forgotPassword {
+  cursor: pointer;
+}
