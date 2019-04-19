@@ -1,0 +1,52 @@
+
+.auth {
+  width: 480px;
+  margin: 50px auto;
+  background-color: rgba(34,34,34,.8);
+  border: .2rem solid  #F5B041;
+  border-radius: 8px;
+  padding: 20px;
+  justify-content:center;
+  align-items:center;
+  color: white;
+}
+
+.auth h2 {
+  text-align: center;
+  color: white;
+}
+
+.auth .btn-primary:disabled, .auth .btn-primary:disabled:hover {
+    color: #fff;
+    background-color: #666;
+    border-color: #666;
+  }
+.forgotPassword {
+  cursor: pointer;
+}
+.auth .btn {
+  width: 120px;
+}
+.auth .btn.disabled, .auth .btn:disabled {
+    opacity: 1;
+}
+
+.auth .btn-primary {
+  background-color: #F5B041;
+  border-color: #F5B041;
+  color: #000;
+}
+.auth .btn-primary:hover {
+  background-color: #F5D061;
+  border-color: #F5D061;
+  color: #000;
+}
+
+label {
+  text-align: right;
+}
+.auth .error{
+  margin-top: 12px;
+  font-size: large;
+  color: red;
+}

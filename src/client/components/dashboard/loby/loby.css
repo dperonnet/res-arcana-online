@@ -1,0 +1,62 @@
+.joinGamePanel, .gameList {
+  border : 1px solid #F5B041;
+  width: 300px;
+  margin: 20px;
+  padding: 12px;
+  background-color: rgba(34,34,34,.8);
+}
+.joinGamePanel {
+  margin-bottom: 0;
+}
+.gameHeader {
+  text-align: center;
+  font-size: larger;
+}
+.playerName, .gameButton {
+  text-align: center;
+}
+.gameButton .btn {
+  margin: 4px 8px;
+  width: 80px;
+}
+.modal-content {
+  margin-top: 60px;
+  background-color: rgba(34,34,34,.9);
+  color: white;
+  border: 1px solid #F5B041;
+}
+.modal-title {
+  text-align: center;
+}
+
+.modal-backdrop.show {
+  opacity: .7;
+}
+.separator {
+  border-bottom: 1px solid #F5B041;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+.joinGamePanel .btn {
+  width: 120px;
+}
+.modal-backdrop {
+  background-color: rgba(128,128,128,.4);
+}
+.close {
+  color: white;
+  opacity: .75;
+}
+.close:hover {
+  color: white;
+  text-decoration: none;
+}
+.close:not(:disabled):not(.disabled):focus, .close:not(:disabled):not(.disabled):hover {
+  opacity: 1;
+}
+.modal-header {
+  border-bottom: 1px solid #F5B041;
+}
+.modal-footer {
+  border-top: 1px solid #F5B041;
+}

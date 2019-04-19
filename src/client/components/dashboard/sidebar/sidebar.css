@@ -11,6 +11,7 @@
     z-index: 999;
     overflow-y: auto;
     color: #c1c2c3;
+    border-right: 1px solid #F5B041;
 }
 .pull-right {
     float: right!important;

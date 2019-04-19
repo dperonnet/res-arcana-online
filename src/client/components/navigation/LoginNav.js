@@ -1,74 +1,37 @@
 import React, { Component } from 'react';
-import io from 'socket.io-client';
-import { LOGOUT, USER_CONNECTED, VERIFY_USER } from '../../../server/Events';
 import { Nav, Navbar } from 'react-bootstrap';
 import { LinkContainer } from "react-router-bootstrap";
+import { connect } from 'react-redux';
+import { signOut } from '../../../store/actions/authActions';
 
-const socketUrl = "http://127.0.0.1:3231"
-
-export default class LoginPanel extends Component {
-  constructor(props){
-    super(props);
-    this.state = {
-      socket:null,
-      user:null
-    };
-  }
-
-  componentWillMount() {
-		this.initSocket();
-	}
-
-  initSocket = ()=>{
-    const socket = io(socketUrl);
-    socket.on('connect', ()=>{
-      if(this.state.user){
-        this.reconnect(socket);
-      }else {
-        console.log("Connected");
-      }
-    });
-    this.setState({socket});
-  }
-
-  reconnect = (socket) => {
-    socket.emit(VERIFY_USER, this.state.user.name, ({isUser, user})=>{
-      if(!isUser){
-        this.setState({user:null});
-      }else {
-        this.setUser(user);
-      }
-    });
-  }
-
-  setUser = (user)=>{
-    const { socket } = this.state;
-    socket.emit(USER_CONNECTED, user);
-    this.setState({user});
-  }
-
-  logout = ()=>{
-    const { socket } = this.state;
-    socket.emit(LOGOUT);
-    this.setState({user:null});
-  }
-
-  handleChange = ()=>{
-
-  }
-
+class LoginPanel extends Component {
   render() {
-    const { socket, user } = this.state;
+    const { auth, signOut } = this.props;
+    console.log(auth);
     return (
-      user === null ?
+      auth.uid ?
+        <>
+          <Navbar.Text onClick={signOut}>{auth.email}</Navbar.Text>
+        </>
+        :
         <>
           <LinkContainer to="/signIn"><Nav.Link>Login</Nav.Link></LinkContainer>
           <LinkContainer to="/register"><Nav.Link>Register</Nav.Link></LinkContainer>
         </>
-           :
-        <>
-          <Navbar.Text>{user}</Navbar.Text>
-        </>
     );
   }
 }
+
+const mapStateToProps = (state) => {
+  return {
+    auth: state.firebase.auth
+  }
+}
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    signOut: () => dispatch(signOut())
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(LoginPanel);
