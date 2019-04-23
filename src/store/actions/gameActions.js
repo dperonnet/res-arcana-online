@@ -2,9 +2,12 @@ export const createGame = (game) => {
   return (dispatch, getState, {getFirebase, getFirestore}) => {
     // make asynch call to database
     const fireStore = getFirestore();
+    const profile = getState().firebase.profile;
+    const creatorId = getState().firebase.auth.uid;
     fireStore.collection('games').add({
       ...game,
-      gameCreator: 'Boby',
+      gameCreator: profile.login,
+      creatorId: creatorId,
       createdAt: new Date()
     }).then(()=>{
       dispatch({ type: 'CREATE_GAME', game});

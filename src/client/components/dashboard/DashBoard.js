@@ -6,10 +6,13 @@ import { Container } from 'react-bootstrap';
 import GameList from './loby/GameList';
 import { firestoreConnect } from 'react-redux-firebase';
 import { compose } from 'redux';
+import { Redirect } from 'react-router-dom';
 
 class DashBoard extends Component {
   render() {
-    const { games } = this.props;
+    const { games, auth } = this.props;
+    if(!auth.uid) return <Redirect to='/signin'/>
+
     return (
       <>
         <SideBar />
@@ -24,7 +27,8 @@ class DashBoard extends Component {
 const mapStateToProps = (state) =>{
   console.log(state);
   return {
-    games: state.firestore.ordered.games
+    games: state.firestore.ordered.games,
+    auth: state.firebase.auth
   }
 }
 

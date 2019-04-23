@@ -1,9 +1,11 @@
 import React, { Component } from 'react';
 import { Button, Col, Container, Form, Row } from 'react-bootstrap'
-import { VERIFY_USER } from '../../../../server/Events';
 import './auth.css';
+import { connect } from 'react-redux'
+import { Redirect } from 'react-router-dom';
+import { register } from '../../../../store/actions/authActions';
 
-export default class Login extends Component {
+class Register extends Component {
   constructor(props){
     super(props);
     this.state = {
@@ -27,9 +29,7 @@ export default class Login extends Component {
 
   handleSubmit = (event)=>{
     event.preventDefault();
-    const { socket } = this.props;
-    const { login } = this.state;
-    socket.emit(VERIFY_USER, login, this.setUser);
+    this.props.register(this.state);
   }
 
   setError = (error)=>{
@@ -46,6 +46,9 @@ export default class Login extends Component {
   }
 
   render() {
+    const { auth, authError } = this.props;
+    if(auth.uid) return <Redirect to='/'/>
+
     return (
       <Container>
         <div className="auth col-md-8 col-offset-2">
@@ -59,7 +62,7 @@ export default class Login extends Component {
                   autoFocus
                   placeholder="Enter your mage name"
                   type="text"
-                  value={this.state.email}
+                  value={this.state.login}
                   onChange={this.handleChange}
                 />
               </Col>
@@ -69,7 +72,6 @@ export default class Login extends Component {
               <Col xs="8">
                 <Form.Control
                   size="sm"
-                  disabled
                   placeholder="Enter your magic password"
                   type="password"
                   value={this.state.password}
@@ -95,7 +97,6 @@ export default class Login extends Component {
               <Col xs="8">
                 <Form.Control
                   size="sm"
-                  disabled
                   placeholder="Enter your magic email"
                   type="email"
                   value={this.state.email}
@@ -114,9 +115,32 @@ export default class Login extends Component {
                 </Button>
               </div>
             </Row>
+            <Row>
+              <div className="offset-3 col-9">
+              <div className="error">
+                { authError ? <p>{authError}</p> : null }
+              </div>
+              </div>
+            </Row>
           </Form>
         </div>
       </Container>
     );
   }
 }
+
+const mapStateToProps = (state) =>{
+  console.log(state);
+  return {
+    authError: state.auth.authError,
+    auth: state.firebase.auth
+  }
+}
+
+const mapDispatchToProps = (dispatch) =>{
+  return {
+    register: (newUser) => dispatch(register(newUser))
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Register);

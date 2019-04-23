@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux'
 import { Button, Col, Form, Modal, Row } from 'react-bootstrap';
 import { createGame } from '../../../../store/actions/gameActions';
+import { Redirect } from 'react-router-dom';
 
 class CreateGame extends Component {
   constructor(props) {
@@ -38,13 +39,16 @@ class CreateGame extends Component {
 
   handleSubmit = (e) => {
     e.preventDefault();
-    console.log(this.state);
     this.props.createGame(this.state.game);
   }
 
   render() {
     const { modalShow, game } = this.state;
+    const { auth } = this.props;
     const numberOfPlayers = ["2","3","4"];
+
+    if(!auth.uid) return <Redirect to='/signin'/>
+
     return (
       <div>
         <Modal size="lg" show={modalShow} onHide={this.handleClose}>
@@ -111,10 +115,17 @@ class CreateGame extends Component {
 
 }
 
+const mapStateToProps = (state) =>{
+  console.log(state);
+  return {
+    auth: state.firebase.auth
+  }
+}
+
 const mapDispatchToProps = dispatch => {
   return {
     createGame: (game) => dispatch(createGame(game))
   }
 }
 
-export default connect(null, mapDispatchToProps)(CreateGame);
+export default connect(mapStateToProps, mapDispatchToProps)(CreateGame);

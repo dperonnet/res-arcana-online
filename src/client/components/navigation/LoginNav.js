@@ -6,12 +6,15 @@ import { signOut } from '../../../store/actions/authActions';
 
 class LoginPanel extends Component {
   render() {
-    const { auth, signOut } = this.props;
+    const { auth, profile, signOut } = this.props;
     console.log(auth);
     return (
       auth.uid ?
         <>
-          <Navbar.Text onClick={signOut}>{auth.email}</Navbar.Text>
+          <Nav>
+            <Nav.Link>{profile.login}</Nav.Link>
+          </Nav>
+          <Nav.Link onClick={signOut}>Logout</Nav.Link>
         </>
         :
         <>
@@ -24,7 +27,8 @@ class LoginPanel extends Component {
 
 const mapStateToProps = (state) => {
   return {
-    auth: state.firebase.auth
+    auth: state.firebase.auth,
+    profile: state.firebase.profile
   }
 }
 
