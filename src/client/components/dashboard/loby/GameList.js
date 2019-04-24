@@ -20,7 +20,7 @@ class GameList extends Component {
     const { games } = this.props;
     const players = ['Max','Bender','Frey','Nooby'];
     return (
-      <>
+      <div>
         <div className='joinGamePanel'>
           <CreateGame />
         </div>
@@ -48,7 +48,7 @@ class GameList extends Component {
           })
         }
         </div>
-      </>
+      </div>
     );
   }
 

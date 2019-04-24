@@ -1,12 +1,13 @@
 import React, { Component } from 'react';
 import SideBar from './sidebar/SideBar';
 import './dashboard.css';
+import { compose } from 'redux';
 import { connect } from 'react-redux';
 import { Container } from 'react-bootstrap';
 import GameList from './loby/GameList';
 import { firestoreConnect } from 'react-redux-firebase';
-import { compose } from 'redux';
 import { Redirect } from 'react-router-dom';
+import Notifications from './Notifications'
 
 class DashBoard extends Component {
   render() {
@@ -18,6 +19,7 @@ class DashBoard extends Component {
         <SideBar />
         <Container className="dashBoard-content">
           <GameList games={games}></GameList>
+          <Notifications />
         </Container>
       </>
     );
@@ -25,7 +27,6 @@ class DashBoard extends Component {
 }
 
 const mapStateToProps = (state) =>{
-  console.log(state);
   return {
     games: state.firestore.ordered.games,
     auth: state.firebase.auth

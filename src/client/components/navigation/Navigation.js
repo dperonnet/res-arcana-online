@@ -3,10 +3,14 @@ import { Nav, Navbar, NavDropdown } from 'react-bootstrap';
 import { LinkContainer } from "react-router-bootstrap";
 import LoginNav from './LoginNav';
 import './navigation.css';
+import { compose } from 'redux';
+import { connect } from 'react-redux';
+import { firestoreConnect } from 'react-redux-firebase';
 
-export default class Navigation extends Component {
+class Navigation extends Component {
 
   render() {
+    const { games } = this.props;
     return (
       <Navbar collapseOnSelect expand="md" variant="dark" fixed="top">
         <LinkContainer to="/"><Navbar.Brand>Res Arcana Online</Navbar.Brand></LinkContainer>
@@ -24,8 +28,7 @@ export default class Navigation extends Component {
             </NavDropdown>
           </Nav>
           <Nav>
-            <Navbar.Text>
-              {Math.floor(Math.random() * 39) + 70  } games
+            <Navbar.Text> {games ? Object.keys(games).length : 0} games
             </Navbar.Text>
             <LoginNav />
           </Nav>
@@ -34,3 +37,17 @@ export default class Navigation extends Component {
     );
   }
 }
+
+const mapStateToProps = (state) =>{
+  return {
+    games: state.firestore.ordered.games,
+  }
+}
+
+export default
+compose(
+  connect(mapStateToProps),
+  firestoreConnect([
+    { collection: 'games'}
+  ])
+)(Navigation)

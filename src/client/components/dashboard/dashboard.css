@@ -1,12 +1,14 @@
 .dashBoard-content {
   padding-left: 200px !important;
-  /*background-color: rgba(128,128,128,.4);*/
   height: 100%;
   color: white;
-  flex-direction: column !important;
   max-width: 100%;
   width:100%
 }
 .form-group {
-    margin-bottom: 8px;
+  margin-bottom: 8px;
+}
+.notifications {
+  color: black;
+  margin: 20px;
 }

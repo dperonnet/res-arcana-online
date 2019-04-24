@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Nav, Navbar } from 'react-bootstrap';
+import { Nav } from 'react-bootstrap';
 import { LinkContainer } from "react-router-bootstrap";
 import { connect } from 'react-redux';
 import { signOut } from '../../../store/actions/authActions';
@@ -7,7 +7,6 @@ import { signOut } from '../../../store/actions/authActions';
 class LoginPanel extends Component {
   render() {
     const { auth, profile, signOut } = this.props;
-    console.log(auth);
     return (
       auth.uid ?
         <>

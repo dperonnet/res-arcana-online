@@ -1,16 +1,18 @@
 import React, { Component } from 'react';
-import { connect } from 'react-redux'
+import { compose } from 'redux';
+import { connect } from 'react-redux';
 import { Button, Col, Form, Modal, Row } from 'react-bootstrap';
 import { createGame } from '../../../../store/actions/gameActions';
-import { Redirect } from 'react-router-dom';
+import { Redirect, withRouter } from 'react-router-dom';
 
 class CreateGame extends Component {
   constructor(props) {
     super(props);
+    console.log(props)
     this.state = {
       modalShow: false,
       game: {
-        name: '',
+        name: null,
         password: '',
         numberOfPlayers: '4',
         allowSpectators: true
@@ -26,7 +28,15 @@ class CreateGame extends Component {
   }
 
   handleShow() {
-    this.setState({ modalShow: true });
+    this.setState({
+      modalShow: true,
+      game: {
+        name: null,
+        password: '',
+        numberOfPlayers: '4',
+        allowSpectators: true
+      }
+    });
   }
 
   handleChange = (e) =>{
@@ -39,12 +49,13 @@ class CreateGame extends Component {
 
   handleSubmit = (e) => {
     e.preventDefault();
-    this.props.createGame(this.state.game);
+    //this.props.createGame(this.state.game);
+    this.props.history.push('/game');
   }
 
   render() {
     const { modalShow, game } = this.state;
-    const { auth } = this.props;
+    const { auth, profile } = this.props;
     const numberOfPlayers = ["2","3","4"];
 
     if(!auth.uid) return <Redirect to='/signin'/>
@@ -67,7 +78,7 @@ class CreateGame extends Component {
                     placeholder="Game name"
                     type="text"
                     name="name"
-                    value={game.name}
+                    value={game.name !== null ? game.name : profile.login + '\'s game'}
                     onChange={this.handleChange}
                   />
                 </Col>
@@ -116,9 +127,9 @@ class CreateGame extends Component {
 }
 
 const mapStateToProps = (state) =>{
-  console.log(state);
   return {
-    auth: state.firebase.auth
+    auth: state.firebase.auth,
+    profile: state.firebase.profile
   }
 }
 
@@ -128,4 +139,7 @@ const mapDispatchToProps = dispatch => {
   }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(CreateGame);
+export default compose(
+  withRouter,
+  connect(mapStateToProps, mapDispatchToProps)
+)(CreateGame);
