@@ -1,4 +1,7 @@
 import React, { Component } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faAngleRight } from '@fortawesome/free-solid-svg-icons';
+import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import './sidebar.css';
 
 export default class SideBar extends Component {
@@ -27,13 +30,18 @@ export default class SideBar extends Component {
 
   render() {
     const { users } = this.state;
+    const { expanded, collapse, expand } = this.props;
+
     return (
+      expanded ?
       <div className="sidebar expanded">
-        <div href="#" className="btn pull-right">
-          <span className="glyphicon glyphicon-remove"/>
+        <div className="sidebarHeader">
+          Online Users
+          <div className="pull-right close" onClick={collapse}>
+            <FontAwesomeIcon icon={faTimes} size="lg" />
+          </div>
         </div>
         <div className="userlist">
-          Online Users
           {
             users ?
               users.map((user) => (
@@ -48,6 +56,14 @@ export default class SideBar extends Component {
             :
             null
           }
+        </div>
+      </div>
+      :
+      <div className="sidebar">
+        <div className="sidebarHeader">
+          <div className="pull-right close">
+            <FontAwesomeIcon icon={faAngleRight} size="lg" onClick={expand}/>
+          </div>
         </div>
       </div>
     );

@@ -10,7 +10,7 @@ class CreateGame extends Component {
     super(props);
     console.log(props)
     this.state = {
-      modalShow: false,
+      isCreatingGame: true,
       game: {
         name: null,
         password: '',
@@ -24,12 +24,12 @@ class CreateGame extends Component {
   }
 
   handleClose() {
-    this.setState({ modalShow: false });
+    this.setState({ isCreatingGame: false });
   }
 
   handleShow() {
     this.setState({
-      modalShow: true,
+      isCreatingGame: true,
       game: {
         name: null,
         password: '',
@@ -54,20 +54,17 @@ class CreateGame extends Component {
   }
 
   render() {
-    const { modalShow, game } = this.state;
+    const { isCreatingGame, game } = this.state;
     const { auth, profile } = this.props;
     const numberOfPlayers = ["2","3","4"];
 
     if(!auth.uid) return <Redirect to='/signin'/>
 
     return (
-      <div>
-        <Modal size="lg" show={modalShow} onHide={this.handleClose}>
-          <Modal.Header closeButton>
-            <Modal.Title>New game</Modal.Title>
-          </Modal.Header>
-
-          <Modal.Body>
+      isCreatingGame ?
+        <div className='game'>
+          <div className="gameHeader"><h5>Create new game</h5></div>
+          <div className="gameOptions">
             <Form>
               <Form.Group as={Row} controlId="name">
                 <Form.Label column xs="4">Name</Form.Label>
@@ -105,22 +102,21 @@ class CreateGame extends Component {
                     value={game.allowSpectators}
                     onChange={this.handleChange}
                   />
-                  </Col>
-                </Form.Group>
+                </Col>
+              </Form.Group>
             </Form>
-          </Modal.Body>
-
-          <Modal.Footer>
-            <Button variant="secondary" onClick={this.handleSubmit}>Start</Button>
-            <Button variant="secondary" onClick={this.handleClose}>Cancel</Button>
-          </Modal.Footer>
-        </Modal>
+          </div>
+          <div className="gameButton">
+            <Button variant="secondary" size="sm" onClick={this.handleSubmit}>Start</Button>
+            <Button variant="secondary" size="sm" onClick={this.handleClose}>Cancel</Button>
+          </div>
+        </div>
+        :
         <div className='gameButton'>
           <Button variant="secondary" size="sm"
-             onClick={this.handleShow}>New Game</Button>
-          <Button variant="secondary" size="sm">Quick Join</Button>
+            onClick={this.handleShow}>New Game</Button>
+          {/*<Button variant="secondary" size="sm">Quick Join</Button>*/}
         </div>
-      </div>
     );
   }
 

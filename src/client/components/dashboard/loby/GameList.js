@@ -40,7 +40,7 @@ class GameList extends Component {
                 </Row>
                 <div className='gameButton'>
                   <Button variant="secondary" size="sm">Join</Button>
-                  <Button variant="secondary" size="sm">Watch</Button>
+                  {/*<Button variant="secondary" size="sm">Watch</Button>*/}
                 </div>
                  {index !== games.length - 1 && <div className='separator'/>}
               </div>

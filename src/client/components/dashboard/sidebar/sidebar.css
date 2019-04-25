@@ -13,13 +13,16 @@
     color: #c1c2c3;
     border-right: 1px solid #F5B041;
 }
+.close {
+  font-size: 1rem;
+}
 .pull-right {
     float: right!important;
 }
-.userlist {
+
+.sidebarHeader {
     text-align: center;
-    padding-top: 5px;
-    padding-bottom: 20px;
+    margin: 5px;
     font-weight: 700;
 }
 .user-row {

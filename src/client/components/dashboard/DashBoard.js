@@ -7,19 +7,47 @@ import { Container } from 'react-bootstrap';
 import GameList from './loby/GameList';
 import { firestoreConnect } from 'react-redux-firebase';
 import { Redirect } from 'react-router-dom';
-import Notifications from './Notifications'
 
 class DashBoard extends Component {
+  constructor(props) {
+    super(props);
+    const localStorageExpanded = JSON.parse(window.localStorage.getItem(LOCALSTORAGE_KEY));
+    const expanded = localStorageExpanded ? localStorageExpanded : true;
+    this.state = {
+      expanded: expanded
+    }
+  }
+
+  handleExpand = () => {
+    this.setState({expanded: true})
+    window.localStorage.setItem(LOCALSTORAGE_KEY, JSON.stringify(true));
+  }
+
+  handleCollapse = () => {
+    this.setState({expanded: false})
+    window.localStorage.setItem(LOCALSTORAGE_KEY, JSON.stringify(false));
+  }
+
+  clearLocalStorage = (changeEvent) => {
+    window.localStorage.removeItem(LOCALSTORAGE_KEY);
+  }
+
   render() {
     const { games, auth } = this.props;
     if(!auth.uid) return <Redirect to='/signin'/>
 
+    const localStorageExpanded = JSON.parse(window.localStorage.getItem(LOCALSTORAGE_KEY));
+    const isExpanded = localStorageExpanded === true || localStorageExpanded === false  ? localStorageExpanded: true;
+
     return (
       <>
-        <SideBar />
+        <SideBar
+          expanded={isExpanded}
+          collapse={this.handleCollapse}
+          expand={this.handleExpand}
+        />
         <Container className="dashBoard-content">
           <GameList games={games}></GameList>
-          <Notifications />
         </Container>
       </>
     );
@@ -39,3 +67,5 @@ export default compose(
     { collection: 'games'}
   ])
 )(DashBoard);
+
+const LOCALSTORAGE_KEY = 'RAO_options';

@@ -1,6 +1,6 @@
 .joinGamePanel, .gameList {
   border : 1px solid #F5B041;
-  width: 300px;
+  width: 100%;
   margin: 20px;
   padding: 12px;
   background-color: rgba(34,34,34,.8);
