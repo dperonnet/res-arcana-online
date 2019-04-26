@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
+import { Container } from 'react-bootstrap';
+import { Redirect } from 'react-router-dom';
 import SideBar from './sidebar/SideBar';
+import Loby from './loby/Loby';
 import './dashboard.css';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
-import { Container } from 'react-bootstrap';
-import GameList from './loby/GameList';
 import { firestoreConnect } from 'react-redux-firebase';
-import { Redirect } from 'react-router-dom';
 
 class DashBoard extends Component {
   constructor(props) {
@@ -46,8 +46,8 @@ class DashBoard extends Component {
           collapse={this.handleCollapse}
           expand={this.handleExpand}
         />
-        <Container className="dashBoard-content">
-          <GameList games={games}></GameList>
+        <Container className={"dashBoard-content " + (isExpanded ? 'expanded' : '')}>
+          <Loby games={games}></Loby>
         </Container>
       </>
     );

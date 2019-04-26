@@ -1,16 +1,16 @@
 import React, { Component } from 'react';
+import { Button, Col, Form, Row } from 'react-bootstrap';
+import { Redirect, withRouter } from 'react-router-dom';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
-import { Button, Col, Form, Modal, Row } from 'react-bootstrap';
 import { createGame } from '../../../../store/actions/gameActions';
-import { Redirect, withRouter } from 'react-router-dom';
 
 class CreateGame extends Component {
   constructor(props) {
     super(props);
     console.log(props)
     this.state = {
-      isCreatingGame: true,
+      isCreatingGame: false,
       game: {
         name: null,
         password: '',
@@ -18,16 +18,13 @@ class CreateGame extends Component {
         allowSpectators: true
       }
     };
-
-    this.handleShow = this.handleShow.bind(this);
-    this.handleClose = this.handleClose.bind(this);
   }
 
-  handleClose() {
+  handleClose = () => {
     this.setState({ isCreatingGame: false });
   }
 
-  handleShow() {
+  handleShow = () => {
     this.setState({
       isCreatingGame: true,
       game: {
@@ -49,7 +46,7 @@ class CreateGame extends Component {
 
   handleSubmit = (e) => {
     e.preventDefault();
-    //this.props.createGame(this.state.game);
+    this.props.createGame(this.state.game);
     this.props.history.push('/game');
   }
 
@@ -61,62 +58,66 @@ class CreateGame extends Component {
     if(!auth.uid) return <Redirect to='/signin'/>
 
     return (
-      isCreatingGame ?
-        <div className='game'>
-          <div className="gameHeader"><h5>Create new game</h5></div>
-          <div className="gameOptions">
-            <Form>
-              <Form.Group as={Row} controlId="name">
-                <Form.Label column xs="4">Name</Form.Label>
-                <Col xs="8">
-                  <Form.Control
-                    size="sm"
-                    autoFocus
-                    placeholder="Game name"
-                    type="text"
-                    name="name"
-                    value={game.name !== null ? game.name : profile.login + '\'s game'}
-                    onChange={this.handleChange}
-                  />
-                </Col>
-              </Form.Group>
-              <Form.Group as={Row}>
-                <Form.Label as="legend" column xs={4}>Number of mages</Form.Label>
-                <Col xs={8} className="mt-2">
-                  {numberOfPlayers.map((number) => (
-                    <Form.Check inline type="radio" name="numberOfPlayers"
-                      key={number} id={number} value={number} label={number}
-                      checked={game.numberOfPlayers === number}
-                      onChange={this.handleChange}
-                    />
-                  ))}
-                </Col>
-              </Form.Group>
-              <Form.Group as={Row} controlId="allowSpectators">
-                <Form.Label column xs={4}>Allow Spectators?</Form.Label>
-                <Col xs={8} className="mt-2">
-                  <Form.Check
-                    size="sm"
-                    type="checkbox"
-                    name="allowSpectators"
-                    value={game.allowSpectators}
-                    onChange={this.handleChange}
-                  />
-                </Col>
-              </Form.Group>
-            </Form>
+      <div className='createGamePanel'>
+        {
+          isCreatingGame ?
+            <div className='game'>
+              <div className="gameHeader"><h5>Create new game</h5></div>
+              <div className="gameOptions">
+                <Form>
+                  <Form.Group as={Row} controlId="name">
+                    <Form.Label column xs="4">Name</Form.Label>
+                    <Col xs="8">
+                      <Form.Control
+                        size="sm"
+                        autoFocus
+                        placeholder="Game name"
+                        type="text"
+                        name="name"
+                        value={game.name !== null ? game.name : profile.login + '\'s game'}
+                        onChange={this.handleChange}
+                      />
+                    </Col>
+                  </Form.Group>
+                  <Form.Group as={Row}>
+                    <Form.Label as="legend" column xs={4}>Number of mages</Form.Label>
+                    <Col xs={8} className="mt-2">
+                      {numberOfPlayers.map((number) => (
+                        <Form.Check inline type="radio" name="numberOfPlayers"
+                          key={number} id={number} value={number} label={number}
+                          checked={game.numberOfPlayers === number}
+                          onChange={this.handleChange}
+                        />
+                      ))}
+                    </Col>
+                  </Form.Group>
+                  <Form.Group as={Row} controlId="allowSpectators">
+                    <Form.Label column xs={4}>Allow Spectators?</Form.Label>
+                    <Col xs={8} className="mt-2">
+                      <Form.Check
+                        size="sm"
+                        type="checkbox"
+                        name="allowSpectators"
+                        value={game.allowSpectators}
+                        onChange={this.handleChange}
+                      />
+                    </Col>
+                  </Form.Group>
+                </Form>
+              </div>
+              <div className="gameButton">
+                <Button variant="secondary" size="sm" onClick={this.handleSubmit}>Start</Button>
+                <Button variant="secondary" size="sm" onClick={this.handleClose}>Cancel</Button>
+              </div>
+            </div>
+          :
+          <div className='gameButton'>
+            <Button variant="secondary" size="sm"
+              onClick={this.handleShow}>New Game</Button>
+            {/*<Button variant="secondary" size="sm">Quick Join</Button>*/}
           </div>
-          <div className="gameButton">
-            <Button variant="secondary" size="sm" onClick={this.handleSubmit}>Start</Button>
-            <Button variant="secondary" size="sm" onClick={this.handleClose}>Cancel</Button>
-          </div>
-        </div>
-        :
-        <div className='gameButton'>
-          <Button variant="secondary" size="sm"
-            onClick={this.handleShow}>New Game</Button>
-          {/*<Button variant="secondary" size="sm">Quick Join</Button>*/}
-        </div>
+        }
+      </div>
     );
   }
 

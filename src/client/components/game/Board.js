@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Container } from 'react-bootstrap';
 import './board.css';
 
 export class ResArcanaBoard extends Component {
@@ -41,12 +40,13 @@ export class ResArcanaBoard extends Component {
     });
 
     return (
-      <Container className="flex-column">
-        <h1>You are Player {this.props.playerID}</h1>
-        <div className="artefacts">{components}</div>
-        <h1>Active player is {this.props.ctx.currentPlayer}</h1>
-
-      </Container>
+      <div className="board">
+        <div className="flex-column">
+          <h1>You are Player {this.props.playerID}</h1>
+          <div className="artefacts">{components}</div>
+          <h1>Active player is {this.props.ctx.currentPlayer}</h1>
+        </div>
+      </div>
     );
   }
 }

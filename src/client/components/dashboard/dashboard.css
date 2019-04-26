@@ -1,9 +1,17 @@
 .dashBoard-content {
-  padding-left: 200px !important;
+  padding-left: 20px !important;
+  padding-right: 35px !important;
   height: 100%;
   color: white;
   max-width: 100%;
-  width:100%
+  width:100%;
+  margin: auto;
+}
+
+@media (min-width: 768px) {
+  .dashBoard-content.expanded {
+    padding-left: 200px !important;
+  }
 }
 .form-group {
   margin-bottom: 8px;

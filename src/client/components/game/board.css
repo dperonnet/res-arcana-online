@@ -1,3 +1,13 @@
+.gameBoard {
+  background-color: rgba(34,34,34,.8);
+  flex-direction: column !important;
+  max-width: 100%;
+  width:100%;
+  padding: 20px !important;
+}
+.board {
+  color: white;
+}
 .smallCard {
   height: 160px;
   width: 112px;
