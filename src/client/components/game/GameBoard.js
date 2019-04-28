@@ -10,14 +10,15 @@ const ResArcanaClient = Client({
   debug: true,
   multiplayer: { server: "localhost:8000" },
   //multiplayer: { local: true },
-  numPlayers: 3
+  numPlayers: 2
 });
 
 export class GameBoard extends Component {
   state = { playerID: null };
 
   render() {
-    if (this.state.playerID === null) {
+    const { playerID } = this.state;
+    if (playerID === null) {
       return (
         <Container className="gameBoard">
           <div className="board">
@@ -40,10 +41,7 @@ export class GameBoard extends Component {
     }
     return (
       <Container className="gameBoard">
-        <ResArcanaClient playerID="0" />
-        <ResArcanaClient playerID="1" />
-        <ResArcanaClient playerID="2" />
-        <ResArcanaClient playerID="3" />
+        <ResArcanaClient gameId="yo" playerID={playerID} />
       </Container>
     );
   }

@@ -11,6 +11,12 @@
 .smallCard {
   height: 160px;
   width: 112px;
+  color: black;
+}
+.xSmallCard {
+  height: 80px;
+  width: 56px;
+  color: black;
 }
 .artefacts {
   display: flex;
@@ -18,4 +24,8 @@
 .flex-column{
   -webkit-flex-direction: row;
   flex-direction: row;
+}
+
+.card.active {
+  background-color: green;
 }

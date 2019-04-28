@@ -1,22 +1,27 @@
-import { Game, TurnOrder  } from 'boardgame.io/core';
+import { Game  } from 'boardgame.io/core';
 
 export const ResArcana = Game({
   name: "res-arcana",
 
-  setup: (G, ctx) => ({
-      artefacts:[
-        {name:"A", value:1},
-        {name:"B", value:0},
-        {name:"C", value:2},
-        {name:"D", value:3},
-        {name:"E", value:0},
-        {name:"F", value:1},
-        {name:"G", value:1},
-        {name:"H", value:1}
-      ],
-      artefactInPLay:[],
-      passed:false,
-    }),
+  setup: (G, ctx) => {
+    const artefactInPlay = {};
+    for (var i=0;i<G.numPlayers;i++) artefactInPlay[i]= [];
+    return (
+      {
+        artefacts:[
+          {name:"A", value:1},
+          {name:"B", value:0},
+          {name:"C", value:2},
+          {name:"D", value:3},
+          {name:"E", value:0},
+          {name:"F", value:1},
+          {name:"G", value:1},
+          {name:"H", value:1}
+        ],
+        artefactsInPlay: artefactInPlay,
+        passed:false,
+      })
+    },
 
     moves: {
       pickArtefact: (G, ctx, artefactName) => {
@@ -25,7 +30,7 @@ export const ResArcana = Game({
         );
         let artefact = copy(G.artefacts[artefactIndex]);
         G.artefacts.splice(artefactIndex, 1);
-        G.artefactInPLay.push(artefact);
+        G.artefactsInPlay[ctx.currentPlayer].push(artefact);
       },
       pass: G => {
         G.passed = true;
@@ -33,14 +38,42 @@ export const ResArcana = Game({
     },
 
     flow: {
+      movesPerTurn: 1,
       startingPhase: 'pickArtefact',
-      turnOrder: TurnOrder.DEFAULT,
 
       phases: {
         pickArtefact: {
           allowedMoves: ['pickArtefact'],
           endPhaseIf: G => G.passed,
           next: 'pickArtefact',
+        }
+      },
+
+      endGameIf: (G, ctx) => {
+        if (G.artefacts.length === 0) {
+          // sum players scores
+          let scores = Object.entries(G.artefactsInPlay).map(player => {
+             let values = player[1].map(component => {
+               return component.value;
+             });
+             const reducer = (res, value) => res + value;
+             const playerId = player[0];
+             const result = {
+               playerId: null,
+               score: 0
+             };
+             result.playerId = playerId
+             result.score = values.reduce(reducer);
+             return result;
+          });
+          // retrieve scores value and get scoreMax
+          let scoreValues = scores.map(score => score.score);
+          let scoreMax = Math.max(...scoreValues);
+          // then get the players having scoreMax as winners
+          let winners = scores.filter(player => {
+            return player.score === scoreMax;
+          });
+          return { winner: winners };
         }
       },
     },
@@ -65,6 +98,5 @@ function initGameComponents(playerNumber) {
 }
 
 function copy(value){
-  console.log(value);
   return JSON.parse(JSON.stringify(value));
 }

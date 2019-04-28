@@ -14,9 +14,7 @@ export class ResArcanaBoard extends Component {
 
   pickArtefact = id => {
     if (this.isActive(id)) {
-      console.log("pickArtefact ",id);
       this.props.moves.pickArtefact(id);
-      console.log("call endTurn ");
       this.props.events.endTurn();
     }
   };
@@ -26,27 +24,72 @@ export class ResArcanaBoard extends Component {
     return true;
   }
 
-  render() {
-    const { artefacts } = this.props.G;
-    const components = artefacts.map(artefact => {
+  getWinner = () => {
+    const { gameover } = this.props.ctx;
+    if (gameover) {
+      console.log("gameover.winner : ", gameover.winner);
       return (
-        <div
-          className="card smallCard"
-          key={artefact.name}
-          onClick={() => { this.pickArtefact(artefact.name)}}
-        >
-          {artefact.name}
-        </div>);
+        gameover.winner !== undefined ? (
+          gameover.winner.map(winner => {
+            return (
+              <div
+                key={winner.playerId}
+                id="winner">Winner is player {winner.playerId} with a score of {winner.score}
+              </div>
+            )
+          })
+        ) : (
+          <div id="winner">Draw!</div>
+        )
+      )
+    } else return null
+  }
+
+  renderCard = (artefact, onClick) => {
+    return (
+      <div
+        className={(this.isActive ? "active ": "") + "card xSmallCard"}
+        key={artefact.name}
+        onClick={onClick}
+      >
+        {artefact.name} : {artefact.value}
+      </div>
+    );
+  }
+
+  render() {
+    const { G, ctx, playerID, gameId } = this.props;
+
+    let winner = this.getWinner();
+
+    const globalArtifacts = G.artefacts && G.artefacts.map(artefact => {
+      return this.renderCard(artefact, () => { this.pickArtefact(artefact.name)})
     });
+    const playerArtifacts = G.artefactsInPlay[playerID] && G.artefactsInPlay[playerID].map(artefact => {
+      return this.renderCard(artefact)
+    });
+
+    let artefactsAvailable = null;
+    if ( this.isActive ) {
+      artefactsAvailable =
+        <div className="flex-column">
+          <div className="artefacts">{globalArtifacts}</div>
+        </div>
+    }
+
+    let playerArtefacts =
+      <div className="flex-column">
+        <div className="artefacts">{playerArtifacts}</div>
+      </div>
 
     return (
       <div className="board">
-        <div className="flex-column">
-          <h1>You are Player {this.props.playerID}</h1>
-          <div className="artefacts">{components}</div>
-          <h1>Active player is {this.props.ctx.currentPlayer}</h1>
-        </div>
+        <h6>You are Player {playerID} in game {gameId}</h6>
+        <h6>Active player is {ctx.currentPlayer}</h6>
+        {artefactsAvailable}
+        {playerArtefacts}
+        {winner}
       </div>
-    );
+    )
   }
 }
