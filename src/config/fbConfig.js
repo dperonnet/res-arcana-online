@@ -3,7 +3,7 @@ import 'firebase/firestore';
 import 'firebase/auth';
 
 // Initialize Firebase
-var config = {
+var fbConfig = {
   apiKey: "AIzaSyCfanQhV4nXpnoei8RY8tsF3c58OpYczU0",
   authDomain: "res-arcana-project.firebaseapp.com",
   databaseURL: "https://res-arcana-project.firebaseio.com",
@@ -12,7 +12,7 @@ var config = {
   messagingSenderId: "495059282761"
 };
 
-firebase.initializeApp(config);
+!firebase.apps.length ? firebase.initializeApp(fbConfig) : firebase.app()
 firebase.firestore().settings({ });
 
-export default firebase;
+export { fbConfig, firebase }
