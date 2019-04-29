@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Nav } from 'react-bootstrap';
+import { Nav, NavDropdown } from 'react-bootstrap';
 import { LinkContainer } from "react-router-bootstrap";
 import { connect } from 'react-redux';
 import { signOut } from '../../../store/actions/authActions';
@@ -10,10 +10,9 @@ class LoginPanel extends Component {
     return (
       auth.uid ?
         <>
-          <Nav>
-            <Nav.Link>{profile.login}</Nav.Link>
-          </Nav>
-          <Nav.Link onClick={signOut}>Logout</Nav.Link>
+          <NavDropdown title={profile.login} id="collasible-nav-dropdown">
+            <LinkContainer to="/"><NavDropdown.Item onClick={signOut}>Logout</NavDropdown.Item></LinkContainer>
+          </NavDropdown>
         </>
         :
         <>

@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { Container } from 'react-bootstrap';
-import { Redirect } from 'react-router-dom';
 import SideBar from './sidebar/SideBar';
 import Loby from './loby/Loby';
 import './dashboard.css';
@@ -33,8 +32,7 @@ class DashBoard extends Component {
   }
 
   render() {
-    const { games, auth } = this.props;
-    if(!auth.uid) return <Redirect to='/signin'/>
+    const { games } = this.props;
 
     const localStorageExpanded = JSON.parse(window.localStorage.getItem(LOCALSTORAGE_KEY));
     const isExpanded = localStorageExpanded === true || localStorageExpanded === false  ? localStorageExpanded: true;

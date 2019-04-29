@@ -52,10 +52,8 @@ class CreateGame extends Component {
 
   render() {
     const { isCreatingGame, game } = this.state;
-    const { auth, profile } = this.props;
+    const { profile } = this.props;
     const numberOfPlayers = ["2","3","4"];
-
-    if(!auth.uid) return <Redirect to='/signin'/>
 
     return (
       <div className='createGamePanel'>
@@ -91,7 +89,7 @@ class CreateGame extends Component {
                       ))}
                     </Col>
                   </Form.Group>
-                  <Form.Group as={Row} controlId="allowSpectators">
+                  {/*<Form.Group as={Row} controlId="allowSpectators">
                     <Form.Label column xs={4}>Allow Spectators?</Form.Label>
                     <Col xs={8} className="mt-2">
                       <Form.Check
@@ -102,7 +100,7 @@ class CreateGame extends Component {
                         onChange={this.handleChange}
                       />
                     </Col>
-                  </Form.Group>
+                  </Form.Group>*/}
                 </Form>
               </div>
               <div className="gameButton">

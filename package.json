@@ -11,6 +11,7 @@
     "esm": "^3.2.22",
     "express": "^4.15.2",
     "firebase": "^5.9.4",
+    "firebase-admin": "^7.3.0",
     "lodash": "^4.17.11",
     "moment": "^2.24.0",
     "react": "^16.8.4",

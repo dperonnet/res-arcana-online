@@ -10,11 +10,19 @@ import { reduxFirestore, getFirestore } from 'redux-firestore';
 import { reactReduxFirebase, getFirebase } from 'react-redux-firebase';
 import fbConfig from './config/fbConfig'
 
+const rrfConfig = {
+  attachAuthIsReady: true,
+  userProfile :'users', // where profiles are stored in database
+  useFirestoreForProfile: true,
+  presence: 'presence', // where list of online users is stored in database
+  sessions: 'sessions' // where list of user sessions is stored in database (presence must be enabled)
+}
+
 const store = createStore(rootReducer,
   compose(
     applyMiddleware(thunk.withExtraArgument({getFirebase, getFirestore})),
     reduxFirestore(fbConfig),
-    reactReduxFirebase(fbConfig, {useFirestoreForProfile: true, userProfile :'users', attachAuthIsReady: true})
+    reactReduxFirebase(fbConfig, rrfConfig)
   )
 );
 
