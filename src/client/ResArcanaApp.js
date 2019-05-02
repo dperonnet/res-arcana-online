@@ -17,7 +17,7 @@ export default class ResArcanaApp extends Component {
           <div className="wrapper">
             <Route exact path="/" component={DashBoard} />
             <Route path="/editor" component={DatabaseEditor} />
-            <Route path="/game" component={GameBoard} />
+            <Route path="/play" component={GameBoard} />
             <Route path="/signIn" component={SignIn} />
             <Route path="/register" component={Register} />
           </div>

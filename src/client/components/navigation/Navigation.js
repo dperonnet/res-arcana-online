@@ -17,7 +17,7 @@ class Navigation extends Component {
         <Navbar.Toggle aria-controls="responsive-navbar-nav" />
         <Navbar.Collapse id="responsive-navbar-nav">
           <Nav className="mr-auto">
-            <LinkContainer to="/game"><Nav.Link>Play</Nav.Link></LinkContainer>
+            <LinkContainer to="/play"><Nav.Link>Play</Nav.Link></LinkContainer>
             <LinkContainer to="/editor"><Nav.Link>Editor</Nav.Link></LinkContainer>
             <NavDropdown title="Help" id="collasible-nav-dropdown">
               <LinkContainer to="/editor"><NavDropdown.Item>How To Play</NavDropdown.Item></LinkContainer>

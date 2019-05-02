@@ -17,7 +17,7 @@ const server = Server({
       messagingSenderId: "495059282761"
     },
     engine: 'Firestore',
-    adminClient: true,
+    adminClient: false,
   }),
 });
 

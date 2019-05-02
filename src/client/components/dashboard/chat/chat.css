@@ -1,0 +1,72 @@
+.flex-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.chatContainer {
+  width: 100%;
+  max-width: 1170px;
+  margin: 0 auto;
+  padding: 20px;
+  height: 100%;
+}
+
+.chatPanel {
+  position: relative;
+  font-size: 12px;
+  background-color: rgba(34,34,34,.8);
+  height: 100%;
+  width: 100%;
+  padding: 12px;
+  border : 1px solid #F5B041;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin: auto;
+}
+
+.chatName {
+  text-align: center;
+  color: #fff;
+}
+
+.messageContent {
+  font-size: 11px;
+  overflow-y: auto;
+  padding-left: 20px;
+  padding-bottom: 4px;
+  color: lightgray;
+}
+
+.chatArea {
+  position: absolute;
+  top: 45px;
+  bottom: 50px;
+  left: 20px;
+  right: 20px;
+  font-size: 11px;
+  overflow-y: auto;
+  margin-left: -10px;
+  margin-right: -10px;
+}
+
+.username {
+  font-size: 12px;
+  font-weight: 700;
+  margin-right: 5px;
+  color: white;
+  padding-left: 10px;
+}
+
+.createdAt {
+  font-size: 10px;
+  color: lightgoldenrodyellow;
+}
+
+.sendForm {
+  position: absolute;
+  bottom: 10px;
+  left: 15px;
+  right: 15px;
+}

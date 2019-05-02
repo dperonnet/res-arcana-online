@@ -1,18 +1,15 @@
-.loby {
-  margin: auto;
-  width: 100%;
-}
-
 .joinGameContainer {
   width: 100%;
   max-width: 640px;
+  margin: 0 auto;
+  padding: 20px;
 }
 
 .createGamePanel, .gameListPanel {
   background-color: rgba(34,34,34,.8);
   width: 100%;
   max-width: 700px;
-  margin: 20px;
+  margin-bottom: 20px;
   padding: 12px;
   border : 1px solid #F5B041;
 }

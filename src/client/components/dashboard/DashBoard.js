@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import { Container } from 'react-bootstrap';
 import SideBar from './sidebar/SideBar';
-import Loby from './loby/Loby';
+import Chat from './chat/Chat';
+import Lobby from './lobby/Lobby';
 import './dashboard.css';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
@@ -33,7 +34,6 @@ class DashBoard extends Component {
 
   render() {
     const { games } = this.props;
-
     const localStorageExpanded = JSON.parse(window.localStorage.getItem(LOCALSTORAGE_KEY));
     const isExpanded = localStorageExpanded === true || localStorageExpanded === false  ? localStorageExpanded: true;
 
@@ -44,8 +44,9 @@ class DashBoard extends Component {
           collapse={this.handleCollapse}
           expand={this.handleExpand}
         />
-        <Container className={"dashBoard-content " + (isExpanded ? 'expanded' : '')}>
-          <Loby games={games}></Loby>
+        <Container className={"dashBoard-content" + (isExpanded ? ' expanded' : '')}>
+          <Chat chatId='lobbyChat'/>
+          {/*<Lobby games={games}></Lobby>*/}
         </Container>
       </>
     );

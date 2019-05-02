@@ -3,6 +3,8 @@ import { Container } from 'react-bootstrap';
 import { Client } from "boardgame.io/react";
 import { ResArcana } from './Game';
 import { ResArcanaBoard } from './Board';
+import logger from 'redux-logger';
+import { applyMiddleware } from 'redux';
 
 const ResArcanaClient = Client({
   game: ResArcana,
@@ -10,14 +12,15 @@ const ResArcanaClient = Client({
   debug: true,
   multiplayer: { server: "localhost:8000" },
   //multiplayer: { local: true },
-  numPlayers: 2
+  numPlayers: 2,
+  enhancer: applyMiddleware(logger)
 });
 
 export class GameBoard extends Component {
   state = { playerID: null };
 
   render() {
-    const { playerID } = this.state;
+    const { gameID, playerID } = this.state;
     if (playerID === null) {
       return (
         <Container className="gameBoard">
@@ -41,7 +44,7 @@ export class GameBoard extends Component {
     }
     return (
       <Container className="gameBoard">
-        <ResArcanaClient gameId="yo" playerID={playerID} />
+        <ResArcanaClient  gameID={gameID} playerID={playerID} />
       </Container>
     );
   }

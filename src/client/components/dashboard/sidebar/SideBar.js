@@ -1,16 +1,36 @@
 import React, { Component } from 'react';
-import { compose } from 'redux';
-import { connect } from 'react-redux';
-import { firestoreConnect } from 'react-redux-firebase';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faAngleRight } from '@fortawesome/free-solid-svg-icons';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import './sidebar.css';
 
-class SideBar extends Component {
+export default class SideBar extends Component {
+
+  constructor(props){
+    super(props);
+    this.state = {
+      users: [
+        {
+          id:1,
+          name:'Bender',
+          avatar: 'bender.gif'
+        },
+        {
+          id:2,
+          name:'Frey',
+          avatar: ''
+        },
+        {
+          id:3,
+          name:'Kenny',
+          avatar: ''
+        }]
+    }
+  }
+
   render() {
-    const { expanded, collapse, expand, users } = this.props;
-    console.log(this.props)
+    const { users } = this.state;
+    const { expanded, collapse, expand } = this.props;
 
     return (
       expanded ?
@@ -49,17 +69,3 @@ class SideBar extends Component {
     );
   }
 }
-
-const mapStateToProps = (state) => {
-  return {
-    users: state.firestore.ordered.users,
-    presence: state.firebase.auth.presence,
-  }
-}
-
-export default compose(
-  connect(mapStateToProps),
-  firestoreConnect([
-    { collection: 'users'}
-  ])
-)(SideBar)

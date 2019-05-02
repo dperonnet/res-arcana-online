@@ -3,7 +3,7 @@ import { Button, Col, Form, Row } from 'react-bootstrap';
 import { Redirect, withRouter } from 'react-router-dom';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
-import { createGame } from '../../../../store/actions/gameActions';
+import { createAndJoinGame } from '../../../../store/actions/gameActions';
 
 class CreateGame extends Component {
   constructor(props) {
@@ -14,10 +14,22 @@ class CreateGame extends Component {
       game: {
         name: null,
         password: '',
-        numberOfPlayers: '4',
-        allowSpectators: true
+        numberOfPlayers: '4'
       }
     };
+  }
+
+  static getDerivedStateFromProps(props, state) {
+    let { game } = state;
+    if (game.name === null) {
+      return {
+        game: {
+          ...game,
+          name: props.profile.login + '\'s game',
+        }
+      }
+    }
+    return state;
   }
 
   handleClose = () => {
@@ -36,7 +48,7 @@ class CreateGame extends Component {
     });
   }
 
-  handleChange = (e) =>{
+  handleChange = (e) => {
     const { checked, name, value, type } = e.target;
     const { game } = this.state;
     const valueToUpdate = type === 'checkbox' ? checked : value;
@@ -46,13 +58,17 @@ class CreateGame extends Component {
 
   handleSubmit = (e) => {
     e.preventDefault();
-    this.props.createGame(this.state.game);
-    this.props.history.push('/game');
+    const { auth, profile } = this.props;
+    const { game } = this.state;
+    game.players = {};
+    game.players[auth.uid] = profile.login;
+    this.setState({game});
+    this.props.createAndJoinGame(this.state.game);
+    this.props.onJoin(this.state.game.id);
   }
 
   render() {
     const { isCreatingGame, game } = this.state;
-    const { profile } = this.props;
     const numberOfPlayers = ["2","3","4"];
 
     return (
@@ -62,7 +78,7 @@ class CreateGame extends Component {
             <div className='game'>
               <div className="gameHeader"><h5>Create new game</h5></div>
               <div className="gameOptions">
-                <Form>
+                <Form onSubmit={this.handleSubmit}>
                   <Form.Group as={Row} controlId="name">
                     <Form.Label column xs="4">Name</Form.Label>
                     <Col xs="8">
@@ -72,7 +88,7 @@ class CreateGame extends Component {
                         placeholder="Game name"
                         type="text"
                         name="name"
-                        value={game.name !== null ? game.name : profile.login + '\'s game'}
+                        value={game.name}
                         onChange={this.handleChange}
                       />
                     </Col>
@@ -89,22 +105,10 @@ class CreateGame extends Component {
                       ))}
                     </Col>
                   </Form.Group>
-                  {/*<Form.Group as={Row} controlId="allowSpectators">
-                    <Form.Label column xs={4}>Allow Spectators?</Form.Label>
-                    <Col xs={8} className="mt-2">
-                      <Form.Check
-                        size="sm"
-                        type="checkbox"
-                        name="allowSpectators"
-                        value={game.allowSpectators}
-                        onChange={this.handleChange}
-                      />
-                    </Col>
-                  </Form.Group>*/}
                 </Form>
               </div>
               <div className="gameButton">
-                <Button variant="secondary" size="sm" onClick={this.handleSubmit}>Start</Button>
+                <Button type="submit" variant="secondary" size="sm" onClick={this.handleSubmit}>Start</Button>
                 <Button variant="secondary" size="sm" onClick={this.handleClose}>Cancel</Button>
               </div>
             </div>
@@ -112,16 +116,14 @@ class CreateGame extends Component {
           <div className='gameButton'>
             <Button variant="secondary" size="sm"
               onClick={this.handleShow}>New Game</Button>
-            {/*<Button variant="secondary" size="sm">Quick Join</Button>*/}
           </div>
         }
       </div>
     );
   }
-
 }
 
-const mapStateToProps = (state) =>{
+const mapStateToProps = (state) => {
   return {
     auth: state.firebase.auth,
     profile: state.firebase.profile
@@ -130,7 +132,7 @@ const mapStateToProps = (state) =>{
 
 const mapDispatchToProps = dispatch => {
   return {
-    createGame: (game) => dispatch(createGame(game))
+    createAndJoinGame: (game) => dispatch(createAndJoinGame(game))
   }
 }
 
