@@ -9,6 +9,7 @@ import thunk from 'redux-thunk'
 import { reduxFirestore, getFirestore } from 'redux-firestore';
 import { reactReduxFirebase, getFirebase } from 'react-redux-firebase';
 import { firebase } from './config/fbConfig'
+import { verifyAuth } from './store/actions/authActions';
 
 const rrfConfig = {
   attachAuthIsReady: true,
@@ -25,6 +26,8 @@ const store = createStore(rootReducer,
     reactReduxFirebase(firebase, rrfConfig)
   )
 );
+
+store.dispatch(verifyAuth());
 
 store.firebaseAuthIsReady.then(()=>{
   ReactDOM.render(

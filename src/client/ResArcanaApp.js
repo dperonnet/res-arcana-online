@@ -7,8 +7,10 @@ import { GameBoard } from './components/game/GameBoard';
 import Navigation from './components/navigation/Navigation';
 import { BrowserRouter as Router, Route } from "react-router-dom";
 import './assets/style/index.css';
+import { connect } from 'react-redux';
+import { setUserStatus } from '../store/actions/authActions';
 
-export default class ResArcanaApp extends Component {
+class ResArcanaApp extends Component {
   render() {
     return (
       <Router>
@@ -26,3 +28,18 @@ export default class ResArcanaApp extends Component {
     );
   }
 }
+
+const mapStateToProps = (state) =>{
+  return {
+    authError: state.auth.authError,
+    auth: state.firebase.auth
+  }
+}
+
+const mapDispatchToProps = (dispatch) =>{
+  return {
+    setUserStatus: () => dispatch(setUserStatus()),
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(ResArcanaApp);

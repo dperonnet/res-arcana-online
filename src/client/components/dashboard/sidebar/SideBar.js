@@ -5,32 +5,8 @@ import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import './sidebar.css';
 
 export default class SideBar extends Component {
-
-  constructor(props){
-    super(props);
-    this.state = {
-      users: [
-        {
-          id:1,
-          name:'Bender',
-          avatar: 'bender.gif'
-        },
-        {
-          id:2,
-          name:'Frey',
-          avatar: ''
-        },
-        {
-          id:3,
-          name:'Kenny',
-          avatar: ''
-        }]
-    }
-  }
-
   render() {
-    const { users } = this.state;
-    const { expanded, collapse, expand } = this.props;
+    const { expanded, collapse, expand, users } = this.props;
 
     return (
       expanded ?
@@ -49,7 +25,7 @@ export default class SideBar extends Component {
                   key={user.id}
                   className="user-row">
                   <img className="gravatar" src={`../../../../assets/image/avatar/${user.avatar}`} alt=''/>
-                  <span>{user.name}</span>
+                  <span>{user.login}</span>
                 </div>
               )
               )

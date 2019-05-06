@@ -44,7 +44,7 @@ class Chat extends Component {
   }
 
   render() {
-    const { chat } = this.props;
+    const { chat, auth } = this.props;
     const { message } = this.state;
     let messages = null;
     if (chat) {
@@ -64,17 +64,30 @@ class Chat extends Component {
             <div className="sendForm">
               <Form onSubmit={this.handleSubmit} autoComplete="off">
                 <InputGroup>
-                  <Form.Control
-                    size="sm"
-                    autoFocus
-                    placeholder="Enter a message..."
-                    type="text"
-                    name="message"
-                    value={message}
-                    onChange={this.handleChange}
-                  />
+                  {auth.uid ?
+                  (
+                    <Form.Control
+                      size="sm"
+                      autoFocus
+                      placeholder="Enter a message..."
+                      type="text"
+                      name="message"
+                      value={message}
+                      onChange={this.handleChange}
+                    />
+                  ) : (
+                    <Form.Control
+                      size="sm"
+                      disabled
+                      placeholder="You must be logged in to send lobby chat messages"
+                      type="text"
+                      name="message"
+                      value={message}
+                    />
+                  )}
                   <InputGroup.Append>
                     <Button variant="secondary" size="sm"
+                      disabled={auth.uid}
                       onClick={this.handleSubmit}> Send</Button>
                   </InputGroup.Append>
                 </InputGroup>
@@ -89,6 +102,7 @@ class Chat extends Component {
 
 const mapStateToProps = (state, props) => {
   return {
+    auth: state.firebase.auth,
     chat : state.firestore.data.chat
   }
 }

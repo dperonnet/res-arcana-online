@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Container } from 'react-bootstrap';
 import SideBar from './sidebar/SideBar';
 import Chat from './chat/Chat';
-import Lobby from './lobby/Lobby';
+//import Lobby from './lobby/Lobby';
 import './dashboard.css';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
@@ -32,19 +32,35 @@ class DashBoard extends Component {
     window.localStorage.removeItem(LOCALSTORAGE_KEY);
   }
 
+  handleLogin = () => {
+    console.log('redirect')
+    return this.props.history.push("/signIn");
+  }
+
   render() {
-    const { games } = this.props;
+    const { auth, users } = this.props;
     const localStorageExpanded = JSON.parse(window.localStorage.getItem(LOCALSTORAGE_KEY));
     const isExpanded = localStorageExpanded === true || localStorageExpanded === false  ? localStorageExpanded: true;
 
     return (
       <>
+        {auth.uid ?
+          (
+          <SideBar
+            expanded={isExpanded}
+            collapse={this.handleCollapse}
+            expand={this.handleExpand}
+            users={users}
+          />
+        ) : (
         <SideBar
-          expanded={isExpanded}
-          collapse={this.handleCollapse}
-          expand={this.handleExpand}
+          expanded={false}
+          collapse={this.handleLogin}
+          expand={this.handleLogin}
+          users={users}
         />
-        <Container className={"dashBoard-content" + (isExpanded ? ' expanded' : '')}>
+      )}
+        <Container className={"dashBoard-content" + (auth.uid && isExpanded ? ' expanded' : '')}>
           <Chat chatId='lobbyChat'/>
           {/*<Lobby games={games}></Lobby>*/}
         </Container>
@@ -53,9 +69,10 @@ class DashBoard extends Component {
   }
 }
 
-const mapStateToProps = (state) =>{
+const mapStateToProps = (state) => {
   return {
     games: state.firestore.ordered.games,
+    users: state.firestore.ordered.users,
     auth: state.firebase.auth
   }
 }
@@ -63,7 +80,9 @@ const mapStateToProps = (state) =>{
 export default compose(
   connect(mapStateToProps),
   firestoreConnect([
-    { collection: 'games'}
+    { collection: 'games'},
+    { collection: 'users',
+		  where: ['state', '==', 'online'],}
   ])
 )(DashBoard);
 
