@@ -1,4 +1,4 @@
-.dashBoard-content {
+.dashBoardContent {
   padding-left: 20px !important;
   height: 100%;
   color: white;
@@ -8,7 +8,7 @@
 }
 
 @media (min-width: 768px) {
-  .dashBoard-content.expanded {
+  .dashBoardContent.expanded {
     padding-left: 200px !important;
   }
 }

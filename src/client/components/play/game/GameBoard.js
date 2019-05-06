@@ -21,7 +21,7 @@ export class GameBoard extends Component {
 
   render() {
     const { gameID, playerID } = this.state;
-    if (playerID === null) {
+    if (false) {
       return (
         <Container className="gameBoard">
           <div className="board">

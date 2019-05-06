@@ -5,13 +5,14 @@ import Message from './Message';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
 import { firestoreConnect } from 'react-redux-firebase';
-import { sendMessage } from '../../../../store/actions/chatActions';
+import { createChat, sendMessage } from '../../../../store/actions/chatActions';
 
 class Chat extends Component {
   constructor(props) {
     super(props);
     this.state = {
       chatId: this.props.chatId,
+      chatName: this.props.chatName,
       message: ''
     };
     this.scrollDown = this.scrollDown.bind(this)
@@ -36,18 +37,26 @@ class Chat extends Component {
 
   handleSubmit = (e) => {
     e.preventDefault();
-    const { chatId, message } = this.state;
+    const { chatId, chatName, message } = this.state;
+    const { chat, createChat } = this.props;
+    if (!chat) {
+      createChat(chatId, chatName);
+    }
     if(message && message.trim() !== '') {
       this.props.sendMessage(message, chatId);
       this.setState({message:''});
     }
   }
 
+  createChat = () => {
+
+  }
+
   render() {
-    const { chat, auth } = this.props;
+    const { chat, chatName, auth } = this.props;
     const { message } = this.state;
     let messages = null;
-    if (chat) {
+    if (chat && chat.messages) {
       messages = chat.messages.map((message) => {
         return <Message key={message.createdAt} message={message} />;
       })
@@ -56,7 +65,7 @@ class Chat extends Component {
     return (
       <div className="chatContainer flex-container">
           <div className="chatPanel">
-            <h5 className="chatName">Lobby chat (x online)</h5>
+            <h5 className="chatName">{chatName}</h5>
             <div>
             <div className="chatArea" ref='chatArea'>
               {messages}
@@ -87,7 +96,7 @@ class Chat extends Component {
                   )}
                   <InputGroup.Append>
                     <Button variant="secondary" size="sm"
-                      disabled={auth.uid}
+                      disabled={!auth.uid}
                       onClick={this.handleSubmit}> Send</Button>
                   </InputGroup.Append>
                 </InputGroup>
@@ -109,7 +118,8 @@ const mapStateToProps = (state, props) => {
 
 const mapDispatchToProps = dispatch => {
   return {
-    sendMessage: (message, chatId) => dispatch(sendMessage(message, chatId))
+    sendMessage: (message, chatId) => dispatch(sendMessage(message, chatId)),
+    createChat: (chatId, chatName) => dispatch(createChat(chatId, chatName))
   }
 }
 

@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import DatabaseEditor from './components/editor/DatabaseEditor';
 import DashBoard from './components/dashboard/DashBoard';
-import SignIn from './components/dashboard/auth/SignIn';
-import Register from './components/dashboard/auth/Register';
-import { GameBoard } from './components/game/GameBoard';
+import SignIn from './components/common/auth/SignIn';
+import Register from './components/common/auth/Register';
+import Play from './components/play/Play';
 import Navigation from './components/navigation/Navigation';
 import { BrowserRouter as Router, Route } from "react-router-dom";
 import './assets/style/index.css';
@@ -19,7 +19,7 @@ class ResArcanaApp extends Component {
           <div className="wrapper">
             <Route exact path="/" component={DashBoard} />
             <Route path="/editor" component={DatabaseEditor} />
-            <Route path="/play" component={GameBoard} />
+            <Route path="/play" component={Play} />
             <Route path="/signIn" component={SignIn} />
             <Route path="/register" component={Register} />
           </div>
@@ -29,7 +29,7 @@ class ResArcanaApp extends Component {
   }
 }
 
-const mapStateToProps = (state) =>{
+const mapStateToProps = (state) => {
   return {
     authError: state.auth.authError,
     auth: state.firebase.auth

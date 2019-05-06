@@ -23,12 +23,12 @@ export const sendMessage = (message, chatId) => {
   }
 };
 
-export const createChat = (game) => {
+export const createChat = (chatId, chatName) => {
   return (dispatch, getState, {getFirebase, getFirestore}) => {
     const fireStore = getFirestore();
-    const creatorId = getState().firebase.auth.uid;
-    fireStore.collection('chats').doc(game.uid).add({
-      name: game.name,
+    const creatorId = getState().firebase.auth.uid
+    fireStore.collection('chats').doc(chatId).set({
+      name: chatName,
       creatorId: creatorId,
       createdAt: new Date()
     }).then((chat) => {

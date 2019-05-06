@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
 import { Container } from 'react-bootstrap';
 import SideBar from './sidebar/SideBar';
-import Chat from './chat/Chat';
-//import Lobby from './lobby/Lobby';
+import Chat from '../common/chat/Chat';
 import './dashboard.css';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
@@ -41,7 +40,7 @@ class DashBoard extends Component {
     const { auth, users } = this.props;
     const localStorageExpanded = JSON.parse(window.localStorage.getItem(LOCALSTORAGE_KEY));
     const isExpanded = localStorageExpanded === true || localStorageExpanded === false  ? localStorageExpanded: true;
-
+    const chatName = 'Lobby Chat' + (users ? ' (' + users.length + ' online)' : '');
     return (
       <>
         {auth.uid ?
@@ -60,9 +59,8 @@ class DashBoard extends Component {
           users={users}
         />
       )}
-        <Container className={"dashBoard-content" + (auth.uid && isExpanded ? ' expanded' : '')}>
-          <Chat chatId='lobbyChat'/>
-          {/*<Lobby games={games}></Lobby>*/}
+        <Container className={"dashBoardContent" + (auth.uid && isExpanded ? ' expanded' : '')}>
+          <Chat chatId='mainChat' chatName={chatName}/>
         </Container>
       </>
     );

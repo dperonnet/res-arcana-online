@@ -106,7 +106,7 @@ exports.userJoined = functions.auth.user()
 
         const newUser = doc.data();
         const notification = {
-          content: 'Joined the RAO community',
+          content: 'joined the Res Arcana Online community,
           user: `${newUser.login}`,
           time: admin.firestore.FieldValue.serverTimestamp()
         }
