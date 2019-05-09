@@ -7,16 +7,22 @@ import './play.css';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
 import { firestoreConnect } from 'react-redux-firebase';
+import moment from 'moment';
 
 class Play extends Component {
   render() {
     const { auth, currentGame } = this.props;
     if(!auth.uid) return <Redirect to='/signIn'/>
-
+    console.log('currentGame && currentGame.gameId', currentGame);
+    if(currentGame) console.log('currentGame.gameId', currentGame.gameId)
     return (
       <Container className="playContainer">
-        {(currentGame && currentGame.gameId) ?
-          <GameLobby /> : <Lobby />}
+        {
+          currentGame ? (
+            currentGame.gameId != null ?
+            <GameLobby /> : <><Lobby /><div>currentGame.gameId : {currentGame.gameId}</div></>
+          ) : <div className="loading">Loading...</div>
+        }
       </Container>
     );
   }
@@ -32,10 +38,12 @@ const mapStateToProps = (state, props) => {
 export default
 compose(
   connect(mapStateToProps),
-  firestoreConnect((props) => [
+  firestoreConnect((props) => {
+    console.log('props',props)
+    return [
     { collection: 'currentGames',
       doc: props.auth.uid,
       storeAs: 'currentGame'
     }
-  ]
+  ]}
 ))(Play)

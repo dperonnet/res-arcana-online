@@ -8,7 +8,6 @@ import { createAndJoinGame } from '../../../../store/actions/gameActions';
 class CreateGame extends Component {
   constructor(props) {
     super(props);
-    console.log(props)
     this.state = {
       isCreatingGame: false,
       game: {

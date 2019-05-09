@@ -25,7 +25,6 @@ class Lobby extends Component {
       </div>
     );
   }
-
 }
 
 const mapStateToProps = (state) => {

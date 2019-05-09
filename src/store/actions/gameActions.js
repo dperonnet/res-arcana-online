@@ -8,30 +8,14 @@ export const createGame = (game) => {
       ...game,
       gameCreator: profile.login,
       creatorId: creatorId,
-      createdAt: new Date()
-    }).then(() => {
-      dispatch({ type: 'CREATE_GAME', game});
+      createdAt: new Date(),
+      status: 'PENDING'
+    }).then((docRef) => {
+      docRef.get().then(doc => {
+        dispatch({ type: 'CREATE_GAME', doc});
+      })
     }).catch((err) => {
       dispatch({type: 'CREATE_GAME_ERROR', err});
-    })
-  }
-};
-
-export const joinGame = (gameId) => {
-  return (dispatch, getState, {getFirebase, getFirestore}) => {
-    // make asynch call to database
-    const fireStore = getFirestore();
-    const creatorId = getState().firebase.auth.uid;
-    const data = {
-      gameId: gameId,
-      createdAt: new Date()
-    };
-    fireStore.collection('currentGames').doc(creatorId).set(
-      data
-    ).then(() => {
-      dispatch({ type: 'JOIN_GAME', gameId});
-    }).catch((err) => {
-      dispatch({type: 'JOIN_GAME_ERROR', err});
     })
   }
 };
@@ -46,7 +30,8 @@ export const createAndJoinGame = (game) => {
       ...game,
       gameCreator: profile.login,
       creatorId: creatorId,
-      createdAt: new Date()
+      createdAt: new Date(),
+      status: 'PENDING'
     }).then((docRef) => {
       docRef.get().then(doc => {
         dispatch({ type: 'CREATE_GAME', doc});
@@ -54,6 +39,65 @@ export const createAndJoinGame = (game) => {
       dispatch(joinGame(docRef.id));
     }).catch((err) => {
       dispatch({type: 'CREATE_GAME_ERROR', err});
+    })
+  }
+}
+
+export const joinGame = (gameId) => {
+  return (dispatch, getState, {getFirebase, getFirestore}) => {
+    const fireStore = getFirestore();
+    const profile = getState().firebase.profile;
+    const creatorId = getState().firebase.auth.uid;
+
+    // Add player to game players list
+    const gameRef = fireStore.collection('games').doc(gameId);
+    gameRef.get().then((doc) => {
+      let players = doc.data().players
+      players[creatorId] = profile.login;
+      gameRef.update({players});
+    }).then(() => {
+      // Set the current game for player
+      const data = {
+        gameId: gameId,
+        createdAt: new Date()
+      };
+      fireStore.collection('currentGames').doc(creatorId).set(data).then(() => {
+        dispatch({ type: 'JOIN_GAME', gameId});
+      })
+    }).catch((err) => {
+      dispatch({type: 'JOIN_GAME_ERROR', err});
+    })
+  }
+};
+
+export const leaveGame = (gameId) => {
+  return (dispatch, getState, {getFirebase, getFirestore}) => {
+    const fireStore = getFirestore();
+    const playerId = getState().firebase.auth.uid;
+    const gameRef = fireStore.collection('games').doc(gameId);
+
+    gameRef.get().then((document) => {
+      let status = document.data().status
+
+      switch (status) {
+        // leave before game Start
+        case 'PENDING':
+          leaveWhilePending(gameId, playerId, document, fireStore);
+        // leave while game is still running
+        case 'STARTED':
+        // leave when game is over
+        case 'OVER':
+        default:
+      }
+    }).then(() => {
+
+    });
+    fireStore.collection('currentGames').doc(playerId).update({
+      gameId: null
+    }).then((docRef) => {
+      dispatch({type: 'LEAVE_CURRENT_GAME'})
+    }).catch((err) => {
+      dispatch({type: 'LEAVE_CURRENT_GAME_ERROR', err});
     })
   }
 }
@@ -72,16 +116,45 @@ export const getCurrentGameId = () => {
   }
 }
 
-export const leaveGame = () => {
-  return (dispatch, getState, {getFirebase, getFirestore}) => {
-    const playerId = getState().firebase.auth.uid;
-    const fireStore = getFirestore();
+const leaveWhilePending = (gameId, playerId, document, fireStore) => {
+console.log('game is pending')
+  const gameRef = fireStore.collection('games').doc(gameId);
+  let players = document.data().players
+
+  // if game creator or the only left player in game, kick all players and delete game.
+  const isGameCreator = (playerId === document.data().creatorId);
+  const isTheOnlyPlayer = (Object.keys(players).length === 1 && Object.keys(players)[0] === playerId);
+  if (isGameCreator || isTheOnlyPlayer) {
+    let kicks = Object.keys(players).map((key) => {
+      console.log('key', key)
+      const playerCurrentGameRef = fireStore.collection('currentGames').doc(key);
+      console.log('playerCurrentGameRef',playerCurrentGameRef)
+      // check if player is synch with the game before kick
+      return playerCurrentGameRef.get().then((currentGame) => {
+        if(currentGame.data().gameId === gameId) {
+          playerCurrentGameRef.update({
+            gameId: null
+          })
+        }
+      })
+    })
+    delete players[playerId];
+    Promise.all(kicks).then(deleteGame(gameRef));
+  // else just leave game
+  } else {
+    delete players[playerId];
     fireStore.collection('currentGames').doc(playerId).update({
       gameId: null
-    }).then((docRef) => {
-      dispatch({type: 'LEAVE_CURRENT_GAME'})
-    }).catch((err) => {
-      dispatch({type: 'LEAVE_CURRENT_GAME_ERROR', err});
     })
+    gameRef.update({players});
   }
+}
+
+const deleteGame = (gameRef) => {
+  const gameId = gameRef.id;
+  gameRef.delete().then(function() {
+    console.log('Game',gameId,'was successfuly delete');
+  }).catch(function(error) {
+    console.error("Error deleting game: ", gameId, error);
+  });
 }

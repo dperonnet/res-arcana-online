@@ -11,19 +11,19 @@ class GameList extends Component {
 
   render() {
     const { games } = this.props;
-
     return (
         <div className='gameListPanel'>
           {games && games.map((game, index)=>{
+            console.log(game.players)
             return (
               <div className='game' key={game.id}>
                 <div className='gameHeader'>{game.name}</div>
                 <Row>
-                  {game.players.map((player)=>{
+                  {Object.entries(game.players).map((player)=>{
                     return (
                       <div
                         className='playerName col-sm-6'
-                        key={player.key}>{player.value}</div>
+                        key={player[0]}>{player[1]}</div>
                     )
                   })}
                 </Row>

@@ -11,8 +11,9 @@ import { leaveGame } from '../../../store/actions/gameActions';
 class Navigation extends Component {
 
   leaveGame = () => {
-    console.log('leaving game');
-    this.props.leaveGame();
+    const { currentGame, leaveGame } = this.props;
+    console.log('leaving game',currentGame.gameId);
+    leaveGame(currentGame.gameId);
   }
 
   render() {
@@ -55,7 +56,7 @@ const mapStateToProps = (state) =>{
 
 const mapDispatchToProps = (dispatch) =>{
   return {
-    leaveGame: (creds) => dispatch(leaveGame(creds))
+    leaveGame: (gameId) => dispatch(leaveGame(gameId))
   }
 }
 

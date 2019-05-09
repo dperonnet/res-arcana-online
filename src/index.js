@@ -2,36 +2,53 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import ResArcanaApp from './client/ResArcanaApp';
 import registerServiceWorker from './registerServiceWorker';
+import firebase from 'firebase'
 import { createStore, applyMiddleware, compose } from 'redux'
-import rootReducer from './store/reducers/rootReducer'
-import { Provider } from 'react-redux'
 import thunk from 'redux-thunk'
-import { reduxFirestore, getFirestore } from 'redux-firestore';
-import { reactReduxFirebase, getFirebase } from 'react-redux-firebase';
-import { firebase } from './config/fbConfig'
+import { Provider } from 'react-redux'
+import { fbConfig } from './config/fbConfig'
+import { ReactReduxFirebaseProvider, getFirebase } from 'react-redux-firebase'
+import { createFirestoreInstance, reduxFirestore, getFirestore } from 'redux-firestore';
 import { verifyAuth } from './store/actions/authActions';
+import rootReducer from './store/reducers/rootReducer'
+
+firebase.initializeApp(fbConfig)
+firebase.firestore().settings({ });
+
+const middleware = [
+  thunk.withExtraArgument({ getFirestore }),
+];
+
+const store = createStore(
+  rootReducer,
+  compose(
+    applyMiddleware(...middleware,thunk.withExtraArgument(getFirebase)),
+    reduxFirestore(fbConfig),
+  )
+);
 
 const rrfConfig = {
   attachAuthIsReady: true,
   userProfile :'users', // where profiles are stored in database
-  useFirestoreForProfile: true,
-  presence: 'presence', // where list of online users is stored in database
-  sessions: 'sessions' // where list of user sessions is stored in database (presence must be enabled)
+  useFirestoreForProfile: true
 }
 
-const store = createStore(rootReducer,
-  compose(
-    applyMiddleware(thunk.withExtraArgument({getFirebase, getFirestore})),
-    reduxFirestore(firebase),
-    reactReduxFirebase(firebase, rrfConfig)
-  )
-);
+const rrfProps = {
+  firebase,
+  config: rrfConfig,
+  dispatch: store.dispatch,
+  createFirestoreInstance
+}
 
 store.dispatch(verifyAuth());
 
 store.firebaseAuthIsReady.then(()=>{
   ReactDOM.render(
-    <Provider store={store}><ResArcanaApp /></Provider>,
+    <Provider store={store}>
+      <ReactReduxFirebaseProvider {...rrfProps}>
+        <ResArcanaApp />
+      </ReactReduxFirebaseProvider>
+    </Provider>,
     document.getElementById('root'));
   registerServiceWorker();
 })

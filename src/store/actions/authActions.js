@@ -33,9 +33,14 @@ export const register = (newUser) => {
       newUser.email,
       newUser.password
     ).then((resp)=>{
-      return firestore.collection('users').doc(resp.user.uid).set({
+      firestore.collection('users').doc(resp.user.uid).set({
         login: newUser.login
       });
+      const initGame = {
+        gameId: null,
+        createdAt: new Date()
+      };
+      firestore.collection('currentGames').doc(resp.user.uid).set(initGame);
     }).then(()=>{
       dispatch({ type: 'REGISTER_SUCCESS' })
     }).catch((err)=>{
