@@ -11,13 +11,13 @@ class LoginPanel extends Component {
       auth.uid ?
         <>
           <NavDropdown title={profile.login} id="collasible-nav-dropdown">
-            <LinkContainer to="/"><NavDropdown.Item onClick={signOut}>Logout</NavDropdown.Item></LinkContainer>
+            <LinkContainer to="/" active={false}><NavDropdown.Item onClick={signOut}>Logout</NavDropdown.Item></LinkContainer>
           </NavDropdown>
         </>
         :
         <>
-          <LinkContainer to="/signIn"><Nav.Link>Login</Nav.Link></LinkContainer>
-          <LinkContainer to="/register"><Nav.Link>Register</Nav.Link></LinkContainer>
+          <LinkContainer to="/signIn" active={false}><Nav.Link>Login</Nav.Link></LinkContainer>
+          <LinkContainer to="/register" active={false}><Nav.Link>Register</Nav.Link></LinkContainer>
         </>
     );
   }

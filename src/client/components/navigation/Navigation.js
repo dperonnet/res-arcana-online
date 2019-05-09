@@ -6,26 +6,33 @@ import './navigation.css';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
 import { firestoreConnect } from 'react-redux-firebase';
+import { leaveGame } from '../../../store/actions/gameActions';
 
 class Navigation extends Component {
 
+  leaveGame = () => {
+    console.log('leaving game');
+    this.props.leaveGame();
+  }
+
   render() {
-    const { games } = this.props;
+    const { currentGame, games } = this.props;
     return (
       <Navbar collapseOnSelect expand="md" variant="dark" fixed="top">
         <LinkContainer to="/"><Navbar.Brand>Res Arcana Online</Navbar.Brand></LinkContainer>
         <Navbar.Toggle aria-controls="responsive-navbar-nav" />
         <Navbar.Collapse id="responsive-navbar-nav">
           <Nav className="mr-auto">
-            <LinkContainer to="/play"><Nav.Link>Play</Nav.Link></LinkContainer>
-            <LinkContainer to="/editor"><Nav.Link>Editor</Nav.Link></LinkContainer>
+            <LinkContainer to="/play" active={false}><Nav.Link>Play</Nav.Link></LinkContainer>
+            <LinkContainer to="/editor" active={false}><Nav.Link>Editor</Nav.Link></LinkContainer>
             <NavDropdown title="Help" id="collasible-nav-dropdown">
-              <LinkContainer to="/editor"><NavDropdown.Item>How To Play</NavDropdown.Item></LinkContainer>
-              <LinkContainer to="/game"><NavDropdown.Item>About action</NavDropdown.Item></LinkContainer>
-              <LinkContainer to="/Help"><NavDropdown.Item>Community</NavDropdown.Item></LinkContainer>
+              <LinkContainer to="/editor" active={false}><NavDropdown.Item>How To Play</NavDropdown.Item></LinkContainer>
+              <LinkContainer to="/game" active={false}><NavDropdown.Item>About action</NavDropdown.Item></LinkContainer>
+              <LinkContainer to="/Help" active={false}><NavDropdown.Item>Community</NavDropdown.Item></LinkContainer>
               <NavDropdown.Divider />
-              <LinkContainer to="/"><NavDropdown.Item>Privacy Policy</NavDropdown.Item></LinkContainer>
+              <LinkContainer to="/" active={false}><NavDropdown.Item>Privacy Policy</NavDropdown.Item></LinkContainer>
             </NavDropdown>
+            {currentGame && currentGame.gameId && <Nav.Link onClick={this.leaveGame}>Leave game</Nav.Link>}
           </Nav>
           <Nav>
             <Navbar.Text> {games ? Object.keys(games).length : 0} games
@@ -41,13 +48,24 @@ class Navigation extends Component {
 const mapStateToProps = (state) =>{
   return {
     games: state.firestore.ordered.games,
+    auth: state.firebase.auth,
+    currentGame: state.firestore.data.currentGame
   }
 }
 
-export default
-compose(
-  connect(mapStateToProps),
-  firestoreConnect([
-    { collection: 'games'}
-  ])
-)(Navigation)
+const mapDispatchToProps = (dispatch) =>{
+  return {
+    leaveGame: (creds) => dispatch(leaveGame(creds))
+  }
+}
+
+export default compose(
+  connect(mapStateToProps, mapDispatchToProps),
+  firestoreConnect((props) => [
+    { collection: 'games'},
+    { collection: 'currentGames',
+      doc: props.auth.uid,
+      storeAs: 'currentGame'
+    }
+  ]
+))(Navigation)

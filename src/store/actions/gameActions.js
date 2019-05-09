@@ -22,12 +22,10 @@ export const joinGame = (gameId) => {
     // make asynch call to database
     const fireStore = getFirestore();
     const creatorId = getState().firebase.auth.uid;
-    console.log('gameId : ', gameId);
     const data = {
       gameId: gameId,
       createdAt: new Date()
     };
-    console.log('data : ', data);
     fireStore.collection('currentGames').doc(creatorId).set(
       data
     ).then(() => {
@@ -50,9 +48,10 @@ export const createAndJoinGame = (game) => {
       creatorId: creatorId,
       createdAt: new Date()
     }).then((docRef) => {
-      game.id = docRef.id;
+      docRef.get().then(doc => {
+        dispatch({ type: 'CREATE_GAME', doc});
+      })
       dispatch(joinGame(docRef.id));
-      dispatch({ type: 'CREATE_GAME', game});
     }).catch((err) => {
       dispatch({type: 'CREATE_GAME_ERROR', err});
     })
@@ -69,6 +68,20 @@ export const getCurrentGameId = () => {
       dispatch({type: 'GET_CURRENT_GAME', gameId})
     }).catch((err) => {
       dispatch({type: 'GET_CURRENT_GAME_ERROR', err});
+    })
+  }
+}
+
+export const leaveGame = () => {
+  return (dispatch, getState, {getFirebase, getFirestore}) => {
+    const playerId = getState().firebase.auth.uid;
+    const fireStore = getFirestore();
+    fireStore.collection('currentGames').doc(playerId).update({
+      gameId: null
+    }).then((docRef) => {
+      dispatch({type: 'LEAVE_CURRENT_GAME'})
+    }).catch((err) => {
+      dispatch({type: 'LEAVE_CURRENT_GAME_ERROR', err});
     })
   }
 }

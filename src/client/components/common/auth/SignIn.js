@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
 import { Button, Col, Container, Form, Row } from 'react-bootstrap'
 import './auth.css';
+import { compose } from 'redux';
 import { connect } from 'react-redux';
+import { firestoreConnect } from 'react-redux-firebase';
 import { signIn } from '../../../../store/actions/authActions';
 import { Redirect } from 'react-router-dom';
 
@@ -41,8 +43,11 @@ class SignIn extends Component {
 
   render() {
     const { authError, forgotPassword } = this.state;
-    const { auth } = this.props;
-    if(auth.uid) return <Redirect to='/'/>
+    const { auth, currentGame } = this.props;
+    if(auth.uid) {
+       let path = currentGame && currentGame.gameId ? '/play' : '/';
+       return <Redirect to={path}/>
+    }
 
     return (
       <Container>
@@ -102,7 +107,8 @@ class SignIn extends Component {
 const mapStateToProps = (state) =>{
   return {
     authError: state.auth.authError,
-    auth: state.firebase.auth
+    auth: state.firebase.auth,
+    currentGame: state.firestore.data.currentGame
   }
 }
 
@@ -112,4 +118,13 @@ const mapDispatchToProps = (dispatch) =>{
   }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(SignIn);
+export default
+compose(
+  connect(mapStateToProps, mapDispatchToProps),
+  firestoreConnect((props) => [
+    { collection: 'currentGames',
+      doc: props.auth.uid,
+      storeAs: 'currentGame'
+    }
+  ]
+))(SignIn);

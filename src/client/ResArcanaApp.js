@@ -11,6 +11,7 @@ import { connect } from 'react-redux';
 import { setUserStatus } from '../store/actions/authActions';
 
 class ResArcanaApp extends Component {
+
   render() {
     return (
       <Router>
