@@ -49,21 +49,26 @@ export const joinGame = (gameId) => {
     const profile = getState().firebase.profile;
     const creatorId = getState().firebase.auth.uid;
 
-    // Add player to game players list
     const gameRef = fireStore.collection('games').doc(gameId);
+    
     gameRef.get().then((doc) => {
+      
+      // Add player to game players list
       let players = doc.data().players
       players[creatorId] = profile.login;
-      gameRef.update({players});
-    }).then(() => {
-      // Set the current game for player
-      const data = {
-        gameId: gameId,
-        createdAt: new Date()
-      };
-      fireStore.collection('currentGames').doc(creatorId).set(data).then(() => {
-        dispatch({ type: 'JOIN_GAME', gameId});
-      })
+
+      gameRef.update({players}).then((game) => {
+        console.log('game',game)
+        // Set the current game for player
+        const data = {
+          gameId: gameId,
+          createdAt: new Date()
+        };
+        fireStore.collection('currentGames').doc(creatorId).set(data).then(() => {
+          dispatch({ type: 'JOIN_GAME', gameId});
+        })
+
+      });
     }).catch((err) => {
       dispatch({type: 'JOIN_GAME_ERROR', err});
     })
@@ -83,10 +88,13 @@ export const leaveGame = (gameId) => {
         // leave before game Start
         case 'PENDING':
           leaveWhilePending(gameId, playerId, document, fireStore);
+          break;
         // leave while game is still running
         case 'STARTED':
+          break;
         // leave when game is over
         case 'OVER':
+          break;
         default:
       }
     }).then(() => {

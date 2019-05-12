@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Button, Col, Form, Row } from 'react-bootstrap';
-import { Redirect, withRouter } from 'react-router-dom';
+import { withRouter } from 'react-router-dom';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
 import { createAndJoinGame } from '../../../../store/actions/gameActions';
@@ -63,7 +63,6 @@ class CreateGame extends Component {
     game.players[auth.uid] = profile.login;
     this.setState({game});
     this.props.createAndJoinGame(this.state.game);
-    this.props.onJoin(this.state.game.id);
   }
 
   render() {

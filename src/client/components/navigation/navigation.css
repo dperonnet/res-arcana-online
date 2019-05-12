@@ -10,3 +10,15 @@
 .ml-auto {
   margin-left: auto!important;
 }
+
+.dropdown-menu {
+  background-color: rgba(34,34,34,.8);
+}
+
+.dropdown-item {
+  color: rgba(255,255,255,.5);
+}
+.navbar-dark .navbar-nav .dropdown-item:focus, .navbar-dark .navbar-nav .dropdown-item:hover {
+  color: rgba(255,255,255,.75);
+  background-color: transparent;
+}

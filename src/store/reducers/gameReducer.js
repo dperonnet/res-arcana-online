@@ -5,16 +5,11 @@ const initState = {
 const gameReducer = (state = initState, action) => {
   switch (action.type) {
     case 'CREATE_GAME':
-      state.game = action.doc;
       console.log('create game', action.doc.id);
-      return {
-        ...state,
-        gameId: action.doc.uid,
-        game: action.doc.data()
-      };
+      return state;
     case 'CREATE_GAME_ERROR':
       console.log('create game error', action.err);
-        return state;
+      return state;
     case 'JOIN_GAME':
       console.log('join game', action.gameId);
       return state;

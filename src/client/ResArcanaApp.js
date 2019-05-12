@@ -7,8 +7,6 @@ import Play from './components/play/Play';
 import Navigation from './components/navigation/Navigation';
 import { BrowserRouter as Router, Route } from "react-router-dom";
 import './assets/style/index.css';
-import { connect } from 'react-redux';
-import { setUserStatus } from '../store/actions/authActions';
 
 class ResArcanaApp extends Component {
 
@@ -20,7 +18,7 @@ class ResArcanaApp extends Component {
           <div className="wrapper">
             <Route exact path="/" component={DashBoard} />
             <Route path="/editor" component={DatabaseEditor} />
-            <Route path="/play" component={Play} />
+            <Route path='/play' component={Play} />
             <Route path="/signIn" component={SignIn} />
             <Route path="/register" component={Register} />
           </div>
@@ -30,17 +28,4 @@ class ResArcanaApp extends Component {
   }
 }
 
-const mapStateToProps = (state) => {
-  return {
-    authError: state.auth.authError,
-    auth: state.firebase.auth
-  }
-}
-
-const mapDispatchToProps = (dispatch) =>{
-  return {
-    setUserStatus: () => dispatch(setUserStatus()),
-  }
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(ResArcanaApp);
+export default ResArcanaApp;

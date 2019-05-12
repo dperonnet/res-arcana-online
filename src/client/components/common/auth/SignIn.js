@@ -26,18 +26,19 @@ class SignIn extends Component {
     return credentials.email.length > 0 && credentials.password.length > 0;
   }
 
-  handleChange = (event)=>{
+  handleChange = (event) => {
     const { credentials } = this.state;
     credentials[event.target.id] = event.target.value
     this.setState({credentials});
   }
 
-  handleSubmit = (event)=>{
+  handleSubmit = (event) => {
     event.preventDefault();
     this.props.signIn(this.state.credentials);
+    this.forceUpdate()
   }
 
-  setError = (error)=>{
+  setError = (error) => {
     this.setState({error});
   }
 

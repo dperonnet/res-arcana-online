@@ -14,7 +14,6 @@ class GameList extends Component {
     return (
         <div className='gameListPanel'>
           {games && games.map((game, index)=>{
-            console.log(game.players)
             return (
               <div className='game' key={game.id}>
                 <div className='gameHeader'>{game.name}</div>

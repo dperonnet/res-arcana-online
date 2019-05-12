@@ -5,7 +5,9 @@ import { firestoreConnect } from 'react-redux-firebase';
 
 class GameLobby extends Component {
   render() {
-    const { currentGame } = this.props;
+    const { currentGame, games } = this.props;
+    console.log('games',games);
+    console.log('this.props',this.props)
     return (
       <div className="gameLoby">
         <div className='game'>
@@ -21,16 +23,17 @@ class GameLobby extends Component {
 const mapStateToProps = (state) => {
   return {
     auth: state.firebase.auth,
-    currentGame: state.firestore.data.currentGame
+    currentGame: state.firestore.data.currentGame,
+    game: state.firestore.data.game
   }
 }
 
 export default compose(
   connect(mapStateToProps),
-  firestoreConnect(props => [
-    { collection: 'currentGames',
-      doc: props.auth.uid,
-      storeAs: 'currentGame'
-    }
-  ])
+  firestoreConnect(props => { console.log('props',props); return [
+    { collection: 'games',
+      doc: props.currentGame.gameId,
+      storeAs: 'game'
+    },
+  ]})
 )(GameLobby)

@@ -6,44 +6,42 @@ import Lobby from "./lobby/Lobby";
 import './play.css';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
-import { firestoreConnect } from 'react-redux-firebase';
-import moment from 'moment';
+import { firestoreConnect, isEmpty, isLoaded } from 'react-redux-firebase';
 
 class Play extends Component {
   render() {
     const { auth, currentGame } = this.props;
+    console.log('this.props', this.props)
+
     if(!auth.uid) return <Redirect to='/signIn'/>
-    console.log('currentGame && currentGame.gameId', currentGame);
-    if(currentGame) console.log('currentGame.gameId', currentGame.gameId)
+
+    if (!isLoaded(currentGame)) {
+      return <div className="loading">Loading...</div> 
+    }
+    if (isEmpty(currentGame)) {
+      return <div>Not in game</div>
+    }    
     return (
       <Container className="playContainer">
-        {
-          currentGame ? (
-            currentGame.gameId != null ?
-            <GameLobby /> : <><Lobby /><div>currentGame.gameId : {currentGame.gameId}</div></>
-          ) : <div className="loading">Loading...</div>
-        }
+        {currentGame.gameId ? <GameLobby /> : <Lobby />}
       </Container>
     );
   }
 }
 
-const mapStateToProps = (state, props) => {
+const mapStateToProps = (state) => {
   return {
     auth: state.firebase.auth,
     currentGame: state.firestore.data.currentGame
   }
 }
 
-export default
-compose(
+export default compose(
   connect(mapStateToProps),
-  firestoreConnect((props) => {
-    console.log('props',props)
-    return [
+  firestoreConnect(props => [
     { collection: 'currentGames',
       doc: props.auth.uid,
       storeAs: 'currentGame'
     }
-  ]}
-))(Play)
+  ])
+)(Play)
