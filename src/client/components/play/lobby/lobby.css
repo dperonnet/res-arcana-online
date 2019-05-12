@@ -1,11 +1,11 @@
-.joinGameContainer {
+.lobbyContainer, .gameLobbyContainer {
   width: 100%;
   max-width: 640px;
   margin: 0 auto;
   padding: 20px;
 }
 
-.createGamePanel, .gameListPanel {
+.createGamePanel, .gameListPanel, .gameLobbyPanel {
   background-color: rgba(34,34,34,.8);
   width: 100%;
   max-width: 700px;

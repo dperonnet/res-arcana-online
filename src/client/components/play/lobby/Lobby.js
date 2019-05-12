@@ -9,7 +9,7 @@ class Lobby extends Component {
   render() {
     const { games } = this.props;
     return (
-      <div className="joinGameContainer">
+      <div className="lobbyContainer">
         <CreateGame/>
         <GameList
           games={games}/>

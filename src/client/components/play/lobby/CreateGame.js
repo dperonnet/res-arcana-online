@@ -106,7 +106,7 @@ class CreateGame extends Component {
                 </Form>
               </div>
               <div className="gameButton">
-                <Button type="submit" variant="secondary" size="sm" onClick={this.handleSubmit}>Start</Button>
+                <Button type="submit" variant="secondary" size="sm" onClick={this.handleSubmit}>Create</Button>
                 <Button variant="secondary" size="sm" onClick={this.handleClose}>Cancel</Button>
               </div>
             </div>
