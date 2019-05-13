@@ -9,34 +9,38 @@ class GameList extends Component {
     this.props.joinGame(gameId);
   }
 
-  render() {
+  renderPlayers = (game) => {
+    return game.players && Object.values(game.players).map((player) => {
+      return <div className='playerName col-sm-6' key={player.id}>{player.name}</div>
+    })
+  }
+
+  render() {    
     const { games } = this.props;
     return (
-        <div className='gameListPanel'>
-          {games && games.map((game, index)=>{
-            return (
-              <div className='game' key={game.id}>
-                <div className='gameHeader'>{game.name}</div>
-                <Row>
-                  {Object.entries(game.players).map((player)=>{
-                    return (
-                      <div
-                        className='playerName col-sm-6'
-                        key={player[0]}>{player[1]}</div>
-                    )
-                  })}
-                </Row>
-                <div className="gameButton">
-                  <Button variant="secondary" size="sm" onClick={() => {this.handleJoin(game.id)}}>Join</Button>
-                  {/*<Button variant="secondary" size="sm">Watch</Button>*/}
-                </div>
-                {index !== games.length - 1 && <div className='separator'/>}
+      <div className='gameListPanel'>
+        {
+          games && games.map((game, index) => 
+            <div className='game' key={game.id}>
+              <div className='gameHeader'>{game.name}</div>
+              <Row>
+                {this.renderPlayers(game)}
+              </Row>
+              <div className="gameButton">
+                <Button variant="secondary" size="sm" onClick={() => {this.handleJoin(game.id)}}>Join</Button>
               </div>
-            );
-          })
-          }
-        </div>
+              {index !== games.length - 1 && <div className='separator'/>}
+            </div>
+          )
+        }
+      </div>
     );
+  }
+}
+
+const mapStateToProps = (state) => {
+  return {
+    games: state.firestore.ordered.games
   }
 }
 
@@ -46,4 +50,4 @@ const mapDispatchToProps = dispatch => {
   }
 }
 
-export default connect(null, mapDispatchToProps)(GameList)
+export default connect(mapStateToProps, mapDispatchToProps)(GameList)

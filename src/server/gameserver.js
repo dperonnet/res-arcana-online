@@ -1,6 +1,6 @@
 const { Server, Firebase } = require('boardgame.io/server');
 const admin = require('firebase-admin');
-const ResArcana = require('../client/components/game/Game').ResArcana;
+const ResArcana = require('../client/components/play/game/Game').ResArcana;
 const serviceAccount = require('./serviceAccountKey.json');
 
 const server = Server({

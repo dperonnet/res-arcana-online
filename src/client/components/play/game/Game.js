@@ -79,7 +79,7 @@ export const ResArcana = Game({
     },
 });
 
-function initGameComponents(playerNumber) {
+/*function initGameComponents(playerNumber) {
   //const magicItems = Array(8).fill(null);
   const magicItems = ["A","B","C","D","E","F","G","H"];
   const monuments = Array(8).fill(null);
@@ -95,7 +95,7 @@ function initGameComponents(playerNumber) {
     playerBoards
   };
   return gameComponents;
-}
+}*/
 
 function copy(value){
   return JSON.parse(JSON.stringify(value));

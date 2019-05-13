@@ -1,3 +1,5 @@
+import { disjoinCurrentGame } from './gameActions';
+
 export const signIn = (credentials) => {
   return (dispatch, getState, {getFirebase}) =>{
     const firebase = getFirebase();
@@ -6,6 +8,7 @@ export const signIn = (credentials) => {
       credentials.password
     ).then(()=>{
       dispatch(setUserStatus());
+      dispatch(disjoinCurrentGame())
     }).then(()=>{
       dispatch({ type: 'LOGIN_SUCCESS' });
     }).catch((err)=>{

@@ -21,7 +21,7 @@ export const createGame = (game) => {
 };
 
 export const createAndJoinGame = (game) => {
-  return (dispatch, getState, {getFirebase, getFirestore}) => {
+  return (dispatch, getState, {getFirestore}) => {
     // make asynch call to database
     const fireStore = getFirestore();
     const profile = getState().firebase.profile;
@@ -44,46 +44,64 @@ export const createAndJoinGame = (game) => {
 }
 
 export const joinGame = (gameId) => {
-  return (dispatch, getState, {getFirebase, getFirestore}) => {
+  return (dispatch, getState, { getFirestore}) => {
     const fireStore = getFirestore();
     const profile = getState().firebase.profile;
-    const creatorId = getState().firebase.auth.uid;
-
+    const playerId = getState().firebase.auth.uid;
     const gameRef = fireStore.collection('games').doc(gameId);
-    
-    gameRef.get().then((doc) => {
+    const currentGameRef = fireStore.collection('currentGames').doc(playerId);
+
+    fireStore.runTransaction(function(transaction) {
+        return transaction.get(gameRef).then(function(gameDoc) {
+          if (!gameDoc.exists) {
+              throw new Error("Document does not exist!");;
+          }
+          console.log('status',gameDoc.data().status)
+          if (gameDoc.data().status === 'PENDING') {
+            // Add player to game players list
+            let players = gameDoc.data().players ? gameDoc.data().players : {}
+            let playersInGame = Object.keys(players).length;
+            if (players[playerId]) {
+              transaction.update(gameRef, {players});
+              return gameId;
+            } else if (playersInGame < 1) {
+              players[playerId] = {
+                id: playersInGame,
+                name: profile.login
+              };
+              transaction.update(gameRef, {players});
+              return gameId;
+            } else {
+              return Promise.reject("Sorry! Game is full.");
+            }
+          } else {
+            transaction.update(gameRef, gameDoc.data());
+          }
+        });
+    }).then(() => {
+
+      // Set the current game for player
+      const data = {
+        gameId: gameId,
+        createdAt: new Date()
+      };
+      currentGameRef.set(data)
+      dispatch({ type: 'JOIN_GAME', gameId});
       
-      // Add player to game players list
-      let players = doc.data().players
-      players[creatorId] = profile.login;
-
-      gameRef.update({players}).then((game) => {
-        console.log('game',game)
-        // Set the current game for player
-        const data = {
-          gameId: gameId,
-          createdAt: new Date()
-        };
-        fireStore.collection('currentGames').doc(creatorId).set(data).then(() => {
-          dispatch({ type: 'JOIN_GAME', gameId});
-        })
-
-      });
     }).catch((err) => {
       dispatch({type: 'JOIN_GAME_ERROR', err});
-    })
+    });
   }
 };
 
 export const leaveGame = (gameId) => {
-  return (dispatch, getState, {getFirebase, getFirestore}) => {
+  return (dispatch, getState, {getFirestore}) => {
     const fireStore = getFirestore();
     const playerId = getState().firebase.auth.uid;
     const gameRef = fireStore.collection('games').doc(gameId);
 
     gameRef.get().then((document) => {
-      let status = document.data().status
-
+      let status = document.exists ? document.data().status : null;
       switch (status) {
         // leave before game Start
         case 'PENDING':
@@ -97,21 +115,13 @@ export const leaveGame = (gameId) => {
           break;
         default:
       }
-    }).then(() => {
-
+      dispatch(disjoinCurrentGame());
     });
-    fireStore.collection('currentGames').doc(playerId).update({
-      gameId: null
-    }).then((docRef) => {
-      dispatch({type: 'LEAVE_CURRENT_GAME'})
-    }).catch((err) => {
-      dispatch({type: 'LEAVE_CURRENT_GAME_ERROR', err});
-    })
   }
 }
 
 export const getCurrentGameId = () => {
-  return (dispatch, getState, {getFirebase, getFirestore}) => {
+  return (dispatch, getState, {getFirestore}) => {
     const playerId = getState().firebase.auth.uid;
     const fireStore = getFirestore();
     fireStore.collection('currentGames').doc(playerId).get().then((docRef) => {
@@ -125,7 +135,6 @@ export const getCurrentGameId = () => {
 }
 
 const leaveWhilePending = (gameId, playerId, document, fireStore) => {
-console.log('game is pending')
   const gameRef = fireStore.collection('games').doc(gameId);
   let players = document.data().players
 
@@ -134,9 +143,7 @@ console.log('game is pending')
   const isTheOnlyPlayer = (Object.keys(players).length === 1 && Object.keys(players)[0] === playerId);
   if (isGameCreator || isTheOnlyPlayer) {
     let kicks = Object.keys(players).map((key) => {
-      console.log('key', key)
       const playerCurrentGameRef = fireStore.collection('currentGames').doc(key);
-      console.log('playerCurrentGameRef',playerCurrentGameRef)
       // check if player is synch with the game before kick
       return playerCurrentGameRef.get().then((currentGame) => {
         if(currentGame.data().gameId === gameId) {
@@ -165,4 +172,32 @@ const deleteGame = (gameRef) => {
   }).catch(function(error) {
     console.error("Error deleting game: ", gameId, error);
   });
+}
+
+export const startGame = (gameId)  => {
+  return (dispatch, getState, {getFirestore}) => {
+    const fireStore = getFirestore();
+    fireStore.collection('games').doc(gameId).update({status: 'STARTED'})
+      .then(()=>{
+        dispatch({type: 'GAME_STARTED', gameId})
+      })
+  }
+}
+
+export const disjoinCurrentGame = () => {
+  return (dispatch, getState, {getFirestore}) => {
+    console.log('disjoinCurrentGame')
+    const fireStore = getFirestore();
+    const creatorId = getState().firebase.auth.uid;
+    // Set the current game for player
+    const data = {
+      gameId: null,
+      createdAt: new Date()
+    };
+    fireStore.collection('currentGames').doc(creatorId).set(data).then(() => {
+      dispatch({type: 'LEAVE_CURRENT_GAME'})
+    }).catch((err) => {
+      dispatch({type: 'LEAVE_CURRENT_GAME_ERROR', err});
+    })
+  }
 }

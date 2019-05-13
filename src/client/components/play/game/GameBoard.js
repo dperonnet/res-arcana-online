@@ -5,6 +5,9 @@ import { ResArcana } from './Game';
 import { ResArcanaBoard } from './Board';
 import logger from 'redux-logger';
 import { applyMiddleware } from 'redux';
+import { compose } from 'redux';
+import { connect } from 'react-redux';
+import { firestoreConnect, isLoaded } from 'react-redux-firebase';
 
 const ResArcanaClient = Client({
   game: ResArcana,
@@ -16,36 +19,37 @@ const ResArcanaClient = Client({
   enhancer: applyMiddleware(logger)
 });
 
-export class GameBoard extends Component {
-  state = { playerID: null };
-
+class GameBoard extends Component {
   render() {
-    const { gameID, playerID } = this.state;
-    if (false) {
-      return (
-        <Container className="gameBoard">
-          <div className="board">
-            <p>Play as</p>
-            <button onClick={() => this.setState({ playerID: "0" })}>
-              Player 1
-            </button>
-            <button onClick={() => this.setState({ playerID: "1" })}>
-              Player 2
-            </button>
-            <button onClick={() => this.setState({ playerID: "2" })}>
-              Player 3
-            </button>
-            <button onClick={() => this.setState({ playerID: "3" })}>
-              Player 4
-            </button>
-          </div>
-        </Container>
-      );
+    const { auth, currentGame, game } = this.props;
+    console.log('currentGame.gameId', currentGame.gameId)
+    if (!isLoaded(game)) {
+      return <div className="loading">Loading...</div> 
     }
+    const playerId = game.players[auth.uid] ? game.players[auth.uid].id.toString() : 'spectator';
     return (
       <Container className="gameBoard">
-        <ResArcanaClient  gameID={gameID} playerID={playerID} />
+        <div>game : {currentGame.gameId} / player {playerId}</div>
+          <ResArcanaClient gameID={currentGame.gameId} playerID={playerId} />
       </Container>
     );
   }
 }
+
+const mapStateToProps = (state) => {
+  return {
+    auth: state.firebase.auth,
+    currentGame: state.firestore.data.currentGame,
+    game: state.firestore.data.game
+  }
+}
+
+export default compose(
+  connect(mapStateToProps),
+  firestoreConnect(props =>  [
+    { collection: 'games',
+      doc: props.currentGame.gameId,
+      storeAs: 'game'
+    },
+  ])
+)(GameBoard)

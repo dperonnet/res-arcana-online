@@ -57,11 +57,6 @@ class CreateGame extends Component {
 
   handleSubmit = (e) => {
     e.preventDefault();
-    const { auth, profile } = this.props;
-    const { game } = this.state;
-    game.players = {};
-    game.players[auth.uid] = profile.login;
-    this.setState({game});
     this.props.createAndJoinGame(this.state.game);
   }
 

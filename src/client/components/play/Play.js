@@ -11,7 +11,6 @@ import { firestoreConnect, isEmpty, isLoaded } from 'react-redux-firebase';
 class Play extends Component {
   render() {
     const { auth, currentGame } = this.props;
-    console.log('this.props', this.props)
 
     if(!auth.uid) return <Redirect to='/signIn'/>
 

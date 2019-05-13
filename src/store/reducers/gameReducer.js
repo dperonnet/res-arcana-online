@@ -23,7 +23,9 @@ const gameReducer = (state = initState, action) => {
     case 'LEAVE_CURRENT_GAME_ERROR':
       console.log('left game error', action.err);
       return state;
-
+    case 'GAME_STARTED':
+      console.log('start game ', action.gameId);
+      return state;
     default:
       return state;
   }
