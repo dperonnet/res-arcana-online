@@ -1,65 +1,94 @@
 import React, { Component } from 'react'
 import { Button, ButtonToolbar, Form} from 'react-bootstrap'
-import { COMPONENTS_TYPE, DELIMITER } from './EditorConstants.js'
+import { COMPONENTS_TYPE } from './EditorConstants.js'
 import './Form.css';
+import { compose } from 'redux';
+import { connect } from 'react-redux';
+import { firestoreConnect, isLoaded } from 'react-redux-firebase';
 
-export default class DatabaseContent extends Component {
+class DatabaseContent extends Component {
   constructor(props) {
     super(props);
-    this.getDatas = this.getDatas.bind(this);
+    this.state = {
+      selectedComponentId: 'default'
+    }
   }
 
-  getDatas(componentType, index1) {
-    const datas = this.props.datas;
-    return ( datas && datas.hasOwnProperty(componentType.id+'List') ?
-      datas[componentType.id+'List'].map((component, index2) => {
-        return (
-          <option key={index1+'_'+index2} value={componentType.id + DELIMITER + component.componentName}>
-            {componentType.name} - {component.componentName}
-          </option>
-        )
-      }) : null
-    );
+  handleFilter = (e) => {
+    const { filterComponents } = this.props
+    const { value } = e.target;
+    filterComponents(value);
+  }
+
+  handleSelect = (event) => {
+    this.setState({selectedComponentId: event.target.value})
+    this.props.onSelect(event);
   }
 
   render() {
-    const options = COMPONENTS_TYPE.map((componentType, index) => {
-        return this.getDatas(componentType, index);
-    });
-
+    const { component, components, filter, onCreate } = this.props;
+    const { selectedComponentId } = this.state;
+    const options = components && Object.entries(components).map((component) => {
+      return (
+        <option key={component[0]} value={component[1].id}>
+          {component[1].componentName}
+        </option>
+      )
+    })
+    const componentsType = JSON.parse(JSON.stringify(COMPONENTS_TYPE));
+    
+    if (!isLoaded(components)) {
+      return <div className="loading">Loading...</div> 
+    }
+    console.log('props.components',this.props.components)
+    
     return (
       <div className="formPanel">
-        <Form.Group controlId="exampleForm.ControlSelect1">
+        <Form.Group controlId="gameComponentsForm">
           <Form.Label>Game Components</Form.Label>
-          <Form.Control as="select" name="currentComponent" value={this.props.selected} onChange={(e) => this.props.onSelect(e)}>
-            <option></option>
+          
+          <div className="mb-3">
+            {componentsType.map((type) => (
+              <Form.Check inline type="radio" name="componentsType"
+                key={type.id} id={type.id} value={type.id} label={type.name}
+                checked={filter === type.id}
+                onChange={this.handleFilter}
+              />
+            ))}
+          </div>
+
+          <Form.Control as="select" name="currentComponent" value={component.id} onChange={(e) => this.handleSelect(e)}
+            className={selectedComponentId === 'default' ? 'disabled' : ''}>
+            <option value="default" className="disabled">--- new component ---</option>
             {options}
           </Form.Control>
         </Form.Group>
         <ButtonToolbar>
-          <Button variant="secondary" onClick={this.props.onLoad}>Reload Database</Button>
-          <Button variant="secondary" onClick={this.props.clear}>Clear LocalStorage</Button>
-          <TextInputWithFocusButton data={this.props.datas}/>
+          <Button variant="secondary" size="sm" onClick={onCreate}>Create</Button>
+          <Button variant="secondary" size="sm" onClick={this.handleDelete}>Delete</Button>
         </ButtonToolbar>
       </div>
     );
   }
 }
 
-function TextInputWithFocusButton(data) {
-  const parsedJsonDatabase = JSON.stringify(data);
-  const onButtonClick = (e) => {
-    const textField = document.createElement('textarea');
-    textField.innerText = parsedJsonDatabase;
-    const parentElement = e.target;
-    parentElement.appendChild(textField);
-    textField.select();
-    document.execCommand('copy');
-    parentElement.removeChild(textField);
-    e.target.focus();
-  };
-
-  return (
-      <Button variant="secondary" onClick={onButtonClick}>Copy to clipboard</Button>
-  );
+const mapStateToProps = (state) => {
+  return {
+    components: state.firestore.data.components,
+    component: state.editor.component,
+    filter: state.editor.filter
+  }
 }
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    filterComponents: (filter) => dispatch({type: 'FILTER_COMPONENTS', filter})
+  }
+}
+
+export default compose(
+  connect(mapStateToProps, mapDispatchToProps),
+  firestoreConnect(() => [
+    { collection: 'components' }
+  ])
+)(DatabaseContent)

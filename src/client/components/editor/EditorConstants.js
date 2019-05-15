@@ -21,9 +21,7 @@ export const DEFAULT_COMPONENT = {
   componentName: '',
   componentType: 'artefact',
   hasStandardCollectAbility: false,
-  standardCollectAbility: {},
   hasSpecificCollectAbility: false,
-  specificCollectAbility: '',
   isDragon: false,
   isCreature: false
 };

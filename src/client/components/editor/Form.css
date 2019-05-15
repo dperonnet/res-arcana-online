@@ -1,21 +1,29 @@
-h2 {
-    color: #666;
+h5 {
+    color: #EEE;
 }
-
+.editorContainer {
+  color: white;
+  flex-direction: column !important;
+  max-width: 100%;
+  height:100%;
+  width:100%;
+  padding: 20px !important;
+}
 .editor {
   padding: 15px !important;
-  background-color: rgba(196,196,196,.8);
+  background-color: rgba(34,34,34,.8);
   width: 100%;
+  height:100%;
 }
-
+.disabled {
+  color: lightgray;
+}
 .formPanel {
   border-width: .2rem .2rem 0;
-  border-radius: 8px 8px 0 0;
   position: relative;
-  color: #212529;
+  color: white;
   padding: 1rem;
-  border: .2rem solid #ececec;
-  border-radius: 8px;
+  border: 1px solid #ececec;
   margin: 20px auto;
 }
 
