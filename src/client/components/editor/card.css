@@ -1,36 +1,111 @@
+
+.play-area, .player-board {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 0;
+}
+
+.play-area {
+  overflow-x: auto;
+}
+
+.player-board {
+  margin: 10px;
+}
+
+.player-board .card-wrapper {
+  margin-right: 10px;
+  margin-bottom: 5px;
+}
+
+.card-row {
+  display: flex;
+  justify-content: flex-start;
+  min-height: 0;
+}
+
+.card-wrapper {
+  margin: 0;
+  vertical-align: middle;
+  display: inline-block;
+}
+
+.card, .card-frame {
+  position: relative;
+}
+
+.card.vertical, .card-image.vertical {
+  height: 91px;
+  width: 65px;
+}
+
+.card.large.vertical, .card-image.large.vertical {
+  height: 182px;
+  width: 130px;
+}
+
+.card.x-large.vertical, .card-image.x-large.vertical {
+  height: 220px;
+  width: 157px;
+}
+
 .card {
-  margin: 15px;
-  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
-  transition: 0.3s;
-  border-radius: 12px;
-  background-color: #aaa;
+  border-radius: 8px;
+  background-color: transparent;
+  box-shadow: 0 0 12px rgba(0,0,0,.4), inset 0 0 0 1px hsla(0,0%,100%,.1);
+  overflow: hidden;
+  z-index: 10;
 }
 
-.card li {
-  list-style: none;
+.card, .card-frame {
+  position: relative;
 }
 
-.card:hover {
-  box-shadow: 0 8px 16px 0 rgba(5,50,50,0.5);
-}
-
-.smallCard {
-  height: 200px;
-  width: 140px;
-}
-
-.card span {
-  padding: 4px;
-}
-
-.cardName {
-  font-weight: bold;
+.card-name {
+  font-size: .8em;
+  font-family: Lucida Sans,Lucida Sans Regular,Lucida Grande,Lucida Sans Unicode,Geneva,Verdana,sans-serif;
+  text-transform: uppercase;
   text-align: center;
-  display: block;
+  flex: 1;
+  line-height: 65px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.card-image {
+  left: 0;
+  position: absolute;
+  top: 0;
+  pointer-events: none;
 }
 
 img {
-  border-radius: 5px 5px 0 0;
-  width: 100%;
+  vertical-align: middle;
+  border: 0;
 }
-  
+
+.card.vertical .counters {
+  flex-direction: column;
+}
+
+.counters {
+  color: #fff;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  justify-content: center;
+  display: flex;
+  align-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  z-index: 11;
+}
+
+.ignore-mouse-events {
+  pointer-events: none;
+}

@@ -3,7 +3,7 @@ import { Col, Container, Row } from 'react-bootstrap';
 import { DEFAULT_COMPONENT } from './EditorConstants';
 import ComponentForm from './ComponentForm';
 import DatabaseContent from './DatabaseContent';
-import './card.css';
+import Card from './Card.js';
 import './editor.css';
 import { connect } from 'react-redux';
 import { deleteComponent, saveComponent } from '../../../store/actions/editorActions'
@@ -45,9 +45,9 @@ class DatabaseEditor extends Component {
       console.log('lets render', component.name)
       const source = require( '../../../../scans/low/'+component.type+'s/'+component.class+'.png');
       return (
-        <div className='card'>
-          <img src={source} alt="" />
-        </div>
+        <Card src={source}
+              alt={component.name}
+              size="x-large" />
       )
     } 
     return null
