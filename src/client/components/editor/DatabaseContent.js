@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
 import { Button, ButtonToolbar, Form} from 'react-bootstrap'
 import { COMPONENTS_TYPE } from './EditorConstants.js'
-import './Form.css';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
 import { firestoreConnect, isLoaded } from 'react-redux-firebase';
@@ -10,13 +9,13 @@ class DatabaseContent extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      selectedComponentId: 'default'
+      selectedComponentId: ''
     }
   }
 
-  handleFilter = (e) => {
+  handleFilter = (event) => {
     const { filterComponents } = this.props
-    const { value } = e.target;
+    const { value } = event.target;
     filterComponents(value);
   }
 
@@ -25,13 +24,25 @@ class DatabaseContent extends Component {
     this.props.onSelect(event);
   }
 
+  handleCreate = () => {
+    this.setState({selectedComponentId: ''})
+    this.props.onCreate()
+  }
+
+  handleDelete = () => {
+    this.props.onDelete();
+  }
+
   render() {
-    const { component, components, filter, onCreate } = this.props;
-    const { selectedComponentId } = this.state;
-    const options = components && Object.entries(components).map((component) => {
+    const { component, components, filter } = this.props;
+    console.log(components)
+    console.log(filter)
+    const options = components && Object.entries(components).filter((component) => {
+      return component[1].type === filter
+    }).map((component) => {
       return (
         <option key={component[0]} value={component[1].id}>
-          {component[1].componentName}
+          {component[1].name}
         </option>
       )
     })
@@ -40,7 +51,6 @@ class DatabaseContent extends Component {
     if (!isLoaded(components)) {
       return <div className="loading">Loading...</div> 
     }
-    console.log('props.components',this.props.components)
     
     return (
       <div className="formPanel">
@@ -57,14 +67,16 @@ class DatabaseContent extends Component {
             ))}
           </div>
 
-          <Form.Control as="select" name="currentComponent" value={component.id} onChange={(e) => this.handleSelect(e)}
-            className={selectedComponentId === 'default' ? 'disabled' : ''}>
-            <option value="default" className="disabled">--- new component ---</option>
+          <Form.Control size="sm" as="select" 
+            name="currentComponent" value={component.id} 
+            onChange={(event) => this.handleSelect(event)}
+          >
+            <option value="" className="disabled" defaultValue>--- new component ---</option>
             {options}
           </Form.Control>
         </Form.Group>
         <ButtonToolbar>
-          <Button variant="secondary" size="sm" onClick={onCreate}>Create</Button>
+          <Button variant="secondary" size="sm" onClick={this.handleCreate}>Create</Button>
           <Button variant="secondary" size="sm" onClick={this.handleDelete}>Delete</Button>
         </ButtonToolbar>
       </div>
@@ -74,7 +86,7 @@ class DatabaseContent extends Component {
 
 const mapStateToProps = (state) => {
   return {
-    components: state.firestore.data.components,
+    components: state.firestore.ordered.components,
     component: state.editor.component,
     filter: state.editor.filter
   }

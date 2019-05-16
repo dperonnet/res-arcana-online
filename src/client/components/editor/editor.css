@@ -7,11 +7,11 @@ h5 {
   max-width: 100%;
   height:100%;
   width:100%;
+  background-color: rgba(34,34,34,.8);
   padding: 20px !important;
 }
 .editor {
   padding: 15px !important;
-  background-color: rgba(34,34,34,.8);
   width: 100%;
   height:100%;
 }
@@ -38,33 +38,39 @@ h5 {
 }
 
 .essenceList {
-    display: inline-flex;
-    margin: 0 10px;
+  display: inline-flex;
+  margin: 0 10px;
+}
+
+.essenceList .input-group-prepend {
+  margin: 0 2px 8px 0;
 }
 
 .essenceList .input-group-append {
-    line-height: normal;
-    height: 25px;
-    width: 25px;
-    margin-top: 3px;
+  line-height: normal;
+  height: 25px;
+  width: 25px;
+  margin-top: 0px;
+  height: 100%;
 }
 
-.essenceList .input-group-append{
-  margin-top: 0;
-}
 .essenceList .btn {
-    margin: 5px 0;
-    padding: 0;
-    width: 20px;
-    height: 20px;
+  display: block;
+  margin: 0 !important;
+  padding: 0;
+  width: 20px;
+  height: 16px;
 }
+
+.essenceList .btn.focus, .essenceList .btn:focus {
+  box-shadow: none;
+}
+
 .essenceList .btn span {
-  margin-top: -4px;
+  margin-top: -5px;
   display: block;
 }
-.essenceList .input-group-prepend {
-  margin-right: 2px;
-}
+
 .help-card-min {
     background-image: url("../../assets/image/help-card-min.png");
     background-repeat: no-repeat;

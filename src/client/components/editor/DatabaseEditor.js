@@ -3,32 +3,32 @@ import { Col, Container, Row } from 'react-bootstrap';
 import { DEFAULT_COMPONENT } from './EditorConstants';
 import ComponentForm from './ComponentForm';
 import DatabaseContent from './DatabaseContent';
-import './Form.css';
+import './card.css';
+import './editor.css';
 import { connect } from 'react-redux';
 import { deleteComponent, saveComponent } from '../../../store/actions/editorActions'
 
 class DatabaseEditor extends Component {
 
-  handleSelect = (changeEvent) => {
-    console.log('handleSelect')
+  handleSelect = (event) => {
     const { components, selectComponent} = this.props;
-    const { value } = changeEvent.target;
-    const selectedComponent  =  JSON.parse(JSON.stringify(value !== 'default' ? components[value] : DEFAULT_COMPONENT));
+    const { value } = event.target;
+    const selectedComponent  =  JSON.parse(JSON.stringify(value !== '' && components[value] ? components[value] : DEFAULT_COMPONENT));
     selectComponent(selectedComponent);
   }
 
   handleCreate = () => {
+    const { selectComponent} = this.props;
     const newComponent = JSON.parse(JSON.stringify(DEFAULT_COMPONENT));
-    this.setState({component: newComponent});
+    selectComponent(newComponent);
   }
 
   handleDelete = () => {
     const { deleteComponent } = this.props;
-    deleteComponent(this.state.component);
+    deleteComponent();
   }
 
   handleSave = () => {
-    console.log('handleSave')
     const { component, saveComponent } = this.props;
     saveComponent(component);
   }
@@ -38,6 +38,20 @@ class DatabaseEditor extends Component {
   }
 
   getJsonFromObject = object => JSON.stringify(object, undefined, 2)
+
+  renderImage = (component) => {
+    console.log('renderImage')
+    if (component && component.class) {
+      console.log('lets render', component.name)
+      const source = require( '../../../../scans/low/'+component.type+'s/'+component.class+'.png');
+      return (
+        <div className='card'>
+          <img src={source} alt="" />
+        </div>
+      )
+    } 
+    return null
+  }
 
   render() {
     const { component } = this.props;
@@ -73,6 +87,7 @@ class DatabaseEditor extends Component {
               <pre className="formPanel">
                 {jsonComponent}
               </pre>
+              {this.renderImage(component)}
             </Col>
           </Row>
         </div>
@@ -90,7 +105,7 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    deleteComponent: (component) => dispatch(deleteComponent(component)),
+    deleteComponent: () => dispatch(deleteComponent()),
     saveComponent: (component) => dispatch(saveComponent(component)),
     selectComponent: (component) => dispatch({type: 'SELECT_COMPONENT', component}),
     resetComponent: () => dispatch({type: 'RESET_COMPONENT'})

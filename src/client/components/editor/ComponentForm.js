@@ -1,16 +1,23 @@
 import React, { Component } from 'react'
 import { Button, ButtonToolbar, Form, InputGroup} from 'react-bootstrap'
 import { COMPONENTS_TYPE, DEFAULT_COMPONENT, DEFAULT_STANDARD_COLLECT_ABILITY } from './EditorConstants'
-import './Form.css';
 import { connect } from 'react-redux';
 import { deleteComponent, saveComponent } from '../../../store/actions/editorActions'
 
 class ComponentForm extends Component {
   constructor(props) {
     super(props);
-    this.state = { 
+    this.state = {
       component: this.getDefaultComponent()
     };
+  }
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.componentDidChange !== this.props.componentDidChange) {
+      this.setState({
+        component: this.getDefaultComponent()
+      })
+    }
   }
 
   getDefaultComponent = () => {
@@ -21,14 +28,12 @@ class ComponentForm extends Component {
   }
 
   handleReset = () => {
-    const { onReset, pristineComponent } = this.props;
     this.setState({ component: this.getDefaultComponent()})
-    onReset();
+    this.props.onReset();
   }
 
   handleFormChange = (changeEvent) => {
     const { checked, name, value, type } = changeEvent.target;
-    const { showComponentJSON } = this.props;
     const { component } = this.state;
     const valueToUpdate = type === 'checkbox' ? checked : value;
     let newComponent;
@@ -46,22 +51,31 @@ class ComponentForm extends Component {
       };
     }
     this.setState({component: newComponent});
-    showComponentJSON(newComponent);
+    this.props.showComponentJSON(newComponent);
   }
 
   handleFormChangeByName = (name, valueToUpdate) => {
-    const { showComponentJSON } = this.props;
     const { component } = this.state;
     let newComponent = {
       ...component,
       [name]: valueToUpdate
     }
     this.setState({component: newComponent});
-    showComponentJSON(newComponent);
+    this.props.showComponentJSON(newComponent);
+  }
+
+  clearCollectOptions = () => {
+    let data = {...this.state.component.standardCollectAbility};
+    for (var property in data.essenceList) {
+      if (data.essenceList.hasOwnProperty(property)) {
+          data.essenceList[property] = 0;
+      }
+    }
+    this.handleFormChangeByName('standardCollectAbility', data);
   }
 
   render() {
-    const { onReset, onSave } = this.props;
+    const { onSave } = this.props;
     const { component } = this.state;
     const componentsType = JSON.parse(JSON.stringify(COMPONENTS_TYPE));
 
@@ -70,23 +84,23 @@ class ComponentForm extends Component {
         {component && 
           <form>
             <Form.Group controlId="ComponentSettingsForm">
-              <InputGroup className="mb-3">
+              <InputGroup size="sm" className="mb-3">
                 <InputGroup.Prepend>
-                  <InputGroup.Text id="componentName">Component Name</InputGroup.Text>
+                  <InputGroup.Text id="name">Name</InputGroup.Text>
                 </InputGroup.Prepend>
                 <Form.Control
-                  placeholder="Name"
-                  name="componentName"
-                  value={component.componentName}
+                  placeholder="My component"
+                  name="name"
+                  value={component.name}
                   onChange={this.handleFormChange}
                 />
               </InputGroup>
 
               <div className="mb-3">
                 {componentsType.map((type) => (
-                  <Form.Check inline type="radio" name="componentType"
+                  <Form.Check inline type="radio" name="type"
                     key={'editor'+type.id} id={'editor'+type.id} value={type.id} label={type.name}
-                    checked={component.componentType === type.id}
+                    checked={component.type === type.id}
                     onChange={this.handleFormChange}
                   />
                 ))}
@@ -94,10 +108,13 @@ class ComponentForm extends Component {
 
               <InputGroup className="mb-3">
                 <Form.Check inline type="checkbox" name="hasStandardCollectAbility"
-                  id="hasStandardCollectAbility" label="Has standard collect ability"
+                  id="hasStandardCollectAbility" label="Add standard collect ability"
                   value={component.hasStandardCollectAbility}
                   checked={component.hasStandardCollectAbility}
                   onChange={this.handleFormChange}/>
+                
+                  <Button variant="secondary" id={'clearCollectOptions'} size="sm" className={component.hasStandardCollectAbility ? '' : 'd-none'}
+                    onClick={(e) => this.clearCollectOptions()}><span>Reset</span></Button>
               </InputGroup>
 
               { component.hasStandardCollectAbility ?
@@ -110,14 +127,14 @@ class ComponentForm extends Component {
 
               <InputGroup className="mb-3">
                 <Form.Check inline type="checkbox" name="hasSpecificCollectAbility"
-                  id="hasSpecificCollectAbility" label="Has specific collect ability"
+                  id="hasSpecificCollectAbility" label="Add specific collect ability"
                   value={component.hasSpecificCollectAbility}
                   checked={component.hasSpecificCollectAbility}
                   onChange={this.handleFormChange}/>
               </InputGroup>
 
               <ButtonToolbar>
-                <Button variant="secondary" size="sm" onClick={onSave} disabled={!component.componentName.trim()}>Save</Button>
+                <Button variant="secondary" size="sm" onClick={onSave} disabled={!component.name.trim()}>Save</Button>
                 <Button variant="secondary" size="sm" onClick={this.handleReset}>Reset</Button>
               </ButtonToolbar>
             </ Form.Group>
@@ -131,6 +148,7 @@ class ComponentForm extends Component {
 const mapStateToProps = (store) => {
   return {
     component: store.editor.component,
+    componentDidChange: store.editor.timeIndicator,
     pristineComponent: store.editor.pristineComponent,
   }
 }
@@ -146,16 +164,6 @@ const mapDispatchToProps = (dispatch) => {
 export default connect(mapStateToProps, mapDispatchToProps)(ComponentForm)
 
 class EssencePanel extends Component {
-
-  clearCollectOptions = () => {
-    let data = {...this.props.standardCollectAbility};
-    for (var property in data.essenceList) {
-      if (data.essenceList.hasOwnProperty(property)) {
-          data.essenceList[property] = 0;
-      }
-    }
-    this.props.onChangeByName('standardCollectAbility', data);
-  }
 
   handleFormChange = (changeEvent) => {
     const { checked, name, value, type } = changeEvent.target;
@@ -182,28 +190,24 @@ class EssencePanel extends Component {
     const essenceListFromProps = standardCollectAbility.essenceList;
     const essenceList = [ 'elan', 'life', 'calm', 'death', 'gold', 'any', 'anyButGold', 'anyButDeathGold'];
     const components = essenceList.map((type, index) => (
-      <div className="essenceList" key={index} >
-        <InputGroup.Prepend >
-          <Button variant="secondary" id={'raise'+type+'Essence'}
-           onClick={() => this.decrement(type)}><span>-</span></Button>
+    <div className="essenceList" key={index} >
+        <InputGroup.Prepend>
+          <InputGroup.Text className={"help-card-min "+type} id={type+'Essence'}>{essenceListFromProps[type]}</InputGroup.Text>
         </InputGroup.Prepend>
-          <InputGroup.Prepend>
-            <InputGroup.Text className={"help-card-min "+type} id={type+'Essence'}>{essenceListFromProps[type]}</InputGroup.Text>
-          </InputGroup.Prepend>
         <InputGroup.Append>
-          <Button variant="secondary" id={'lower'+type+'CollectOptions'}
-           onClick={() => this.increment(type)}><span>+</span></Button>
+          <div className="verticalButtons">
+            <Button variant="secondary" id={'lower'+type+'CollectOptions'}
+            onClick={() => this.increment(type)}><span>+</span></Button>
+            <Button variant="secondary" id={'raise'+type+'Essence'}
+            onClick={() => this.decrement(type)}><span>-</span></Button>
+          </div>
         </InputGroup.Append>
       </div>
     ));
     return (
       <div>
-        { hasStandardCollectAbility ===true ?
+        { hasStandardCollectAbility === true ?
           <div>
-            <div className="mb-3">
-              <Button variant="secondary" id={'clearCollectOptions'} size="sm"
-                onClick={(e) => this.clearCollectOptions()}><span>Reset</span></Button>
-            </div>
             <div className="mb-3">
               {components}
             </div>
@@ -219,6 +223,7 @@ class EssencePanel extends Component {
           </div>
           : <div></div>
         }
-      </div> );
+      </div> 
+    );
   }
 }

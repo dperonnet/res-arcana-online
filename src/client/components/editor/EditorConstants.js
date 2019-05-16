@@ -18,8 +18,10 @@ export const DEFAULT_STANDARD_COLLECT_ABILITY = {
 };
 
 export const DEFAULT_COMPONENT = {
-  componentName: '',
-  componentType: 'artefact',
+  id: '',
+  class: '',
+  name: '',
+  type: 'artefact',
   hasStandardCollectAbility: false,
   hasSpecificCollectAbility: false,
   isDragon: false,
