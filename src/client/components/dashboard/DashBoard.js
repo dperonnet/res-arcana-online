@@ -40,7 +40,7 @@ class DashBoard extends Component {
     const { auth, users } = this.props;
     const localStorageExpanded = JSON.parse(window.localStorage.getItem(LOCALSTORAGE_KEY));
     const isExpanded = localStorageExpanded === true || localStorageExpanded === false  ? localStorageExpanded: true;
-    const chatName = 'Lobby Chat' + (users ? ' (' + users.length + ' online)' : '');
+    const chatName = 'Lobby Chat' + (auth.uid && users ? ' (' + users.length + ' online)' : '');
     return (
       <>
         {auth.uid ?
@@ -56,7 +56,6 @@ class DashBoard extends Component {
           expanded={false}
           collapse={this.handleLogin}
           expand={this.handleLogin}
-          users={users}
         />
       )}
         <Container className={"dashBoardContent" + (auth.uid && isExpanded ? ' expanded' : '')}>

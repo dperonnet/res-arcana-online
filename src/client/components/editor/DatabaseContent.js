@@ -33,8 +33,21 @@ class DatabaseContent extends Component {
     this.props.onDelete();
   }
 
+  copyDatabaseToClipboard = (e) => {
+    const { components } = this.props
+    const parsedJsonDatabase = JSON.stringify(components);
+    const textField = document.createElement('textarea');
+    textField.innerText = parsedJsonDatabase;
+    const parentElement = e.target;
+    parentElement.appendChild(textField);
+    textField.select();
+    document.execCommand('copy');
+    parentElement.removeChild(textField);
+    e.target.focus();
+  }
+  
   render() {
-    const { component, components, filter } = this.props;
+    const { component, components, filter, pristineComponent } = this.props;
     const options = components && Object.entries(components).filter((component) => {
       return component[1].type === filter
     }).map((component) => {
@@ -75,7 +88,8 @@ class DatabaseContent extends Component {
         </Form.Group>
         <ButtonToolbar>
           <Button variant="secondary" size="sm" onClick={this.handleCreate}>Create</Button>
-          <Button variant="secondary" size="sm" onClick={this.handleDelete}>Delete</Button>
+          <Button variant="secondary" size="sm" onClick={this.handleDelete} disabled={!pristineComponent.id}>Delete</Button>
+          <Button variant="secondary" size="sm"  onClick={this.copyDatabaseToClipboard}>Copy database</Button>
         </ButtonToolbar>
       </div>
     );
@@ -86,6 +100,7 @@ const mapStateToProps = (state) => {
   return {
     components: state.firestore.ordered.components,
     component: state.editor.component,
+    pristineComponent: state.editor.pristineComponent,
     filter: state.editor.filter
   }
 }

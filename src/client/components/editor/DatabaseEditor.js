@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
+import { Redirect } from 'react-router-dom';
 import { Col, Container, Row } from 'react-bootstrap';
 import { DEFAULT_COMPONENT } from './EditorConstants';
 import ComponentForm from './ComponentForm';
 import DatabaseContent from './DatabaseContent';
-import CardZoom from './CardZoom.js';
+import CardZoom from '../common/card/CardZoom.js';
 import './editor.css';
 import { connect } from 'react-redux';
 import { deleteComponent, saveComponent } from '../../../store/actions/editorActions'
@@ -40,14 +41,17 @@ class DatabaseEditor extends Component {
   getJsonFromObject = object => JSON.stringify(object, undefined, 2)
 
   render() {
-    const { component, pristineComponent } = this.props;
+    const { auth, component, pristineComponent } = this.props;
     const jsonComponent = this.getJsonFromObject(component);
+    
+    if(!auth.uid) return <Redirect to='/signIn'/>
+
     let card;
     if (pristineComponent && pristineComponent.class) {
       try {
-        const sourcePath = './scans/low/' + pristineComponent.type + '/' + pristineComponent.class + '.png';
+        const sourcePath = '../../../../scans/low/' + pristineComponent.type + '/' + pristineComponent.class + '.png';
         console.log('sourcePath', sourcePath);
-        const src = require(sourcePath);
+        const src = require('../../../../scans/low/' + pristineComponent.type + '/' + pristineComponent.class + '.png');
         card = <div className="card-zoom-frame">
           <CardZoom
             src={ src }
@@ -56,7 +60,6 @@ class DatabaseEditor extends Component {
             />
         </div>
       } catch (err) {
-        console.log(err);
         card = <div>No file found for {pristineComponent.class}.png</div>
       }
     } 
@@ -125,6 +128,7 @@ class DatabaseEditor extends Component {
 
 const mapStateToProps = (state) => {
   return {
+    auth: state.firebase.auth,
     components: state.firestore.data.components,
     component: state.editor.component,
     pristineComponent: state.editor.pristineComponent

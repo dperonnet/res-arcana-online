@@ -36,7 +36,7 @@
   position: relative;
 }
 
-.card-zoom-frame {
+.card-zoom-frame, .card-zoom-frame > img {
   width: 300px;
   height: 420px;
 }

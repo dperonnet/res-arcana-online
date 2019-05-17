@@ -82,7 +82,7 @@ class ComponentForm extends Component {
     return (
       <div className="formPanel flex-grow">
         {component && 
-          <form>
+          <form onSubmit={onSave}>
             <Form.Group controlId="ComponentSettingsForm">
               <InputGroup size="sm" className="mb-3">
                 <InputGroup.Prepend>
