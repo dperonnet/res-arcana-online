@@ -1,23 +1,37 @@
 .sidebar.expanded {
-    width: 200px;
+  width: 200px;
 }
 
 .sidebar {
-    position: fixed;
-    left: 0;
-    top: 40px;
-    bottom: 0;
-    background-color: rgba(34,34,34,.8);
-    z-index: 999;
-    overflow-y: auto;
-    color: #c1c2c3;
-    border-right: 1px solid #F5B041;
+  position: fixed;
+  left: 0;
+  top: 40px;
+  bottom: 0;
+  background-color: rgba(34,34,34,.8);
+  z-index: 999;
+  overflow-y: auto;
+  color: #c1c2c3;
+  border-right: 1px solid #F5B041;
+}
+
+.sidebar-right {
+  width: 300px;
+  min-width: 300px;
+  position: fixed;
+  right: 0;
+  top: 40px;
+  bottom: 0;
+  background-color: rgba(34,34,34,.8);
+  z-index: 999;
+  overflow-y: auto;
+  color: #c1c2c3;
+  border-left: 1px solid #F5B041;
 }
 
 .sidebarHeader {
-    text-align: center;
-    margin: 5px;
-    font-weight: 700;
+  text-align: center;
+  margin: 5px;
+  font-weight: 700;
 }
 
 .pull-right {

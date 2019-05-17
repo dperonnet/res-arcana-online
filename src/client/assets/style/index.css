@@ -25,7 +25,6 @@ body {
 }
 
 .bg {
-    padding-top: 50px;
     background-image: url("../image/ra_bg.jpg");
     height: 100%;
     background-position: top;
@@ -33,12 +32,13 @@ body {
     background-size: cover;
 }
 .wrapper {
-    position: absolute;
+    position: fixed;
     left: 0;
     right: 0;
-    top: 41px;
+    top: 0;
     bottom: 0;
     overflow-y: auto;
+    padding-top: 41px;
 }
 
 .loading {

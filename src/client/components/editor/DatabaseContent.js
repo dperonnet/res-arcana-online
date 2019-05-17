@@ -35,8 +35,6 @@ class DatabaseContent extends Component {
 
   render() {
     const { component, components, filter } = this.props;
-    console.log(components)
-    console.log(filter)
     const options = components && Object.entries(components).filter((component) => {
       return component[1].type === filter
     }).map((component) => {

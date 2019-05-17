@@ -80,7 +80,7 @@ class ComponentForm extends Component {
     const componentsType = JSON.parse(JSON.stringify(COMPONENTS_TYPE));
 
     return (
-      <div className="formPanel">
+      <div className="formPanel flex-grow">
         {component && 
           <form>
             <Form.Group controlId="ComponentSettingsForm">

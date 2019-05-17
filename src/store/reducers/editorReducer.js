@@ -23,7 +23,8 @@ const initState = {
         console.log('save component', action.component);
         return {
           ...state,
-          component: action.component
+          component: action.component,
+          pristineComponent: action.component
         };
       case 'SAVE_COMPONENT_ERROR':
         console.log('save component error', action.err);
@@ -37,7 +38,8 @@ const initState = {
       case 'CREATE_COMPONENT':
         return {
           ...state,
-          component: action.component
+          component: action.component,
+          pristineComponent: action.component
         }
       case 'FILTER_COMPONENTS':
         return {

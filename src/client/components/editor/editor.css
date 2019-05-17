@@ -8,12 +8,72 @@ h5 {
   height:100%;
   width:100%;
   background-color: rgba(34,34,34,.8);
-  padding: 20px !important;
 }
 .editor {
-  padding: 15px !important;
   width: 100%;
   height:100%;
+  margin-right: 300px;
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+  overflow: hidden;
+}
+
+.mainSection {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex: auto;
+  flex-direction: column;
+  overflow-x: hidden;
+  padding: 10px !important;
+}
+
+.sideSection {
+  height: 100%;
+  width: 300px;
+  min-width: 300px;
+  max-width: 300px;
+  position: relative;
+  right: 0;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: hidden;
+
+  background-color: rgba(34,34,34,.8);
+  z-index: 999;
+  overflow-y: auto;
+  color: #c1c2c3;
+  border-left: 1px solid #F5B041;
+}
+
+.right-side {
+  width: 100%;
+  height:100%;
+}
+
+.fullHeight {
+  height: 100%;
+}
+.flex-row, .flex-row > div[class*='col-'] {
+  display: -webkit-box;
+  display: -moz-box;
+  display: -ms-flexbox;
+  display: -webkit-flex;
+  display: flex;
+  flex: 0 auto;
+  height: 100%;
+}
+.flex-col {
+  display: flex;
+  display: -webkit-flex;
+  flex: 1;
+  flex-flow: column nowrap;
+}
+.flex-grow {
+  flex: auto;
 }
 .disabled {
   color: lightgray;
@@ -24,7 +84,7 @@ h5 {
   color: white;
   padding: 1rem;
   border: 1px solid #ececec;
-  margin: 20px auto;
+  margin: 0 0 20px 0;
 }
 
 .btn-toolbar>*+* {

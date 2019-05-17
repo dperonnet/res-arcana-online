@@ -3,10 +3,10 @@ import './card.css';
 
 export default class Card extends PureComponent {
   render() {
-    const { alt, size, src } = this.props;
+    const { alt, onMouseOut, onMouseOver, size, src } = this.props;
     const classes = `card ${size} vertical`;
     return (
-      <div className="card-frame">
+      <div className="card-frame" onMouseOut={onMouseOut} onMouseOver={onMouseOver}>
         <div className={classes}>
           <div>
             <span className="card-name">{alt}</span>
