@@ -64,7 +64,7 @@ export const joinGame = (gameId) => {
             if (players[playerId]) {
               transaction.update(gameRef, {players});
               return gameId;
-            } else if (playersInGame < 1) {
+            } else if (playersInGame < 4) {
               players[playerId] = {
                 id: playersInGame,
                 name: profile.login
@@ -109,9 +109,11 @@ export const leaveGame = (gameId) => {
           break;
         // leave while game is still running
         case 'STARTED':
+          leaveWhileStarted(gameId, playerId, document, fireStore);
           break;
         // leave when game is over
         case 'OVER':
+          leaveWhileOver(gameId, playerId, document, fireStore);
           break;
         default:
       }
@@ -163,6 +165,16 @@ const leaveWhilePending = (gameId, playerId, document, fireStore) => {
     })
     gameRef.update({players});
   }
+}
+
+const leaveWhileStarted = (gameId, playerId, document, fireStore) => {
+  // Todo
+  leaveWhilePending(gameId, playerId, document, fireStore);
+}
+
+const leaveWhileOver = (gameId, playerId, document, fireStore) => {
+  // Todo
+  leaveWhilePending(gameId, playerId, document, fireStore);
 }
 
 const deleteGame = (gameRef) => {
