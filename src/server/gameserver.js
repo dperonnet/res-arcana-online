@@ -6,14 +6,14 @@ const serviceAccount = require('./serviceAccountKey.json');
 const server = Server({
   games: [ResArcana],
 
-  db: new Firebase({
+  /*db: new Firebase({
     config: {
       credential: admin.credential.cert(serviceAccount),
       databaseURL: "https://res-arcana-project.firebaseio.com",
     },
     engine: 'RTDB',
     adminClient: false,
-  }),
+  }),*/
 });
 
 server.run(8000);

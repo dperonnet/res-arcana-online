@@ -15,6 +15,7 @@ class GameLobby extends Component {
 
   render() {
     const { game } = this.props;
+    console.log('GameLobby render with game',game)
     if (!isLoaded(game)) {
       return <div className="loading">Loading...</div> 
     }
@@ -62,7 +63,7 @@ const mapStateToProps = (state) => {
   return {
     auth: state.firebase.auth,
     currentGame: state.firestore.data.currentGame,
-    game: state.firestore.data.game
+    game: state.firestore.ordered.game && state.firestore.ordered.game[0]
   }
 }
 
@@ -74,10 +75,14 @@ const mapDispatchToProps = (dispatch) => {
 
 export default compose(
   connect(mapStateToProps, mapDispatchToProps),
-  firestoreConnect(props =>  [
-    { collection: 'games',
-      doc: props.currentGame.gameId,
-      storeAs: 'game'
-    },
-  ])
+  firestoreConnect(props => {
+    console.log('Querying game with gameId',props.currentGame.gameId);
+    return (
+    [
+      { collection: 'games',
+        doc: props.currentGame.gameId,
+        storeAs: 'game'
+      },
+    ])
+  })
 )(GameLobby)

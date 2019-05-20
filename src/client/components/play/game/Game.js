@@ -4,6 +4,7 @@ export const ResArcana = Game({
   name: "res-arcana",
 
   setup: (G, ctx) => {
+    console.log('G',G)
     const artefactInPlay = {};
     for (var i=0;i<G.numPlayers;i++) artefactInPlay[i]= [];
     return (
@@ -30,6 +31,7 @@ export const ResArcana = Game({
         );
         let artefact = copy(G.artefacts[artefactIndex]);
         G.artefacts.splice(artefactIndex, 1);
+        if (!G.artefactInPlay) G.artefactInPlay= {};
         G.artefactsInPlay[ctx.currentPlayer].push(artefact);
       },
       pass: G => {

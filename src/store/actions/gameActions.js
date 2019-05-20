@@ -34,6 +34,7 @@ export const createAndJoinGame = (game) => {
       status: 'PENDING'
     }).then((docRef) => {
       docRef.get().then(doc => {
+        console.log('game created and joined :',doc.id, doc.data())
         dispatch({ type: 'CREATE_GAME', doc});
       })
       dispatch(joinGame(docRef.id));
@@ -155,7 +156,6 @@ const leaveWhilePending = (gameId, playerId, document, fireStore) => {
         }
       })
     })
-    delete players[playerId];
     Promise.all(kicks).then(deleteGame(gameRef));
   // else just leave game
   } else {
@@ -184,6 +184,28 @@ const deleteGame = (gameRef) => {
   }).catch(function(error) {
     console.error("Error deleting game: ", gameId, error);
   });
+}
+
+export const deleteGameById = (gameId) => {
+  return (dispatch, getState, {getFirestore}) => {
+    const fireStore = getFirestore();
+    const gameRef = fireStore.collection('games').doc(gameId);
+    gameRef.get().then((document) => {
+      let players = document.data().players
+      let kicks = Object.keys(players).map((key) => {
+        const playerCurrentGameRef = fireStore.collection('currentGames').doc(key);
+        // check if player is synch with the game before kick
+        return playerCurrentGameRef.get().then((currentGame) => {
+          if(currentGame.data().gameId === gameId) {
+            playerCurrentGameRef.update({
+              gameId: null
+            })
+          }
+        })
+      })
+      Promise.all(kicks).then(deleteGame(gameRef));
+    });
+  }
 }
 
 export const startGame = (gameId)  => {

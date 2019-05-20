@@ -1,12 +1,19 @@
 import React, { Component } from 'react';
 import { Button, Row } from 'react-bootstrap';
 import { connect } from 'react-redux';
-import { joinGame } from '../../../../store/actions/gameActions';
+import { deleteGameById, joinGame } from '../../../../store/actions/gameActions';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faTrash } from '@fortawesome/free-solid-svg-icons';
 
 class GameList extends Component {
 
   handleJoin = (gameId) => {
     this.props.joinGame(gameId);
+  }
+
+  handleDeleteById = (event, gameId) => {
+    event.preventDefault();
+    this.props.deleteGameById(gameId)
   }
 
   renderPlayers = (game) => {
@@ -15,14 +22,18 @@ class GameList extends Component {
     })
   }
 
-  render() {    
+  render() {
     const { games } = this.props;
     return (
       <div className='gameListPanel'>
         {
           games && games.map((game, index) => 
             <div className='game' key={game.id}>
-              <div className='gameHeader'>{game.name}</div>
+              <div className='gameHeader'>{game.name}
+                <div className="pull-right close" onClick={(event) => this.handleDeleteById(event, game.id)}>
+                  <FontAwesomeIcon icon={faTrash} />
+                </div>
+              </div>
               <Row>
                 {this.renderPlayers(game)}
               </Row>
@@ -46,7 +57,8 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = dispatch => {
   return {
-    joinGame: (gameId) => dispatch(joinGame(gameId))
+    joinGame: (gameId) => dispatch(joinGame(gameId)),
+    deleteGameById: (gameId) => dispatch(deleteGameById(gameId))
   }
 }
 

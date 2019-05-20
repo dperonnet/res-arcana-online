@@ -32,7 +32,6 @@ class DashBoard extends Component {
   }
 
   handleLogin = () => {
-    console.log('redirect')
     return this.props.history.push("/signIn");
   }
 
