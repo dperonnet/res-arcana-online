@@ -3,28 +3,32 @@ const initState = {
 }
 
 const gameReducer = (state = initState, action) => {
+  const debug = false;
   switch (action.type) {
     case 'CREATE_GAME':
-      console.log('create game', action.doc.id);
+      debug && console.log('create game', action.doc.id);
       return state;
     case 'CREATE_GAME_ERROR':
-      console.log('create game error', action.err);
+      debug && console.log('create game error', action.err);
       return state;
     case 'JOIN_GAME':
-      console.log('join game', action.gameId);
+      debug && console.log('join game', action.gameId);
       return state;
     case 'JOIN_GAME_ERROR':
-      console.log('join game error', action.err);
+      debug && console.log('join game error', action.err);
       return state;
     case 'LEAVE_CURRENT_GAME':
-      console.log('left game');
+      debug && console.log('left game');
       state.gameId = null;
       return state;
     case 'LEAVE_CURRENT_GAME_ERROR':
-      console.log('left game error', action.err);
+      debug && console.log('left game error', action.err);
       return state;
     case 'GAME_STARTED':
-      console.log('start game ', action.gameId);
+      debug && console.log('start game ', action.gameId);
+      return state;
+    case 'GAME_OVER':
+      debug && console.log('end game ', action.gameId);
       return state;
     default:
       return state;

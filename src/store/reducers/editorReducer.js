@@ -18,22 +18,23 @@ const initState = {
   }
   
   const editorReducer = (state = initState, action) => {
+    const debug = false;
     switch (action.type) {
       case 'SAVE_COMPONENT':
-        console.log('save component', action.component);
+        debug && console.log('save component', action.component);
         return {
           ...state,
           component: action.component,
           pristineComponent: action.component
         };
       case 'SAVE_COMPONENT_ERROR':
-        console.log('save component error', action.err);
+        debug && console.log('save component error', action.err);
         return state;
       case 'DELETE_COMPONENT':
-        console.log('component deleted', action.componentId);
+        debug && console.log('component deleted', action.componentId);
         return initState;
       case 'DELETE_COMPONENT_ERROR':
-        console.log('delete component error', action.err);
+        debug && console.log('delete component error', action.err);
         return state;
       case 'CREATE_COMPONENT':
         return {

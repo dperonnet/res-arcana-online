@@ -8,7 +8,8 @@ import { faTrash } from '@fortawesome/free-solid-svg-icons';
 class GameList extends Component {
 
   handleJoin = (gameId) => {
-    this.props.joinGame(gameId);
+    const { joinGame, onClickJoin } = this.props;
+    joinGame(gameId, onClickJoin);
   }
 
   handleDeleteById = (event, gameId) => {
@@ -57,7 +58,7 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = dispatch => {
   return {
-    joinGame: (gameId) => dispatch(joinGame(gameId)),
+    joinGame: (gameId, callback) => dispatch(joinGame(gameId, callback)),
     deleteGameById: (gameId) => dispatch(deleteGameById(gameId))
   }
 }

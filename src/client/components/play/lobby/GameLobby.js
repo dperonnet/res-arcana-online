@@ -14,8 +14,8 @@ class GameLobby extends Component {
   }
 
   render() {
-    const { game } = this.props;
-    console.log('GameLobby render with game',game)
+    const { game, runningGame } = this.props;
+    
     if (!isLoaded(game)) {
       return <div className="loading">Loading...</div> 
     }
@@ -48,7 +48,9 @@ class GameLobby extends Component {
         : game.status === 'STARTED' ? 
           <>
             <h5>Game Started</h5>
-            <GameBoard />
+            <GameBoard 
+              runningGame={runningGame}
+            />
           </>
         : game.status === 'OVER' ? 
           <h5>Game Over</h5>
@@ -75,14 +77,12 @@ const mapDispatchToProps = (dispatch) => {
 
 export default compose(
   connect(mapStateToProps, mapDispatchToProps),
-  firestoreConnect(props => {
-    console.log('Querying game with gameId',props.currentGame.gameId);
-    return (
+  firestoreConnect(props => 
     [
       { collection: 'games',
         doc: props.currentGame.gameId,
         storeAs: 'game'
       },
-    ])
-  })
+    ]
+  )
 )(GameLobby)

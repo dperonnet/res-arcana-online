@@ -1,8 +1,11 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import './board.css';
+import { Button } from 'react-bootstrap';
+import { connect } from 'react-redux';
+import { endGame } from '../../../../store/actions/gameActions';
 
-export class ResArcanaBoard extends Component {
+class ResArcanaBoard extends Component {
   static propTypes = {
     G: PropTypes.any.isRequired,
     ctx: PropTypes.any.isRequired,
@@ -13,6 +16,7 @@ export class ResArcanaBoard extends Component {
   };
 
   pickArtefact = id => {
+    console.log('pick Artefact')
     if (this.isActive(id)) {
       this.props.moves.pickArtefact(id);
       this.props.events.endTurn();
@@ -45,6 +49,12 @@ export class ResArcanaBoard extends Component {
     } else return null
   }
 
+  handleEndGame = (e) => {
+    e.preventDefault();
+    const { endGame, currentGame } = this.props;
+    endGame(currentGame.gameId)
+  }
+
   renderCard = (artefact, onClick) => {
     return (
       <div
@@ -59,7 +69,7 @@ export class ResArcanaBoard extends Component {
 
   render() {
     const { G, ctx, playerID, gameId } = this.props;
-
+    
     let winner = this.getWinner();
 
     const globalArtifacts = G.artefacts && G.artefacts.map(artefact => {
@@ -89,7 +99,23 @@ export class ResArcanaBoard extends Component {
         {artefactsAvailable}
         {playerArtefacts}
         {winner}
+        <Button variant="secondary" size="sm" onClick={(event) => this.handleEndGame(event)}>Game Over</Button>
       </div>
     )
   }
 }
+
+const mapStateToProps = (state) => {
+  return {
+    auth: state.firebase.auth,
+    currentGame: state.firestore.data.currentGame
+  }
+}
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    endGame: (gameId) => dispatch(endGame(gameId))
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(ResArcanaBoard)

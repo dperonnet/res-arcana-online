@@ -8,17 +8,18 @@ import Navigation from './components/navigation/Navigation';
 import { BrowserRouter as Router, Route } from "react-router-dom";
 import './assets/style/index.css';
 
-class ResArcanaApp extends Component {
+const gameServerUrl = "http://localhost:8000"
 
+class ResArcanaApp extends Component {
   render() {
     return (
       <Router>
         <div className="bg">
-          <Navigation />
+          <Navigation gameServerUrl={gameServerUrl}/>
           <div className="wrapper">
             <Route exact path="/" component={DashBoard} />
             <Route path="/editor" component={DatabaseEditor} />
-            <Route path='/play' component={Play} />
+            <Route path='/play' render={(props) => <Play {...props} gameServerUrl={gameServerUrl} />}/>
             <Route path="/signIn" component={SignIn} />
             <Route path="/register" component={Register} />
           </div>

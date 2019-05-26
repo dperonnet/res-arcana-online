@@ -1,6 +1,6 @@
 import { Game  } from 'boardgame.io/core';
 
-export const ResArcana = Game({
+export const ResArcanaGame = Game({
   name: "res-arcana",
 
   setup: (G, ctx) => {

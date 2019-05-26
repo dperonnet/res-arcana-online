@@ -13,7 +13,8 @@ class CreateGame extends Component {
       game: {
         name: null,
         password: '',
-        numberOfPlayers: '4'
+        numberOfPlayers: '4',
+        boardGameId: null
       }
     };
   }
@@ -57,12 +58,17 @@ class CreateGame extends Component {
 
   handleSubmit = (e) => {
     e.preventDefault();
-    this.props.createAndJoinGame(this.state.game);
+    const { createGame, joinGame } = this.props
+    const { game } = this.state;
+    createGame('res-arcana', this.state.game.numberOfPlayers).then((resp) => {
+      game.boardGameId = resp.gameID
+      this.props.createAndJoinGame(game, joinGame);
+    })
   }
 
   render() {
     const { isCreatingGame, game } = this.state;
-    const numberOfPlayers = ["2","3","4"];
+    const numberOfPlayers = ["1","2","3","4"];
 
     return (
       <div className='createGamePanel'>
@@ -125,7 +131,7 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = dispatch => {
   return {
-    createAndJoinGame: (game) => dispatch(createAndJoinGame(game))
+    createAndJoinGame: (game, callback) => dispatch(createAndJoinGame(game, callback))
   }
 }
 
