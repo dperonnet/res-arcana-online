@@ -1,4 +1,4 @@
-[
+export const GameComponents = [
   {
     "id": "alchimie",
     "class": "alchimie",

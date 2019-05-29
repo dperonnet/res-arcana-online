@@ -4,6 +4,7 @@ import './board.css';
 import { Button } from 'react-bootstrap';
 import { connect } from 'react-redux';
 import { endGame } from '../../../../store/actions/gameActions';
+import Card from '../../common/card/Card'
 
 class ResArcanaBoard extends Component {
   static propTypes = {
@@ -16,7 +17,6 @@ class ResArcanaBoard extends Component {
   };
 
   pickArtefact = id => {
-    console.log('pick Artefact')
     if (this.isActive(id)) {
       this.props.moves.pickArtefact(id);
       this.props.events.endTurn();
@@ -55,14 +55,20 @@ class ResArcanaBoard extends Component {
     endGame(currentGame.gameId)
   }
 
-  renderCard = (artefact, onClick) => {
+  renderCard = (card, onClick) => {
+    const src = require('../../../../../scans/low/' + card.type + '/' + card.class + '.png');
     return (
       <div
-        className={(this.isActive ? "active ": "") + "card xSmallCard"}
-        key={artefact.name}
+        key={card.name}
+        className={(this.isActive ? "active ": "") + " card vertical"}
         onClick={onClick}
       >
-        {artefact.name} : {artefact.value}
+        <Card
+          cardClass={' vertical'}
+          src={ src }
+          show={ true } 
+          alt={ card.name ? card.name : null } 
+        />
       </div>
     );
   }

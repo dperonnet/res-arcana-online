@@ -25,7 +25,8 @@ class Play extends Component {
         <Lobby 
           gameServer={gameServerUrl}
           lobbyServer={gameServerUrl}
-          gameComponents={importedGames}/>
+          gameComponents={importedGames}
+          debug={true}/>
       </Container>
     );
   }

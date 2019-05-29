@@ -28,6 +28,7 @@ class GameLobby extends Component {
         <div className="player" key={player.id}>{player.name}</div>
       )
     });
+    const missingPlayer = Object.keys(game.players).length < game.numberOfPlayers;
     
     return (
       <>
@@ -39,7 +40,7 @@ class GameLobby extends Component {
                   <h5>You are in game {game.name}</h5>
                   {players}
                   <div className="gameButton">
-                    <Button variant="secondary" size="sm" onClick={this.startGame}>Start</Button>
+                    <Button variant="secondary" size="sm" onClick={this.startGame} disabled={missingPlayer}>Start</Button>
                   </div>
                 </div>
               </div>

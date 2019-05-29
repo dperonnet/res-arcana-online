@@ -12,8 +12,6 @@ class GameBoard extends Component {
       return <div className="loading">Loading...</div> 
     }
 
-    console.log('GameBoard rendered with :', game, runningGame)
-
     const playerId = game.players[auth.uid] ? game.players[auth.uid].id.toString() : 'spectator';
 
     return (

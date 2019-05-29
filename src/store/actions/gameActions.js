@@ -34,7 +34,6 @@ export const createAndJoinGame = (game, callBack) => {
       status: 'PENDING'
     }).then((docRef) => {
       docRef.get().then(doc => {
-        console.log('game created and joined :',doc.id, doc.data())
         dispatch({ type: 'CREATE_GAME', doc});
       })
       dispatch(joinGame(docRef.id, callBack));
@@ -138,7 +137,6 @@ export const getCurrentGameId = () => {
     const fireStore = getFirestore();
     fireStore.collection('currentGames').doc(playerId).get().then((docRef) => {
       const gameId = docRef ? docRef.id : null;
-      console.log('current game id : ', gameId);
       dispatch({type: 'GET_CURRENT_GAME', gameId})
     }).catch((err) => {
       dispatch({type: 'GET_CURRENT_GAME_ERROR', err});
@@ -153,7 +151,6 @@ const leaveWhilePending = (gameId, playerId, document, fireStore, gameServerUrl)
 
   fireStore.collection('currentGames').doc(playerId).get().then((cgDoc) => {
     const currentGameDatas = cgDoc.data()
-    console.log('currentGameDatas',currentGameDatas)
     leaveServerInstance(gameServerUrl, 'res-arcana', game.boardGameId, players[playerId].id, currentGameDatas.credentials)
 
     // if game creator or the only left player in game, kick all players and delete game.
@@ -197,7 +194,6 @@ const leaveWhileOver = (gameId, playerId, document, fireStore, gameServerUrl) =>
 const deleteGame = (gameRef) => {
   const gameId = gameRef.id;
   gameRef.delete().then(function() {
-    console.log('Game',gameId,'was successfuly delete');
   }).catch(function(error) {
     console.error("Error deleting game: ", gameId, error);
   });
@@ -294,8 +290,16 @@ export const saveCredentials = (credentials) => {
   }
 };
 
-export const gameOver = () => {
+export const getComponents = () => {
   return (dispatch, getState, { getFirestore}) => {
-
+    const fireStore = getFirestore();
+    const components = {};
+    
+    fireStore.collection('components').get().then((snapshot) => {  
+      snapshot.forEach(function(doc) {
+        components[doc.id] = doc.data();
+      })
+    });
+    return components;
   }
 }

@@ -1,37 +1,69 @@
 import { Game  } from 'boardgame.io/core';
+import { GameComponents } from '../../../../database'
+
+const initGameComponents = (componentsList) => {
+  const components = copy(componentsList);
+  const components2 = getComponentsByType(components);
+  const magicItems = Array(8).fill(null);
+  const monuments = Array(8).fill(null);
+  const placesOfPower = Array(5).fill(null);
+  const commonBoard = {
+    monuments,
+    placesOfPower,
+    magicItems
+  };
+  const playerBoards = Array(4).fill(null);
+  const gameComponents = {
+    commonBoard,
+    playerBoards
+  };
+  return gameComponents;
+}
+
+const getComponentsByType = (components) => {
+  const res = {}
+  if (components) {
+    Object.values(components).forEach((component) => {
+      if(!res[component.type]) res[component.type] = [];
+      res[component.type].push(component)
+    });
+  }
+  return res;
+}
+
+export function getInitialState(ctx) {
+  const G = {};
+  const components = getComponentsByType(GameComponents);
+  const nbArtefacts = ctx.numPlayers * 8;
+  const artefacts = ctx.random.Shuffle(components.artefact);
+  G.artefacts = artefacts.slice(0, nbArtefacts);
+
+  const artefactInPlay = {};
+  for (var i=0; i < ctx.numPlayers; i++) {
+    artefactInPlay[i]= [];
+  }
+  G.artefactsInPlay = artefactInPlay;
+  G.passed = false;
+  console.log('G',G)
+
+  return G;
+}
 
 export const ResArcanaGame = Game({
   name: "res-arcana",
 
-  setup: (G, ctx) => {
-    console.log('G',G)
-    const artefactInPlay = {};
-    for (var i=0;i<G.numPlayers;i++) artefactInPlay[i]= [];
-    return (
-      {
-        artefacts:[
-          {name:"A", value:1},
-          {name:"B", value:0},
-          {name:"C", value:2},
-          {name:"D", value:3},
-          {name:"E", value:0},
-          {name:"F", value:1},
-          {name:"G", value:1},
-          {name:"H", value:1}
-        ],
-        artefactsInPlay: artefactInPlay,
-        passed:false,
-      })
-    },
+  setup: getInitialState,
 
     moves: {
       pickArtefact: (G, ctx, artefactName) => {
+        console.log('context',G,ctx,artefactName)
         let artefactIndex = G.artefacts.findIndex(
           artefact => artefact.name === artefactName
         );
         let artefact = copy(G.artefacts[artefactIndex]);
         G.artefacts.splice(artefactIndex, 1);
         if (!G.artefactInPlay) G.artefactInPlay= {};
+        console.log('G.artefactsInPlay', G.artefactsInPlay[ctx.currentPlayer])
         G.artefactsInPlay[ctx.currentPlayer].push(artefact);
       },
       pass: G => {
@@ -78,26 +110,8 @@ export const ResArcanaGame = Game({
           return { winner: winners };
         }
       },
-    },
+    }
 });
-
-/*function initGameComponents(playerNumber) {
-  //const magicItems = Array(8).fill(null);
-  const magicItems = ["A","B","C","D","E","F","G","H"];
-  const monuments = Array(8).fill(null);
-  const placesOfPower = Array(5).fill(null);
-  const commonBoard = {
-    monuments,
-    placesOfPower,
-    magicItems
-  };
-  const playerBoards = Array(playerNumber).fill(null);
-  const gameComponents = {
-    commonBoard,
-    playerBoards
-  };
-  return gameComponents;
-}*/
 
 function copy(value){
   return JSON.parse(JSON.stringify(value));

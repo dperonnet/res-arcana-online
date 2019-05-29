@@ -60,7 +60,9 @@ class CreateGame extends Component {
     e.preventDefault();
     const { createGame, joinGame } = this.props
     const { game } = this.state;
+    console.log('this.state.game.numberOfPlayers',this.state.game.numberOfPlayers)
     createGame('res-arcana', this.state.game.numberOfPlayers).then((resp) => {
+      console.log('resp', resp)
       game.boardGameId = resp.gameID
       this.props.createAndJoinGame(game, joinGame);
     })

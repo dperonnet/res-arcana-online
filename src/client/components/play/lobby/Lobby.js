@@ -88,10 +88,9 @@ class Lobby extends Component {
         const res = this.connection.getGameInstance('res-arcana', game.boardGameId);
         res.then((inst)=> {
           if(inst) {
-            console.log('set runningGame with _startGame')
             const playerSeat = inst.players.find(
               player => player.name === this.props.playerName
-              );
+              ) || 'Visitor';
             const gameOptions = {
               gameID: inst.roomID,
               playerID: '' + playerSeat.id,
@@ -99,11 +98,10 @@ class Lobby extends Component {
             }
             this._startGame('res-arcana', gameOptions);
           } else {
-            console.log('set runningGame to null')
             this.setState({runningGame: null });
           }
         })
-      } else if (game.status === 'PENDING' && this.state.runningGame) {
+      } else if (game.status !== 'STARTED' && this.state.runningGame) {
         this.setState({runningGame: null });
       }
     }
@@ -142,6 +140,7 @@ class Lobby extends Component {
   _createRoom = async (gameName, numPlayers) => {
     try {
       const resp = await this.connection.create(gameName, numPlayers);
+      console.log('numPlayers et resp',numPlayers, resp)
       await this.connection.refresh();
       // rerender
       this.setState({ errorMsg: '' });
@@ -188,6 +187,7 @@ class Lobby extends Component {
 
     let multiplayer = undefined;
     if (gameOpts.numPlayers > 1) {
+      console.log('gameOpts.numPlayers',gameOpts.numPlayers)
       if (this.props.gameServer) {
         multiplayer = { server: this.props.gameServer };
       } else {
@@ -241,27 +241,25 @@ class Lobby extends Component {
 
     return (
       <>
-        <div className="lobbyContainer">
-          {!currentGame.gameId ? (
-            <>
-              <CreateGame
-                createGame={this._createRoom}
-                joinGame={this._joinRoom} />
-              <GameList
-                onClickJoin={this._joinRoom}
-                onClickLeave={this._leaveRoom}/>
-              <span className="error-msg">
-                {errorMsg}
-              </span>
-            </>
-          ) : (
-            <>
-              <GameLobby
-                runningGame={runningGame}
-              />
-            </>
-          )}
-        </div>
+        {!currentGame.gameId ? (
+          <div className="lobbyContainer">
+            <CreateGame
+              createGame={this._createRoom}
+              joinGame={this._joinRoom} />
+            <GameList
+              onClickJoin={this._joinRoom}
+              onClickLeave={this._leaveRoom}/>
+            <span className="error-msg">
+              {errorMsg}
+            </span>
+          </div>
+        ) : (
+          <>
+            <GameLobby
+              runningGame={runningGame}
+            />
+          </>
+        )}
       </>
     );
   }
