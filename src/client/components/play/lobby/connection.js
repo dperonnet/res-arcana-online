@@ -72,31 +72,11 @@ class _LobbyConnectionImpl {
     }
   }
 
-  async join(gameName, gameID, playerID, credentials) {
+  async join(gameName, gameID, playerID) {
     try {
       let inst = this._findPlayer(this.playerName);
-      if (inst && credentials) {
+      if (inst) {
         console.log('player has already joined ' + inst.gameID);
-        for (let player of inst.players) {
-          if (player.name === this.playerName) {
-            const resp = await fetch(
-              this._baseUrl() + '/' + gameName + '/' + inst.gameID + '/leave',
-              {
-                method: 'POST',
-                body: JSON.stringify({
-                  playerID: player.id,
-                  playerCredentials: credentials,
-                }),
-                headers: { 'Content-Type': 'application/json' },
-              }
-            );
-            if (resp.status !== 200) {
-              throw new Error('HTTP status ' + resp.status);
-            }
-            delete player.name;
-            delete this.playerCredentials;
-          }
-        }
       }
 
       inst = this._getGameInstance(gameID);

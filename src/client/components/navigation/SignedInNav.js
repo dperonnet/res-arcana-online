@@ -11,7 +11,8 @@ import { signOut } from '../../../store/actions/authActions';
 class SignedInNav extends Component {
 
   leaveGame = () => {
-    const { currentGames, leaveGame, gameServerUrl } = this.props;
+    const { currentGames, leaveGame, gameServerUrl, setLoading } = this.props;
+    setLoading(false);
     leaveGame(currentGames.gameId, gameServerUrl);
   }
 
@@ -59,7 +60,8 @@ const mapStateToProps = (state) =>{
 const mapDispatchToProps = (dispatch) =>{
   return {
     leaveGame: (gameId, baseUrl) => dispatch(leaveGame(gameId, baseUrl)),
-    signOut: () => dispatch(signOut())
+    signOut: () => dispatch(signOut()),
+    setLoading: (value) => dispatch({type: 'LOADING', loading: value})
   }
 }
 

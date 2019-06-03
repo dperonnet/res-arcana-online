@@ -8,8 +8,8 @@ import { faTrash } from '@fortawesome/free-solid-svg-icons';
 class GameList extends Component {
 
   handleJoin = (gameId) => {
-    const { joinGame, onClickJoin } = this.props;
-    joinGame(gameId, onClickJoin);
+    const { joinGame, onClickJoin, gameServer } = this.props;
+    joinGame(gameId, onClickJoin, gameServer);
   }
 
   handleDeleteById = (event, gameId) => {
@@ -26,7 +26,7 @@ class GameList extends Component {
   render() {
     const { games } = this.props;
     return (
-      <div className='gameListPanel'>
+      <div className='gameListPanel alignCenter'>
         {
           games && games.map((game, index) => 
             <div className='game' key={game.id}>
@@ -45,6 +45,7 @@ class GameList extends Component {
             </div>
           )
         }
+        {games && games.length === 0 && <span>There is currently no game running.</span>}
       </div>
     );
   }
@@ -58,7 +59,7 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = dispatch => {
   return {
-    joinGame: (gameId, callback) => dispatch(joinGame(gameId, callback)),
+    joinGame: (gameId, callback, gameServer) => dispatch(joinGame(gameId, callback, gameServer)),
     deleteGameById: (gameId) => dispatch(deleteGameById(gameId))
   }
 }

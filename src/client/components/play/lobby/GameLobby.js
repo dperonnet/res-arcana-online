@@ -3,18 +3,25 @@ import { Button } from 'react-bootstrap';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
 import { firestoreConnect, isEmpty, isLoaded } from 'react-redux-firebase';
-import { startGame } from '../../../../store/actions/gameActions';
+import { leaveGame, startGame } from '../../../../store/actions/gameActions';
 import GameBoard from '../game/GameBoard'
 
 class GameLobby extends Component {
 
-  startGame = () => {
+  handleLeave = () => {
+    const { currentGame, leaveGame, gameServer, setLoading } = this.props;
+    console.log('gameServer',gameServer)
+    setLoading(false);
+    leaveGame(currentGame.gameId, gameServer);
+  }
+
+  handleStart = () => {
     const { currentGame, startGame } = this.props
     startGame(currentGame.gameId);
   }
 
   render() {
-    const { game, runningGame } = this.props;
+    const { auth, game, runningGame } = this.props;
     
     if (!isLoaded(game)) {
       return <div className="loading">Loading...</div> 
@@ -40,7 +47,9 @@ class GameLobby extends Component {
                   <h5>You are in game {game.name}</h5>
                   {players}
                   <div className="gameButton">
-                    <Button variant="secondary" size="sm" onClick={this.startGame} disabled={missingPlayer}>Start</Button>
+                    {auth && auth.uid === game.creatorId &&
+                      <Button variant="primary" size="sm" onClick={this.handleStart} disabled={missingPlayer}>Start</Button>}
+                    <Button variant="secondary" size="sm" onClick={this.handleLeave}>Leave</Button>
                   </div>
                 </div>
               </div>
@@ -65,14 +74,16 @@ class GameLobby extends Component {
 const mapStateToProps = (state) => {
   return {
     auth: state.firebase.auth,
-    currentGame: state.firestore.data.currentGame,
+    currentGame: state.firestore.data.currentGames,
     game: state.firestore.ordered.game && state.firestore.ordered.game[0]
   }
 }
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    startGame: (gameId) => dispatch(startGame(gameId))
+    leaveGame: (gameId, gameServer) => dispatch(leaveGame(gameId, gameServer)),
+    startGame: (gameId) => dispatch(startGame(gameId)),
+    setLoading: (value) => dispatch({type: 'LOADING', loading: value})
   }
 }
 
@@ -84,6 +95,10 @@ export default compose(
         doc: props.currentGame.gameId,
         storeAs: 'game'
       },
+      { collection: 'currentGames',
+        doc: props.auth.uid,
+        storeAs: 'currentGames'
+      }
     ]
   )
 )(GameLobby)

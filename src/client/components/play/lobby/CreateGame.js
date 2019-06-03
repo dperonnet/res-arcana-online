@@ -33,6 +33,8 @@ class CreateGame extends Component {
   }
 
   handleClose = () => {
+    const { setLoading } = this.props
+    setLoading(false);
     this.setState({ isCreatingGame: false });
   }
 
@@ -58,13 +60,12 @@ class CreateGame extends Component {
 
   handleSubmit = (e) => {
     e.preventDefault();
-    const { createGame, joinGame } = this.props
+    const { createGame, joinGame, gameServer, setLoading } = this.props
     const { game } = this.state;
-    console.log('this.state.game.numberOfPlayers',this.state.game.numberOfPlayers)
+    setLoading(true);
     createGame('res-arcana', this.state.game.numberOfPlayers).then((resp) => {
-      console.log('resp', resp)
       game.boardGameId = resp.gameID
-      this.props.createAndJoinGame(game, joinGame);
+      this.props.createAndJoinGame(game, joinGame, gameServer);
     })
   }
 
@@ -133,7 +134,8 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = dispatch => {
   return {
-    createAndJoinGame: (game, callback) => dispatch(createAndJoinGame(game, callback))
+    createAndJoinGame: (game, callback, gameServer) => dispatch(createAndJoinGame(game, callback, gameServer)),
+    setLoading: (value) => dispatch({type: 'LOADING', loading: value})
   }
 }
 

@@ -117,8 +117,9 @@ class Lobby extends Component {
     });
   };
 
-  _updateCredentials = (playerName, credentials) => {
-    this.props.saveCredentials(credentials)
+  _updateCredentials = (playerName, gameID, playerID, credentials) => {
+    console.log('_updateCredentials',playerName, gameID, playerID, credentials)
+    this.props.saveCredentials(gameID, playerID, credentials)
     this.setState(prevState => {
       // clone store or componentDidUpdate will not be triggered
       const store = Object.assign({}, prevState.credentialStore);
@@ -138,9 +139,10 @@ class Lobby extends Component {
   };
 
   _createRoom = async (gameName, numPlayers) => {
+    const { setLoading } = this.props;
     try {
+      setLoading(true);
       const resp = await this.connection.create(gameName, numPlayers);
-      console.log('numPlayers et resp',numPlayers, resp)
       await this.connection.refresh();
       // rerender
       this.setState({ errorMsg: '' });
@@ -150,25 +152,15 @@ class Lobby extends Component {
     }
   };
 
-  _joinRoom = async (gameName, gameID, playerID, credentials) => {
+  _joinRoom = async (gameName, gameID, playerID) => {
     try {
-      await this.connection.join(gameName, gameID, playerID, credentials);
+      await this.connection.join(gameName, gameID, playerID);
       await this.connection.refresh();
+      console.log('this.connection.playerCredentials',this.connection.playerCredentials)
       this._updateCredentials(
         this.connection.playerName,
-        this.connection.playerCredentials
-      );
-    } catch (error) {
-      this.setState({ errorMsg: error.message });
-    }
-  };
-
-  _leaveRoom = async (gameName, gameID) => {
-    try {
-      await this.connection.leave(gameName, gameID);
-      await this.connection.refresh();
-      this._updateCredentials(
-        this.connection.playerName,
+        gameID, 
+        playerID,
         this.connection.playerCredentials
       );
     } catch (error) {
@@ -212,14 +204,13 @@ class Lobby extends Component {
   };
 
   render() {
-    const { currentGame, gameComponents, playerName, renderer } = this.props;
+    const { currentGame, gameComponents, gameServer, loading, playerName, renderer } = this.props;
     const { errorMsg, runningGame } = this.state;
 
     if (!isLoaded(currentGame)) {
-      return <div className="loading">Loading...</div> 
-    }
-    if (isEmpty(currentGame)) {
-      return <div>Not in game</div>
+      return <div className="lobbyContainer">
+        <div className="loadingPanel alignCenter"><img className="loader" />Loading...</div>
+      </div>
     }
     
     if (renderer) {
@@ -243,19 +234,27 @@ class Lobby extends Component {
       <>
         {!currentGame.gameId ? (
           <div className="lobbyContainer">
-            <CreateGame
-              createGame={this._createRoom}
-              joinGame={this._joinRoom} />
-            <GameList
-              onClickJoin={this._joinRoom}
-              onClickLeave={this._leaveRoom}/>
-            <span className="error-msg">
-              {errorMsg}
-            </span>
+            {loading ?
+              <div className="loadingPanel alignCenter"><img className="loader" />Loading...</div>
+            :
+              <>
+                <CreateGame
+                  createGame={this._createRoom}
+                  joinGame={this._joinRoom}
+                  gameServer={gameServer} />
+                <GameList
+                  gameServer={gameServer}
+                  onClickJoin={this._joinRoom}/>
+                <span className="error-msg">
+                  {errorMsg}
+                </span>
+              </>
+            }
           </div>
         ) : (
           <>
             <GameLobby
+              gameServer={gameServer}
               runningGame={runningGame}
             />
           </>
@@ -270,13 +269,15 @@ const mapStateToProps = (state) => {
     auth: state.firebase.auth,
     currentGame: state.firestore.data.currentGame,
     playerName: state.firebase.profile.login,
-    game: state.firestore.ordered.game && state.firestore.ordered.game[0]
+    game: state.firestore.ordered.game && state.firestore.ordered.game[0],
+    loading: state.ui.loading
   }
 }
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    saveCredentials: (creds) => dispatch(saveCredentials(creds))
+    saveCredentials: (gameID, playerID, credentials) => dispatch(saveCredentials(gameID, playerID, credentials)),
+    setLoading: (value) => dispatch({type: 'LOADING', loading: value})
   }
 }
 

@@ -18,8 +18,8 @@
 
 .auth .btn-primary:disabled, .auth .btn-primary:disabled:hover {
     color: #fff;
-    background-color: #666;
-    border-color: #666;
+    background-color: #6c757d;
+    border-color: #6c757d;
   }
 .forgotPassword {
   cursor: pointer;

@@ -20,7 +20,7 @@ export const createGame = (game) => {
   }
 };
 
-export const createAndJoinGame = (game, callBack) => {
+export const createAndJoinGame = (game, callBack, gameServerUrl) => {
   return (dispatch, getState, {getFirestore}) => {
     // make asynch call to database
     const fireStore = getFirestore();
@@ -36,69 +36,75 @@ export const createAndJoinGame = (game, callBack) => {
       docRef.get().then(doc => {
         dispatch({ type: 'CREATE_GAME', doc});
       })
-      dispatch(joinGame(docRef.id, callBack));
+      dispatch(joinGame(docRef.id, callBack, gameServerUrl));
     }).catch((err) => {
       dispatch({type: 'CREATE_GAME_ERROR', err});
     })
   }
 }
 
-export const joinGame = (gameId, callBack) => {
+export const joinGame = (gameId, callBack, gameServerUrl) => {
   return (dispatch, getState, { getFirestore}) => {
+    console.log('joinGame',gameId, callBack, gameServerUrl)
     const fireStore = getFirestore();
     const profile = getState().firebase.profile;
     const playerId = getState().firebase.auth.uid;
     const gameRef = fireStore.collection('games').doc(gameId);
     const currentGameRef = fireStore.collection('currentGames').doc(playerId);
-    
-    fireStore.runTransaction(function(transaction) {
-        return transaction.get(gameRef).then(function(gameDoc) {
-          if (!gameDoc.exists) {
-              throw new Error("Document does not exist!");;
-          }
-          if (gameDoc.data().status === 'PENDING') {
-            // Add player to game players list
-            let players = gameDoc.data().players ? gameDoc.data().players : {}
-            let playersInGame = Object.keys(players).length;
-            if (players[playerId]) {
-              transaction.update(gameRef, {players});
-              return gameId;
-            } else if (playersInGame < 4) {
-              players[playerId] = {
-                id: playersInGame,
-                name: profile.login
-              };
-              transaction.update(gameRef, {players});
-              return gameId;
-            } else {
-              return Promise.reject("Sorry! Game is full.");
+    currentGameRef.get().then((cgDoc) => {
+      const currentGameDatas = cgDoc.data();
+      console.log('currentGameDatas',currentGameDatas)
+      leaveServerInstance(gameServerUrl, 'res-arcana', currentGameDatas.gameCredentials).then(() => {      
+        fireStore.runTransaction(function(transaction) {
+          return transaction.get(gameRef).then(function(gameDoc) {
+            if (!gameDoc.exists) {
+                throw new Error("Document does not exist!");;
             }
-          } else {
-            transaction.update(gameRef, gameDoc.data());
-          }
-        });
-    }).then(() => {
-      gameRef.get().then((gameDoc) => {
-        currentGameRef.get().then((cGame) => {
-          // Set the current game for player
-          const data = {
-            gameId: gameId,
-            createdAt: new Date()
-          };
-          const credentials = cGame.data().credentials;
-          currentGameRef.set(data).then(() => {
-            // If player in game players, process join server game with callback
-            if (Object.keys(gameDoc.data().players).includes(playerId)) {
-              const boardGameId = gameDoc.data().boardGameId
-              const playerIdInGame = gameDoc.data().players[playerId].id;
-              callBack('res-arcana', boardGameId, playerIdInGame, credentials);
+            if (gameDoc.data().status === 'PENDING') {
+              // Add player to game players list
+              let players = gameDoc.data().players ? gameDoc.data().players : {}
+              let playersInGame = Object.keys(players).length;
+              if (players[playerId]) {
+                transaction.update(gameRef, {players});
+                return gameId;
+              } else if (playersInGame < 4) {
+                players[playerId] = {
+                  id: playersInGame,
+                  name: profile.login
+                };
+                transaction.update(gameRef, {players});
+                return gameId;
+              } else {
+                return Promise.reject("Sorry! Game is full.");
+              }
+            } else {
+              transaction.update(gameRef, gameDoc.data());
             }
           });
+        }).then(() => {
+          gameRef.get().then((gameDoc) => {
+            currentGameRef.get().then((cGame) => {
+              // Set the current game for player
+              const datas = {
+                gameId: gameId,
+                createdAt: new Date(),
+                gameCredentials: {}
+              }
+              currentGameRef.set(datas).then(() => {
+                // If player in game players, process join server game with callback
+                if (Object.keys(gameDoc.data().players).includes(playerId)) {
+                  const boardGameId = gameDoc.data().boardGameId
+                  const playerIdInGame = gameDoc.data().players[playerId].id;
+                  callBack('res-arcana', boardGameId, playerIdInGame);
+                }
+              });
+            });
+            dispatch({ type: 'JOIN_GAME', gameId});
+          })
+        }).catch((err) => {
+          dispatch({type: 'JOIN_GAME_ERROR', err});
         });
-        dispatch({ type: 'JOIN_GAME', gameId});
-      })
-    }).catch((err) => {
-      dispatch({type: 'JOIN_GAME_ERROR', err});
+      });
     });
   }
 };
@@ -151,33 +157,39 @@ const leaveWhilePending = (gameId, playerId, document, fireStore, gameServerUrl)
 
   fireStore.collection('currentGames').doc(playerId).get().then((cgDoc) => {
     const currentGameDatas = cgDoc.data()
-    leaveServerInstance(gameServerUrl, 'res-arcana', game.boardGameId, players[playerId].id, currentGameDatas.credentials)
-
-    // if game creator or the only left player in game, kick all players and delete game.
-    const isGameCreator = (playerId === game.creatorId);
-    const isTheOnlyPlayer = (Object.keys(players).length === 1 && Object.keys(players)[0] === playerId);
-    if (isGameCreator || isTheOnlyPlayer) {
-      let kicks = Object.keys(players).map((key) => {
-        const playerCurrentGameRef = fireStore.collection('currentGames').doc(key);
-        // check if player is synch with the game before kick
-        return playerCurrentGameRef.get().then((currentGame) => {
-          const cgDatas = currentGame.data()
-          if(cgDatas.gameId === gameId) {
-            playerCurrentGameRef.update({
-              gameId: null
-            })
-          }
+    leaveServerInstance(gameServerUrl, 'res-arcana', currentGameDatas.gameCredentials).then(() => {
+      
+      // if game creator or the only left player in game, kick all players and delete game.
+      const isGameCreator = (playerId === game.creatorId);
+      const isTheOnlyPlayer = (Object.keys(players).length === 1 && Object.keys(players)[0] === playerId);
+      if (isGameCreator || isTheOnlyPlayer) {
+        let kicks = Object.keys(players).map((key) => {
+          const playerCurrentGameRef = fireStore.collection('currentGames').doc(key);
+          // check if player is synch with the game before kick
+          return playerCurrentGameRef.get().then((currentGame) => {
+            const cgDatas = currentGame.data()
+            if(cgDatas.gameId === gameId) {
+              let datas = {
+                gameId: null
+              }
+              if (key === game.creatorId) {
+                datas.gameCredentials = {}
+              }
+              playerCurrentGameRef.update(datas)
+            }
+          })
         })
-      })
-      Promise.all(kicks).then(deleteGame(gameRef));
-    // else just leave game
-    } else {
-      delete players[playerId];
-      fireStore.collection('currentGames').doc(playerId).update({
-        gameId: null
-      })
-      gameRef.update({players});
-    }
+        Promise.all(kicks).then(deleteGame(gameRef));
+      // else just leave game
+      } else {
+        delete players[playerId];
+        fireStore.collection('currentGames').doc(playerId).update({
+          gameId: null,
+          gameCredentials: {}
+        })
+        gameRef.update({players});
+      }
+    })
   })
 }
 
@@ -250,7 +262,11 @@ export const disjoinCurrentGame = () => {
       gameId: null,
       createdAt: new Date()
     };
-    fireStore.collection('currentGames').doc(creatorId).set(data).then(() => {
+    const currentGameRef = fireStore.collection('currentGames').doc(creatorId)
+    currentGameRef.get().then((document) => {
+      const datas = document.data();
+      datas.gameId = null;
+      currentGameRef.set(datas);
       dispatch({type: 'LEAVE_CURRENT_GAME'})
     }).catch((err) => {
       dispatch({type: 'LEAVE_CURRENT_GAME_ERROR', err});
@@ -258,33 +274,49 @@ export const disjoinCurrentGame = () => {
   }
 }
 
-export const leaveServerInstance = async (gameServerUrl, gameName, gameID, playerID, credentials) => {
-  const resp = await fetch(
-    `${gameServerUrl || ''}/games/${gameName}/${gameID}/leave`,
-    {
-      method: 'POST',
-      body: JSON.stringify({
-        playerID: playerID,
-        playerCredentials: credentials,
-      }),
-      headers: { 'Content-Type': 'application/json' },
-    }
-  );
-  if (resp.status !== 200) {
-    throw new Error('HTTP status ' + resp.status);
+export const leaveServerInstance = async (gameServerUrl, gameName, gameCredentials) => {
+  console.log('leaveServerInstance', gameServerUrl, gameName, gameCredentials)
+  if(gameCredentials) {
+    console.log('gameCredentials', gameCredentials)
+    const promises = [];
+    Object.keys(gameCredentials).forEach( (gameID) => {
+      const resp = fetch(
+        `${gameServerUrl || ''}/games/${gameName}/${gameID}/leave`,
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            playerID: gameCredentials[gameID].playerId,
+            playerCredentials: gameCredentials[gameID].credentials,
+          }),
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+      promises.push(resp);
+    });
+    const ready = Promise.all(promises);
+    ready.then(() => {
+      return;
+    })
   }
 }
 
 
-export const saveCredentials = (credentials) => {
+export const saveCredentials = (gameID, playerID, credentials) => {
   return (dispatch, getState, { getFirestore}) => {
+    console.log('saveCredentials',gameID, playerID, credentials)
     const fireStore = getFirestore();
     const playerId = getState().firebase.auth.uid;
     
     const currentGameRef = fireStore.collection('currentGames').doc(playerId)
     currentGameRef.get().then((document) => {
-      const datas= document.data();
-      datas.credentials = credentials
+      const datas = document.data();
+      let gameCredentials = datas.gameCredentials || {};
+      gameCredentials[gameID] = {
+        playerId: playerID,
+        credentials: credentials
+      };
+      datas.gameCredentials = gameCredentials;
+      console.log('datas',datas)
       currentGameRef.set(datas);
     });
   }
