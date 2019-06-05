@@ -2,7 +2,9 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import './board.css';
 import { Button } from 'react-bootstrap';
+import { compose } from 'redux';
 import { connect } from 'react-redux';
+import { firestoreConnect, isLoaded } from 'react-redux-firebase';
 import { endGame } from '../../../../store/actions/gameActions';
 import Card from '../../common/card/Card'
 
@@ -56,11 +58,11 @@ class ResArcanaBoard extends Component {
   }
 
   renderCard = (card, onClick) => {
-    const src = require('../../../../../scans/low/' + card.type + '/' + card.class + '.png');
+    const src = require('../../../assets/image/components/' + card.type + '/' + card.class + '.png');
     return (
       <div
         key={card.name}
-        className={(this.isActive ? "active ": "") + " card vertical"}
+        className={(this.isActive ? "active": "") + " card vertical"}
         onClick={onClick}
       >
         <Card
@@ -73,15 +75,38 @@ class ResArcanaBoard extends Component {
     );
   }
 
-  render() {
-    const { G, ctx, playerID, gameId } = this.props;
+  renderPlayerDraftBoard = () => {
+    const { auth, game, G, ctx, playerID, gameId } = this.props;
     
-    let winner = this.getWinner();
+    const playerName = game.players[auth.uid] ? game.players[auth.uid].name : 'spectator';
+
+    const draftCards = G.players[playerID] && G.players[playerID].draftCards.map(card => {
+      return this.renderCard(card, () => { this.pickArtefact(card.name)})
+    });
+
+    return <>
+        <div>{playerName}</div>
+        <div className="artefacts">
+          {draftCards}
+        </div>
+      </>
+  }
+
+  renderOthersDraftBoard = () => {
+    return
+  }
+
+  renderPlayerPlayBoard = () => {
+    return
+  }
+
+  renderOthersPlayBoard = () => {
+    const { auth, G, ctx, playerID, game, gameId } = this.props;
 
     const globalArtifacts = G.artefacts && G.artefacts.map(artefact => {
       return this.renderCard(artefact, () => { this.pickArtefact(artefact.name)})
     });
-    const playerArtifacts = G.artefactsInPlay[playerID] && G.artefactsInPlay[playerID].map(artefact => {
+    const playerArtifacts = G.artefactsInPlay && G.artefactsInPlay[playerID] && G.artefactsInPlay[playerID].map(artefact => {
       return this.renderCard(artefact)
     });
 
@@ -98,14 +123,50 @@ class ResArcanaBoard extends Component {
         <div className="artefacts">{playerArtifacts}</div>
       </div>
 
+    const playerName = game.players[auth.uid] ? game.players[auth.uid].name : 'spectator';
+
     return (
-      <div className="board">
-        <h6>You are Player {playerID} in game {gameId}</h6>
-        <h6>Active player is {ctx.currentPlayer}</h6>
+      <>
+        <div>{playerName}</div>
         {artefactsAvailable}
         {playerArtefacts}
+      </>
+    )
+  }
+
+  renderCommunBoard = () => {
+
+  }
+
+  render() {
+    const { G, ctx, playerID, game, gameId } = this.props;
+    
+    if (!isLoaded(game)) {
+      return <div className="loadingPanel alignCenter"><img className="loader" alt="Loading..."/>Loading...</div>
+    }
+
+    let winner = this.getWinner();
+    
+    let renderPlayerBoard = null;
+    let renderOthersBoard = null;
+
+    switch(G.phase) {
+      case 'DRAFT_PHASE':
+        renderPlayerBoard = this.renderPlayerDraftBoard();
+        renderOthersBoard = this.renderOthersDraftBoard();
+        break;
+      case 'PLAY_PHASE':
+      default:
+        renderPlayerBoard = this.renderPlayerPlayBoard();
+        renderOthersBoard = this.renderOthersPlayBoard();
+    }
+
+    return (
+      <div className="board">
+        {renderPlayerBoard}
+        {renderOthersBoard}
         {winner}
-        <Button variant="secondary" size="sm" onClick={(event) => this.handleEndGame(event)}>Game Over</Button>
+        {/*<Button variant="secondary" size="sm" onClick={(event) => this.handleEndGame(event)}>Game Over</Button>*/}
       </div>
     )
   }
@@ -114,7 +175,8 @@ class ResArcanaBoard extends Component {
 const mapStateToProps = (state) => {
   return {
     auth: state.firebase.auth,
-    currentGame: state.firestore.data.currentGame
+    currentGame: state.firestore.data.currentGame,
+    game: state.firestore.ordered.game && state.firestore.ordered.game[0]
   }
 }
 
@@ -124,4 +186,12 @@ const mapDispatchToProps = (dispatch) => {
   }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(ResArcanaBoard)
+export default compose(
+  connect(mapStateToProps, mapDispatchToProps),
+  firestoreConnect(props => [
+    { collection: 'games',
+      doc: props.currentGame.gameId,
+      storeAs: 'game'
+    },
+  ])
+)(ResArcanaBoard)

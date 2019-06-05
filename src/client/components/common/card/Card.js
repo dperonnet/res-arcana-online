@@ -3,7 +3,7 @@ import './card.css';
 
 export default class Card extends PureComponent {
   render() {
-    const { alt, cardClass, onMouseOut, onMouseOver, size, src } = this.props;
+    const { alt, cardClass, onMouseOut, onMouseOver, src } = this.props;
     const classes = `card ${cardClass}`;
     return (
       <div className="card-frame" onMouseOut={onMouseOut} onMouseOver={onMouseOver}>

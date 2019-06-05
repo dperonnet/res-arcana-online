@@ -258,10 +258,6 @@ export const disjoinCurrentGame = () => {
     const fireStore = getFirestore();
     const creatorId = getState().firebase.auth.uid;
     // Set the current game for player
-    const data = {
-      gameId: null,
-      createdAt: new Date()
-    };
     const currentGameRef = fireStore.collection('currentGames').doc(creatorId)
     currentGameRef.get().then((document) => {
       const datas = document.data();

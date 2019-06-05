@@ -6,17 +6,14 @@ import { firestoreConnect, isLoaded } from 'react-redux-firebase';
 
 class GameBoard extends Component {
     render() {
-    const { auth, currentGame, game, runningGame } = this.props;
+    const { game, runningGame } = this.props;
     
     if (!isLoaded(game)) {
       return <div className="loading">Loading...</div> 
     }
 
-    const playerId = game.players[auth.uid] ? game.players[auth.uid].id.toString() : 'spectator';
-
     return (
       <Container className="gameBoard">
-        <div>game : {currentGame.gameId} / player {playerId}</div>
         {game.status === 'STARTED' && runningGame && (
           <runningGame.app
             gameID={runningGame.gameID}

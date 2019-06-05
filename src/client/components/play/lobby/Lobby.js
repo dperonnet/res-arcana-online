@@ -11,7 +11,7 @@ import Cookies from 'react-cookies';
 import PropTypes from 'prop-types';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
-import { firestoreConnect, isEmpty, isLoaded } from 'react-redux-firebase';
+import { firestoreConnect, isLoaded } from 'react-redux-firebase';
 import { saveCredentials } from '../../../../store/actions/gameActions';
 import { Client } from "boardgame.io/react";
 import { LobbyConnection } from './connection';
@@ -118,7 +118,6 @@ class Lobby extends Component {
   };
 
   _updateCredentials = (playerName, gameID, playerID, credentials) => {
-    console.log('_updateCredentials',playerName, gameID, playerID, credentials)
     this.props.saveCredentials(gameID, playerID, credentials)
     this.setState(prevState => {
       // clone store or componentDidUpdate will not be triggered
@@ -156,7 +155,6 @@ class Lobby extends Component {
     try {
       await this.connection.join(gameName, gameID, playerID);
       await this.connection.refresh();
-      console.log('this.connection.playerCredentials',this.connection.playerCredentials)
       this._updateCredentials(
         this.connection.playerName,
         gameID, 
@@ -179,7 +177,6 @@ class Lobby extends Component {
 
     let multiplayer = undefined;
     if (gameOpts.numPlayers > 1) {
-      console.log('gameOpts.numPlayers',gameOpts.numPlayers)
       if (this.props.gameServer) {
         multiplayer = { server: this.props.gameServer };
       } else {
@@ -191,13 +188,14 @@ class Lobby extends Component {
       game: gameCode.game,
       board: gameCode.board,
       debug: this.props.debug,
+      numPlayers: gameOpts.numPlayers,
       multiplayer,
     });
 
     const game = {
       app: app,
       gameID: gameOpts.gameID,
-      playerID: gameOpts.numPlayers > 1 ? gameOpts.playerID : null,
+      playerID: gameOpts.numPlayers > 1 ? gameOpts.playerID : "0",
       credentials: this.connection.playerCredentials,
     };
     this.setState({runningGame: game });
@@ -209,7 +207,7 @@ class Lobby extends Component {
 
     if (!isLoaded(currentGame)) {
       return <div className="lobbyContainer">
-        <div className="loadingPanel alignCenter"><img className="loader" />Loading...</div>
+        <div className="loadingPanel alignCenter"><img className="loader" alt="Loading..."/>Loading...</div>
       </div>
     }
     
@@ -235,7 +233,7 @@ class Lobby extends Component {
         {!currentGame.gameId ? (
           <div className="lobbyContainer">
             {loading ?
-              <div className="loadingPanel alignCenter"><img className="loader" />Loading...</div>
+              <div className="loadingPanel alignCenter"><img className="loader" alt="Loading..."/>Loading...</div>
             :
               <>
                 <CreateGame

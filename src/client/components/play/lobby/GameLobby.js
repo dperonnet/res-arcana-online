@@ -10,7 +10,6 @@ class GameLobby extends Component {
 
   handleLeave = () => {
     const { currentGame, leaveGame, gameServer, setLoading } = this.props;
-    console.log('gameServer',gameServer)
     setLoading(false);
     leaveGame(currentGame.gameId, gameServer);
   }
@@ -56,12 +55,9 @@ class GameLobby extends Component {
             </div>
           </div>
         : game.status === 'STARTED' ? 
-          <>
-            <h5>Game Started</h5>
-            <GameBoard 
-              runningGame={runningGame}
-            />
-          </>
+          <GameBoard 
+            runningGame={runningGame}
+          />
         : game.status === 'OVER' ? 
           <h5>Game Over</h5>
         : null
