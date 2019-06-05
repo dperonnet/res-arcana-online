@@ -13,7 +13,7 @@ class CreateGame extends Component {
       game: {
         name: null,
         password: '',
-        numberOfPlayers: '4',
+        numberOfPlayers: '2',
         boardGameId: null
       }
     };
@@ -44,7 +44,7 @@ class CreateGame extends Component {
       game: {
         name: null,
         password: '',
-        numberOfPlayers: '4',
+        numberOfPlayers: '2',
         allowSpectators: true
       }
     });

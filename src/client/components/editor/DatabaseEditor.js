@@ -49,9 +49,7 @@ class DatabaseEditor extends Component {
     let card;
     if (pristineComponent && pristineComponent.class) {
       try {
-        const sourcePath = '../../../../scans/low/' + pristineComponent.type + '/' + pristineComponent.class + '.png';
-        console.log('sourcePath', sourcePath);
-        const src = require('../../../../scans/low/' + pristineComponent.type + '/' + pristineComponent.class + '.png');
+        const src = require('../../assets/image/components/' + pristineComponent.type + '/' + pristineComponent.class + '.png');
         card = <div className="card-zoom-frame">
           <CardZoom
             src={ src }

@@ -18,9 +18,10 @@ class ResArcanaBoard extends Component {
     isMultiplayer: PropTypes.bool,
   };
 
-  pickArtefact = id => {
-    if (this.isActive(id)) {
-      this.props.moves.pickArtefact(id);
+  pickArtefact = (cardId) => {
+    const { playerID } = this.props;
+    if (this.isActive(cardId)) {
+      this.props.moves.draftCards(playerID, cardId);
       this.props.events.endTurn();
     }
   };
@@ -80,14 +81,22 @@ class ResArcanaBoard extends Component {
     
     const playerName = game.players[auth.uid] ? game.players[auth.uid].name : 'spectator';
 
-    const draftCards = G.players[playerID] && G.players[playerID].draftCards.map(card => {
-      return this.renderCard(card, () => { this.pickArtefact(card.name)})
+    const draftCards = G.players[playerID] && G.players[playerID].draftCards.map((card) => {
+      return this.renderCard(card, () => { this.pickArtefact(card.id)})
     });
+
+    const deck = G.players[playerID].deck.map((card)=>{
+      console.log('card',card)
+      return this.renderCard(card)
+    })
 
     return <>
         <div>{playerName}</div>
         <div className="artefacts">
           {draftCards}
+        </div>
+        <div className="artefacts">
+          {deck}
         </div>
       </>
   }

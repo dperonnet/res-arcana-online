@@ -37,14 +37,27 @@ const getComponentsByType = (components) => {
 // DRAFT PHASE
 const initDraftPhase = (G, ctx) => {
   G.phase = 'DRAFT_PHASE'
-  G.draftWay = G.draftWay && G.draftWay === 'toLeftPlayer' ? 'toRightPlayer' : 'toLeftPlayer'
-    G = dealDraftCards(G, ctx);
+  if (G.players['0'].incomingDraftCards.length === 0) {
+    console.log('initDraftPhase with incomingDraftCards === 0')
+    G.draftWay = G.draftWay && G.draftWay === 'toLeftPlayer' ? 'toRightPlayer' : 'toLeftPlayer'
+    dealDraftCards(G, ctx);
+  } else {
+    console.log('initDraftPhase else')
+    getNextCards(G, ctx);
+  }
   return G
 }
 const dealDraftCards = (G, ctx) => {
   for (let i= 0; i < ctx.numPlayers; i++) {
     G.players[i].draftCards = G.secret.artefactsInGameStack.slice(0, 4) // deal 4 cards to player
     G.secret.artefactsInGameStack.splice(0, 4) // remove 4 cards from pile
+  }
+  return G
+}
+const getNextCards = (G, ctx) => {
+  for (let i= 0; i < ctx.numPlayers; i++) {
+    G.players[i].draftCards = copy(G.players[i].incomingDraftCards)
+    G.players[i].incomingDraftCards = []
   }
   return G
 }
@@ -55,25 +68,31 @@ const allCardsDealt = (G, ctx) => {
   }
   return assert
 }
-
-// MOVES
-const draftCards = (G, ctx, playerID, cardId) => {
-  if (!G.players[playerID].deck) {
-    G.players[playerID].deck = []
-  }
-  const selectedCard = copy(G.players[playerID].draftCards.filter((card) => {
-    return card === cardId
-  }))
-  G.players[playerID].deck.push(selectedCard);
-  delete G.players[playerID].draftCards[selectedCard.id]
-  const otherCard = G.players[playerID].draftCards;
-  const nextPlayer = (G.draftWay === 'toLeftPlayer' ? 1 : -1)
+const initPlayPhase = (G, ctx) => {
+  G.phase = 'PLAY_PHASE'
   return G
 }
 
-const pickArtefact = (G, ctx, artefactName) => {
+// MOVES
+const draftCards = (G, ctx, playerID, cardId) => {
+  console.log('draftCards',G, ctx, playerID, cardId)
+  const selectedCard = copy(G.players[playerID].draftCards.filter((card) => {
+    return card.id === cardId
+  })[0])
+  G.players[playerID.toString()].deck.push(selectedCard);
+  const deniedCards = copy(G.players[playerID].draftCards.filter((card) => {
+    return card.id !== cardId
+  }));
+  const nextPlayerID = ((G.draftWay === 'toLeftPlayer' ? 1 : -1) + parseInt(playerID)) % ctx.numPlayers
+  console.log('nextPlayerID',nextPlayerID)
+  G.players[nextPlayerID.toString()].incomingDraftCards = deniedCards
+  G.players[playerID].draftCards = []
+  return G
+}
+
+const pickArtefact = (G, ctx, artefactId) => {
   let artefactIndex = G.artefacts.findIndex(
-    artefact => artefact.name === artefactName
+    artefact => artefact.id === artefactId
   );
   let artefact = copy(G.artefacts[artefactIndex]);
   G.artefacts.splice(artefactIndex, 1);
@@ -87,13 +106,15 @@ const getInitialState = (ctx)  => {
     secret: {
       artefactsInGameStack: []
     },
-    players: {
-      '0': {
-        draftCards: []
-      }
-    }
+    players: {}
   };
-  for(let i=0; i<ctx.numPlayers; i++) G.players[i.toString()]= {}
+  for (let i=0; i<ctx.numPlayers; i++) {
+    G.players[i.toString()]= {
+      deck: [],
+      draftCards: [],
+      incomingDraftCards: []
+    }
+  }
 
   const components = getComponentsByType(GameComponents);
 
@@ -129,6 +150,7 @@ export const ResArcanaGame = Game({
   },
 
   flow: {
+    onMove: (G, ctx) => G,
     movesPerTurn: 1,
     startingPhase: 'draftPhase',
 
@@ -147,38 +169,11 @@ export const ResArcanaGame = Game({
         endPhaseIf: allCardsDealt,
         next: 'pickArtefact'
       },
-      pickArtefact: {
+      playPhase: {
+        onPhaseBegin: initPlayPhase,
         allowedMoves: ['pickArtefact'],
         endPhaseIf: G => G.passed,
         next: 'pickArtefact',
-      }
-    },
-
-    endGameIf: (G, ctx) => {
-      if (G.artefacts.length === 0) {
-        // sum players scores
-        let scores = Object.entries(G.artefactsInPlay).map(player => {
-            let values = player[1].map(component => {
-              return component.value;
-            });
-            const reducer = (res, value) => res + value;
-            const playerId = player[0];
-            const result = {
-              playerId: null,
-              score: 0
-            };
-            result.playerId = playerId
-            result.score = values.reduce(reducer);
-            return result;
-        });
-        // retrieve scores value and get scoreMax
-        let scoreValues = scores.map(score => score.score);
-        let scoreMax = Math.max(...scoreValues);
-        // then get the players having scoreMax as winners
-        let winners = scores.filter(player => {
-          return player.score === scoreMax;
-        });
-        return { winner: winners };
       }
     },
   },
