@@ -102,6 +102,7 @@ class ResArcanaBoard extends Component {
   }
 
   renderOthersDraftBoard = () => {
+    const { G } = this.props;
     return
   }
 
@@ -172,6 +173,7 @@ class ResArcanaBoard extends Component {
 
     return (
       <div className="board">
+        <h5>{G.phase}</h5>
         {renderPlayerBoard}
         {renderOthersBoard}
         {winner}

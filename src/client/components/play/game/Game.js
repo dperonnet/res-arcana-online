@@ -1,4 +1,4 @@
-import { Game, TurnOrder   } from 'boardgame.io/core';
+import { Game, PlayerView, TurnOrder   } from 'boardgame.io/core';
 import { GameComponents } from '../../../../database'
 import logger from 'redux-logger';
 import { applyMiddleware } from 'redux';
@@ -37,8 +37,8 @@ const getComponentsByType = (components) => {
 // DRAFT PHASE
 const initDraftPhase = (G, ctx) => {
   G.phase = 'DRAFT_PHASE'
-  if (G.players['0'].incomingDraftCards.length === 0) {
-    console.log('initDraftPhase with incomingDraftCards === 0')
+  if (G.players['0'].deniedCards.length === 0) {
+    console.log('initDraftPhase with deniedCards === 0')
     G.draftWay = G.draftWay && G.draftWay === 'toLeftPlayer' ? 'toRightPlayer' : 'toLeftPlayer'
     dealDraftCards(G, ctx);
   } else {
@@ -56,8 +56,9 @@ const dealDraftCards = (G, ctx) => {
 }
 const getNextCards = (G, ctx) => {
   for (let i= 0; i < ctx.numPlayers; i++) {
-    G.players[i].draftCards = copy(G.players[i].incomingDraftCards)
-    G.players[i].incomingDraftCards = []
+    const nextPlayerID = ((G.draftWay === 'toLeftPlayer' ? 1 : ctx.numPlayers - 1) + parseInt(i)) % ctx.numPlayers
+    G.players[nextPlayerID].draftCards = copy(G.players[i].deniedCards)
+    G.players[i].deniedCards = []
   }
   return G
 }
@@ -79,14 +80,13 @@ const draftCards = (G, ctx, playerID, cardId) => {
   const selectedCard = copy(G.players[playerID].draftCards.filter((card) => {
     return card.id === cardId
   })[0])
-  G.players[playerID.toString()].deck.push(selectedCard);
+  G.players[playerID].deck.push(selectedCard);
   const deniedCards = copy(G.players[playerID].draftCards.filter((card) => {
     return card.id !== cardId
   }));
-  const nextPlayerID = ((G.draftWay === 'toLeftPlayer' ? 1 : -1) + parseInt(playerID)) % ctx.numPlayers
-  console.log('nextPlayerID',nextPlayerID)
-  G.players[nextPlayerID.toString()].incomingDraftCards = deniedCards
+  G.players[playerID].deniedCards = deniedCards
   G.players[playerID].draftCards = []
+  G.publicData[playerID].deckSize += 1
   return G
 }
 
@@ -106,13 +106,17 @@ const getInitialState = (ctx)  => {
     secret: {
       artefactsInGameStack: []
     },
-    players: {}
+    players: {},
+    publicData: {}
   };
   for (let i=0; i<ctx.numPlayers; i++) {
-    G.players[i.toString()]= {
+    G.players[i]= {
       deck: [],
       draftCards: [],
-      incomingDraftCards: []
+      deniedCards: []
+    }
+    G.publicData[i] = {
+      deckSize: 0,
     }
   }
 
@@ -178,6 +182,7 @@ export const ResArcanaGame = Game({
     },
   },
   enhancer: applyMiddleware(logger),
+  playerView: PlayerView.STRIP_SECRETS
 });
 
 function copy(value){
