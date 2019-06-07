@@ -38,8 +38,9 @@ class SignedInNav extends Component {
           <Nav>
             <Navbar.Text> {games ? Object.keys(games).length : 0} games
             </Navbar.Text>
-            <NavDropdown title={profile.login} id="collasible-nav-dropdown">
-              <LinkContainer to="/" active={false}><NavDropdown.Item onClick={signOut}>Logout</NavDropdown.Item></LinkContainer>
+            <NavDropdown alignRight title={profile.login} id="collasible-nav-dropdown">
+              <LinkContainer to="/profile" active={false}><NavDropdown.Item>Profile</NavDropdown.Item></LinkContainer>
+              <LinkContainer to="/logout" active={false}><NavDropdown.Item onClick={signOut}>Logout</NavDropdown.Item></LinkContainer>
             </NavDropdown>
           </Nav>
         </Navbar.Collapse>

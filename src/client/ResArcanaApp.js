@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import DatabaseEditor from './components/editor/DatabaseEditor';
 import DashBoard from './components/dashboard/DashBoard';
+import Profile from './components/common/auth/Profile';
 import SignIn from './components/common/auth/SignIn';
 import Register from './components/common/auth/Register';
 import Play from './components/play/Play';
@@ -22,6 +23,7 @@ class ResArcanaApp extends Component {
             <Route path='/play' render={(props) => <Play {...props} gameServerUrl={gameServerUrl} />}/>
             <Route path="/signIn" component={SignIn} />
             <Route path="/register" component={Register} />
+            <Route path="/profile" component={Profile} />
           </div>
         </div>
       </Router>

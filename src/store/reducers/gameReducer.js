@@ -1,4 +1,5 @@
 const initState = {
+  cardToZoom: undefined,
   games: []
 }
 
@@ -30,6 +31,14 @@ const gameReducer = (state = initState, action) => {
     case 'GAME_OVER':
       debug && console.log('end game ', action.gameId);
       return state;
+    case 'ZOOM_CARD':
+      return Object.assign({}, state, {
+          zoomCard: action.card
+      });
+    case 'CLEAR_ZOOM':
+      return Object.assign({}, state, {
+        zoomCard: undefined
+      });
     default:
       return state;
   }

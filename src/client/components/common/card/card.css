@@ -20,12 +20,6 @@
   margin-bottom: 5px;
 }
 
-.card-row {
-  display: flex;
-  justify-content: flex-start;
-  min-height: 0;
-}
-
 .card-wrapper {
   margin: 0;
   vertical-align: middle;
@@ -34,6 +28,7 @@
 
 .card, .card-frame, .card-zoom-frame {
   position: relative;
+  user-select: none;
 }
 
 .card-zoom-frame, .card-zoom-frame > img {
@@ -41,9 +36,41 @@
   height: 420px;
 }
 
-.card.vertical, .card-image.vertical {
+/* Card row */
+.card-row.x-small {
+  min-height: 54.6px;
+}
+
+.card-row.small {
+  min-height: 91px;
+}
+
+.card-row.normal {
+  min-height: 127.4px;
+}
+
+.card-row.large {
+  min-height: 182px;
+}
+
+.card-row.x-large {
+  min-height: 220px;
+}
+
+/* Card size */
+.card.x-small.vertical, .card-image.x-small.vertical {
+  height: 54.6px;
+  width: 39px;
+}
+
+.card.small.vertical, .card-image.small.vertical {
   height: 91px;
   width: 65px;
+}
+
+.card.normal.vertical, .card-image.normal.vertical {
+  height: 127.4px;
+  width: 91px;
 }
 
 .card.large.vertical, .card-image.large.vertical {
@@ -85,6 +112,10 @@
   position: absolute;
   top: 0;
   pointer-events: none;
+}
+
+.card.active {
+  border : 2px solid #F5B041;
 }
 
 img {

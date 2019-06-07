@@ -113,3 +113,18 @@ export const setUserStatus = () => {
     });
   }
 }
+
+export const saveProfile = (profile) => {
+  return (dispatch, getState, {getFirebase, getFirestore}) => {
+    const firestore = getFirestore();
+    const userId = getState().firebase.auth.uid;
+
+    firestore.collection('users').doc(userId).update({
+      cardSize: profile.cardSize || 'normal'
+    }).then(()=>{
+      dispatch({ type: 'REGISTER_SUCCESS' })
+    }).catch((err)=>{
+      dispatch({ type: 'REGISTER_FAIL', err})
+    })
+  }
+}

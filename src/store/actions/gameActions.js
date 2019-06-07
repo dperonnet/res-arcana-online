@@ -331,3 +331,16 @@ export const getComponents = () => {
     return components;
   }
 }
+
+export function zoomCard(card) {
+  return {
+      type: 'ZOOM_CARD',
+      card: card
+  };
+}
+
+export function clearZoom() {
+  return {
+      type: 'CLEAR_ZOOM'
+  };
+}

@@ -26,6 +26,8 @@
   flex-direction: row;
 }
 
-.card.active {
-  background-color: green;
+.gameBoard .card-zoom-frame {
+  position: absolute;
+  top: 0;
+  right: 0;
 }

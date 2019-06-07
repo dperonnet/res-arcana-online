@@ -45,8 +45,54 @@
 label {
   text-align: right;
 }
-.auth .error{
+.auth .error {
   margin-top: 12px;
   font-size: large;
   color: red;
+}
+
+.profil-container h2 {
+  text-align: center;
+  color: white;
+}
+
+.profil-container {
+  width: 100%;
+  max-width: 1170px;
+  margin: 0 auto;
+  padding: 20px;
+  height: 100%;
+  color: white;
+}
+.profil-panel {
+  background-color: rgba(34,34,34,.8);
+  width: 100%;
+  max-width: 700px;
+  margin: 0 auto 20px;
+  padding: 12px;
+  border : 1px solid #F5B041;
+}
+.card-size-selector {
+  display: inline-block;
+}
+.card-settings {
+  display: inline-block;
+  margin-left: 5px;
+  margin-right: 5px;
+}
+.card-size-selector>.preview-card>.card {
+  display: block;
+}
+.label-card-size {
+  display: inline-block;
+  width: 100%;
+  text-align: center;
+}
+.card-size-selector>.preview-card>.card, .card-size-selector>.preview-card>.card-image {
+  align-self: flex-end;
+  margin-left: 10px;
+}
+
+.card.active {
+  border : 2px solid #F5B041;
 }
