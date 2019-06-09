@@ -100,30 +100,39 @@ class ResArcanaBoard extends Component {
     this.props.clearZoom();
   }
 
-  renderPlayerDraftBoard = () => {
-    const { auth, game, G, ctx, playerID, profile } = this.props;
-    
-    const playerName = game.players[auth.uid] ? game.players[auth.uid].name : 'spectator';
-
+  renderPickBoard = () => {
+    const { G, playerID, profile } = this.props;
     const draftCards = G.players[playerID] && G.players[playerID].draftCards.map((card) => {
       return this.renderCard(card, () => { this.pickArtefact(card.id)})
     });
+
+    return <>
+      {G.players[playerID].draftCards.length > 0 && 
+        <div className='draft-card-panel'>
+          <h5>Pick a card {G.players[playerID].deck.length +1}/8</h5>
+          <div className={'draft-card card-row ' + profile.cardSize}>
+            {draftCards}
+          </div>
+        </div>
+      }
+    </>
+  }
+
+  renderPlayerDraftBoard = () => {
+    const { auth, game, G, playerID, profile } = this.props;
+    
+    const playerName = game.players[auth.uid] ? game.players[auth.uid].name : 'spectator';
 
     const deck = G.players[playerID].deck.map((card)=>{
       return this.renderCard(card)
     })
 
-    return <>
-        <div>{playerName}</div>
-        {deck.length < 8 && 
-          <div className={'artefacts card-row ' + profile.cardSize}>
-            {draftCards}
-          </div>
-        }
-        <div className={'artefacts card-row ' + profile.cardSize}>
-          {deck}
-        </div>
-      </>
+    return <div>
+      <div>{playerName}</div>
+      <div className={'artefacts card-row ' + profile.cardSize}>
+        {deck}
+      </div>
+    </div>
   }
 
   renderOthersDraftBoard = () => {
@@ -151,18 +160,16 @@ class ResArcanaBoard extends Component {
       }
       return (
         <div key={id}>
-          {playerName}
+          <div>{playerName}</div>
           <div className={'artefacts card-row ' + profile.cardSize}>
             {deck}
           </div>
         </div>
       );
     });
-    return (
-      <div>
-        {boards}
-      </div>
-    );
+    return <>
+      {boards}
+    </>
   }
 
   renderPlayerPlayBoard = () => {
@@ -191,17 +198,32 @@ class ResArcanaBoard extends Component {
 
     const playerName = game.players[auth.uid] ? game.players[auth.uid].name : 'spectator';
 
-    return (
-      <>
-        <div>{playerName}</div>
-        {artefactsAvailable}
-        {playerArtefacts}
-      </>
-    )
+    return <>
+      <div>{playerName}</div>
+      {artefactsAvailable}
+      {playerArtefacts}
+    </>
   }
 
-  renderCommonBoard = () => {
-
+  renderDraftBoard = () => {
+    let playerPickBoard = this.renderPickBoard();
+    let playerBoard = this.renderPlayerDraftBoard();
+    let othersBoard = this.renderOthersDraftBoard();
+    return <>
+      <div className='draft-card-container'>
+        {playerPickBoard}
+      </div>
+      <div>
+        {playerBoard}
+        {othersBoard}
+      </div>
+    </>
+  }
+  
+  renderPlayBoard = () => {
+    let playerBoard = this.renderPlayerPlayBoard();
+    let othersBoard = this.renderOthersPlayBoard();
+    return null
   }
 
   render() {
@@ -213,29 +235,28 @@ class ResArcanaBoard extends Component {
 
     let winner = this.getWinner();
     
-    let renderPlayerBoard = null;
-    let renderOthersBoard = null;
+    let board = null;
 
     switch(G.phase) {
       case 'DRAFT_PHASE':
-        renderPlayerBoard = this.renderPlayerDraftBoard();
-        renderOthersBoard = this.renderOthersDraftBoard();
+        board = this.renderDraftBoard();
         break;
       case 'PLAY_PHASE':
       default:
-        renderPlayerBoard = this.renderPlayerPlayBoard();
-        renderOthersBoard = this.renderOthersPlayBoard();
+        board = this.renderPlayBoard();
     }
 
-    return (
+    return (<>
       <div className="board">
         <h5>{G.phase}</h5>
-        {renderPlayerBoard}
-        {renderOthersBoard}
+        {board}
         {winner}
-        {cardToZoom && this.renderCardZoom()}
         {/*<Button variant="secondary" size="sm" onClick={(event) => this.handleEndGame(event)}>Game Over</Button>*/}
       </div>
+      <div className="chat-container">
+        {cardToZoom && this.renderCardZoom()}
+      </div>
+      </>
     )
   }
 }

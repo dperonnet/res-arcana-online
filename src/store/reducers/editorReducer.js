@@ -61,11 +61,15 @@ const initState = {
           component: JSON.parse(JSON.stringify(state.pristineComponent))
         }
       case 'FORM_CHANGE':
+
+        let id = camelCase(action.component.name)
+        if (action.component.alternative) id += '_alt';
+        
         return {
           ...state,
           component: {
             ...action.component,
-            id: camelCase(action.component.name),
+            id: id,
             class: snakeCase(action.component.name)
           }
         }

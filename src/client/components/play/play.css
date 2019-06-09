@@ -1,6 +1,8 @@
 .playContainer {
   color: white;
   flex-direction: column !important;
+  height: auto;
+  min-height: 100%;
   max-width: 100%;
   width:100%;
 }

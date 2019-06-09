@@ -38,13 +38,18 @@ class ComponentForm extends Component {
     const valueToUpdate = type === 'checkbox' ? checked : value;
     let newComponent;
     if (name === 'hasStandardCollectAbility') {
-      const newSCA = JSON.parse(JSON.stringify(DEFAULT_STANDARD_COLLECT_ABILITY));
+      if (valueToUpdate === true) {
+        const newSCA = JSON.parse(JSON.stringify(DEFAULT_STANDARD_COLLECT_ABILITY));
+        component.standardCollectAbility = newSCA;
+      } else {
+        delete component.standardCollectAbility;
+      }
       newComponent = {
         ...component,
-        standardCollectAbility: valueToUpdate === true ? newSCA : {},
         [name]: valueToUpdate
       };
-    } else {
+    }
+    else {
       newComponent = {
         ...component,
         [name]: valueToUpdate
@@ -89,7 +94,7 @@ class ComponentForm extends Component {
                   <InputGroup.Text id="name">Name</InputGroup.Text>
                 </InputGroup.Prepend>
                 <Form.Control
-                  placeholder="My component"
+                  placeholder="Component name"
                   name="name"
                   value={component.name}
                   onChange={this.handleFormChange}
@@ -105,6 +110,20 @@ class ComponentForm extends Component {
                   />
                 ))}
               </div>
+
+              {component.type === 'placeOfPower' &&
+                <InputGroup size="sm" className="mb-3">
+                  <InputGroup.Prepend>
+                    <InputGroup.Text id="name">Excluded component id</InputGroup.Text>
+                  </InputGroup.Prepend>
+                  <Form.Control
+                    placeholder="excludedComponentId"
+                    name="excludedComponentId"
+                    value={component.excludedComponentId}
+                    onChange={this.handleFormChange}
+                  />
+                </InputGroup>
+              }
 
               <InputGroup className="mb-3">
                 <Form.Check inline type="checkbox" name="hasStandardCollectAbility"
@@ -132,6 +151,36 @@ class ComponentForm extends Component {
                   checked={component.hasSpecificCollectAbility}
                   onChange={this.handleFormChange}/>
               </InputGroup>
+
+              <InputGroup className="mb-3">
+                <Form.Check inline type="checkbox" name="hasAlternative"
+                  id="hasAlternative" label="Has an alternative card"
+                  value={component.hasAlternative}
+                  checked={component.hasAlternative}
+                  onChange={this.handleFormChange}/>
+              </InputGroup>
+
+              <InputGroup className="mb-3">
+                <Form.Check inline type="checkbox" name="isAlternative"
+                  id="isAlternative" label="Is an alternative card"
+                  value={component.isAlternative}
+                  checked={component.isAlternative}
+                  onChange={this.handleFormChange}/>
+              </InputGroup>
+
+              { component.isAlternative && 
+                <InputGroup size="sm" className="mb-3">
+                  <InputGroup.Prepend>
+                    <InputGroup.Text id="name">Component Id</InputGroup.Text>
+                  </InputGroup.Prepend>
+                  <Form.Control
+                    placeholder="Id"
+                    name="altOfId"
+                    value={component.altOfId}
+                    onChange={this.handleFormChange}
+                  />
+                </InputGroup>
+              }
 
               <ButtonToolbar>
                 <Button variant="secondary" size="sm" onClick={onSave} disabled={!component.name.trim()}>Save</Button>

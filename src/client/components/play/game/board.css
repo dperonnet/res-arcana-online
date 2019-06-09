@@ -1,13 +1,36 @@
 .gameBoard {
   background-color: rgba(34,34,34,.8);
-  flex-direction: column !important;
-  max-width: 100%;
+  height: 100%;
   width:100%;
-  padding: 20px !important;
 }
+
+.bgio-client {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+  width: 100%;
+}
+
 .board {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  width: 100%;
+  padding: 10px;
   color: white;
 }
+
+.chat-container {
+  display: flex;
+  position: relative;
+  width: 300px;
+  min-width: 300px;
+  background-color: rgba(34,34,34,.8);
+  overflow-y: auto;
+  color: #c1c2c3;
+  border-left: 1px solid #F5B041;
+}
+
 .smallCard {
   height: 160px;
   width: 112px;
@@ -30,4 +53,30 @@
   position: absolute;
   top: 0;
   right: 0;
+}
+
+.draft-card-container {
+  position: fixed;
+  top: 70px;
+  width: 100%;
+  z-index: 42;
+}
+
+.draft-card-panel {
+  display: table;
+  margin: 0 auto;
+  background-color: rgba(34,34,34,.8);
+  padding: 20px;
+  border : 1px solid #F5B041;
+  min-width: 320px;
+}
+.draft-card-container h5 {
+  text-align: center;
+}
+.draft-card {
+  display: table;
+  margin: auto;
+}
+.draft-card .card {
+  display: inline-block;
 }

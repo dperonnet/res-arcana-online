@@ -60,7 +60,7 @@ class DatabaseEditor extends Component {
       } catch (err) {
         card = <div>No file found for {pristineComponent.class}.png</div>
       }
-    } 
+    }
 
     return (
       <Container className="editorContainer">
@@ -102,21 +102,6 @@ class DatabaseEditor extends Component {
           </div>
           <div className="sideSection">
             {card}
-            {/*<Chat
-                visible={ this.state.showChat }
-                messages={ this.props.currentGame.messages }
-                onMouseOver={ this.onMouseOver }
-                onMouseOut={ this.onMouseOut }
-                sendMessage={ this.sendMessage }
-            />
-            <Controls
-                onSettingsClick={ this.onSettingsClick }
-                onManualModeClick={ this.onManualModeClick }
-                onToggleChatClick={ this.onToggleChatClick }
-                showChatAlert={ this.state.showChatAlert }
-                manualModeEnabled={ manualMode }
-                showManualMode={ !this.state.spectating }
-            />*/}
           </div>
         </div>
       </Container>
@@ -129,6 +114,7 @@ const mapStateToProps = (state) => {
     auth: state.firebase.auth,
     components: state.firestore.data.components,
     component: state.editor.component,
+    filter: state.editor.filter,
     pristineComponent: state.editor.pristineComponent
   }
 }
