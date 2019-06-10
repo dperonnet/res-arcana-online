@@ -21,7 +21,7 @@ class Play extends Component {
     if(!auth.uid) return <Redirect to='/signIn'/>
 
     return (
-      <Container className="playContainer">
+      <Container className="play-container">
         <Lobby 
           gameServer={gameServerUrl}
           lobbyServer={gameServerUrl}

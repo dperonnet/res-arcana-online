@@ -88,7 +88,7 @@ class SignIn extends Component {
                 >
                   Login
                 </Button>
-                <span className="ml-3 forgotPassword" onClick={() => {this.setState({forgotPassword:true})}}>{ forgotPassword ? "Well, that sucks !" : "Forgot your password?"}</span>
+                <span className="ml-3 forgot-password" onClick={() => {this.setState({forgotPassword:true})}}>{ forgotPassword ? "Well, that sucks !" : "Forgot your password?"}</span>
               </div>
             </Row>
             <Row>

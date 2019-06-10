@@ -1,4 +1,4 @@
-.gameBoard {
+.game-board {
   background-color: rgba(34,34,34,.8);
   height: 100%;
   width:100%;
@@ -19,18 +19,24 @@
   width: 100%;
   padding: 10px;
   color: white;
+  resize: horizontal;
 }
 
-.chat-container {
+.right-panel {
   display: block;
   position: relative;
-  width: 100px;
   background-color: rgba(34,34,34,.8);
-  overflow-y: visible;
+  overflow-y: auto;
   color: #c1c2c3;
   border-left: 1px solid #F5B041;
-  direction: rtl;
-  resize: horizontal;
+}
+
+.right-panel .chat-container {
+  width: 300px;
+}
+
+.right-panel .chat-panel {
+  border: none;
 }
 
 .common-board {
@@ -42,7 +48,22 @@
   border-right: 1px solid #F5B041;
   resize: horizontal;
 }
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f1f1; 
+}
 
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #888; 
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #555; 
+}
 .common-board.x-small, .common-board.small {
   width: 230px;
 }
@@ -55,7 +76,7 @@
   width: 360px;
 }
 
-.smallCard {
+.small-card {
   height: 160px;
   width: 112px;
   color: black;

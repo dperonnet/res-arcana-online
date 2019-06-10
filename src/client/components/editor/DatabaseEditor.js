@@ -63,9 +63,9 @@ class DatabaseEditor extends Component {
     }
 
     return (
-      <Container className="editorContainer">
+      <Container className="editor-container">
         <div className="editor">
-          <div className="mainSection">
+          <div className="main-section">
             <Row className="flex-row">
               <Col xs="12" md="6" className="flex-col">
                 <Row>
@@ -92,7 +92,7 @@ class DatabaseEditor extends Component {
                 <Row className="flex-grow">
                   <Col className="flex-col">
                     <h2>Component datas</h2>
-                    <pre className="formPanel flex-grow">
+                    <pre className="form-panel flex-grow">
                       {jsonComponent}
                     </pre>
                   </Col>
@@ -100,7 +100,7 @@ class DatabaseEditor extends Component {
               </Col>
             </Row>
           </div>
-          <div className="sideSection">
+          <div className="side-section">
             {card}
           </div>
         </div>

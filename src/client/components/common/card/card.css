@@ -26,7 +26,7 @@
 }
 
 .card, .card-frame, .card-zoom-frame {
-  position: relative;
+  position: absolute;
   user-select: none;
 }
 

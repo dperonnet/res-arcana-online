@@ -1,18 +1,13 @@
-.flex-container {
-  display: flex;
-  flex-direction: column;
+.chat-container {
   height: 100%;
-}
-
-.chatContainer {
   width: 100%;
   max-width: 1170px;
   margin: 0 auto;
-  padding: 20px;
-  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
-.chatPanel {
+.chat-panel {
   position: relative;
   font-size: 12px;
   background-color: rgba(34,34,34,.8);
@@ -26,12 +21,12 @@
   margin: auto;
 }
 
-.chatName {
+.chat-name {
   text-align: center;
   color: #fff;
 }
 
-.messageContent {
+.message-content {
   font-size: 11px;
   word-break: break-all;
   overflow-y: auto;
@@ -40,7 +35,7 @@
   color: lightgray;
 }
 
-.chatArea {
+.chat-area {
   position: absolute;
   top: 45px;
   bottom: 50px;
@@ -60,12 +55,12 @@
   padding-left: 10px;
 }
 
-.createdAt {
+.created-at {
   font-size: 10px;
   color: lightgoldenrodyellow;
 }
 
-.sendForm {
+.send-form {
   position: absolute;
   bottom: 10px;
   left: 15px;

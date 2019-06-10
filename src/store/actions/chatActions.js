@@ -38,3 +38,11 @@ export const createChat = (chatId, chatName) => {
     })
   }
 }
+
+export const deleteChat = (chatId) => {
+  return (dispatch, getState, {getFirebase, getFirestore}) => {
+    const fireStore = getFirestore();
+    console.log('call to deleteChat',chatId)
+    fireStore.collection('chats').doc(chatId).delete()
+  }
+}

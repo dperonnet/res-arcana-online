@@ -57,7 +57,7 @@ class DashBoard extends Component {
           expand={this.handleLogin}
         />
       )}
-        <Container className={"dashBoardContent" + (auth.uid && isExpanded ? ' expanded' : '')}>
+        <Container className={"dashboard-content" + (auth.uid && isExpanded ? ' expanded' : '')}>
           <Chat chatId='mainChat' chatName={chatName}/>
         </Container>
       </>

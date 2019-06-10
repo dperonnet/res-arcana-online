@@ -102,7 +102,7 @@ class Profile extends Component {
               {this.renderCard('large')}
               {this.renderCard('x-large')}
             </div>
-            <div className="gameButton">
+            <div className="game-button">
               <Button type="submit" variant="secondary" size="sm">Save</Button>
             </div>
           </Form>

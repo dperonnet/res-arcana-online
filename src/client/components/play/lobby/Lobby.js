@@ -206,8 +206,8 @@ class Lobby extends Component {
     const { errorMsg, runningGame } = this.state;
 
     if (!isLoaded(currentGame)) {
-      return <div className="lobbyContainer">
-        <div className="loadingPanel alignCenter"><img className="loader" alt="Loading..."/>Loading...</div>
+      return <div className="lobby-container">
+        <div className="loading-panel align-center"><img className="loader" alt="Loading..."/>Loading...</div>
       </div>
     }
     
@@ -231,9 +231,9 @@ class Lobby extends Component {
     return (
       <>
         {!currentGame.gameId ? (
-          <div className="lobbyContainer">
+          <div className="lobby-container">
             {loading ?
-              <div className="loadingPanel alignCenter"><img className="loader" alt="Loading..."/>Loading...</div>
+              <div className="loading-panel align-center"><img className="loader" alt="Loading..."/>Loading...</div>
             :
               <>
                 <CreateGame

@@ -74,12 +74,12 @@ class CreateGame extends Component {
     const numberOfPlayers = ["1","2","3","4"];
 
     return (
-      <div className='createGamePanel'>
+      <div className='create-game-panel'>
         {
           isCreatingGame ?
             <div className='game'>
-              <div className="gameHeader"><h5>Create new game</h5></div>
-              <div className="gameOptions">
+              <div className="game-header"><h5>Create new game</h5></div>
+              <div className="game-options">
                 <Form onSubmit={this.handleSubmit}>
                   <Form.Group as={Row} controlId="name">
                     <Form.Label column xs="4">Name</Form.Label>
@@ -109,13 +109,13 @@ class CreateGame extends Component {
                   </Form.Group>
                 </Form>
               </div>
-              <div className="gameButton">
+              <div className="game-button">
                 <Button type="submit" variant="secondary" size="sm" onClick={this.handleSubmit}>Create</Button>
                 <Button variant="secondary" size="sm" onClick={this.handleClose}>Cancel</Button>
               </div>
             </div>
           :
-          <div className='gameButton'>
+          <div className='game-button'>
             <Button variant="secondary" size="sm"
               onClick={this.handleShow}>New Game</Button>
           </div>

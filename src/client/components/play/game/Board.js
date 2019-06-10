@@ -7,6 +7,7 @@ import { firestoreConnect, isLoaded } from 'react-redux-firebase';
 import { clearZoom, endGame, zoomCard } from '../../../../store/actions/gameActions';
 import Card from '../../common/card/Card'
 import CardZoom from '../../common/card/CardZoom.js';
+import Chat from '../../common/chat/Chat';
 
 class ResArcanaBoard extends Component {
 
@@ -264,12 +265,17 @@ class ResArcanaBoard extends Component {
     return null
   }
 
+  renderChat = () => {
+    const { game } = this.props
+    return <Chat chatId={game.id} chatName={game.name + ' Chat'}/>
+  }
+
   render() {
     const { G, ctx, playerID, game, cardToZoom, profile } = this.props;
     console.log('G',G);
     
     if (!isLoaded(game)) {
-      return <div className="loadingPanel alignCenter"><img className="loader" alt="Loading..."/>Loading...</div>
+      return <div className="loading-panel align-center"><img className="loader" alt="Loading..."/>Loading...</div>
     }
 
     let winner = this.getWinner();
@@ -295,9 +301,9 @@ class ResArcanaBoard extends Component {
         {winner}
         {/*<Button variant="secondary" size="sm" onClick={(event) => this.handleEndGame(event)}>Game Over</Button>*/}
       </div>
-      <div className="chat-container">
-        <h5>Je suis le chat</h5>
+      <div className="right-panel">
         {cardToZoom && this.renderCardZoom()}
+        {this.renderChat()}
       </div>
       </>
     )

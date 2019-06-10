@@ -7,8 +7,8 @@ class Message extends Component {
     return (
       <div>
         <span className="username">{message.creatorName}</span>
-        <span className="createdAt">{moment(message.createdAt.toDate()).calendar()}</span>
-        <div className="messageContent">{message.content}</div>
+        <span className="created-at">{moment(message.createdAt.toDate()).calendar()}</span>
+        <div className="message-content">{message.content}</div>
       </div>
     );
   }

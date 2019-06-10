@@ -11,7 +11,7 @@ export default class SideBar extends Component {
     return (
       expanded ?
       <div className="sidebar expanded">
-        <div className="sidebarHeader">
+        <div className="sidebar-header">
           Online Users
           <div className="pull-right close" onClick={collapse}>
             <FontAwesomeIcon icon={faTimes} size="lg" />
@@ -36,7 +36,7 @@ export default class SideBar extends Component {
       </div>
       :
       <div className="sidebar">
-        <div className="sidebarHeader">
+        <div className="sidebar-header">
           <div className="pull-right close">
             <FontAwesomeIcon icon={faAngleRight} size="lg" onClick={expand}/>
           </div>

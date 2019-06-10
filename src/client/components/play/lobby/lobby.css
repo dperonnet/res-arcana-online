@@ -1,11 +1,16 @@
-.lobbyContainer, .gameLobbyContainer {
+.lobby-container, .game-lobby-container {
   width: 100%;
   max-width: 640px;
   margin: 0 auto;
   padding: 20px;
 }
+.game-lobby-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
 
-.createGamePanel, .gameListPanel, .gameLobbyPanel, .loadingPanel {
+.create-game-panel, .game-list-panel, .game-lobby-panel, .loading-panel {
   background-color: rgba(34,34,34,.8);
   width: 100%;
   max-width: 700px;
@@ -14,25 +19,25 @@
   border : 1px solid #F5B041;
 }
 
-.alignCenter {
+.align-center {
   text-align: center;
 }
 
-.gameButton {
+.game-button {
   text-align: center;
 }
 
-.gameButton .btn {
+.game-button .btn {
   width: 120px;
   margin: 4px 8px;
 }
 
-.gameHeader {
+.game-header {
   text-align: center;
   font-size: larger;
 }
 
-.playerName {
+.player-name {
   text-align: center;
 }
 .separator {
@@ -41,20 +46,20 @@
   margin-bottom: 10px;
 }
 
-.gameButton .btn-primary {
+.game-button .btn-primary {
 background-color: #F5B041;
 border-color: #F5B041;
 color: #000;
 }
-.gameButton .btn-primary:hover {
+.game-button .btn-primary:hover {
 background-color: #F5D061;
 border-color: #F5D061;
 color: #000;
 }
-.gameButton .btn.disabled, .gameButton .btn:disabled {
+.game-button .btn.disabled, .game-button .btn:disabled {
   opacity: 1;
 }
-.gameButton .btn-primary:disabled, .gameButton .btn-primary:disabled:hover {
+.game-button .btn-primary:disabled, .game-button .btn-primary:disabled:hover {
   color: #fff;
   background-color: #333;
   border-color: #333;

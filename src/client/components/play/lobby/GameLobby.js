@@ -4,6 +4,7 @@ import { compose } from 'redux';
 import { connect } from 'react-redux';
 import { firestoreConnect, isEmpty, isLoaded } from 'react-redux-firebase';
 import { leaveGame, startGame } from '../../../../store/actions/gameActions';
+import Chat from '../../common/chat/Chat';
 import GameBoard from '../game/GameBoard'
 
 class GameLobby extends Component {
@@ -17,6 +18,11 @@ class GameLobby extends Component {
   handleStart = () => {
     const { currentGame, startGame } = this.props
     startGame(currentGame.gameId);
+  }
+
+  renderChat = () => {
+    const { game } = this.props
+    return <Chat chatId={game.id} chatName={game.name + ' Chat'}/>
   }
 
   render() {
@@ -39,13 +45,13 @@ class GameLobby extends Component {
     return (
       <>
         { game.status === 'PENDING' ? 
-          <div className="gameLobbyContainer">
-            <div className="gameLobbyPanel">
+          <div className="game-lobby-container">
+            <div className="game-lobby-panel">
               <div className='game'>
-                <div className="gameHeader">
+                <div className="game-header">
                   <h5>You are in game {game.name}</h5>
                   {players}
-                  <div className="gameButton">
+                  <div className="game-button">
                     {auth && auth.uid === game.creatorId &&
                       <Button variant="primary" size="sm" onClick={this.handleStart} disabled={missingPlayer}>Start</Button>}
                     <Button variant="secondary" size="sm" onClick={this.handleLeave}>Leave</Button>
@@ -53,6 +59,7 @@ class GameLobby extends Component {
                 </div>
               </div>
             </div>
+            {this.renderChat()}
           </div>
         : game.status === 'STARTED' ? 
           <GameBoard 

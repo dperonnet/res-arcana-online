@@ -85,7 +85,7 @@ class ComponentForm extends Component {
     const componentsType = JSON.parse(JSON.stringify(COMPONENTS_TYPE));
 
     return (
-      <div className="formPanel flex-grow">
+      <div className="form-panel flex-grow">
         {component && 
           <form onSubmit={onSave}>
             <Form.Group controlId="ComponentSettingsForm">
@@ -239,12 +239,12 @@ class EssencePanel extends Component {
     const essenceListFromProps = standardCollectAbility.essenceList;
     const essenceList = [ 'elan', 'life', 'calm', 'death', 'gold', 'any', 'anyButGold', 'anyButDeathGold'];
     const components = essenceList.map((type, index) => (
-    <div className="essenceList" key={index} >
+    <div className="essence-list" key={index} >
         <InputGroup.Prepend>
           <InputGroup.Text className={"help-card-min "+type} id={type+'Essence'}>{essenceListFromProps[type]}</InputGroup.Text>
         </InputGroup.Prepend>
         <InputGroup.Append>
-          <div className="verticalButtons">
+          <div className="vertical-buttons">
             <Button variant="secondary" id={'lower'+type+'CollectOptions'}
             onClick={() => this.increment(type)}><span>+</span></Button>
             <Button variant="secondary" id={'raise'+type+'Essence'}

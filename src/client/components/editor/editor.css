@@ -1,7 +1,7 @@
 h5 {
     color: #EEE;
 }
-.editorContainer {
+.editor-container {
   color: white;
   flex-direction: column !important;
   max-width: 100%;
@@ -19,7 +19,7 @@ h5 {
   overflow: hidden;
 }
 
-.mainSection {
+.main-section {
   height: 100%;
   width: 100%;
   display: flex;
@@ -29,7 +29,7 @@ h5 {
   padding: 10px !important;
 }
 
-.sideSection {
+.side-section {
   height: 100%;
   width: 300px;
   min-width: 300px;
@@ -54,7 +54,7 @@ h5 {
   height:100%;
 }
 
-.fullHeight {
+.full-height {
   height: 100%;
 }
 .flex-row, .flex-row > div[class*='col-'] {
@@ -78,7 +78,7 @@ h5 {
 .disabled {
   color: lightgray;
 }
-.formPanel {
+.form-panel {
   border-width: .2rem .2rem 0;
   position: relative;
   color: white;
@@ -97,16 +97,16 @@ h5 {
   flex: 0 1 auto !important;
 }
 
-.essenceList {
+.essence-list {
   display: inline-flex;
   margin: 0 10px;
 }
 
-.essenceList .input-group-prepend {
+.essence-list .input-group-prepend {
   margin: 0 2px 8px 0;
 }
 
-.essenceList .input-group-append {
+.essence-list .input-group-append {
   line-height: normal;
   height: 25px;
   width: 25px;
@@ -114,7 +114,7 @@ h5 {
   height: 100%;
 }
 
-.essenceList .btn {
+.essence-list .btn {
   display: block;
   margin: 0 !important;
   padding: 0;
@@ -122,11 +122,11 @@ h5 {
   height: 16px;
 }
 
-.essenceList .btn.focus, .essenceList .btn:focus {
+.essence-list .btn.focus, .essence-list .btn:focus {
   box-shadow: none;
 }
 
-.essenceList .btn span {
+.essence-list .btn span {
   margin-top: -5px;
   display: block;
 }

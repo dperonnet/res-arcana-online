@@ -1,3 +1,5 @@
+import { deleteChat } from './chatActions';
+
 export const createGame = (game) => {
   return (dispatch, getState, {getFirebase, getFirestore}) => {
     // make asynch call to database
@@ -177,7 +179,9 @@ const leaveWhilePending = (gameId, playerId, document, fireStore, gameServerUrl)
             }
           })
         })
-        Promise.all(kicks).then(deleteGame(gameRef));
+        Promise.all(kicks).then(() => {
+          deleteGame(gameId);
+        });
       // else just leave game
       } else {
         delete players[playerId];
@@ -201,12 +205,16 @@ const leaveWhileOver = (gameId, playerId, document, fireStore, gameServerUrl) =>
   leaveWhilePending(gameId, playerId, document, fireStore, gameServerUrl);
 }
 
-const deleteGame = (gameRef) => {
-  const gameId = gameRef.id;
-  gameRef.delete().then(function() {
-  }).catch(function(error) {
-    console.error("Error deleting game: ", gameId, error);
-  });
+const deleteGame = (gameId) => {
+  return (dispatch, getState, {getFirestore}) => {
+    const fireStore = getFirestore();
+    const gameRef = fireStore.collection('games').doc(gameId);
+    gameRef.delete().then(
+      dispatch(deleteChat(gameId))
+    ).catch(function(error) {
+      console.error("Error deleting game: ", gameId, error);
+    });
+  }
 }
 
 export const deleteGameById = (gameId) => {
@@ -226,7 +234,7 @@ export const deleteGameById = (gameId) => {
           }
         })
       })
-      Promise.all(kicks).then(deleteGame(gameRef));
+      Promise.all(kicks).then(deleteGame(gameId));
     });
   }
 }

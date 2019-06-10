@@ -19,18 +19,18 @@ class GameList extends Component {
 
   renderPlayers = (game) => {
     return game.players && Object.values(game.players).map((player) => {
-      return <div className='playerName col-sm-6' key={player.id}>{player.name}</div>
+      return <div className='player-name col-sm-6' key={player.id}>{player.name}</div>
     })
   }
 
   render() {
     const { games } = this.props;
     return (
-      <div className='gameListPanel alignCenter'>
+      <div className='game-list-panel align-center'>
         {
           games && games.map((game, index) => 
             <div className='game' key={game.id}>
-              <div className='gameHeader'>{game.name}
+              <div className='game-header'>{game.name}
                 <div className="pull-right close" onClick={(event) => this.handleDeleteById(event, game.id)}>
                   <FontAwesomeIcon icon={faTrash} />
                 </div>
@@ -38,7 +38,7 @@ class GameList extends Component {
               <Row>
                 {this.renderPlayers(game)}
               </Row>
-              <div className="gameButton">
+              <div className="game-button">
                 <Button variant="secondary" size="sm" onClick={() => {this.handleJoin(game.id)}}>Join</Button>
               </div>
               {index !== games.length - 1 && <div className='separator'/>}

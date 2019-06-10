@@ -64,7 +64,7 @@ class DatabaseContent extends Component {
     }
     
     return (
-      <div className="formPanel">
+      <div className="form-panel">
         <Form.Group controlId="gameComponentsForm">
           <Form.Label>Game Components</Form.Label>
           

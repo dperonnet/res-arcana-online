@@ -13,7 +13,7 @@ class GameBoard extends Component {
     }
 
     return (
-      <div className="gameBoard">
+      <div className="game-board">
         {game.status === 'STARTED' && runningGame && (
           <runningGame.app
             gameID={runningGame.gameID}

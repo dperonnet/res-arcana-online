@@ -63,14 +63,14 @@ class Chat extends Component {
     }
 
     return (
-      <div className="chatContainer flex-container">
-          <div className="chatPanel">
-            <h5 className="chatName">{chatName}</h5>
+      <div className="chat-container">
+          <div className="chat-panel">
+            <h5 className="chat-name">{chatName}</h5>
             <div>
-            <div className="chatArea" ref='chatArea'>
+            <div className="chat-area" ref='chatArea'>
               {messages}
             </div></div>
-            <div className="sendForm">
+            <div className="send-form">
               <Form onSubmit={this.handleSubmit} autoComplete="off">
                 <InputGroup>
                   {auth.uid ?
