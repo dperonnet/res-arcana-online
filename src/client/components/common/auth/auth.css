@@ -84,8 +84,7 @@ label {
   display: block;
 }
 .label-card-size {
-  display: inline-block;
-  width: 100%;
+  display: block;
   text-align: center;
 }
 .card-size-selector>.preview-card>.card, .card-size-selector>.preview-card>.card-image {

@@ -18,6 +18,18 @@ class Profile extends Component {
     }
   }
 
+  static getDerivedStateFromProps(props, state) {
+    let { profile } = state;
+    if (profile.cardSize === '') {
+      return {
+        profile: {
+          cardSize: props.profile.cardSize || 'normal',
+        }
+      }
+    }
+    return state;
+  }
+
   componentDidUpdate(prevProps) {
     if (prevProps.profile.cardSize !== this.props.profile.cardSize) {
       const { profile } = this.state;
@@ -54,11 +66,11 @@ class Profile extends Component {
     return (
       <div className="card-settings">
         <div
-          className={"preview-card" + (profile.cardSize === size ? " active ": " ") + size +" card vertical"}
+          className={"preview-card" + (profile.cardSize === size ? ' active ': ' ') + size +' card vertical'}
           onClick={event => this.handleSelectCardSize(event, size)}
         >
           <Card
-            cardClass={size + ' vertical'}
+            classes={size + ' card vertical'}
             src={ src }
             show={ true } 
             alt={ size } 
@@ -100,7 +112,7 @@ class Profile extends Component {
   }
 }
 
-const mapStateToProps = (state) =>{
+const mapStateToProps = (state) => {
   return {
     authError: state.auth.authError,
     auth: state.firebase.auth,
@@ -109,7 +121,7 @@ const mapStateToProps = (state) =>{
   }
 }
 
-const mapDispatchToProps = (dispatch) =>{
+const mapDispatchToProps = (dispatch) => {
   return {
     saveProfile: (profile) => dispatch(saveProfile(profile))
   }

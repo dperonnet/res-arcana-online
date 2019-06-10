@@ -12,23 +12,47 @@
 }
 
 .board {
-  display: flex;
+  display: block;
   flex: 1;
   flex-direction: column;
+  overflow-y: auto;
   width: 100%;
   padding: 10px;
   color: white;
 }
 
 .chat-container {
-  display: flex;
+  display: block;
   position: relative;
-  width: 300px;
-  min-width: 300px;
+  width: 100px;
+  background-color: rgba(34,34,34,.8);
+  overflow-y: visible;
+  color: #c1c2c3;
+  border-left: 1px solid #F5B041;
+  direction: rtl;
+  resize: horizontal;
+}
+
+.common-board {
+  display: block;
+  position: relative;
   background-color: rgba(34,34,34,.8);
   overflow-y: auto;
   color: #c1c2c3;
-  border-left: 1px solid #F5B041;
+  border-right: 1px solid #F5B041;
+  resize: horizontal;
+}
+
+.common-board.x-small, .common-board.small {
+  width: 230px;
+}
+
+.common-board.normal, .common-board.large {
+  width: 328px;
+}
+
+.common-board.x-large {
+  width: 360px;
 }
 
 .smallCard {
@@ -41,9 +65,7 @@
   width: 56px;
   color: black;
 }
-.artefacts {
-  display: flex;
-}
+
 .flex-column {
   -webkit-flex-direction: row;
   flex-direction: row;
@@ -56,27 +78,24 @@
 }
 
 .draft-card-container {
-  position: fixed;
-  top: 70px;
   width: 100%;
-  z-index: 42;
 }
 
 .draft-card-panel {
-  display: table;
+  display: block;
   margin: 0 auto;
   background-color: rgba(34,34,34,.8);
   padding: 20px;
   border : 1px solid #F5B041;
   min-width: 320px;
 }
-.draft-card-container h5 {
+.draft-card-container h5, .common-board h5 {
   text-align: center;
 }
 .draft-card {
   display: table;
   margin: auto;
 }
-.draft-card .card {
+.common-board .monuments div, .draft-card .card {
   display: inline-block;
 }

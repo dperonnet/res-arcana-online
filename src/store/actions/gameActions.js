@@ -45,7 +45,6 @@ export const createAndJoinGame = (game, callBack, gameServerUrl) => {
 
 export const joinGame = (gameId, callBack, gameServerUrl) => {
   return (dispatch, getState, { getFirestore}) => {
-    console.log('joinGame',gameId, callBack, gameServerUrl)
     const fireStore = getFirestore();
     const profile = getState().firebase.profile;
     const playerId = getState().firebase.auth.uid;
@@ -53,7 +52,6 @@ export const joinGame = (gameId, callBack, gameServerUrl) => {
     const currentGameRef = fireStore.collection('currentGames').doc(playerId);
     currentGameRef.get().then((cgDoc) => {
       const currentGameDatas = cgDoc.data();
-      console.log('currentGameDatas',currentGameDatas)
       leaveServerInstance(gameServerUrl, 'res-arcana', currentGameDatas.gameCredentials).then(() => {      
         fireStore.runTransaction(function(transaction) {
           return transaction.get(gameRef).then(function(gameDoc) {
@@ -271,9 +269,7 @@ export const disjoinCurrentGame = () => {
 }
 
 export const leaveServerInstance = async (gameServerUrl, gameName, gameCredentials) => {
-  console.log('leaveServerInstance', gameServerUrl, gameName, gameCredentials)
   if(gameCredentials) {
-    console.log('gameCredentials', gameCredentials)
     const promises = [];
     Object.keys(gameCredentials).forEach( (gameID) => {
       const resp = fetch(
@@ -299,7 +295,6 @@ export const leaveServerInstance = async (gameServerUrl, gameName, gameCredentia
 
 export const saveCredentials = (gameID, playerID, credentials) => {
   return (dispatch, getState, { getFirestore}) => {
-    console.log('saveCredentials',gameID, playerID, credentials)
     const fireStore = getFirestore();
     const playerId = getState().firebase.auth.uid;
     
@@ -312,7 +307,6 @@ export const saveCredentials = (gameID, playerID, credentials) => {
         credentials: credentials
       };
       datas.gameCredentials = gameCredentials;
-      console.log('datas',datas)
       currentGameRef.set(datas);
     });
   }

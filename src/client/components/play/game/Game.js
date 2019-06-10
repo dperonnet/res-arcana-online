@@ -104,10 +104,14 @@ const pickArtefact = (G, ctx, artefactId) => {
 const getInitialState = (ctx)  => {
   const G = {
     secret: {
-      artefactsInGameStack: []
+      artefactsInGameStack: [],
     },
     players: {},
-    publicData: {}
+    publicData: {
+      placesOfPowerInGame: [],
+      monumentsStack: [],
+      monumentsRevealed: []
+    }
   };
   for (let i=0; i<ctx.numPlayers; i++) {
     G.players[i]= {
@@ -127,21 +131,27 @@ const getInitialState = (ctx)  => {
   const artefactsInGameStack = ctx.random.Shuffle(components.artefact);
   G.secret.artefactsInGameStack = artefactsInGameStack.slice(0, nbArtefacts);
 
-  /*const artefactInPlay = {};
-  for (var i=0; i < ctx.numPlayers; i++) {
-    artefactInPlay[i]= [];
-  }
-
-  G.artefactsInPlay = artefactInPlay;*/
+  // Get places of power excluding those on back side
+  let placesOfPower = ctx.random.Shuffle(components.placeOfPower);
+  let placesOfPowerExcluded = [];
+  placesOfPower.forEach((pop)=> {
+    if (!placesOfPowerExcluded.includes(pop.id)) {
+      G.publicData.placesOfPowerInGame.push(pop);
+      placesOfPowerExcluded.push(pop.excludedComponentId)
+    }
+  })
+  G.publicData.magicItems = components.magicItem;
   
-  console.log('G',G)
-
+  // Reveal 2 monuments
+  let monumentsInGameStack = ctx.random.Shuffle(components.monument);
+  G.publicData.monumentsRevealed = monumentsInGameStack.slice(0, 2)
+  G.publicData.monumentsStack = monumentsInGameStack.splice(0, 2);
   return G;
 }
 
 // GAME
 export const ResArcanaGame = Game({
-  name: "res-arcana",
+  name: 'res-arcana',
 
   setup: getInitialState,
 
