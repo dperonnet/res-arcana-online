@@ -10,16 +10,35 @@ export const sendMessage = (message, chatId) => {
         createdAt: new Date(),
         content: message
     }
+    const threshold = chatId === 'mainChat' ? 120 : 1000;
 
-    console.log('sendMessage : ', newMessage)
+    const chatRef = fireStore.collection('chats').doc(chatId);
+    fireStore.runTransaction((transaction) => {
+      return transaction.get(chatRef).then((chatDoc) => {
+        let messages = chatDoc.data().messages;
+        if(messages) {
 
-    fireStore.collection('chats').doc(chatId).update({
-      messages: fireStore.FieldValue.arrayUnion(newMessage)
+          if (messages.length > threshold) {
+            for(let i=0; i <=1;i++){
+              transaction.update(chatRef, {
+                messages: fireStore.FieldValue.arrayRemove(messages[i])
+              })
+            }
+          }
+          transaction.update(chatRef, {
+            messages: fireStore.FieldValue.arrayUnion(newMessage)
+          })        
+        } else {
+          messages = [newMessage]
+          transaction.update(chatRef, { messages })
+        }
+      })
     }).then(() => {
       dispatch({ type: 'SEND_MESSAGE', message});
     }).catch((err) => {
       dispatch({type: 'SEND_MESSAGE_ERROR', err});
     })
+    
   }
 };
 
