@@ -25,7 +25,7 @@
   display: inline-block;
 }
 
-.card, .card-frame, .card-zoom-frame {
+.card, .card-zoom-frame {
   position: absolute;
   user-select: none;
 }
@@ -140,7 +140,7 @@ div.place-of-power, div.magic-item, div.card {
   margin: 5px 0 0 5px;
 }
 
-.card, .card-frame {
+.card, .magic-item, .monument, .place-of-power {
   position: relative;
 }
 

@@ -48,6 +48,7 @@
   border-right: 1px solid #F5B041;
   resize: horizontal;
 }
+
 ::-webkit-scrollbar {
   width: 10px;
 }
@@ -92,7 +93,7 @@
   flex-direction: row;
 }
 
-.gameBoard .card-zoom-frame {
+.game-board .card-zoom-frame {
   position: absolute;
   top: 0;
   right: 0;

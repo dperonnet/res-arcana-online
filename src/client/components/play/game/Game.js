@@ -35,7 +35,8 @@ const getComponentsByType = (components) => {
 // PHASES:
 
 // DRAFT PHASE
-const initDraftPhase = (G, ctx) => {
+const initDraftPhase = (G, ctx, source) => {
+  console.log('source',source)
   G.phase = 'DRAFT_PHASE'
   if (G.players['0'].deniedCards.length === 0) {
     console.log('initDraftPhase with deniedCards === 0')
@@ -51,6 +52,7 @@ const dealDraftCards = (G, ctx) => {
   for (let i= 0; i < ctx.numPlayers; i++) {
     G.players[i].draftCards = G.secret.artefactsInGameStack.slice(0, 4) // deal 4 cards to player
     G.secret.artefactsInGameStack.splice(0, 4) // remove 4 cards from pile
+    G.publicData.waitingFor.push(i);
   }
   return G
 }
@@ -59,15 +61,19 @@ const getNextCards = (G, ctx) => {
     const nextPlayerID = ((G.draftWay === 'toLeftPlayer' ? 1 : ctx.numPlayers - 1) + parseInt(i)) % ctx.numPlayers
     G.players[nextPlayerID].draftCards = copy(G.players[i].deniedCards)
     G.players[i].deniedCards = []
+    G.publicData.waitingFor.push(i);
   }
   return G
 }
 const allCardsDealt = (G, ctx) => {
+  let decksReady = true;
   let assert = true;
   for (let i= 0; i < ctx.numPlayers; i++) {
-    assert &= G.players[i].draftCards.length === 0
+    assert = assert && G.players[i].draftCards.length === 0
+    decksReady = decksReady && G.players[i].deck.length === 8
   }
-  return assert
+  if (decksReady) return { next: 'playPhase' }
+  if (assert) return { next: 'draftPhase' }
 }
 const initPlayPhase = (G, ctx) => {
   G.phase = 'PLAY_PHASE'
@@ -76,7 +82,6 @@ const initPlayPhase = (G, ctx) => {
 
 // MOVES
 const draftCards = (G, ctx, playerID, cardId) => {
-  console.log('draftCards',G, ctx, playerID, cardId)
   const selectedCard = copy(G.players[playerID].draftCards.filter((card) => {
     return card.id === cardId
   })[0])
@@ -86,7 +91,8 @@ const draftCards = (G, ctx, playerID, cardId) => {
   }));
   G.players[playerID].deniedCards = deniedCards
   G.players[playerID].draftCards = []
-  G.publicData[playerID].deckSize += 1
+  G.publicData.players[playerID].deckSize += 1
+  G.publicData.waitingFor.splice(G.publicData.waitingFor.indexOf(parseInt(playerID)), 1);
   return G
 }
 
@@ -110,7 +116,9 @@ const getInitialState = (ctx)  => {
     publicData: {
       placesOfPowerInGame: [],
       monumentsStack: [],
-      monumentsRevealed: []
+      monumentsRevealed: [],
+      players: {},
+      waitingFor: []
     }
   };
   for (let i=0; i<ctx.numPlayers; i++) {
@@ -119,7 +127,7 @@ const getInitialState = (ctx)  => {
       draftCards: [],
       deniedCards: []
     }
-    G.publicData[i] = {
+    G.publicData.players[i] = {
       deckSize: 0,
     }
   }
@@ -170,18 +178,10 @@ export const ResArcanaGame = Game({
 
     phases: {
       draftPhase: {
-        onPhaseBegin: initDraftPhase,
+        onPhaseBegin: (G, ctx) => initDraftPhase(G, ctx,'1st'),
         allowedMoves: ['draftCards'],
         turnOrder: TurnOrder.ANY_ONCE,
-        endPhaseIf: allCardsDealt,
-        next: 'secondDraftPhase'
-      },
-      secondDraftPhase: {
-        onPhaseBegin: initDraftPhase,
-        allowedMoves: ['draftCards'],
-        turnOrder: TurnOrder.ANY_ONCE,
-        endPhaseIf: allCardsDealt,
-        next: 'pickArtefact'
+        endPhaseIf: allCardsDealt
       },
       playPhase: {
         onPhaseBegin: initPlayPhase,

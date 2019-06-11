@@ -21,14 +21,14 @@ class GameLobby extends Component {
   }
 
   renderChat = () => {
-    const { game } = this.props
-    return <Chat chatId={game.id} chatName={game.name + ' Chat'}/>
+    const { chat, game } = this.props
+    return <Chat chat={chat} chatId={game.id} chatName={game.name + ' Chat'}/>
   }
 
   render() {
-    const { auth, game, runningGame } = this.props;
+    const { auth, chat, game, runningGame } = this.props;
     
-    if (!isLoaded(game)) {
+    if (!isLoaded(game) && !(isLoaded(chat))) {
       return <div className="loading">Loading...</div> 
     }
     if (isEmpty(game)) {
@@ -77,7 +77,8 @@ class GameLobby extends Component {
 const mapStateToProps = (state) => {
   return {
     auth: state.firebase.auth,
-    currentGame: state.firestore.data.currentGames,
+    chat : state.firestore.ordered.chat && state.firestore.ordered.chat[0],
+    currentGame: state.firestore.data.currentGame,
     game: state.firestore.ordered.game && state.firestore.ordered.game[0]
   }
 }
@@ -100,7 +101,11 @@ export default compose(
       },
       { collection: 'currentGames',
         doc: props.auth.uid,
-        storeAs: 'currentGames'
+        storeAs: 'currentGame'
+      },
+      { collection: 'chats',
+        doc: props.currentGame.gameId,
+        storeAs: 'chat'
       }
     ]
   )

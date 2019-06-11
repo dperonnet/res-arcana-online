@@ -1,4 +1,4 @@
-import { deleteChat } from './chatActions';
+import { createChat, deleteChat } from './chatActions';
 
 export const createGame = (game) => {
   return (dispatch, getState, {getFirebase, getFirestore}) => {
@@ -37,6 +37,7 @@ export const createAndJoinGame = (game, callBack, gameServerUrl) => {
     }).then((docRef) => {
       docRef.get().then(doc => {
         dispatch({ type: 'CREATE_GAME', doc});
+        dispatch(createChat(doc.id, doc.data().name + ' Chat'));
       })
       dispatch(joinGame(docRef.id, callBack, gameServerUrl));
     }).catch((err) => {
@@ -120,15 +121,15 @@ export const leaveGame = (gameId, gameServerUrl) => {
       switch (status) {
         // leave before game Start
         case 'PENDING':
-          leaveWhilePending(gameId, playerId, document, fireStore, gameServerUrl);
+          dispatch(leaveWhilePending(gameId, playerId, document, fireStore, gameServerUrl));
           break;
         // leave while game is still running
         case 'STARTED':
-          leaveWhileStarted(gameId, playerId, document, fireStore, gameServerUrl);
+          dispatch(leaveWhileStarted(gameId, playerId, document, fireStore, gameServerUrl));
           break;
         // leave when game is over
         case 'OVER':
-          leaveWhileOver(gameId, playerId, document, fireStore, gameServerUrl);
+          dispatch(leaveWhileOver(gameId, playerId, document, fireStore, gameServerUrl));
           break;
         default:
       }
@@ -151,58 +152,64 @@ export const getCurrentGameId = () => {
 }
 
 const leaveWhilePending = (gameId, playerId, document, fireStore, gameServerUrl) => {
-  const gameRef = fireStore.collection('games').doc(gameId);
-  const game = document.data();
-  let players = game.players
+  return (dispatch, getState, {getFirestore}) => {
+    const gameRef = fireStore.collection('games').doc(gameId);
+    const game = document.data();
+    let players = game.players
 
-  fireStore.collection('currentGames').doc(playerId).get().then((cgDoc) => {
-    const currentGameDatas = cgDoc.data()
-    leaveServerInstance(gameServerUrl, 'res-arcana', currentGameDatas.gameCredentials).then(() => {
-      
-      // if game creator or the only left player in game, kick all players and delete game.
-      const isGameCreator = (playerId === game.creatorId);
-      const isTheOnlyPlayer = (Object.keys(players).length === 1 && Object.keys(players)[0] === playerId);
-      if (isGameCreator || isTheOnlyPlayer) {
-        let kicks = Object.keys(players).map((key) => {
-          const playerCurrentGameRef = fireStore.collection('currentGames').doc(key);
-          // check if player is synch with the game before kick
-          return playerCurrentGameRef.get().then((currentGame) => {
-            const cgDatas = currentGame.data()
-            if(cgDatas.gameId === gameId) {
-              let datas = {
-                gameId: null
+    fireStore.collection('currentGames').doc(playerId).get().then((cgDoc) => {
+      const currentGameDatas = cgDoc.data()
+      leaveServerInstance(gameServerUrl, 'res-arcana', currentGameDatas.gameCredentials).then(() => {
+        
+        // if game creator or the only left player in game, kick all players and delete game.
+        const isGameCreator = (playerId === game.creatorId);
+        const isTheOnlyPlayer = (Object.keys(players).length === 1 && Object.keys(players)[0] === playerId);
+        if (isGameCreator || isTheOnlyPlayer) {
+          let kicks = Object.keys(players).map((key) => {
+            const playerCurrentGameRef = fireStore.collection('currentGames').doc(key);
+            // check if player is synch with the game before kick
+            return playerCurrentGameRef.get().then((currentGame) => {
+              const cgDatas = currentGame.data()
+              if(cgDatas.gameId === gameId) {
+                let datas = {
+                  gameId: null
+                }
+                if (key === game.creatorId) {
+                  datas.gameCredentials = {}
+                }
+                playerCurrentGameRef.update(datas)
               }
-              if (key === game.creatorId) {
-                datas.gameCredentials = {}
-              }
-              playerCurrentGameRef.update(datas)
-            }
+            })
           })
-        })
-        Promise.all(kicks).then(() => {
-          deleteGame(gameId);
-        });
-      // else just leave game
-      } else {
-        delete players[playerId];
-        fireStore.collection('currentGames').doc(playerId).update({
-          gameId: null,
-          gameCredentials: {}
-        })
-        gameRef.update({players});
-      }
+          Promise.all(kicks).then(() => {
+            dispatch(deleteGame(gameId));
+          });
+        // else just leave game
+        } else {
+          delete players[playerId];
+          fireStore.collection('currentGames').doc(playerId).update({
+            gameId: null,
+            gameCredentials: {}
+          })
+          gameRef.update({players});
+        }
+      })
     })
-  })
+  }
 }
 
 const leaveWhileStarted = (gameId, playerId, document, fireStore, gameServerUrl) => {
-  // Todo
-  leaveWhilePending(gameId, playerId, document, fireStore, gameServerUrl);
+  return (dispatch, getState, {getFirestore}) => {
+    // Todo
+    dispatch(leaveWhilePending(gameId, playerId, document, fireStore, gameServerUrl));
+  }
 }
 
 const leaveWhileOver = (gameId, playerId, document, fireStore, gameServerUrl) => {
-  // Todo
-  leaveWhilePending(gameId, playerId, document, fireStore, gameServerUrl);
+  return (dispatch, getState, {getFirestore}) => {
+    // Todo
+    dispatch(leaveWhilePending(gameId, playerId, document, fireStore, gameServerUrl));
+  }
 }
 
 const deleteGame = (gameId) => {
@@ -234,7 +241,7 @@ export const deleteGameById = (gameId) => {
           }
         })
       })
-      Promise.all(kicks).then(deleteGame(gameId));
+      Promise.all(kicks).then(dispatch(deleteGame(gameId)));
     });
   }
 }

@@ -20,7 +20,7 @@ class Chat extends Component {
 
   scrollDown(){
     const { chatArea } = this.refs
-    chatArea.scrollTop = chatArea.scrollHeight
+    if(chatArea) chatArea.scrollTop = chatArea.scrollHeight
   }
 
   componentDidMount() {
@@ -53,10 +53,12 @@ class Chat extends Component {
   }
 
   render() {
-    const { chat, chatName, auth } = this.props;
+    const { chat, chatId, chatName, auth } = this.props;
     const { message } = this.state;
     let messages = null;
     if (chat && chat.messages) {
+      if(chat.id !== chatId) return null
+
       messages = chat.messages.map((message) => {
         return <Message key={message.createdAt} message={message} />;
       })
@@ -112,7 +114,6 @@ class Chat extends Component {
 const mapStateToProps = (state, props) => {
   return {
     auth: state.firebase.auth,
-    chat : state.firestore.data.chat
   }
 }
 
@@ -123,12 +124,4 @@ const mapDispatchToProps = dispatch => {
   }
 }
 
-export default compose(
-  connect(mapStateToProps, mapDispatchToProps),
-  firestoreConnect((props) => [
-    { collection: 'chats',
-      doc: props.chatId,
-      storeAs: 'chat'
-    }
-  ])
-)(Chat);
+export default connect(mapStateToProps, mapDispatchToProps)(Chat);

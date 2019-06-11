@@ -36,7 +36,7 @@ class DashBoard extends Component {
   }
 
   render() {
-    const { auth, users } = this.props;
+    const { auth, mainChat, users } = this.props;
     const localStorageExpanded = JSON.parse(window.localStorage.getItem(LOCALSTORAGE_KEY));
     const isExpanded = localStorageExpanded === true || localStorageExpanded === false  ? localStorageExpanded: true;
     const chatName = 'Lobby Chat' + (auth.uid && users ? ' (' + users.length + ' online)' : '');
@@ -57,9 +57,9 @@ class DashBoard extends Component {
           expand={this.handleLogin}
         />
       )}
-        <Container className={"dashboard-content" + (auth.uid && isExpanded ? ' expanded' : '')}>
-          <Chat chatId='mainChat' chatName={chatName}/>
-        </Container>
+        <div className={"dashboard-content" + (auth.uid && isExpanded ? ' expanded' : '')}>
+          <Chat chat={mainChat} chatId='mainChat' chatName={chatName}/>
+        </div>
       </>
     );
   }
@@ -67,6 +67,7 @@ class DashBoard extends Component {
 
 const mapStateToProps = (state) => {
   return {
+    mainChat : state.firestore.ordered.mainChat && state.firestore.ordered.mainChat[0],
     games: state.firestore.ordered.games,
     users: state.firestore.ordered.users,
     auth: state.firebase.auth
@@ -75,10 +76,14 @@ const mapStateToProps = (state) => {
 
 export default compose(
   connect(mapStateToProps),
-  firestoreConnect([
+  firestoreConnect((props) => [
     { collection: 'games'},
     { collection: 'users',
-		  where: ['state', '==', 'online'],}
+		  where: ['state', '==', 'online'],},
+    { collection: 'chats',
+      doc: 'mainChat',
+      storeAs: 'mainChat'
+    }
   ])
 )(DashBoard);
 

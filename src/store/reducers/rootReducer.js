@@ -1,4 +1,5 @@
 import authReducer from './authReducer';
+import chatReducer from './chatReducer';
 import editorReducer from './editorReducer';
 import gameReducer from './gameReducer';
 import uiReducer from './uiReducer';
@@ -8,6 +9,7 @@ import { firebaseReducer } from 'react-redux-firebase';
 
 const rootReducer = combineReducers({
   auth: authReducer,
+  chat: chatReducer,
   editor: editorReducer,
   game: gameReducer,
   firestore: firestoreReducer,

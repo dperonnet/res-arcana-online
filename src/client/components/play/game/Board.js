@@ -109,15 +109,36 @@ class ResArcanaBoard extends Component {
       return this.renderComponent(card, 'card', () => this.pickArtefact(card.id), () => this.onMouseOver(card), () => this.onMouseOut(card))
     });
     
-    return <>
-      {G.players[playerID].draftCards.length > 0 && 
-        <div className='draft-card-panel'>
-          <h5>Pick a card {G.players[playerID].deck.length +1}/8</h5>
-          <div className={'draft-card card-row ' + profile.cardSize}>
-            {draftCards}
-          </div>
-        </div>
+    const emptyHand = G.players[playerID].draftCards.length === 0;
+    const deniedCards = G.players[playerID] && G.players[playerID].deniedCards.map((card) => {
+      const cardBack = {
+        class: 'back_artefact',
+        id: card.id+'_back_artefact',
+        name: 'Artefact',
+        type: 'back',
       }
+      return this.renderComponent(cardBack, 'card',)
+    });
+
+    const playersName = this.getPlayersName()
+    let waitingFor = 'Waiting for ';
+    G.publicData.waitingFor.forEach((id, index) => {
+      waitingFor += playersName[parseInt(id)]
+      waitingFor += index === G.publicData.waitingFor.length - 1 ? '.' : ', '
+    })
+    
+    return <>
+      <div className='draft-card-panel'>
+        {G.publicData.waitingFor.length > 0 && emptyHand ?
+          <h5>{waitingFor}</h5>
+          :
+          <h5>Pick a card {G.players[playerID].deck.length +1}/8</h5>
+        }
+        <div className={'draft-card card-row ' + profile.cardSize}>
+          {draftCards}
+          {deniedCards}
+        </div>
+      </div>
     </>
   }
 
@@ -141,17 +162,18 @@ class ResArcanaBoard extends Component {
 
   renderOthersDraftBoard = () => {
     const { ctx, G, game, playerID, profile } = this.props;
-    const othersNextId = Object.keys(G.publicData).filter((id) => {
+    const othersNextId = Object.keys(G.publicData.players).filter((id) => {
       return id !== playerID && id > playerID
     });
-    const othersPrevId = Object.keys(G.publicData).filter((id) => {
+    const othersPrevId = Object.keys(G.publicData.players).filter((id) => {
       return id !== playerID && id < playerID
     });
     const othersId = othersNextId.concat(othersPrevId);
     const playersName = this.getPlayersName()
+    console.log('othersId',othersId)
     const boards = othersId.map((id) =>{
       const playerName = playersName[parseInt(id)];
-      const deckSize = G.publicData[id].deckSize
+      const deckSize = G.publicData.players[id].deckSize
       let deck = []
       for(let i = 0; i< deckSize; i++) {
         const card = {
@@ -215,6 +237,7 @@ class ResArcanaBoard extends Component {
     let othersBoard = this.renderOthersDraftBoard();
     return <>
       <div className='draft-card-container'>
+        <h5>Draft Phase</h5>
         {playerPickBoard}
       </div>
       <div>
@@ -260,14 +283,16 @@ class ResArcanaBoard extends Component {
   }
 
   renderPlayBoard = () => {
-    let playerBoard = this.renderPlayerPlayBoard();
-    let othersBoard = this.renderOthersPlayBoard();
-    return null
+    return <>
+      <div className='draft-card-container'>
+        <h5>Play Phase</h5>
+      </div>
+    </>
   }
 
   renderChat = () => {
-    const { game } = this.props
-    return <Chat chatId={game.id} chatName={game.name + ' Chat'}/>
+    const { chat, game } = this.props
+    return <Chat chat={chat} chatId={game.id} chatName={game.name + ' Chat'}/>
   }
 
   render() {
@@ -291,12 +316,11 @@ class ResArcanaBoard extends Component {
         board = this.renderPlayBoard();
     }
     const sizeSetting = profile && profile.cardSize || 'normal';
-    return (<>
+    return <>
       <div className={'common-board ' + sizeSetting}>
         {this.renderCommonBoard()}
       </div>
       <div className="board">
-        <h5>{G.phase}</h5>
         {board}
         {winner}
         {/*<Button variant="secondary" size="sm" onClick={(event) => this.handleEndGame(event)}>Game Over</Button>*/}
@@ -305,14 +329,14 @@ class ResArcanaBoard extends Component {
         {cardToZoom && this.renderCardZoom()}
         {this.renderChat()}
       </div>
-      </>
-    )
+    </>
   }
 }
 
 const mapStateToProps = (state) => {
   return {
     auth: state.firebase.auth,
+    chat : state.firestore.ordered.chat && state.firestore.ordered.chat[0],
     cardToZoom: state.game.zoomCard,
     currentGame: state.firestore.data.currentGame,
     game: state.firestore.ordered.game && state.firestore.ordered.game[0],
@@ -335,5 +359,9 @@ export default compose(
       doc: props.currentGame.gameId,
       storeAs: 'game'
     },
+    { collection: 'chats',
+      doc: props.currentGame.gameId,
+      storeAs: 'chat'
+    }
   ])
 )(ResArcanaBoard)

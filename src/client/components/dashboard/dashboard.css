@@ -1,5 +1,5 @@
 .dashboard-content {
-  padding: 20px !important;
+  padding: 20px 20px 20px 40px;
   height: 100%;
   color: white;
   max-width: 100%;
@@ -9,7 +9,7 @@
 
 @media (min-width: 768px) {
   .dashboard-content.expanded {
-    padding-left: 200px !important;
+    padding-left: 220px !important;
   }
 }
 .form-group {
