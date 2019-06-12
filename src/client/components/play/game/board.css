@@ -10,25 +10,39 @@
   height: 100%;
   width: 100%;
 }
+.board-vertical {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+  width: 100%;
+}
+.common-board {
+  display: inline-block;
+  position: relative;
+  /*background-color: rgba(34,34,34,.8);*/
+  overflow-y: auto;
+  color: #c1c2c3;
+  border-right: 1px solid #F5B041;
+  resize: horizontal;
+  max-width: 575px;
+  min-width: 180px;
+  text-align: center;
+}
 
 .board {
-  display: block;
-  flex: 1;
+  display: flex;
+  flex: auto;
   flex-direction: column;
   overflow-y: auto;
-  width: 100%;
-  padding: 10px;
   color: white;
-  resize: horizontal;
 }
 
 .right-panel {
-  display: block;
-  position: relative;
-  background-color: rgba(34,34,34,.8);
+  display: flex;
   overflow-y: auto;
   color: #c1c2c3;
   border-left: 1px solid #F5B041;
+  min-width: 180px;
 }
 
 .right-panel .chat-container {
@@ -39,14 +53,23 @@
   border: none;
 }
 
-.common-board {
-  display: block;
-  position: relative;
-  background-color: rgba(34,34,34,.8);
-  overflow-y: auto;
-  color: #c1c2c3;
-  border-right: 1px solid #F5B041;
-  resize: horizontal;
+.right-panel .chat-area {
+  position: absolute;
+  top: 0px;
+  bottom: 34px;
+  left: 8px;
+  right: 10px;
+}
+
+.right-panel .chat-name {
+  display: none;
+}
+
+.right-panel .send-form {
+  position: absolute;
+  bottom: 2px;
+  left: 2px;
+  right: 2px;
 }
 
 ::-webkit-scrollbar {
@@ -77,29 +100,14 @@
   width: 360px;
 }
 
-.small-card {
-  height: 160px;
-  width: 112px;
-  color: black;
-}
-.xSmallCard {
-  height: 80px;
-  width: 56px;
-  color: black;
-}
-
-.flex-column {
-  -webkit-flex-direction: row;
-  flex-direction: row;
-}
-
 .game-board .card-zoom-frame {
   position: absolute;
-  top: 0;
-  right: 0;
+  top: 45px;
+  right: 0px;
 }
 
 .draft-card-container {
+  margin: 10px;
   width: 100%;
 }
 
@@ -114,10 +122,30 @@
 .draft-card-container h5, .common-board h5 {
   text-align: center;
 }
+
 .draft-card {
   display: table;
   margin: auto;
 }
-.common-board .monuments div, .draft-card .card {
+
+.first-player, .first-player > img {
+  height: 40px;
+  width: 40px;
+}
+
+.first-player.large, .first-player.large > img,
+.first-player.x-large, .first-player.x-large > img {
+  height: 45px;
+  width: 45px;
+}
+
+.ruban {
+  height: 50px;
+  background-color: rgba(34,34,34,.8);
+  border-bottom : 1px solid #F5B041;
+  border-top : 1px solid #F5B041;
+}
+
+.ruban div {
   display: inline-block;
 }

@@ -37,7 +37,9 @@ export const register = (newUser) => {
       newUser.password
     ).then((resp)=>{
       firestore.collection('users').doc(resp.user.uid).set({
-        login: newUser.login
+        login: newUser.login,
+        layout: 'vertical',
+        cardSize: 'normal'
       });
       const initGame = {
         gameId: null,
@@ -122,9 +124,9 @@ export const saveProfile = (profile) => {
     firestore.collection('users').doc(userId).update({
       cardSize: profile.cardSize || 'normal'
     }).then(()=>{
-      dispatch({ type: 'REGISTER_SUCCESS' })
+      dispatch({ type: 'SAVE_PROFILE_SUCCESS' })
     }).catch((err)=>{
-      dispatch({ type: 'REGISTER_FAIL', err})
+      dispatch({ type: 'SAVE_PROFIE_FAIL', err})
     })
   }
 }

@@ -31,11 +31,22 @@ const authReducer = (state = initState, action) => {
         ...state,
         authError: action.err.message
       }
+    case 'SAVE_PROFILE_SUCCESS':
+      console.log('save profile success')
+      return {
+        ...state,
+        authError: null
+      }
+    case 'SAVE_PROFILE_FAIL':
+      console.log('save profile error')
+      return {
+        ...state,
+        authError: action.err.message
+      }
     case 'GET_ONLINE_USERS_SUCCESS':
       console.log('Get online users list success')
       return {
         ...state,
-        users: action.users,
         authError: null
       }
     case 'GET_ONLINE_USERS_ERROR':

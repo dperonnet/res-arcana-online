@@ -13,21 +13,32 @@ class Profile extends Component {
     super(props);
     this.state = {
       profile: {
-        cardSize: ''
+        cardSize: '',
+        layout: ''
       },
     }
   }
 
   static getDerivedStateFromProps(props, state) {
     let { profile } = state;
+    let newProfile = profile;
     if (profile.cardSize === '') {
-      return {
+      newProfile = {
+        ...profile,
         profile: {
           cardSize: props.profile.cardSize || 'normal',
         }
       }
     }
-    return state;
+    if (profile.layout === '') {
+      newProfile = {
+        ...profile,
+        profile: {
+          cardSize: props.profile.layout || 'vertical',
+        }
+      }
+    }
+    return {newProfile};
   }
 
   componentDidUpdate(prevProps) {
@@ -50,6 +61,14 @@ class Profile extends Component {
     this.setState({profile});
   }
 
+  handleFormChange = (event) => {
+    event.preventDefault();
+    const { name, value } = event.target;
+    const { profile } = this.state;
+    profile[name] = value;
+    this.setState({profile});
+  }
+
   handleSubmit = (event) => {
     event.preventDefault();
     this.props.saveProfile(this.state.profile);
@@ -58,6 +77,27 @@ class Profile extends Component {
 
   setError = (error) => {
     this.setState({error});
+  }
+
+  renderLayout = () => {
+    const { profile } = this.state;
+    return <Form.Group as={Row} controlId="layout">
+      <Form.Label column xs="2">Layout</Form.Label>
+      <Col xs="10">
+        <div className="align-radio">
+          <Form.Check inline type="radio" name="layout"
+            id="vertical" value='vertical' label="Vertical"
+            checked={profile.layout === 'vertical'}
+            onChange={this.handleFormChange}
+          />
+          <Form.Check inline type="radio" name="layout"
+            id="horizontal" value='horizontal' label="Horizontal"
+            checked={profile.layout === 'horizontal'}
+            onChange={this.handleFormChange}
+          />
+        </div>
+      </Col>
+    </Form.Group>
   }
 
   renderCard = (size) => {
@@ -93,6 +133,7 @@ class Profile extends Component {
         <div className="profil-panel">
           <h2>Profile</h2>
           <Form onSubmit={this.handleSubmit}>
+            {this.renderLayout()}
             <div className="card-size-selector">
               {this.renderCard('x-small')}
               {this.renderCard('small')}

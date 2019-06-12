@@ -30,9 +30,31 @@
   user-select: none;
 }
 
-.card-zoom-frame, .card-zoom-frame > img {
-  width: 300px;
-  height: 420px;
+@media (min-width: 680px) {
+  .card-zoom-frame, .card-zoom-frame > img {
+    height: 320px;
+    width: 228px;
+  }  
+  .large.card-zoom-frame, .large.card-zoom-frame > img {
+    height: 380px;
+    width: 270px;
+  }  
+  .x-large.card-zoom-frame, .x-large.card-zoom-frame > img {
+    height: 420px;
+    width: 300px;
+  }
+}
+
+@media (max-width: 680px) {
+  .card-zoom-frame, .card-zoom-frame > img {
+    height: 220px;
+    width: 157px;
+  }
+  .large.card-zoom-frame, .large.card-zoom-frame > img,
+  .x-large.card-zoom-frame, .x-large.card-zoom-frame > img {
+    height: 320px;
+    width: 228px;
+  }
 }
 
 /* Card row */
@@ -132,7 +154,7 @@
   z-index: 10;
 }
 
-.place-of-power, .magic-item, .card {
+.place-of-power, .magic-item, .monument, .card {
   display: inline-block;
 }
 

@@ -4,7 +4,7 @@ import './board.css';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
 import { firestoreConnect, isLoaded } from 'react-redux-firebase';
-import { clearZoom, endGame, zoomCard } from '../../../../store/actions/gameActions';
+import { clearZoom, zoomCard } from '../../../../store/actions/gameActions';
 import Card from '../../common/card/Card'
 import CardZoom from '../../common/card/CardZoom.js';
 import Chat from '../../common/chat/Chat';
@@ -20,40 +20,9 @@ class ResArcanaBoard extends Component {
     isMultiplayer: PropTypes.bool,
   };
 
-  pickArtefact = (cardId) => {
-    const { isActive, playerID } = this.props;
-    if (isActive) {
-      this.props.moves.draftCards(playerID, cardId);
-    }
-  };
-
-  getWinner = () => {
-    const { gameover } = this.props.ctx;
-    if (gameover) {
-      console.log("gameover.winner : ", gameover.winner);
-      return (
-        gameover.winner !== undefined ? (
-          gameover.winner.map(winner => {
-            return (
-              <div
-                key={winner.playerId}
-                id="winner">Winner is player {winner.playerId} with a score of {winner.score}
-              </div>
-            )
-          })
-        ) : (
-          <div id="winner">Draw!</div>
-        )
-      )
-    } else return null
-  }
-
-  handleEndGame = (e) => {
-    e.preventDefault();
-    const { endGame, currentGame } = this.props;
-    endGame(currentGame.gameId)
-  }
-
+  /**
+   * Return an array of players name with players id as index.
+   */
   getPlayersName = () => {
     const { ctx, game } = this.props;
     let playersName = [ctx.numPlayers];
@@ -63,6 +32,10 @@ class ResArcanaBoard extends Component {
     return playersName;
   }
 
+  /**
+   * Function used to render components:
+   * Artefacts, Mages, Magic Items, Monuments and Places of Power.
+   */
   renderComponent = (card, cardType, onClick, onMouseOver, onMouseOut) => {
     const { profile } = this.props;
     const src = require('../../../assets/image/components/' + card.type + '/' + card.class + '.png');
@@ -84,23 +57,118 @@ class ResArcanaBoard extends Component {
     );
   }
 
+  /**
+   * Render the component to Zoom.
+   */
   renderCardZoom = () => {
-    const { cardToZoom } = this.props
+    const { cardToZoom, profile } = this.props
     const src = require('../../../assets/image/components/' + cardToZoom.type + '/' + cardToZoom.class + '.png');
-    return <div className="card-zoom-frame">
+    return <div className={'card-zoom-frame ' + (profile.cardSize ? profile.cardSize : 'normal')}>
       <CardZoom src={src} show={true} alt={cardToZoom.name}  />
     </div>
   }
 
+  renderFirstPlayerToken = (flip) => {
+    const { profile } = this.props;
+    let passe = flip ? '_passe': '';
+    const src = require('../../../assets/image/components/premier_joueur' + passe + '.png');
+    return <div className={'first-player ' + (profile.cardSize ? profile.cardSize : 'normal')}>
+      <img src={src} alt={'First Player'}  />
+    </div>
+  }
+
+  /**
+   * Define the card to zoom on mouse over.
+   */
   onMouseOver = (card) => {
     if (card.type !== 'back')
     this.props.zoomCard(card);
   }
 
+  /**
+   * Hide the card to zoom on mouse out.
+   */
   onMouseOut = () => {
     this.props.clearZoom();
   }
 
+  /**
+   * Render the chat.
+   */
+  renderChat = () => {
+    const { chat, game } = this.props
+    return <Chat chat={chat} chatId={game.id} chatName={game.name + ' Chat'}/>
+  }
+
+  /**
+   * Render the common components for the game:
+   * Places of Power, Magic Items and Monuments.
+   */
+  renderCommonBoard = () => {
+    const { G } = this.props;
+    const placesOfPower = G.publicData.placesOfPowerInGame.map((pop)=>{
+      return this.renderComponent(pop, 'place-of-power', null, () => this.onMouseOver(pop), () => this.onMouseOut(pop))
+    })
+    const magicItems = G.publicData.magicItems.map((magicItem)=>{
+      return this.renderComponent(magicItem, 'magic-item', null, () => this.onMouseOver(magicItem), () => this.onMouseOut(magicItem))
+    })
+    const monuments = G.publicData.monumentsRevealed.map((monument)=>{
+      return this.renderComponent(monument, 'card', null, () => this.onMouseOver(monument), () => this.onMouseOut(monument))
+    })
+    const monumentBack = {
+      class: 'back_monument',
+      id: 'back_monument',
+      name: 'Monument',
+      type: 'back',
+    }
+    const monumentsStack = this.renderComponent(monumentBack, 'card');
+    return <>
+      <div className="components">
+        <h5>Places of power ({G.publicData.placesOfPowerInGame.length} left)</h5>
+        <div className="place-of-power-container">
+          {placesOfPower}
+        </div>
+      </div>
+      <div className="components">
+        <h5>Magic Items</h5>
+        <div className="magic-item-container">
+          {magicItems}
+        </div>
+      </div>
+      <div className="components">
+        <h5>Monuments</h5>
+        <div className="monument-container">
+          {monumentsStack}
+          <div className="monument">{monuments}</div>
+        </div>
+      </div>
+    </>
+  }
+
+  /**
+   * This function render the board during Draft Phase.
+   */
+  renderDraftBoard = () => {
+    let playerPickBoard = this.renderPickBoard();
+    let playerBoard = this.renderPlayerDraftBoard();
+    let othersBoard = this.renderOthersDraftBoard();
+    return <>
+      <div className='draft-card-container'>
+        <h5>Draft Phase</h5>
+        {playerPickBoard}
+      </div>
+      <div>
+        {playerBoard}
+        {othersBoard}
+      </div>
+    </>
+  }
+  
+  /**
+   * Render the board during Draft Phase.
+   * This board is player specific and will not be available for spectators.
+   * The board show draft cards when player have to pick a card.
+   */
   renderPickBoard = () => {
     const { G, playerID, profile } = this.props;
     if (!Number.isInteger(parseInt(playerID))) return null;
@@ -142,6 +210,20 @@ class ResArcanaBoard extends Component {
     </>
   }
 
+  /**
+   * This action is used to select cards during draft phase.
+   */
+  pickArtefact = (cardId) => {
+    const { isActive, playerID } = this.props;
+    if (isActive) {
+      this.props.moves.pickArtefact(playerID, cardId);
+    }
+  };
+
+  /**
+   * This board render the cards selected by the player during Draft Phase.
+   * This board is player specific and will not be available for spectators.
+   */
   renderPlayerDraftBoard = () => {
     const { auth, game, G, playerID, profile } = this.props;
     if (!Number.isInteger(parseInt(playerID))) return null;
@@ -152,14 +234,25 @@ class ResArcanaBoard extends Component {
       return this.renderComponent(card, 'card', null, () => this.onMouseOver(card), () => this.onMouseOut(card));
     })
 
-    return <div>
-      <div>{playerName}</div>
+    const mages = G.players[playerID].mages.map((card)=>{
+      return this.renderComponent(card, 'card', null, () => this.onMouseOver(card), () => this.onMouseOut(card));
+    })
+
+    const firstPlayer = G.publicData.firstPlayer === playerID ? this.renderFirstPlayerToken() : null;
+    return <>
+      <div className="ruban">
+        <div className="player-name">{playerName}</div><div>{firstPlayer}</div>
+      </div>
       <div className={'artefacts card-row ' + profile.cardSize}>
+        {mages}
         {deck}
       </div>
-    </div>
+    </>
   }
 
+  /**
+   * This board render the back of the cards selected by others player during Draft Phase.
+   */
   renderOthersDraftBoard = () => {
     const { ctx, G, game, playerID, profile } = this.props;
     const othersNextId = Object.keys(G.publicData.players).filter((id) => {
@@ -174,21 +267,36 @@ class ResArcanaBoard extends Component {
     const boards = othersId.map((id) =>{
       const playerName = playersName[parseInt(id)];
       const deckSize = G.publicData.players[id].deckSize
+      
+      const cardmage = {
+        class: 'back_mage',
+        id: 'back_mage',
+        name: 'Mage',
+        type: 'back',
+      }
+      let mages = []
+      mages.push(this.renderComponent({...cardmage, id: 'back_mage_1'}, 'card'));
+      mages.push(this.renderComponent({...cardmage, id: 'back_mage_2'}, 'card'));
+
+      const cardArtefact = {
+        class: 'back_artefact',
+        id: 'back_artefact',
+        name: 'Artefact',
+        type: 'back',
+      }
       let deck = []
       for(let i = 0; i< deckSize; i++) {
-        const card = {
-          class: 'back_artefact',
-          id: id+'_'+i+'back_artefact',
-          name: 'Artefact',
-          type: 'back',
-        }
-        deck.push(this.renderComponent(card, 'card'));
+        cardArtefact.id = id + '_' + i + '_back_artefact'
+        deck.push(this.renderComponent(cardArtefact, 'card'));
       }
+
+      const firstPlayer = G.publicData.firstPlayer === id ? this.renderFirstPlayerToken() : null;
+
       return (
         <div key={id}>
-          <div>{playerName}</div>
+          <div>{playerName}{firstPlayer}</div>
           <div className={'card-row ' + profile.cardSize}>
-            {deck}
+            {mages}{deck}
           </div>
         </div>
       );
@@ -199,87 +307,11 @@ class ResArcanaBoard extends Component {
   }
 
   renderPlayerPlayBoard = () => {
-    return
+    return null
   }
 
   renderOthersPlayBoard = () => {
-    const { auth, G, ctx, playerID, game, gameId } = this.props;
-
-    const globalArtifacts = G.artefacts && G.artefacts.map(artefact => {
-      return this.renderCard(artefact, () => { this.pickArtefact(artefact.name)})
-    });
-    const playerArtifacts = G.artefactsInPlay && G.artefactsInPlay[playerID] && G.artefactsInPlay[playerID].map(artefact => {
-      return this.renderCard(artefact)
-    });
-
-    let artefactsAvailable =
-      <div className="flex-column">
-        <div className="artefacts">{globalArtifacts}</div>
-      </div>
-
-    let playerArtefacts =
-      <div className="flex-column">
-        <div className="artefacts">{playerArtifacts}</div>
-      </div>
-
-    const playerName = game.players[auth.uid] ? game.players[auth.uid].name : 'spectator';
-
-    return <>
-      <div>{playerName}</div>
-      {artefactsAvailable}
-      {playerArtefacts}
-    </>
-  }
-
-  renderDraftBoard = () => {
-    let playerPickBoard = this.renderPickBoard();
-    let playerBoard = this.renderPlayerDraftBoard();
-    let othersBoard = this.renderOthersDraftBoard();
-    return <>
-      <div className='draft-card-container'>
-        <h5>Draft Phase</h5>
-        {playerPickBoard}
-      </div>
-      <div>
-        {playerBoard}
-        {othersBoard}
-      </div>
-    </>
-  }
-  
-  renderCommonBoard = () => {
-    const { G } = this.props;
-    const placesOfPower = G.publicData.placesOfPowerInGame.map((pop)=>{
-      return this.renderComponent(pop, 'place-of-power', null, () => this.onMouseOver(pop), () => this.onMouseOut(pop))
-    })
-    const magicItems = G.publicData.magicItems.map((magicItem)=>{
-      return this.renderComponent(magicItem, 'magic-item', null, () => this.onMouseOver(magicItem), () => this.onMouseOut(magicItem))
-    })
-    const monuments = G.publicData.monumentsRevealed.map((monument)=>{
-      return this.renderComponent(monument, 'card', null, () => this.onMouseOver(monument), () => this.onMouseOut(monument))
-    })
-    const monumentBack = {
-      class: 'back_monument',
-      id: 'back_monument',
-      name: 'Monument',
-      type: 'back',
-    }
-    const monumentsStack = this.renderComponent(monumentBack, 'card');
-    return <>
-      <div>
-        <h5>Places of power ({G.publicData.placesOfPowerInGame.length} left)</h5>
-        {placesOfPower}
-      </div>
-      <div>
-        <h5>Magic Items</h5>
-        {magicItems}
-      </div>
-      <div className="monuments">
-        <h5>Monuments</h5>
-        <div>{monumentsStack}</div>
-        <div>{monuments}</div>
-      </div>
-    </>
+    return null
   }
 
   renderPlayBoard = () => {
@@ -290,11 +322,6 @@ class ResArcanaBoard extends Component {
     </>
   }
 
-  renderChat = () => {
-    const { chat, game } = this.props
-    return <Chat chat={chat} chatId={game.id} chatName={game.name + ' Chat'}/>
-  }
-
   render() {
     const { G, ctx, playerID, game, cardToZoom, profile } = this.props;
     console.log('G',G);
@@ -303,8 +330,6 @@ class ResArcanaBoard extends Component {
       return <div className="loading-panel align-center"><img className="loader" alt="Loading..."/>Loading...</div>
     }
 
-    let winner = this.getWinner();
-    
     let board = null;
 
     switch(G.phase) {
@@ -316,20 +341,19 @@ class ResArcanaBoard extends Component {
         board = this.renderPlayBoard();
     }
     const sizeSetting = profile && profile.cardSize || 'normal';
-    return <>
+    const layoutSetting = profile && profile.layout || 'vertical';
+    return <div className={'board-'+layoutSetting}>
       <div className={'common-board ' + sizeSetting}>
         {this.renderCommonBoard()}
       </div>
       <div className="board">
         {board}
-        {winner}
-        {/*<Button variant="secondary" size="sm" onClick={(event) => this.handleEndGame(event)}>Game Over</Button>*/}
       </div>
       <div className="right-panel">
         {cardToZoom && this.renderCardZoom()}
         {this.renderChat()}
       </div>
-    </>
+    </div>
   }
 }
 
@@ -347,7 +371,6 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => {
   return {
     clearZoom: () => dispatch(clearZoom()),
-    endGame: (gameId) => dispatch(endGame(gameId)),
     zoomCard: (card) => dispatch(zoomCard(card)),
   }
 }

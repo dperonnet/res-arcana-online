@@ -81,7 +81,7 @@ const initPlayPhase = (G, ctx) => {
 }
 
 // MOVES
-const draftCards = (G, ctx, playerID, cardId) => {
+const pickArtefact = (G, ctx, playerID, cardId) => {
   const selectedCard = copy(G.players[playerID].draftCards.filter((card) => {
     return card.id === cardId
   })[0])
@@ -96,7 +96,7 @@ const draftCards = (G, ctx, playerID, cardId) => {
   return G
 }
 
-const pickArtefact = (G, ctx, artefactId) => {
+const playArtefact = (G, ctx, artefactId) => {
   let artefactIndex = G.artefacts.findIndex(
     artefact => artefact.id === artefactId
   );
@@ -106,8 +106,12 @@ const pickArtefact = (G, ctx, artefactId) => {
   G.artefactsInPlay[ctx.currentPlayer].push(artefact);
 }
 
+const pickMagicItem = (G, ctx, magicItemId) => {
+  
+}
+
 // SETUP
-const getInitialState = (ctx)  => {
+const getInitialState = (ctx) => {
   const G = {
     secret: {
       artefactsInGameStack: [],
@@ -154,7 +158,29 @@ const getInitialState = (ctx)  => {
   let monumentsInGameStack = ctx.random.Shuffle(components.monument);
   G.publicData.monumentsRevealed = monumentsInGameStack.slice(0, 2)
   G.publicData.monumentsStack = monumentsInGameStack.splice(0, 2);
+  
+  // Deal 2 mages to players
+  let mages = ctx.random.Shuffle(components.mage);
+  for (let i=0; i<ctx.numPlayers; i++) {
+    G.players[i].mages = mages.slice(0, 2)
+    mages.splice(0, 2);
+  }
+
+  // Define the first player
+  G.publicData.firstPlayer = (ctx.random.Die(ctx.numPlayers) -1).toString();
+
   return G;
+}
+
+const getTurnOrder = (G, ctx) => {
+  let firstPlayer = G.publicData.firstPlayer;
+  let order = [];
+  for (let i = 0; i < ctx.numPlayers; i++ ) {
+    let nextPlayerId = (parseInt(firstPlayer) + i) % ctx.numPlayers;
+    order.push((nextPlayerId).toString())
+  }
+  console.log('order',order);
+  return order
 }
 
 // GAME
@@ -164,8 +190,9 @@ export const ResArcanaGame = Game({
   setup: getInitialState,
 
   moves: {
-    draftCards: draftCards,
     pickArtefact: pickArtefact,
+    playArtefact: playArtefact,
+    pickMagicItem: pickMagicItem,
     pass: G => {
       G.passed = true;
     },
@@ -179,15 +206,27 @@ export const ResArcanaGame = Game({
     phases: {
       draftPhase: {
         onPhaseBegin: (G, ctx) => initDraftPhase(G, ctx,'1st'),
-        allowedMoves: ['draftCards'],
+        allowedMoves: ['pickArtefact'],
         turnOrder: TurnOrder.ANY_ONCE,
         endPhaseIf: allCardsDealt
       },
+      pickMagicItem: {
+        allowedMoves: ['pickMagicItem'],
+        turnOrder: {
+          playOrder: (G, ctx) => getTurnOrder(G, ctx),
+          first: (G, ctx) => G.publicData.firstPlayer,
+          next: (G, ctx) => (ctx.playOrderPos + 1) % ctx.numPlayers,
+        },
+      },
       playPhase: {
         onPhaseBegin: initPlayPhase,
-        allowedMoves: ['pickArtefact'],
+        allowedMoves: ['playArtefact'],
         endPhaseIf: G => G.passed,
-        next: 'pickArtefact',
+        turnOrder: {
+          playOrder: (G, ctx) => getTurnOrder(G, ctx),
+          first: (G, ctx) => G.publicData.firstPlayer,
+          next: (G, ctx) => (ctx.playOrderPos + 1) % ctx.numPlayers,
+        },
       }
     },
   },

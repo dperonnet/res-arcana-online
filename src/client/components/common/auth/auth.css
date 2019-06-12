@@ -95,3 +95,7 @@ label {
 .card.active {
   border : 2px solid #F5B041;
 }
+
+.align-radio {
+  padding-top: calc(.375rem + 1px);
+}
