@@ -46,7 +46,7 @@
 }
 
 .right-panel .chat-container {
-  width: 300px;
+  width: 250px;
 }
 
 .right-panel .chat-panel {
@@ -93,7 +93,7 @@
 }
 
 .common-board.normal, .common-board.large {
-  width: 328px;
+  width: 340px;
 }
 
 .common-board.x-large {
@@ -107,15 +107,15 @@
 }
 
 .draft-card-container {
-  margin: 10px;
   width: 100%;
 }
 
 .draft-card-panel {
   display: block;
-  margin: 0 auto;
+  margin: 15px auto;
+  padding: 8px;
+  max-width: 720px;
   background-color: rgba(34,34,34,.8);
-  padding: 20px;
   border : 1px solid #F5B041;
   min-width: 320px;
 }
@@ -126,6 +126,7 @@
 .draft-card {
   display: table;
   margin: auto;
+  text-align: center;
 }
 
 .first-player, .first-player > img {
@@ -148,4 +149,8 @@
 
 .ruban div {
   display: inline-block;
+}
+
+.hidden {
+  visibility: hidden;
 }

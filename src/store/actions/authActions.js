@@ -122,7 +122,8 @@ export const saveProfile = (profile) => {
     const userId = getState().firebase.auth.uid;
 
     firestore.collection('users').doc(userId).update({
-      cardSize: profile.cardSize || 'normal'
+      cardSize: profile.cardSize || 'normal',
+      layout: profile.layout || 'vertical'
     }).then(()=>{
       dispatch({ type: 'SAVE_PROFILE_SUCCESS' })
     }).catch((err)=>{

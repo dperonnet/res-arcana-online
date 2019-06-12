@@ -1,6 +1,7 @@
 const initState = {
   cardToZoom: undefined,
-  games: []
+  games: [],
+  selectedCard: undefined
 }
 
 const gameReducer = (state = initState, action) => {
@@ -31,9 +32,13 @@ const gameReducer = (state = initState, action) => {
     case 'GAME_OVER':
       debug && console.log('end game ', action.gameId);
       return state;
+    case 'SELECT_CARD':
+      return Object.assign({}, state, {
+        selectedCard: action.card
+      });
     case 'ZOOM_CARD':
       return Object.assign({}, state, {
-          zoomCard: action.card
+        zoomCard: action.card
       });
     case 'CLEAR_ZOOM':
       return Object.assign({}, state, {

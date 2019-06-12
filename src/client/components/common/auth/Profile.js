@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Button, Col, Container, Form, Row } from 'react-bootstrap'
+import { Button, Col, Form, Row } from 'react-bootstrap'
 import './auth.css';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
@@ -21,24 +21,21 @@ class Profile extends Component {
 
   static getDerivedStateFromProps(props, state) {
     let { profile } = state;
-    let newProfile = profile;
+    console.log('state',state)
     if (profile.cardSize === '') {
-      newProfile = {
+      profile = {
         ...profile,
-        profile: {
-          cardSize: props.profile.cardSize || 'normal',
-        }
+        cardSize: props.profile.cardSize || 'normal',
       }
     }
     if (profile.layout === '') {
-      newProfile = {
+      profile = {
         ...profile,
-        profile: {
-          cardSize: props.profile.layout || 'vertical',
-        }
+        layout: props.profile.layout || 'vertical',
       }
     }
-    return {newProfile};
+    console.log('profile',profile)
+    return {profile};
   }
 
   componentDidUpdate(prevProps) {
@@ -62,7 +59,6 @@ class Profile extends Component {
   }
 
   handleFormChange = (event) => {
-    event.preventDefault();
     const { name, value } = event.target;
     const { profile } = this.state;
     profile[name] = value;

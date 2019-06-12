@@ -341,6 +341,13 @@ export const getComponents = () => {
   }
 }
 
+export function selectCard(card) {
+  return {
+      type: 'SELECT_CARD',
+      card: card
+  };
+}
+
 export function zoomCard(card) {
   return {
       type: 'ZOOM_CARD',
