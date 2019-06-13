@@ -30,31 +30,9 @@
   user-select: none;
 }
 
-@media (min-width: 680px) {
-  .card-zoom-frame, .card-zoom-frame > img {
-    height: 320px;
-    width: 228px;
-  }  
-  .large.card-zoom-frame, .large.card-zoom-frame > img {
-    height: 380px;
-    width: 270px;
-  }  
-  .x-large.card-zoom-frame, .x-large.card-zoom-frame > img {
-    height: 420px;
-    width: 300px;
-  }
-}
-
-@media (max-width: 680px) {
-  .card-zoom-frame, .card-zoom-frame > img {
-    height: 220px;
-    width: 157px;
-  }
-  .large.card-zoom-frame, .large.card-zoom-frame > img,
-  .x-large.card-zoom-frame, .x-large.card-zoom-frame > img {
-    height: 320px;
-    width: 228px;
-  }
+.card-zoom-frame, .card-zoom-frame > img {
+  height: 320px;
+  width: 228px;
 }
 
 /* Card row */
@@ -146,6 +124,98 @@
   width: 130px;
 }
 
+/* START Tapped components size */
+
+/* Card size */
+.card.x-small.vertical.tapped {
+  width: 54.6px;
+  height: 39px;
+}
+
+.card.small.vertical.tapped {
+  width: 91px;
+  height: 65px;
+  top: -13px;
+  left: 13px;
+}
+
+.card.normal.vertical.tapped {
+  width: 127.4px;
+  height: 91px;
+}
+
+.card.large.vertical.tapped {
+  width: 182px;
+  height: 130px;
+}
+
+.card.x-large.vertical.tapped {
+  width: 220px;
+  height: 157px;
+}
+
+/* Place of Power Size */
+.place-of-power.x-small.vertical.tapped, .place-of-power.small.vertical.tapped {
+  width: 91px;
+  height: 65px;
+  top: -13px;
+  left: 13px;
+}
+
+.place-of-power.normal.vertical.tapped {
+  width: 127.4px;
+  height: 91px;
+}
+
+.place-of-power.large.vertical.tapped {
+  width: 182px;
+  height: 130px;
+}
+
+.place-of-power.x-large.vertical.tapped {
+  width: 220px;
+  height: 157px;
+}
+
+/* Magic Item Size */
+.magic-item.x-small.vertical.tapped, .magic-item.small.vertical.tapped {
+  width: 54.6px;
+  height: 39px;
+  top: -8px;
+  left: 8px;
+}
+
+.magic-item.normal.vertical.tapped {
+  width: 91px;
+  height: 65px;
+  top: -13px;
+  left: 13px;
+}
+
+.magic-item.large.vertical.tapped {
+  width: 127.4px;
+  height: 91px;
+}
+
+.magic-item.x-large.vertical.tapped {
+  width: 182px;
+  height: 130px;
+}
+
+.tapped img {
+  -webkit-transform: rotate(90deg);
+  -moz-transform: rotate(90deg);
+  -o-transform: rotate(90deg);
+  -ms-transform: rotate(90deg);
+  transform: rotate(90deg);
+  top: -18px;
+  left: 18px;
+}
+.magic-item.tapped img {
+}
+/* END Tapped Component Size */
+
+
 .card, .place-of-power, .magic-item {
   border-radius: 8px;
   background-color: transparent;
@@ -156,6 +226,7 @@
 
 .place-of-power, .magic-item, .monument, .card {
   display: inline-block;
+  border: none;
 }
 
 div.place-of-power, div.magic-item, div.card {

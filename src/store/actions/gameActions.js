@@ -360,3 +360,10 @@ export function clearZoom() {
       type: 'CLEAR_ZOOM'
   };
 }
+
+export function tapComponent(card) {
+  return {
+    type: 'TAP_COMPONENT',
+    card: card
+  }
+}

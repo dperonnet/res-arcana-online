@@ -1,7 +1,8 @@
 const initState = {
   cardToZoom: undefined,
   games: [],
-  selectedCard: undefined
+  selectedCard: undefined,
+  tappedComponents: []
 }
 
 const gameReducer = (state = initState, action) => {
@@ -43,6 +44,18 @@ const gameReducer = (state = initState, action) => {
     case 'CLEAR_ZOOM':
       return Object.assign({}, state, {
         zoomCard: undefined
+      });
+    case 'TAP_COMPONENT':
+      const { tappedComponents } = state;
+      console.log('card.id', action.card.id)
+      let index = tappedComponents.indexOf(action.card.id)
+      if (index >= 0) {
+        tappedComponents.splice(index, 1);
+      } else {
+        tappedComponents.push(action.card.id)
+      }
+      return Object.assign({}, state, {
+        tappedComponents
       });
     default:
       return state;

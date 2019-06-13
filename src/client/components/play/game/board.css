@@ -112,11 +112,10 @@
 
 .draft-card-panel {
   display: block;
-  margin: 15px auto;
+  margin: 0 auto;
   padding: 8px;
-  max-width: 720px;
   background-color: rgba(34,34,34,.8);
-  border : 1px solid #F5B041;
+  border-bottom : 1px solid #F5B041;
   min-width: 320px;
 }
 .draft-card-container h5, .common-board h5 {
@@ -143,8 +142,9 @@
 .ruban {
   height: 50px;
   background-color: rgba(34,34,34,.8);
-  border-bottom : 1px solid #F5B041;
   border-top : 1px solid #F5B041;
+  background-image: url("../../../assets/image/ruban3.png");
+  background-size: contain;
 }
 
 .ruban div {
@@ -153,4 +153,8 @@
 
 .hidden {
   visibility: hidden;
+}
+
+.info {
+  text-align: center;
 }

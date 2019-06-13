@@ -5,7 +5,7 @@ import './board.css';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
 import { firestoreConnect, isLoaded } from 'react-redux-firebase';
-import { clearZoom, selectCard, zoomCard } from '../../../../store/actions/gameActions';
+import { clearZoom, selectCard, tapComponent, zoomCard } from '../../../../store/actions/gameActions';
 import Card from '../../common/card/Card'
 import CardZoom from '../../common/card/CardZoom.js';
 import Chat from '../../common/chat/Chat';
@@ -34,18 +34,29 @@ class ResArcanaBoard extends Component {
   }
 
   /**
+   * Get the name of the next player.
+   */
+  getNextPlayer = () => {
+    const { G, ctx, playerID } = this.props;    
+    const nextPlayerID = ((G.draftWay === 'toLeftPlayer' ? 1 : ctx.numPlayers - 1) + parseInt(playerID)) % ctx.numPlayers
+    return this.getPlayersName()[nextPlayerID]
+  }
+
+  /**
    * Function used to render components:
    * Artefacts, Mages, Magic Items, Monuments and Places of Power.
    */
   renderComponent = (card, cardType, handleClick, handleDoubleClick, handleMouseOver, handleMouseOut) => {
-    const { profile, selectedCard } = this.props;
+    const { profile, selectedCard, tappedComponents } = this.props;
     const src = require('../../../assets/image/components/' + card.type + '/' + card.class + '.png');
     const cardSize = (profile.cardSize ? profile.cardSize : ' normal ');
     const active = selectedCard && selectedCard.id === card.id ? ' active ' : '';
+    console.log('tappedComponents',tappedComponents)
+    const tapped = tappedComponents.indexOf(card.id) >= 0 ? ' tapped ' : '';
     return (
       <div
         key={card.id}
-        className={ cardSize + ' vertical ' + cardType + active }
+        className={ cardSize + ' vertical ' + cardType + active + tapped }
         onClick={handleClick}
         onDoubleClick={handleDoubleClick}
         onMouseOver={handleMouseOver}
@@ -79,6 +90,10 @@ class ResArcanaBoard extends Component {
     return <div className={'first-player ' + (profile.cardSize ? profile.cardSize : 'normal')}>
       <img src={src} alt={'First Player'}  />
     </div>
+  }
+
+  tapComponent = (card) => {
+    this.props.tapComponent(card);
   }
 
   handleClick = (card) => {
@@ -115,13 +130,13 @@ class ResArcanaBoard extends Component {
   renderCommonBoard = () => {
     const { G } = this.props;
     const placesOfPower = G.publicData.placesOfPowerInGame.map((pop)=>{
-      return this.renderComponent(pop, 'place-of-power', null, null,() => this.handleMouseOver(pop), () => this.handleMouseOut(pop))
+      return this.renderComponent(pop, 'place-of-power', () => this.tapComponent(pop), null,() => this.handleMouseOver(pop), () => this.handleMouseOut(pop))
     })
     const magicItems = G.publicData.magicItems.map((magicItem)=>{
-      return this.renderComponent(magicItem, 'magic-item', null, null, () => this.handleMouseOver(magicItem), () => this.handleMouseOut(magicItem))
+      return this.renderComponent(magicItem, 'magic-item', () => this.tapComponent(magicItem), null, () => this.handleMouseOver(magicItem), () => this.handleMouseOut(magicItem))
     })
     const monuments = G.publicData.monumentsRevealed.map((monument)=>{
-      return this.renderComponent(monument, 'card', null, null, () => this.handleMouseOver(monument), () => this.handleMouseOut(monument))
+      return this.renderComponent(monument, 'card', () => this.tapComponent(monument), null, () => this.handleMouseOver(monument), () => this.handleMouseOut(monument))
     })
     const monumentBack = {
       class: 'back_monument',
@@ -162,8 +177,8 @@ class ResArcanaBoard extends Component {
     let othersBoard = this.renderOthersDraftBoard();
     return <>
       <div className="draft-card-container">
-        {playerBoard}
         {playerPickBoard}
+        {playerBoard}
         {othersBoard}
       </div>
     </>
@@ -175,9 +190,12 @@ class ResArcanaBoard extends Component {
    * The board show draft cards when player have to pick a card.
    */
   renderPickBoard = () => {
-    const { G, playerID, profile, selectedCard } = this.props;
+    const { auth, game, G, playerID, profile, selectedCard } = this.props;
     if (!Number.isInteger(parseInt(playerID))) return null;
     
+    const playerName = game.players[auth.uid] ? game.players[auth.uid].name : 'spectator';
+    const firstPlayer = G.publicData.firstPlayer === playerID ? this.renderFirstPlayerToken() : null;
+
     const draftCards = G.players[playerID] && G.players[playerID].draftCards.map((card) => {
       return this.renderComponent(card, 'card', () => this.handleClick(card), () => this.pickArtefact(card.id), () => this.handleMouseOver(card), () => this.handleMouseOut(card))
     });
@@ -208,8 +226,11 @@ class ResArcanaBoard extends Component {
     const lastDraftCard = G.players[playerID].draftCards.length === 1
     const confirmButton = <Button variant="primary" size="sm" onClick={() => this.pickArtefact(selectedCard.id)} disabled={!selectedCard}>Confirm</Button>
     const cancelButton = !lastDraftCard && <Button variant={!selectedCard ? 'primary' : 'secondary'} size="sm" onClick={() => this.handleClick(undefined)} disabled={!selectedCard}>Cancel</Button>
-    
+    const nextPlayer = this.getNextPlayer();
     return <>
+      <div className="ruban">
+        <div className="player-name">{playerName}</div><div>{firstPlayer}</div>
+      </div>
       <div className='draft-card-panel'>
         <h5>Draft Phase - Artefact selection {G.players[playerID].deck.length}/8</h5>
         <div className={'draft-card card-row ' + profile.cardSize}>
@@ -220,9 +241,9 @@ class ResArcanaBoard extends Component {
             <h5>{waitingFor}</h5> 
           : 
             selectedCard ?
-            <h5>Keep {selectedCard.name} {!lastDraftCard && 'and pass the rest to <TODO> ?'}</h5>
+            <div class="info">Keep {selectedCard.name} {!lastDraftCard && 'and pass the rest to '  + nextPlayer + ' ?'}</div>
           :
-            <h5>Select an artefact to add into your deck.</h5>
+            <div class="info">Select an artefact to add into your deck.</div>
         }
         {!deckFull && <div className={waitingWithoutCard ? 'game-button hidden': 'game-button'}>
           {confirmButton} {cancelButton}
@@ -247,10 +268,8 @@ class ResArcanaBoard extends Component {
    * This board is player specific and will not be available for spectators.
    */
   renderPlayerDraftBoard = () => {
-    const { auth, game, G, playerID, profile } = this.props;
+    const { G, playerID, profile } = this.props;
     if (!Number.isInteger(parseInt(playerID))) return null;
-
-    const playerName = game.players[auth.uid] ? game.players[auth.uid].name : 'spectator';
 
     const deck = G.players[playerID].deck.map((card)=>{
       return this.renderComponent(card, 'card', null, null, () => this.handleMouseOver(card), () => this.handleMouseOut(card));
@@ -260,11 +279,7 @@ class ResArcanaBoard extends Component {
       return this.renderComponent(card, 'card', null, null, () => this.handleMouseOver(card), () => this.handleMouseOut(card));
     })
 
-    const firstPlayer = G.publicData.firstPlayer === playerID ? this.renderFirstPlayerToken() : null;
     return <>
-      <div className="ruban">
-        <div className="player-name">{playerName}</div><div>{firstPlayer}</div>
-      </div>
       <div className={'artefacts card-row ' + profile.cardSize}>
         {mages}
         {deck}
@@ -389,6 +404,7 @@ const mapStateToProps = (state) => {
     game: state.firestore.ordered.game && state.firestore.ordered.game[0],
     profile: state.firebase.profile,
     selectedCard: state.game.selectedCard,
+    tappedComponents: state.game.tappedComponents,
   }
 }
 
@@ -396,6 +412,7 @@ const mapDispatchToProps = (dispatch) => {
   return {
     clearZoom: () => dispatch(clearZoom()),
     selectCard: (card) => dispatch(selectCard(card)),
+    tapComponent: (card) => dispatch(tapComponent(card)),
     zoomCard: (card) => dispatch(zoomCard(card)),
   }
 }
