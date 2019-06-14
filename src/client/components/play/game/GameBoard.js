@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { Container } from 'react-bootstrap';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
 import { firestoreConnect, isLoaded } from 'react-redux-firebase';

@@ -53,3 +53,11 @@ body {
   margin-top: -10px;
   margin-right: 7px;
 }
+
+.align-center {
+  text-align: center;
+}
+
+.hidden {
+  visibility: hidden;
+}

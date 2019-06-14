@@ -120,7 +120,7 @@ class Profile extends Component {
   }
 
   render() {
-    const { auth, profile } = this.props;
+    const { auth } = this.props;
     
     if(!auth.uid) return <Redirect to='/signIn'/>
 
@@ -130,14 +130,16 @@ class Profile extends Component {
           <h2>Profile</h2>
           <Form onSubmit={this.handleSubmit}>
             {this.renderLayout()}
-            <div className="card-size-selector">
-              {this.renderCard('x-small')}
-              {this.renderCard('small')}
-              {this.renderCard('normal')}
-            </div>
-            <div className="card-size-selector">
-              {this.renderCard('large')}
-              {this.renderCard('x-large')}
+            <div className="align-center">
+              <div className="card-size-selector">
+                {this.renderCard('x-small')}
+                {this.renderCard('small')}
+                {this.renderCard('normal')}
+              </div>
+              <div className="card-size-selector">
+                {this.renderCard('large')}
+                {this.renderCard('x-large')}
+              </div>
             </div>
             <div className="game-button">
               <Button type="submit" variant="secondary" size="sm">Save</Button>

@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { Container } from 'react-bootstrap';
 import SideBar from './sidebar/SideBar';
 import Chat from '../common/chat/Chat';
 import './dashboard.css';

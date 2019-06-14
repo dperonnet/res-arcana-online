@@ -123,38 +123,121 @@
 }
 
 .draft-card {
-  display: table;
   margin: auto;
   text-align: center;
 }
 
-.first-player, .first-player > img {
-  height: 40px;
-  width: 40px;
-}
-
-.first-player.large, .first-player.large > img,
-.first-player.x-large, .first-player.x-large > img {
-  height: 45px;
-  width: 45px;
+.info {
+  text-align: center;
 }
 
 .ruban {
   height: 50px;
-  background-color: rgba(34,34,34,.8);
-  border-top : 1px solid #F5B041;
-  background-image: url("../../../assets/image/ruban3.png");
-  background-size: contain;
+  line-height: 50px;
+  background-color: rgba(63,46,33,.8);
+  background-blend-mode: luminosity;
+  background-image: url("../../../assets/image/ruban.png");
+  background-repeat: repeat-x;
+  background-size: 920px 50px;
+  white-space: nowrap;
 }
 
-.ruban div {
+.ruban > div {
   display: inline-block;
 }
 
-.hidden {
-  visibility: hidden;
+.player-name {
+  text-align: center;
+  font-size: larger;
+  padding-left: 4px;
+  padding-right: 4px;
 }
 
-.info {
+.first-player {
+  margin-left: 20px;
+  width: 44px;
+}
+.first-player > img {
+  height: 40px;
+  width: 40px;
+  position: relative;
+  top: -3px;
+  left: 2px;
+}
+
+.player-pool {
+  margin-left: 20px;
+}
+
+.essence {
+  display: inline-block;
+  color: ghostwhite;
+  font-weight: bold;
+  font-size: large;
   text-align: center;
+  background-image: url("../../../assets/image/essences.png");
+  background-repeat: no-repeat;
+  background-size: 220px;
+  height: 50px;
+  width: 40px;
+  margin-left: 8px;
+  padding-top: 2px;
+  vertical-align: top;
+}
+
+.essence.elan {
+  background-position: 4px 5px;
+}
+
+.essence.life {
+  background-position: -44px 5px;
+}
+
+.essence.calm {
+  background-position: -91px 5px;
+}
+
+.essence.death {
+  background-position: -138px 5px;
+}
+
+.essence.gold {
+  background-position: -184px 5px;
+}
+
+.any {
+background-position: -23px -81px;
+}
+
+.anyButGold {
+text-align: left;
+background-position: -74px -81px;
+width: 61px;
+}
+
+.anyButDeathGold {
+  text-align: left;
+background-position: -151px -81px;
+width: 75px;
+}
+
+.essence-count {
+  margin-left: -3px;
+}
+
+.cards-in-hand {
+  display: inline-block;
+  color: ghostwhite;
+  font-weight: bold;
+  font-size: large;
+  text-align: center;
+  background-image: url("../../../assets/image/cards.png");
+  background-repeat: no-repeat;
+  background-size: 34px;
+  height: 50px;
+  width: 40px;
+  margin-left: 20px;
+  padding-top: 2px;
+  vertical-align: top;
+  background-position: 0 5px;
 }

@@ -2,9 +2,7 @@ import React, { Component } from 'react';
 import { Button, Form, InputGroup } from 'react-bootstrap';
 import './chat.css';
 import Message from './Message';
-import { compose } from 'redux';
 import { connect } from 'react-redux';
-import { firestoreConnect } from 'react-redux-firebase';
 import { createChat, sendMessage } from '../../../../store/actions/chatActions';
 
 class Chat extends Component {

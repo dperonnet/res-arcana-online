@@ -3,25 +3,6 @@ import { GameComponents } from '../../../../database'
 import logger from 'redux-logger';
 import { applyMiddleware } from 'redux';
 
-const initGameComponents = (componentsList) => {
-  const components = copy(componentsList);
-  const components2 = getComponentsByType(components);
-  const magicItems = Array(8).fill(null);
-  const monuments = Array(8).fill(null);
-  const placesOfPower = Array(5).fill(null);
-  const commonBoard = {
-    monuments,
-    placesOfPower,
-    magicItems
-  };
-  const playerBoards = Array(4).fill(null);
-  const gameComponents = {
-    commonBoard,
-    playerBoards
-  };
-  return gameComponents;
-}
-
 const getComponentsByType = (components) => {
   const res = {}
   if (components) {
@@ -129,10 +110,13 @@ const getInitialState = (ctx) => {
     G.players[i]= {
       deck: [],
       draftCards: [],
-      deniedCards: []
+      deniedCards: [],
     }
     G.publicData.players[i] = {
       deckSize: 0,
+      essencePool: {
+        elan: 1, life: 1, calm: 1, death: 1, gold: 1
+      }
     }
   }
 

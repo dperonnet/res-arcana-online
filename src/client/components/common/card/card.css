@@ -29,7 +29,6 @@
   position: absolute;
   user-select: none;
 }
-
 .card-zoom-frame, .card-zoom-frame > img {
   height: 320px;
   width: 228px;
@@ -39,47 +38,17 @@
 .card-row.x-small {
   min-height: 54.6px;
 }
-
 .card-row.small {
   min-height: 91px;
 }
-
 .card-row.normal {
   min-height: 127.4px;
 }
-
 .card-row.large {
   min-height: 182px;
 }
-
 .card-row.x-large {
   min-height: 220px;
-}
-
-/* Card size */
-.card.x-small.vertical {
-  height: 54.6px;
-  width: 39px;
-}
-
-.card.small.vertical {
-  height: 91px;
-  width: 65px;
-}
-
-.card.normal.vertical {
-  height: 127.4px;
-  width: 91px;
-}
-
-.card.large.vertical {
-  height: 182px;
-  width: 130px;
-}
-
-.card.x-large.vertical {
-  height: 220px;
-  width: 157px;
 }
 
 /* Place of Power Size */
@@ -87,18 +56,37 @@
   height: 91px;
   width: 65px;
 }
-
 .place-of-power.normal.vertical {
   height: 127.4px;
   width: 91px;
 }
-
 .place-of-power.large.vertical {
   height: 182px;
   width: 130px;
 }
-
 .place-of-power.x-large.vertical {
+  height: 220px;
+  width: 157px;
+}
+
+/* Card size */
+.card.x-small.vertical {
+  height: 54.6px;
+  width: 39px;
+}
+.card.small.vertical {
+  height: 91px;
+  width: 65px;
+}
+.card.normal.vertical {
+  height: 127.4px;
+  width: 91px;
+}
+.card.large.vertical {
+  height: 182px;
+  width: 130px;
+}
+.card.x-large.vertical {
   height: 220px;
   width: 157px;
 }
@@ -108,17 +96,14 @@
   height: 54.6px;
   width: 39px;
 }
-
 .magic-item.normal.vertical {
   height: 91px;
   width: 65px;
 }
-
 .magic-item.large.vertical {
   height: 127.4px;
   width: 91px;
 }
-
 .magic-item.x-large.vertical {
   height: 182px;
   width: 130px;
@@ -126,80 +111,114 @@
 
 /* START Tapped components size */
 
-/* Card size */
-.card.x-small.vertical.tapped {
-  width: 54.6px;
-  height: 39px;
-}
-
-.card.small.vertical.tapped {
-  width: 91px;
+/* Place of Power Size */
+.place-of-power.x-small.vertical.tapped, .place-of-power.small.vertical.tapped {
   height: 65px;
+  width: 91px;
+}
+.place-of-power.x-small.vertical.tapped img, .place-of-power.small.vertical.tapped img {
   top: -13px;
   left: 13px;
 }
-
-.card.normal.vertical.tapped {
-  width: 127.4px;
+.place-of-power.normal.vertical.tapped {
   height: 91px;
+  width: 127.4px;
 }
-
-.card.large.vertical.tapped {
-  width: 182px;
+.place-of-power.normal.vertical.tapped img {
+  top: -18px;
+  left: 18px;
+}
+.place-of-power.large.vertical.tapped {
   height: 130px;
+  width: 182px;
+}
+.place-of-power.large.vertical.tapped img {
+  top: -26px;
+  left: 26px;
+}
+.place-of-power.x-large.vertical.tapped {
+  height: 157px;
+  width: 220px;
+}
+.place-of-power.x-large.vertical.tapped img {
+  top: -32px;
+  left: 32px;
 }
 
+/* Card size */
+.card.x-small.vertical.tapped {
+  height: 39px;
+  width: 54.6px;
+}
+.card.x-small.vertical.tapped img {
+  top: -8px;
+  left: 8px;
+}
+.card.small.vertical.tapped {
+  height: 65px;
+  width: 91px;
+}
+.card.small.vertical.tapped img {
+  top: -13px;
+  left: 13px;
+}
+.card.normal.vertical.tapped {
+  height: 91px;
+  width: 127.4px;
+}
+.card.normal.vertical.tapped img {
+  top: -18px;
+  left: 18px;
+}
+.card.large.vertical.tapped {
+  height: 130px;
+  width: 182px;
+}
+.card.large.vertical.tapped img {
+  top: -26px;
+  left: 26px;
+}
 .card.x-large.vertical.tapped {
   width: 220px;
   height: 157px;
 }
-
-/* Place of Power Size */
-.place-of-power.x-small.vertical.tapped, .place-of-power.small.vertical.tapped {
-  width: 91px;
-  height: 65px;
-  top: -13px;
-  left: 13px;
-}
-
-.place-of-power.normal.vertical.tapped {
-  width: 127.4px;
-  height: 91px;
-}
-
-.place-of-power.large.vertical.tapped {
-  width: 182px;
-  height: 130px;
-}
-
-.place-of-power.x-large.vertical.tapped {
-  width: 220px;
-  height: 157px;
+.card.x-large.vertical.tapped img {
+  top: -32px;
+  left: 32px;
 }
 
 /* Magic Item Size */
 .magic-item.x-small.vertical.tapped, .magic-item.small.vertical.tapped {
-  width: 54.6px;
   height: 39px;
+  width: 54.6px;
+}
+.magic-item.x-small.vertical.tapped img, .magic-item.small.vertical.tapped img {
   top: -8px;
   left: 8px;
 }
-
 .magic-item.normal.vertical.tapped {
-  width: 91px;
   height: 65px;
+  width: 91px;
+}
+.magic-item.normal.vertical.tapped img {
   top: -13px;
   left: 13px;
 }
-
 .magic-item.large.vertical.tapped {
-  width: 127.4px;
   height: 91px;
+  width: 127.4px;
 }
-
+.magic-item.large.vertical.tapped img {
+  top: -18px;
+  left: 18px;
+}
 .magic-item.x-large.vertical.tapped {
-  width: 182px;
   height: 130px;
+  width: 182px;
+}
+.magic-item.x-large.vertical.tapped img {
+  top: -26px;
+  left: 26px;
 }
 
 .tapped img {
@@ -208,11 +227,8 @@
   -o-transform: rotate(90deg);
   -ms-transform: rotate(90deg);
   transform: rotate(90deg);
-  top: -18px;
-  left: 18px;
 }
-.magic-item.tapped img {
-}
+
 /* END Tapped Component Size */
 
 

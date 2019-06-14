@@ -27,7 +27,7 @@ class ResArcanaBoard extends Component {
   getPlayersName = () => {
     const { ctx, game } = this.props;
     let playersName = [ctx.numPlayers];
-    Object.values(game.players).map((player) => {
+    Object.values(game.players).forEach((player) => {
       playersName[player.id] = player.name;
     })
     return playersName;
@@ -51,7 +51,6 @@ class ResArcanaBoard extends Component {
     const src = require('../../../assets/image/components/' + card.type + '/' + card.class + '.png');
     const cardSize = (profile.cardSize ? profile.cardSize : ' normal ');
     const active = selectedCard && selectedCard.id === card.id ? ' active ' : '';
-    console.log('tappedComponents',tappedComponents)
     const tapped = tappedComponents.indexOf(card.id) >= 0 ? ' tapped ' : '';
     return (
       <div
@@ -83,13 +82,21 @@ class ResArcanaBoard extends Component {
     </div>
   }
 
-  renderFirstPlayerToken = (flip) => {
-    const { profile } = this.props;
+  renderFirstPlayerToken = (playerId, flip) => {
+    const { G } = this.props;
     let passe = flip ? '_passe': '';
     const src = require('../../../assets/image/components/premier_joueur' + passe + '.png');
-    return <div className={'first-player ' + (profile.cardSize ? profile.cardSize : 'normal')}>
-      <img src={src} alt={'First Player'}  />
-    </div>
+    return G.publicData.firstPlayer === playerId && <img src={src} alt={'First Player'}  />
+  }
+
+  renderPlayerPool = (id) => {
+    const { G } = this.props
+    const essences = ['elan', 'life', 'calm', 'death', 'gold'];
+    return essences.map((essence, index) => {
+      return <div className={'essence ' + essence} key={index}>
+        <div className="essence-count">{G.publicData.players[id].essencePool[essence]}</div>
+      </div>
+    })
   }
 
   tapComponent = (card) => {
@@ -169,14 +176,33 @@ class ResArcanaBoard extends Component {
   }
 
   /**
+   * This function render the Ruban for a specific player.
+   * The ruban contains : player name, first player token, essence pool and hand size.
+   */
+  renderPlayerRuban = (playerId) => {
+    const playerName = this.getPlayersName()[parseInt(playerId)];
+    const firstPlayer = this.renderFirstPlayerToken(playerId);
+    const playerPool = this.renderPlayerPool(playerId);
+    const cardsInHand = <div>3</div>
+    return <div className="ruban">
+      <div className="player-name">{playerName}</div>
+      <div className="first-player">{firstPlayer}</div>
+      <div className="player-pool">{playerPool}</div>
+      <div className="cards-in-hand">{cardsInHand}</div>
+    </div>
+  }
+  /**
    * This function render the board during Draft Phase.
    */
   renderDraftBoard = () => {
-    let playerPickBoard = this.renderPickBoard();
-    let playerBoard = this.renderPlayerDraftBoard();
-    let othersBoard = this.renderOthersDraftBoard();
+    const { playerID } = this.props;
+    const playerRuban = this.renderPlayerRuban(playerID);
+    const playerPickBoard = this.renderPickBoard();
+    const playerBoard = this.renderPlayerDraftBoard();
+    const othersBoard = this.renderOthersDraftBoard();
     return <>
       <div className="draft-card-container">
+        {playerRuban}
         {playerPickBoard}
         {playerBoard}
         {othersBoard}
@@ -190,12 +216,9 @@ class ResArcanaBoard extends Component {
    * The board show draft cards when player have to pick a card.
    */
   renderPickBoard = () => {
-    const { auth, game, G, playerID, profile, selectedCard } = this.props;
+    const { G, playerID, profile, selectedCard } = this.props;
     if (!Number.isInteger(parseInt(playerID))) return null;
     
-    const playerName = game.players[auth.uid] ? game.players[auth.uid].name : 'spectator';
-    const firstPlayer = G.publicData.firstPlayer === playerID ? this.renderFirstPlayerToken() : null;
-
     const draftCards = G.players[playerID] && G.players[playerID].draftCards.map((card) => {
       return this.renderComponent(card, 'card', () => this.handleClick(card), () => this.pickArtefact(card.id), () => this.handleMouseOver(card), () => this.handleMouseOut(card))
     });
@@ -228,9 +251,6 @@ class ResArcanaBoard extends Component {
     const cancelButton = !lastDraftCard && <Button variant={!selectedCard ? 'primary' : 'secondary'} size="sm" onClick={() => this.handleClick(undefined)} disabled={!selectedCard}>Cancel</Button>
     const nextPlayer = this.getNextPlayer();
     return <>
-      <div className="ruban">
-        <div className="player-name">{playerName}</div><div>{firstPlayer}</div>
-      </div>
       <div className='draft-card-panel'>
         <h5>Draft Phase - Artefact selection {G.players[playerID].deck.length}/8</h5>
         <div className={'draft-card card-row ' + profile.cardSize}>
@@ -291,7 +311,7 @@ class ResArcanaBoard extends Component {
    * This board render the back of the cards selected by others player during Draft Phase.
    */
   renderOthersDraftBoard = () => {
-    const { ctx, G, game, playerID, profile } = this.props;
+    const { G, playerID, profile } = this.props;
     const othersNextId = Object.keys(G.publicData.players).filter((id) => {
       return id !== playerID && id > playerID
     });
@@ -299,9 +319,7 @@ class ResArcanaBoard extends Component {
       return id !== playerID && id < playerID
     });
     const othersId = othersNextId.concat(othersPrevId);
-    const playersName = this.getPlayersName()
     const boards = othersId.map((id) =>{
-      const playerName = playersName[parseInt(id)];
       const deckSize = G.publicData.players[id].deckSize
       
       const cardmage = {
@@ -326,13 +344,10 @@ class ResArcanaBoard extends Component {
         deck.push(this.renderComponent(cardArtefact, 'card'));
       }
 
-      const firstPlayer = G.publicData.firstPlayer === id ? this.renderFirstPlayerToken() : null;
-
+      const playerRuban = this.renderPlayerRuban(id);
       return (
         <div key={id}>
-          <div className="ruban">
-            <div className="player-name">{playerName}</div><div>{firstPlayer}</div>
-          </div>
+          {playerRuban}
           <div className={'card-row ' + profile.cardSize}>
             {mages}{deck}
           </div>
@@ -361,7 +376,7 @@ class ResArcanaBoard extends Component {
   }
 
   render() {
-    const { G, ctx, playerID, game, cardToZoom, profile } = this.props;
+    const { G, game, cardToZoom, profile } = this.props;
     console.log('G',G);
     
     if (!isLoaded(game)) {
@@ -378,8 +393,8 @@ class ResArcanaBoard extends Component {
       default:
         board = this.renderPlayBoard();
     }
-    const sizeSetting = profile && profile.cardSize || 'normal';
-    const layoutSetting = profile && profile.layout || 'vertical';
+    const sizeSetting = profile && profile.cardSize ? profile.cardSize : 'normal';
+    const layoutSetting = profile && profile.layout ? profile.layout : 'vertical';
     return <div className={'board-'+layoutSetting}>
       <div className={'common-board ' + sizeSetting}>
         {this.renderCommonBoard()}
