@@ -284,6 +284,17 @@ class ResArcanaBoard extends Component {
   };
 
   /**
+   * This action is used to select mage after draft phase.
+   */
+  pickMage = (cardId) => {
+    const { isActive, playerID } = this.props;
+    if (isActive) {
+      this.props.moves.pickMage(playerID, cardId);
+    }
+    this.props.selectCard(undefined);
+  };
+
+  /**
    * This board render the cards selected by the player during Draft Phase.
    * This board is player specific and will not be available for spectators.
    */
