@@ -27,6 +27,7 @@
   max-width: 575px;
   min-width: 180px;
   text-align: center;
+  flex-shrink: 0;
 }
 
 .board {
@@ -43,6 +44,7 @@
   color: #c1c2c3;
   border-left: 1px solid #F5B041;
   min-width: 180px;
+  flex-shrink: 0;
 }
 
 .right-panel .chat-container {
@@ -107,7 +109,9 @@
 }
 
 .draft-card-container {
-  width: 100%;
+  flex-shrink: 0;
+  width: fit-content;
+  min-width: 100%;
 }
 
 .draft-card-panel {

@@ -218,23 +218,15 @@ class ResArcanaBoard extends Component {
   renderPickBoard = () => {
     const { G, playerID, profile, selectedCard } = this.props;
     if (!Number.isInteger(parseInt(playerID))) return null;
-    
-    const draftCards = G.players[playerID] && G.players[playerID].draftCards.map((card) => {
+    const playerHasDraftCards = G.players[playerID] && G.players[playerID].draftCards && G.players[playerID].draftCards.length > 0;
+    const draftCards = playerHasDraftCards && G.players[playerID].draftCards[0].map((card) => {
       return this.renderComponent(card, 'card', () => this.handleClick(card), () => this.pickArtefact(card.id), () => this.handleMouseOver(card), () => this.handleMouseOut(card))
     });
     
     const emptyHand = G.players[playerID].draftCards.length === 0;
     const waitingWithoutCard = G.publicData.waitingFor.length > 0 && emptyHand
+    console.log('empty hand :',emptyHand,'waiting:',G.publicData.waitingFor)
     const deckFull = G.players[playerID].deck.length === 8
-    const deniedCards = G.players[playerID] && G.players[playerID].deniedCards.map((card) => {
-      const cardBack = {
-        class: 'back_artefact',
-        id: card.id+'_back_artefact',
-        name: 'Artefact',
-        type: 'back',
-      }
-      return this.renderComponent(cardBack, 'card',)
-    });
 
     const playersName = this.getPlayersName()
     let waitingFor = 'Waiting for ';
@@ -246,24 +238,23 @@ class ResArcanaBoard extends Component {
 
       waitingFor += isLastPlayer ? '.' :  waitingAtLeastTwoPlayers && beforeLastPlayer ? ' and ' : ', '
     })
-    const lastDraftCard = G.players[playerID].draftCards.length === 1
+    const lastDraftCard = G.players[playerID].draftCards.length && G.players[playerID].draftCards[0].length === 1
     const confirmButton = <Button variant="primary" size="sm" onClick={() => this.pickArtefact(selectedCard.id)} disabled={!selectedCard}>Confirm</Button>
     const cancelButton = !lastDraftCard && <Button variant={!selectedCard ? 'primary' : 'secondary'} size="sm" onClick={() => this.handleClick(undefined)} disabled={!selectedCard}>Cancel</Button>
     const nextPlayer = this.getNextPlayer();
     return <>
       <div className='draft-card-panel'>
-        <h5>Draft Phase - Artefact selection {G.players[playerID].deck.length}/8</h5>
+        <h5>Draft Phase - Artefact selection {G.players[playerID].deck.length + 1}/8</h5>
         <div className={'draft-card card-row ' + profile.cardSize}>
           {draftCards}
-          {deniedCards}
         </div>
         {waitingWithoutCard ? 
             <h5>{waitingFor}</h5> 
           : 
             selectedCard ?
-            <div class="info">Keep {selectedCard.name} {!lastDraftCard && 'and pass the rest to '  + nextPlayer + ' ?'}</div>
+            <div className="info">Keep {selectedCard.name} {!lastDraftCard && 'and pass the rest to '  + nextPlayer + ' ?'}</div>
           :
-            <div class="info">Select an artefact to add into your deck.</div>
+            <div className="info">Select an artefact to add into your deck.</div>
         }
         {!deckFull && <div className={waitingWithoutCard ? 'game-button hidden': 'game-button'}>
           {confirmButton} {cancelButton}
@@ -378,10 +369,18 @@ class ResArcanaBoard extends Component {
     return null
   }
 
-  renderPlayBoard = () => {
+  renderPlayBoard = () => {    
+    const { playerID } = this.props;
+    const playerRuban = this.renderPlayerRuban(playerID);
+    const playerPickBoard = this.renderPickBoard();
+    const playerBoard = this.renderPlayerDraftBoard();
+    const othersBoard = this.renderOthersDraftBoard();
     return <>
-      <div className='draft-card-container'>
-        <h5>Play Phase</h5>
+      <div className="draft-card-container">
+        {playerRuban}
+        {playerPickBoard}
+        {playerBoard}
+        {othersBoard}
       </div>
     </>
   }
