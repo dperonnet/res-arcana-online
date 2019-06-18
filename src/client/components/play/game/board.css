@@ -10,6 +10,9 @@
   height: 100%;
   width: 100%;
 }
+.debug-ui {
+  z-index: 9999;
+}
 .board-vertical {
   display: flex;
   flex-direction: row;
