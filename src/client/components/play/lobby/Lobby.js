@@ -137,11 +137,11 @@ class Lobby extends Component {
     this.setState({ errorMsg: '' });
   };
 
-  _createRoom = async (gameName, numPlayers) => {
+  _createRoom = async (gameName, numPlayers, setupData) => {
     const { setLoading } = this.props;
     try {
       setLoading(true);
-      const resp = await this.connection.create(gameName, numPlayers);
+      const resp = await this.connection.create(gameName, numPlayers, setupData);
       await this.connection.refresh();
       // rerender
       this.setState({ errorMsg: '' });

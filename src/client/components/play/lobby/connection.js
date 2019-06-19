@@ -120,7 +120,7 @@ class _LobbyConnectionImpl {
               method: 'POST',
               body: JSON.stringify({
                 playerID: player.id,
-                playerCredentials: this.playerCredentials,
+                credentials: this.playerCredentials,
               }),
               headers: { 'Content-Type': 'application/json' },
             }
@@ -147,7 +147,7 @@ class _LobbyConnectionImpl {
     this.playerName = 'Visitor';
   }
 
-  async create(gameName, numPlayers) {
+  async create(gameName, numPlayers, setupData) {
     try {
       const comp = this._getGameComponents(gameName);
       if (!comp) throw new Error('game not found');
@@ -160,6 +160,7 @@ class _LobbyConnectionImpl {
         method: 'POST',
         body: JSON.stringify({
           numPlayers: numPlayers,
+          setupData: setupData
         }),
         headers: { 'Content-Type': 'application/json' },
       });

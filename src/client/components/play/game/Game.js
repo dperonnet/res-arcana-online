@@ -4,7 +4,7 @@ import logger from 'redux-logger'
 import { applyMiddleware } from 'redux'
 
 // SETUP
-const getInitialState = (ctx) => {
+const getInitialState = (ctx, setupData) => {
   const G = {
     secret: {
       artefactsInGameStack: [],
@@ -18,19 +18,23 @@ const getInitialState = (ctx) => {
       waitingFor: []
     },
   }
-  for (let i=0; i<ctx.numPlayers; i++) {
+  for (let i=0; i < ctx.numPlayers; i++) {
     G.players[i]= {
       deck: [],
       draftCards: [],
       deniedCards: [],
       hand: [],
+      mages: [],
       reminder: []
     }
     G.publicData.players[i] = {
-      handSize: 0,
       essencePool: {
         elan: 1, life: 1, calm: 1, death: 1, gold: 1
       },
+      deckSize: 0,
+      handSize: 0,
+      inPlay: [],
+      mage: null,
       status: 'DRAFTING_ARTEFACTS'
     }
   }
@@ -60,13 +64,34 @@ const getInitialState = (ctx) => {
   
   // Deal 2 mages to players
   let mages = ctx.random.Shuffle(components.mage)
-  for (let i=0; i<ctx.numPlayers; i++) {
+  for (let i=0; i < ctx.numPlayers; i++) {
     G.players[i].mages = mages.slice(0, 2)
     mages.splice(0, 2)
   }
 
   // Define the first player
   G.publicData.firstPlayer = (ctx.random.Die(ctx.numPlayers) -1).toString()
+  
+  const skip = false
+  
+  if (skip) {
+    console.log('[setupGameComponents] skipDraftPhase')
+    for (let i=0; i<ctx.numPlayers; i++) {
+      console.log('[setupGameComponents] creating player\'s setup')
+      G.players[i].reminder = G.secret.artefactsInGameStack.slice(0, 8)
+      G.secret.artefactsInGameStack.splice(0, 8)
+      G.players[i].deck = ctx.random.Shuffle(G.players[i].reminder)
+      G.players[i].hand = G.players[i].deck.slice(0, 3)
+      G.players[i].deck.splice(0, 3)
+      G.publicData.players[i].mage = G.players[i].mages[0]
+      G.publicData.players[i].inPlay.push(G.players[i].mages[0])
+      G.publicData.players[i].status = 'READY'
+      G.publicData.players[i].deckSize = G.players[i].deck.length
+      G.publicData.players[i].handSize = G.players[i].hand.length
+    }
+  }
+  G.skipDraftPhase = skip
+  G.startingPhase = skip ? { next: 'pickMagicItemPhase' } : { next: 'draftPhase' }
 
   return G
 }
@@ -171,6 +196,7 @@ const pickMage = (G, ctx, playerID, mageId) => {
   if (G.players[playerID].draftCards.length === 0) {
     G.publicData.waitingFor.splice(G.publicData.waitingFor.indexOf(parseInt(playerID)), 1)
   }
+  G.publicData.players[playerID].inPlay.push(selectedCard)
   G.publicData.players[playerID].status = 'READY'
   return G
 }
@@ -187,7 +213,7 @@ const checkIfAllCardsDrafted = (G, ctx) => {
     needStartingCards = needStartingCards || (G.players[i].hand.length === 8 && G.publicData.players[i].status === 'DRAFTING_ARTEFACTS')
   }
   if (playersReady) {
-    console.log('[checkIfAllCardsDrafted] All players are ready, return "playPhase"')
+    console.log('[checkIfAllCardsDrafted] All players are ready, return "pickMagicItemPhase"')
     return { next: 'playPhase' }
   }
   if (hasCardsToPass) {
@@ -225,7 +251,7 @@ const pickMagicItem = (G, ctx, playerID, magicItemId) => {
 const allMagicItemsReady = (G, ctx) => {
   let magicItemsReady = true  
   for (let i= 0; i < ctx.numPlayers; i++) {
-    magicItemsReady = magicItemsReady && G.players[i].magicItem
+    magicItemsReady = magicItemsReady && G.publicData.players[i].magicItem
   }
   if (magicItemsReady) return {next: 'playPhase' }
 }
@@ -256,16 +282,40 @@ const getTurnOrder = (G, ctx) => {
   return order
 }
 
-
-function copy(value){
+function copy(value) {
   return JSON.parse(JSON.stringify(value))
 }
 
+const setupGameComponents = (G, ctx) => {
+  console.log('[setupGameComponents] Call to setupGameComponents')
+  if (G && G.skipDraftPhase) {
+    console.log('[setupGameComponents] skipDraftPhase')
+    for (let i=0; i<ctx.numPlayers; i++) {
+      console.log('[setupGameComponents] creating player\'s setup')
+      G.players[i].reminder = G.secret.artefactsInGameStack.slice(0, 8)
+      G.secret.artefactsInGameStack.splice(0, 8)
+      G.players[i].deck = ctx.random.Shuffle(G.players[i].reminder)
+      G.players[i].hand = G.players[i].deck.slice(0, 3)
+      G.players[i].deck.splice(0, 3)
+      G.publicData.players[i].mage = G.players[i].mages[0]
+      G.publicData.players[i].inPlay.push(G.players[i].mages[0])
+      G.publicData.players[i].status = 'READY'
+      G.publicData.players[i].deckSize = G.players[i].deck.length
+      G.publicData.players[i].handSize = G.players[i].hand.length
+    }
+  }
+  return G
+}
+
+const getStartingPhase = (G) => {
+  console.log('[getStartingPhase] Call to getStartingPhase, G.startingPhase', G.startingPhase)
+  return G.startingPhase;
+}
 // GAME
 export const ResArcanaGame = Game({
   name: 'res-arcana',
 
-  setup: getInitialState,
+  setup: (G,ctx) => getInitialState(G, ctx),
 
   moves: {
     pickArtefact: pickArtefact,
@@ -283,6 +333,10 @@ export const ResArcanaGame = Game({
     startingPhase: 'draftPhase',
 
     phases: {
+      setupPhase: {
+        onPhaseBegin: (G, ctx) => setupGameComponents(G, ctx),
+        endPhaseIf: (G, ctx) => getStartingPhase(G, ctx)
+      },
       draftPhase: {
         onPhaseBegin: (G, ctx) => initDraftPhase(G, ctx),
         allowedMoves: ['pickArtefact','pickMage'],

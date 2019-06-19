@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Button, Col, Form, Row } from 'react-bootstrap';
+import { Button, Col, Form, InputGroup, Row } from 'react-bootstrap';
 import { withRouter } from 'react-router-dom';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
@@ -14,7 +14,8 @@ class CreateGame extends Component {
         name: null,
         password: '',
         numberOfPlayers: '2',
-        boardGameId: null
+        boardGameId: null,
+        skipDraftPhase: true
       }
     };
   }
@@ -40,13 +41,7 @@ class CreateGame extends Component {
 
   handleShow = () => {
     this.setState({
-      isCreatingGame: true,
-      game: {
-        name: null,
-        password: '',
-        numberOfPlayers: '2',
-        allowSpectators: true
-      }
+      isCreatingGame: true
     });
   }
 
@@ -63,7 +58,10 @@ class CreateGame extends Component {
     const { createGame, joinGame, gameServer, setLoading } = this.props
     const { game } = this.state;
     setLoading(true);
-    createGame('res-arcana', this.state.game.numberOfPlayers).then((resp) => {
+    const setupData = {
+      skipDraftPhase: game.skipDraftPhase
+    }
+    createGame('res-arcana', this.state.game.numberOfPlayers, setupData).then((resp) => {
       game.boardGameId = resp.gameID
       this.props.createAndJoinGame(game, joinGame, gameServer);
     })
@@ -105,6 +103,20 @@ class CreateGame extends Component {
                           onChange={this.handleChange}
                         />
                       ))}
+                    </Col>
+                  </Form.Group>
+                  <Form.Group as={Row}>
+                    <Form.Label as="legend" column xs={4}>
+                      Draft Options
+                    </Form.Label>
+                    <Col xs={8} className="mt-2">
+                      <InputGroup className="mb-3">
+                        <Form.Check inline type="checkbox" name="skipDraftPhase"
+                          id="skipDraftPhase" label="Skip draft phase ?"
+                          value={game.skipDraftPhase}
+                          checked={game.skipDraftPhase}
+                          onChange={this.handleChange}/>
+                      </InputGroup>
                     </Col>
                   </Form.Group>
                 </Form>
