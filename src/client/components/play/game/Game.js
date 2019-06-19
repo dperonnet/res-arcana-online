@@ -189,6 +189,7 @@ const pickArtefact = (G, ctx, playerID, cardId) => {
   return G
 }
 const pickMage = (G, ctx, playerID, mageId) => {
+  console.log('[pickMage] The player', playerID, 'picked mage', mageId)
   const selectedCard = copy(G.players[playerID].mages.filter((mage) => {
     return mage.id === mageId
   })[0])
@@ -214,7 +215,7 @@ const checkIfAllCardsDrafted = (G, ctx) => {
   }
   if (playersReady) {
     console.log('[checkIfAllCardsDrafted] All players are ready, return "pickMagicItemPhase"')
-    return { next: 'playPhase' }
+    return { next: 'pickMagicItemPhase' }
   }
   if (hasCardsToPass) {
     console.log('[checkIfAllCardsDrafted] One Player at least has cards to pass, return "drafPhase"')
@@ -232,10 +233,12 @@ const checkIfAllCardsDrafted = (G, ctx) => {
 }
 // PICK MAGIC ITEM PHASE
 const initPickMagicItemPhase = (G, ctx) => {
+  console.log('[initPickMagicItemPhase] Call to initPickMagicItemPhase()')
   G.phase = 'PICK_MAGIC_ITEM_PHASE'
   return G
 }
 const pickMagicItem = (G, ctx, playerID, magicItemId) => {
+  console.log('[pickMagicItem] The player', playerID, 'picked magic item', magicItemId)
   let selectedItemIndex = 0
   const selectedItem = copy(G.publicData.magicItem.filter((magicItem, index) => {
     const isSelectedItem = magicItem.id === magicItemId
@@ -249,6 +252,7 @@ const pickMagicItem = (G, ctx, playerID, magicItemId) => {
   return G
 }
 const allMagicItemsReady = (G, ctx) => {
+  console.log('[allMagicItemsReady] Call to allMagicItemsReady()')
   let magicItemsReady = true  
   for (let i= 0; i < ctx.numPlayers; i++) {
     magicItemsReady = magicItemsReady && G.publicData.players[i].magicItem
@@ -258,6 +262,7 @@ const allMagicItemsReady = (G, ctx) => {
 
 // PLAY PHASE
 const initPlayPhase = (G, ctx) => {
+  console.log('[initPlayPhase] Call to initPlayPhase()')
   G.phase = 'PLAY_PHASE'
   return G
 }

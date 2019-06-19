@@ -338,12 +338,14 @@ class ResArcanaBoard extends Component {
     let title = 'Draft Phase'
     let waiting = false
     let waitingFor = 'Waiting for '
+    let showCards = true
     let showButtons = true
     let draftCards = null
     let directive = null
     let handleConfirm= null;
     const lastDraftCard = G.players[playerID].draftCards.length && G.players[playerID].draftCards[0].length === 1
     const nextPlayer = this.getNextPlayer()
+    const playersName = this.getPlayersName()
 
     switch (G.publicData.players[playerID].status) {
       case 'DRAFTING_ARTEFACTS':
@@ -361,7 +363,6 @@ class ResArcanaBoard extends Component {
         :
           <div className="info">Select an artefact to add into your deck.</div>
         
-        const playersName = this.getPlayersName()
         G.publicData.waitingFor.forEach((id, index) => {
           let isLastPlayer = index === G.publicData.waitingFor.length - 1
           let waitingAtLeastTwoPlayers = G.publicData.waitingFor.length > 1
@@ -385,6 +386,20 @@ class ResArcanaBoard extends Component {
         handleConfirm = () => this.pickMage(selectedCard.id)
         break
       case 'READY':
+        title = `Get Ready to pick your magic item`
+        directive = null
+        showCards = false
+        console.log('READY ',G.publicData)
+        const playersNotReady = Object.entries(G.publicData.players).filter((player) => {
+          return player[1].status !== 'READY'
+        })
+        playersNotReady.forEach((player, index) => {
+          let isLastPlayer = index === playersNotReady.length - 1
+          let waitingAtLeastTwoPlayers = playersNotReady.length > 1
+          let beforeLastPlayer = index === playersNotReady.length - 2
+          waitingFor += playersName[parseInt(player[0])]
+          waitingFor += isLastPlayer ? '.' :  waitingAtLeastTwoPlayers && beforeLastPlayer ? ' and ' : ', '
+        })
       default:
         waiting = true
         showButtons = false
@@ -396,9 +411,9 @@ class ResArcanaBoard extends Component {
     return <>
       <div className='draft-card-panel'>
         <h5>{title}</h5>
-        <div className={'draft-card card-row ' + profile.cardSize}>
+        {showCards && <div className={'draft-card card-row ' + profile.cardSize}>
           {draftCards}
-        </div>
+        </div>}
         {waiting ? <h5>{waitingFor}</h5> : <>{directive}</>}
         {showButtons && <div className={waiting ? 'game-button hidden': 'game-button'}>
           {confirmButton} {cancelButton}
@@ -408,7 +423,50 @@ class ResArcanaBoard extends Component {
   }
 
   renderMagicItemDialog = () => {
-    return null
+    const { G, ctx, playerID, profile, selectedCard } = this.props
+    if (!Number.isInteger(parseInt(playerID))) return null
+    const playersName = this.getPlayersName()
+
+    let title = 'Magic Item Selection Phase'
+    let waiting = playerID !== ctx.currentPlayer
+    let waitingFor = 'Waiting for ' + playersName[parseInt(ctx.currentPlayer)] + ' to pick a Magic Item.'
+    let showCards = true
+    let showButtons = !waiting
+    let magicItems = G.publicData.magicItems.map((magicItem) => {
+      return waiting ?
+        <GameComponent key={magicItem.id} component={magicItem}/>
+      :
+        <GameComponent key={magicItem.id} component={magicItem} onClick={() => this.handleClick(magicItem)} onDoubleClick={() => this.pickMagicItem(magicItem.id)}/>
+    })
+  
+    let directive = null
+    let handleConfirm= null;
+
+    switch (G.publicData.players[playerID].status) {
+      case 'SELECTING_MAGIC_ITEM':
+        directive = <div className="info">Select a Magic Item.</div>
+        handleConfirm = () => this.pickMagicItem(selectedCard.id)
+        break
+      case 'READY':
+      default:
+        title = `Get Ready for the battle`
+    }
+
+    const confirmButton = <Button variant="primary" size="sm" onClick={handleConfirm} disabled={!selectedCard}>Confirm</Button>
+    const cancelButton = <Button variant={!selectedCard ? 'primary' : 'secondary'} size="sm" onClick={() => this.handleClick(undefined)} disabled={!selectedCard}>Cancel</Button>
+    
+    return <>
+      <div className='draft-card-panel'>
+        <h5>{title}</h5>
+        {showCards && <div className={'draft-card card-row ' + profile.cardSize}>
+          {magicItems}
+        </div>}
+        {waiting ? <h5>{waitingFor}</h5> : <>{directive}</>}
+        {showButtons && <div className={waiting ? 'game-button hidden': 'game-button'}>
+          {confirmButton} {cancelButton}
+        </div>}
+      </div>
+    </>
   }
   
   renderActionBoard = () => {
@@ -481,8 +539,9 @@ class ResArcanaBoard extends Component {
         board = this.renderMagicItemPhaseBoard()
         break
       case 'PLAY_PHASE':
-      default:
         board = this.renderActionPhaseBoard()
+        break
+      default:
     }
     const sizeSetting = profile && profile.cardSize ? profile.cardSize : 'normal'
     const layoutSetting = profile && profile.layout ? profile.layout : 'vertical'

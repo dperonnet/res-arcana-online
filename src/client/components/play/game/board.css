@@ -22,7 +22,7 @@
 .common-board {
   display: inline-block;
   position: relative;
-  /*background-color: rgba(34,34,34,.8);*/
+  background-color: rgba(34,34,34,.8);
   overflow-y: auto;
   color: #c1c2c3;
   border-right: 1px solid #F5B041;
@@ -121,7 +121,7 @@
   display: block;
   margin: 0 auto;
   padding: 8px;
-  background-color: rgba(34,34,34,.8);
+  background-color: rgba(150,100,50,0.3);
   min-width: 320px;
 }
 .board-container h5, .common-board h5 {
