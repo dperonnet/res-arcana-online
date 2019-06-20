@@ -35,6 +35,7 @@ const getInitialState = (ctx, setupData) => {
       handSize: 0,
       inPlay: [],
       mage: null,
+      magicItem: null,
       status: 'DRAFTING_ARTEFACTS'
     }
   }
@@ -235,12 +236,21 @@ const checkIfAllCardsDrafted = (G, ctx) => {
 const initPickMagicItemPhase = (G, ctx) => {
   console.log('[initPickMagicItemPhase] Call to initPickMagicItemPhase()')
   G.phase = 'PICK_MAGIC_ITEM_PHASE'
+  Object.entries(G.publicData.players).forEach((player) => {
+    if (!player[1].magicItem) {
+      player[1].status = 'SELECTING_MAGIC_ITEM'
+    }
+  })
   return G
 }
 const pickMagicItem = (G, ctx, playerID, magicItemId) => {
   console.log('[pickMagicItem] The player', playerID, 'picked magic item', magicItemId)
   let selectedItemIndex = 0
-  const selectedItem = copy(G.publicData.magicItem.filter((magicItem, index) => {
+  if (G.publicData.players[playerID].magicItem){
+    G.publicData.magicItems.push(G.publicData.players[playerID].magicItem)
+    G.publicData.players[playerID].magicItem = null
+  }
+  const selectedItem = copy(G.publicData.magicItems.filter((magicItem, index) => {
     const isSelectedItem = magicItem.id === magicItemId
     if (isSelectedItem) {
       selectedItemIndex = index
@@ -248,7 +258,8 @@ const pickMagicItem = (G, ctx, playerID, magicItemId) => {
     return isSelectedItem
   })[0])
   G.publicData.players[playerID].magicItem = selectedItem
-  G.publicData.magicItem.splice(selectedItemIndex, 1)
+  G.publicData.players[playerID].inPlay.push(selectedItem);
+  G.publicData.magicItems.splice(selectedItemIndex, 1)
   return G
 }
 const allMagicItemsReady = (G, ctx) => {
@@ -260,12 +271,19 @@ const allMagicItemsReady = (G, ctx) => {
   if (magicItemsReady) return {next: 'playPhase' }
 }
 
+const getTurnOrderFromLastPlayer = (G, ctx) => {
+  const order = getTurnOrder(G, ctx).reverse()
+  console.log('order',order)
+  return order
+}
+
 // PLAY PHASE
 const initPlayPhase = (G, ctx) => {
   console.log('[initPlayPhase] Call to initPlayPhase()')
   G.phase = 'PLAY_PHASE'
   return G
 }
+
 const playArtefact = (G, ctx, artefactId) => {
   let artefactIndex = G.artefacts.findIndex(
     artefact => artefact.id === artefactId
@@ -283,14 +301,12 @@ const getTurnOrder = (G, ctx) => {
     let nextPlayerId = (parseInt(firstPlayer) + i) % ctx.numPlayers
     order.push((nextPlayerId).toString())
   }
-  console.log('order',order)
   return order
 }
 
 function copy(value) {
   return JSON.parse(JSON.stringify(value))
 }
-
 const setupGameComponents = (G, ctx) => {
   console.log('[setupGameComponents] Call to setupGameComponents')
   if (G && G.skipDraftPhase) {
@@ -352,8 +368,8 @@ export const ResArcanaGame = Game({
         onPhaseBegin: (G, ctx) => initPickMagicItemPhase(G, ctx),
         allowedMoves: ['pickMagicItem'],
         turnOrder: {
-          playOrder: (G, ctx) => getTurnOrder(G, ctx),
-          first: (G, ctx) => G.publicData.firstPlayer,
+          playOrder: (G, ctx) => getTurnOrderFromLastPlayer(G, ctx),
+          first: (G, ctx) => 0,
           next: (G, ctx) => (ctx.playOrderPos + 1) % ctx.numPlayers,
         },
         endPhaseIf: allMagicItemsReady

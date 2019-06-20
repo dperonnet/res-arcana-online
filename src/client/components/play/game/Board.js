@@ -126,7 +126,18 @@ class ResArcanaBoard extends Component {
     }
     this.props.selectCard(undefined)
   }
-
+  
+  /**
+   * This action is used to select mage after draft phase.
+   */
+  pickMagicItem = (cardId) => {
+    const { isActive, playerID } = this.props
+    if (isActive) {
+      this.props.moves.pickMagicItem(playerID, cardId)
+    }
+    this.props.selectCard(undefined)
+  }
+  
   handleClick = (card) => {
     this.props.selectCard(card)
   }
@@ -400,9 +411,10 @@ class ResArcanaBoard extends Component {
           waitingFor += playersName[parseInt(player[0])]
           waitingFor += isLastPlayer ? '.' :  waitingAtLeastTwoPlayers && beforeLastPlayer ? ' and ' : ', '
         })
-      default:
         waiting = true
         showButtons = false
+        break
+      default:
     }
 
     const confirmButton = <Button variant="primary" size="sm" onClick={handleConfirm} disabled={!selectedCard}>Confirm</Button>
