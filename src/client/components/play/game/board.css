@@ -265,3 +265,38 @@ width: 75px;
   vertical-align: top;
   background-position: 0 5px;
 }
+
+.draw-pile {
+  position: relative;
+}
+
+.x-small .component-legend, .small .component-legend {
+  font-size: 8px;
+}
+.component-legend {
+  color: white;
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  z-index: 20;
+  padding: 1px 4px;
+  font-size: 10px;
+  line-height: 14px;
+  background-color: rgba(34,34,34,.8);
+  text-shadow: 1px 1px 2px #000;
+}
+
+.component-container {
+  z-index: 1;
+}
+
+.discard {
+  position: absolute;
+  bottom: 3px;
+  left: 25px;
+}
+
+.discard .component-legend {
+  left: unset;
+  right: 0;
+}

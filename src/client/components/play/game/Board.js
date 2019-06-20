@@ -88,7 +88,7 @@ class ResArcanaBoard extends Component {
     let passe = flip ? '_passe': ''
     const src = require('../../../assets/image/components/premier_joueur' + passe + '.png')
     return G.publicData.firstPlayer === playerId && <img src={src} alt={'First Player'}  />
-  } 
+  }
 
   renderPlayerPool = (id) => {
     const { G } = this.props
@@ -225,6 +225,33 @@ class ResArcanaBoard extends Component {
     </div>
   }
 
+  renderPlayerDrawPileAndDiscard = (playerId) => {
+    const { G } = this.props
+    
+    const drawPile = copy(CARD_BACK_ARTEFACT)
+    drawPile.playerId = playerId + '_back_artefact'
+    const countDeck = G.publicData.players[playerId].deckSize
+    const countDiscard = G.publicData.players[playerId].discard.length
+    return <div className="draw-pile">
+      <div className="card-container discard">
+        <span className="component-legend">Discard ({countDiscard})</span>
+        <GameComponent component={drawPile} discard={true}/>
+      </div>
+      <div className="card-container">
+        <span className="component-legend">Draw pile ({countDeck})</span>
+        <GameComponent component={drawPile}/>
+      </div>
+    </div>
+  }
+
+  renderPlayerHand = () => {
+    const { G, playerID } = this.props
+    const hand = G.players[playerID].hand.map((card)=>{
+      return <GameComponent key={card.id} component={card} />
+    })
+    return hand;
+  }
+
   /**
    * This board render the cards in play of the player.
    * This board is player specific and will not be available for spectators.
@@ -234,6 +261,7 @@ class ResArcanaBoard extends Component {
     if (!Number.isInteger(parseInt(id))) return null
 
     let cards = null
+    let drawPileAndDiscard = null
     switch (G.publicData.players[playerID].status) {
       case 'DRAFTING_ARTEFACTS':
         const mages = G.players[playerID].mages.map((card)=>{
@@ -245,14 +273,11 @@ class ResArcanaBoard extends Component {
         cards = <>{mages}{deck}</>
         break
       case 'SELECTING_MAGE':
-        if (playerID === id) {
-          cards = G.players[playerID].hand.map((card)=>{
-            return <GameComponent key={card.id} component={card} />
-          })
-        }
+        drawPileAndDiscard = this.renderPlayerDrawPileAndDiscard(id)
         break
       case 'READY':
       default:
+        drawPileAndDiscard = this.renderPlayerDrawPileAndDiscard(id)
         cards = G.publicData.players[id].inPlay.map((card)=>{
           return <GameComponent key={card.id} component={card} />
         })
@@ -260,6 +285,7 @@ class ResArcanaBoard extends Component {
 
     return <>
       <div className={'artefacts card-row ' + profile.cardSize}>
+        {drawPileAndDiscard}
         {cards}
       </div>
     </>
@@ -279,6 +305,7 @@ class ResArcanaBoard extends Component {
     const othersId = othersNextId.concat(othersPrevId)
     
     let boards = null;
+    let drawPileAndDiscard = null
     switch (G.publicData.players[playerID].status) {
       case 'DRAFTING_ARTEFACTS':
       case 'SELECTING_MAGE':
@@ -287,6 +314,9 @@ class ResArcanaBoard extends Component {
           return (
             <div key={id}>
               {playerRuban}
+              <div className={'card-row ' + profile.cardSize}>
+                {drawPileAndDiscard}
+              </div>
             </div>
           )
         })
@@ -299,9 +329,7 @@ class ResArcanaBoard extends Component {
           return (
             <div key={id}>
               {playerRuban}
-              <div className={'card-row ' + profile.cardSize}>
-                {cards}
-              </div>
+              {cards}
             </div>
           )
         })
@@ -352,6 +380,7 @@ class ResArcanaBoard extends Component {
     let showCards = true
     let showButtons = true
     let draftCards = null
+    let hand = null
     let directive = null
     let handleConfirm= null;
     const lastDraftCard = G.players[playerID].draftCards.length && G.players[playerID].draftCards[0].length === 1
@@ -389,16 +418,18 @@ class ResArcanaBoard extends Component {
         draftCards = G.players[playerID].mages.length > 0 && G.players[playerID].mages.map((card) => {
           return <GameComponent key={card.id} component={card} onClick={() => this.handleClick(card)} onDoubleClick={() => this.pickMage(card.id)}/>
         })
-      
         directive = selectedCard ?
           <div className="info">Keep {selectedCard.name} ?</div>
         :
           <div className="info">Select your mage.</div>
         handleConfirm = () => this.pickMage(selectedCard.id)
+        
+        hand = this.renderPlayerHand()
+        
         break
       case 'READY':
         title = `Get Ready to pick your magic item`
-        directive = null
+        hand = this.renderPlayerHand()
         showCards = false
         console.log('READY ',G.publicData)
         const playersNotReady = Object.entries(G.publicData.players).filter((player) => {
@@ -430,6 +461,11 @@ class ResArcanaBoard extends Component {
         {showButtons && <div className={waiting ? 'game-button hidden': 'game-button'}>
           {confirmButton} {cancelButton}
         </div>}
+        <div className={'draft-card card-row ' + profile.cardSize}>
+          <div className="separator"></div>
+          <h5>Cards in hand</h5>
+          {hand}
+        </div>
       </div>
     </>
   }
@@ -442,7 +478,7 @@ class ResArcanaBoard extends Component {
     let title = 'Magic Item Selection Phase'
     let waiting = playerID !== ctx.currentPlayer
     let waitingFor = 'Waiting for ' + playersName[parseInt(ctx.currentPlayer)] + ' to pick a Magic Item.'
-    let showCards = true
+    let hand = this.renderPlayerHand()
     let showButtons = !waiting
     let magicItems = G.publicData.magicItems.map((magicItem) => {
       return waiting ?
@@ -470,13 +506,18 @@ class ResArcanaBoard extends Component {
     return <>
       <div className='draft-card-panel'>
         <h5>{title}</h5>
-        {showCards && <div className={'draft-card card-row ' + profile.cardSize}>
+        <div className={'draft-card card-row ' + profile.cardSize}>
           {magicItems}
-        </div>}
+        </div>
         {waiting ? <h5>{waitingFor}</h5> : <>{directive}</>}
         {showButtons && <div className={waiting ? 'game-button hidden': 'game-button'}>
           {confirmButton} {cancelButton}
         </div>}
+        <div className={'draft-card card-row ' + profile.cardSize}>
+          <div className="separator"></div>
+          <h5>Cards in hand</h5>
+          {hand}
+        </div>
       </div>
     </>
   }
@@ -488,8 +529,8 @@ class ResArcanaBoard extends Component {
     let title = 'Play Phase'
     let waiting = false
     let waitingFor = 'Waiting for '
-    let showButtons = true
-    let draftCards = null
+    let hand = this.renderPlayerHand()
+    let showButtons = false
     let directive = null
     
     const confirmButton = <Button variant="primary" size="sm" onClick={() => this.pickArtefact(selectedCard.id)} disabled={!selectedCard}>Confirm</Button>
@@ -498,13 +539,15 @@ class ResArcanaBoard extends Component {
     return <>
       <div className='draft-card-panel'>
         <h5>{title}</h5>
-        <div className={'draft-card card-row ' + profile.cardSize}>
-          {draftCards}
-        </div>
         {waiting ? <h5>{waitingFor}</h5> : <>{directive}</>}
         {showButtons && <div className={waiting ? 'game-button hidden': 'game-button'}>
           {confirmButton} {cancelButton}
         </div>}
+        <div className={'draft-card card-row ' + profile.cardSize}>
+          <div className="separator"></div>
+          <h5>Cards in hand</h5>
+          {hand}
+        </div>
       </div>
     </>
   }
@@ -514,7 +557,7 @@ class ResArcanaBoard extends Component {
    */
   renderDraftPhaseBoard = () => {
     const dialogBoard = this.renderDraftDialog()
-    return this.renderBoard(dialogBoard);
+    return this.renderBoard(dialogBoard)
   }
   
   /**
@@ -522,15 +565,15 @@ class ResArcanaBoard extends Component {
    */
   renderMagicItemPhaseBoard = () => {
     const dialogBoard = this.renderMagicItemDialog()
-    return this.renderBoard(dialogBoard);
+    return this.renderBoard(dialogBoard)
   }
 
   /**
    * This function render the board during Action Phase
    */
   renderActionPhaseBoard = () => {
-    const dialogBoard = <div>TODO: Action Dialog Board</div>
-    return this.renderBoard(dialogBoard);
+    const dialogBoard = this.renderActionBoard()
+    return this.renderBoard(dialogBoard)
   }
 
   render() {

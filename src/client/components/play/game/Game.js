@@ -32,6 +32,7 @@ const getInitialState = (ctx, setupData) => {
         elan: 1, life: 1, calm: 1, death: 1, gold: 1
       },
       deckSize: 0,
+      discard: [],
       handSize: 0,
       inPlay: [],
       mage: null,

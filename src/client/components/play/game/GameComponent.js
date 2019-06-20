@@ -30,23 +30,24 @@ class GameComponent extends Component {
   }
 
   render() {
-    const {component, onClick, onDoubleClick, profile, selectedCard, tappedComponents } = this.props
+    const {component, discard, onClick, onDoubleClick, profile, selectedCard, tappedComponents } = this.props
     const src = require('../../../assets/image/components/' + component.type + '/' + component.class + '.png')
     const cardSize = (profile.cardSize ? profile.cardSize : ' normal ')
     const componentType = COMPONENTS_STYLES[component.type]
     const active = selectedCard && selectedCard.id === component.id ? ' active ' : ''
-    const tapped = tappedComponents.indexOf(component.id) >= 0 ? ' tapped ' : ''
+    const tapped = (tappedComponents.indexOf(component.id) >= 0) || discard ? ' tapped ' : ''
+    const layout = ' vertical ';
     return (
       <div
         key={component.id}
-        className={cardSize + ' vertical ' + componentType + active + tapped}
+        className={cardSize + layout + componentType + active + tapped}
         onClick={onClick}
         onDoubleClick={onDoubleClick}
         onMouseOver={() => this.handleMouseOver(component)}
         onMouseOut={() => this.handleMouseOut()}
       >
         <Card
-          classes={cardSize +' vertical '+ componentType}
+          classes={cardSize + layout + componentType}
           src={ src }
           show={ true } 
           alt={ component.name ? component.name : null } 
