@@ -65,3 +65,9 @@ export const deleteChat = (chatId) => {
     fireStore.collection('chats').doc(chatId).delete()
   }
 }
+
+export const toggleChat = () => {
+  return {
+      type: 'TOGGLE_CHAT'
+  };
+}

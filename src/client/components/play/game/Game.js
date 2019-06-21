@@ -1,4 +1,4 @@
-import { Game, PlayerView, TurnOrder   } from 'boardgame.io/core'
+import { Game, Pass, PlayerView, TurnOrder   } from 'boardgame.io/core'
 import { GameComponents } from '../../../../database'
 import logger from 'redux-logger'
 import { applyMiddleware } from 'redux'
@@ -28,7 +28,8 @@ const getInitialState = (ctx, setupData) => {
       reminder: []
     }
     G.publicData.players[i] = {
-      essencePool: {
+      essencesOnComponent: {},
+      essencesPool: {
         elan: 1, life: 1, calm: 1, death: 1, gold: 1
       },
       deckSize: 0,
@@ -188,8 +189,27 @@ const pickArtefact = (G, ctx, playerID, cardId) => {
   if (G.players[playerID].draftCards.length === 0) {
     G.publicData.waitingFor.splice(G.publicData.waitingFor.indexOf(parseInt(playerID)), 1)
   }
+  const essencesTypes = ['elan', 'life', 'calm', 'death', 'gold']
+  const essencesTypeNumber = 5
+  for (let i = 0; i < essencesTypeNumber; i++){
+    addEssenceOnComponent(G, playerID, cardId, essencesTypes[i], ctx.random.Die(5))
+  }
   return G
 }
+
+const addEssenceOnComponent = (G, playerId, componentId, essenceType, essenceNumber) => {
+  let component = G.publicData.players[playerId].essencesOnComponent[componentId]
+  if (!component) {
+    G.publicData.players[playerId].essencesOnComponent[componentId] = {}
+    component = G.publicData.players[playerId].essencesOnComponent[componentId]
+  }
+  if (component[essenceType]) {
+    component[essenceType] += essenceNumber
+  } else {
+    component[essenceType] = essenceNumber
+  }
+}
+
 const pickMage = (G, ctx, playerID, mageId) => {
   console.log('[pickMage] The player', playerID, 'picked mage', mageId)
   const selectedCard = copy(G.players[playerID].mages.filter((mage) => {
@@ -344,9 +364,7 @@ export const ResArcanaGame = Game({
     playArtefact: playArtefact,
     pickMage: pickMage,
     pickMagicItem: pickMagicItem,
-    pass: G => {
-      G.passed = true
-    },
+    pass: Pass,
   },
 
   flow: {
@@ -377,7 +395,7 @@ export const ResArcanaGame = Game({
       },
       playPhase: {
         onPhaseBegin: initPlayPhase,
-        allowedMoves: ['playArtefact'],
+        allowedMoves: ['pass','playArtefact'],
         endPhaseIf: G => G.passed,
         turnOrder: {
           playOrder: (G, ctx) => getTurnOrder(G, ctx),

@@ -1,23 +1,28 @@
-import React, { Component } from 'react';
-import { Nav, Navbar, NavDropdown } from 'react-bootstrap';
-import { LinkContainer } from "react-router-bootstrap";
-import './navigation.css';
-import { compose } from 'redux';
-import { connect } from 'react-redux';
-import { firestoreConnect } from 'react-redux-firebase';
-import { leaveGame } from '../../../store/actions/gameActions';
-import { signOut } from '../../../store/actions/authActions';
+import React, { Component } from 'react'
+import { Nav, Navbar, NavDropdown } from 'react-bootstrap'
+import { LinkContainer } from "react-router-bootstrap"
+import './navigation.css'
+import { compose } from 'redux'
+import { connect } from 'react-redux'
+import { firestoreConnect } from 'react-redux-firebase'
+import { leaveGame } from '../../../store/actions/gameActions'
+import { signOut } from '../../../store/actions/authActions'
+import { toggleChat } from '../../../store/actions/chatActions'
 
 class SignedInNav extends Component {
 
   leaveGame = () => {
-    const { currentGames, leaveGame, gameServerUrl, setLoading } = this.props;
-    setLoading(false);
-    leaveGame(currentGames.gameId, gameServerUrl);
+    const { currentGames, leaveGame, gameServerUrl, setLoading } = this.props
+    setLoading(false)
+    leaveGame(currentGames.gameId, gameServerUrl)
+  }
+
+  toggleChat = () => {
+    this.props.toggleChat()
   }
 
   render() {
-    const { currentGames, games, profile, signOut } = this.props;
+    const { chatDisplay, currentGames, games, profile, signOut } = this.props
     return (
       <Navbar collapseOnSelect expand="md" variant="dark" fixed="top">
         <LinkContainer to="/"><Navbar.Brand>Res Arcana Online</Navbar.Brand></LinkContainer>
@@ -36,6 +41,9 @@ class SignedInNav extends Component {
             {currentGames && currentGames.gameId != null && <Nav.Link onClick={this.leaveGame}>Leave game</Nav.Link>}
           </Nav>
           <Nav>
+            {currentGames && currentGames.gameId != null && <Nav.Link onClick={this.toggleChat}>{chatDisplay ? 'Hide' : 'Show'} chat</Nav.Link>}
+            <Navbar.Text> [CardSize] {profile.cardSize}
+            </Navbar.Text>
             <Navbar.Text> {games ? Object.keys(games).length : 0} games
             </Navbar.Text>
             <NavDropdown alignRight title={profile.login} id="collasible-nav-dropdown">
@@ -51,9 +59,10 @@ class SignedInNav extends Component {
 
 const mapStateToProps = (state) =>{
   return {
-    games: state.firestore.ordered.games,
     auth: state.firebase.auth,
+    chatDisplay: state.chat.chatDisplay,
     currentGames: state.firestore.data.currentGames,
+    games: state.firestore.ordered.games,
     profile: state.firebase.profile
   }
 }
@@ -62,7 +71,8 @@ const mapDispatchToProps = (dispatch) =>{
   return {
     leaveGame: (gameId, baseUrl) => dispatch(leaveGame(gameId, baseUrl)),
     signOut: () => dispatch(signOut()),
-    setLoading: (value) => dispatch({type: 'LOADING', loading: value})
+    setLoading: (value) => dispatch({type: 'LOADING', loading: value}),
+    toggleChat: () => dispatch(toggleChat())
   }
 }
 

@@ -46,7 +46,6 @@
   overflow-y: auto;
   color: #c1c2c3;
   border-left: 1px solid #F5B041;
-  min-width: 180px;
   flex-shrink: 0;
 }
 
@@ -149,6 +148,14 @@
   display: inline-grid;
   grid-template-columns: 1fr 1fr;
   width: 100%;
+}
+
+.ruban.passed {
+  background-color: rgba(63,90,115,.8);
+}
+
+.ruban.active-player {
+  background-color: rgba(63,96,68,.8)
 }
 
 .ruban > div {
@@ -268,10 +275,25 @@ width: 75px;
 
 .draw-pile {
   position: relative;
+  margin-right: 58px;
+  float: right;
+  right: 16px;
+}
+.x-small .draw-pile {
+  margin-right: 34px;
+}
+.small .draw-pile {
+  margin-right: 46px;
+}
+.large .draw-pile {
+  margin-right: 70px;
+}
+.x-large .draw-pile {
+  margin-right: 82px;
 }
 
 .x-small .component-legend, .small .component-legend {
-  font-size: 8px;
+  display: none;
 }
 .component-legend {
   color: white;
@@ -280,7 +302,7 @@ width: 75px;
   left: 5px;
   z-index: 20;
   padding: 1px 4px;
-  font-size: 10px;
+  font-size: 12px;
   line-height: 14px;
   background-color: rgba(34,34,34,.8);
   text-shadow: 1px 1px 2px #000;
@@ -293,7 +315,7 @@ width: 75px;
 .discard {
   position: absolute;
   bottom: 3px;
-  left: 25px;
+  left: 15px;
 }
 
 .discard .component-legend {

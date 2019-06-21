@@ -29,14 +29,31 @@ class GameComponent extends Component {
     this.props.clearZoom()
   }
 
+  renderEssences = () => {
+    const {essencesOnComponent} = this.props
+    let essences
+    if(essencesOnComponent) {
+      essences = Object.entries(essencesOnComponent).map((essence) => {
+         return essence[1] > 0 && <div className={'essence ' + essence[0]}>{essence[1]}</div>
+      })
+    }
+    return <div className="essence-on-component">
+      {essences}
+    </div>
+  }
+
   render() {
     const {component, discard, onClick, onDoubleClick, profile, selectedCard, tappedComponents } = this.props
-    const src = require('../../../assets/image/components/' + component.type + '/' + component.class + '.png')
+    let src = null
+    if (component.class) {
+      src = require('../../../assets/image/components/' + component.type + '/' + component.class + '.png')
+    }
     const cardSize = (profile.cardSize ? profile.cardSize : ' normal ')
     const componentType = COMPONENTS_STYLES[component.type]
     const active = selectedCard && selectedCard.id === component.id ? ' active ' : ''
     const tapped = (tappedComponents.indexOf(component.id) >= 0) || discard ? ' tapped ' : ''
     const layout = ' vertical ';
+    const essences = this.renderEssences()
     return (
       <div
         key={component.id}
@@ -46,12 +63,13 @@ class GameComponent extends Component {
         onMouseOver={() => this.handleMouseOver(component)}
         onMouseOut={() => this.handleMouseOut()}
       >
-        <Card
+        {essences}
+        {component.class && <Card
           classes={cardSize + layout + componentType}
           src={ src }
           show={ true } 
           alt={ component.name ? component.name : null } 
-        />
+        />}
       </div>
     )
   }

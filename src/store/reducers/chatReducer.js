@@ -1,5 +1,6 @@
 const initState = {
-  chat: null
+  chat: null,
+  chatDisplay: true
 }
 
 const chatReducer = (state = initState, action) => {
@@ -8,6 +9,11 @@ const chatReducer = (state = initState, action) => {
       return {
         ...state,
         chat: action.chat,
+      }
+    case 'TOGGLE_CHAT':
+      return {
+        ...state,
+        chatDisplay: !state.chatDisplay
       }
     default:
       return state;

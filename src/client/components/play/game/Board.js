@@ -2,10 +2,12 @@ import React, { Component } from 'react'
 import { Button } from 'react-bootstrap'
 import PropTypes from 'prop-types'
 import './board.css'
+import './essence.scss'
 import { compose } from 'redux'
 import { connect } from 'react-redux'
 import { firestoreConnect, isLoaded } from 'react-redux-firebase'
 import { selectCard, tapComponent } from '../../../../store/actions/gameActions'
+import { toggleChat } from '../../../../store/actions/chatActions'
 import CardZoom from '../../common/card/CardZoom.js'
 import Chat from '../../common/chat/Chat'
 import GameComponent from './GameComponent'
@@ -96,7 +98,7 @@ class ResArcanaBoard extends Component {
     const essences = ['elan', 'life', 'calm', 'death', 'gold']
     return essences.map((essence, index) => {
       return <div className={'essence ' + essence} key={index}>
-        <div className="essence-count">{G.publicData.players[id].essencePool[essence]}</div>
+        <div className="essence-count">{G.publicData.players[id].essencesPool[essence]}</div>
       </div>
     })
   }
@@ -105,6 +107,10 @@ class ResArcanaBoard extends Component {
     this.props.tapComponent(card)
   }
 
+  toggleChat = () => {
+    this.props.toggleChat()
+  }
+  
   /**
    * This action is used to select cards during draft phase.
    */
@@ -207,13 +213,15 @@ class ResArcanaBoard extends Component {
    * The ruban contains : player name, first player token, essence pool and hand size.
    */
   renderPlayerRuban = (playerId) => {
-    const { G } = this.props
+    const { G, ctx } = this.props
     const playerName = this.getPlayersName()[parseInt(playerId)]
     const firstPlayer = this.renderFirstPlayerToken(playerId)
     const playerPool = this.renderPlayerPool(playerId)
     const handSize = G.publicData.players[playerId].handSize
     const cardsInHand = <div>{handSize}</div>
-    return <div className="ruban">
+    const activePlayer = G.phase !== 'DRAFT_PHASE' && playerId == ctx.currentPlayer ? ' active-player': ''
+    const passed = G.passOrder && G.passOrder.includes(playerId) ? ' passed': ''
+    return <div className={'ruban ' + activePlayer + passed}>
       <div className="leftCell">
         <div className="first-player">{firstPlayer}</div>
         <div className="player-name">{playerName}</div>
@@ -235,21 +243,25 @@ class ResArcanaBoard extends Component {
     return <div className="draw-pile">
       <div className="card-container discard">
         <span className="component-legend">Discard ({countDiscard})</span>
-        <GameComponent component={drawPile} discard={true}/>
+        <GameComponent component={{...drawPile, class: countDiscard > 0 ? drawPile.class : null}} discard={true}/>
       </div>
       <div className="card-container">
         <span className="component-legend">Draw pile ({countDeck})</span>
-        <GameComponent component={drawPile}/>
+        <GameComponent component={{...drawPile, class: countDeck > 0 ? drawPile.class : null}}/>
       </div>
     </div>
   }
 
   renderPlayerHand = () => {
-    const { G, playerID } = this.props
+    const { G, playerID, profile } = this.props
     const hand = G.players[playerID].hand.map((card)=>{
       return <GameComponent key={card.id} component={card} />
     })
-    return hand;
+    return <div className={'draft-card card-row ' + profile.cardSize}>
+      <div className="separator"></div>
+      <h5>Cards in hand</h5>
+      {hand}
+    </div>;
   }
 
   /**
@@ -261,25 +273,26 @@ class ResArcanaBoard extends Component {
     if (!Number.isInteger(parseInt(id))) return null
 
     let cards = null
-    let drawPileAndDiscard = null
+    let drawPileAndDiscard = this.renderPlayerDrawPileAndDiscard(id)
+    let essencesOnComponent = null
     switch (G.publicData.players[playerID].status) {
       case 'DRAFTING_ARTEFACTS':
         const mages = G.players[playerID].mages.map((card)=>{
           return <GameComponent key={card.id} component={card} />
         })
+        essencesOnComponent = G.publicData.players[id].essencesOnComponent
         const deck = G.players[playerID].hand.map((card)=>{
-          return <GameComponent key={card.id} component={card} />
+          return <GameComponent key={card.id} component={card} essencesOnComponent={essencesOnComponent[card.id]} />
         })
         cards = <>{mages}{deck}</>
         break
       case 'SELECTING_MAGE':
-        drawPileAndDiscard = this.renderPlayerDrawPileAndDiscard(id)
         break
       case 'READY':
       default:
-        drawPileAndDiscard = this.renderPlayerDrawPileAndDiscard(id)
+        essencesOnComponent = G.publicData.players[id].essencesOnComponent
         cards = G.publicData.players[id].inPlay.map((card)=>{
-          return <GameComponent key={card.id} component={card} />
+          return <GameComponent key={card.id} component={card} essencesOnComponent={essencesOnComponent[card.id]} />
         })
     }
 
@@ -305,9 +318,28 @@ class ResArcanaBoard extends Component {
     const othersId = othersNextId.concat(othersPrevId)
     
     let boards = null;
-    let drawPileAndDiscard = null
+    let drawPileAndDiscard = (id) => this.renderPlayerDrawPileAndDiscard(id)
     switch (G.publicData.players[playerID].status) {
       case 'DRAFTING_ARTEFACTS':
+        boards = othersId.map((id) =>{
+          const playerRuban = this.renderPlayerRuban(id)
+          let cards = []
+          let cardMage = copy(CARD_BACK_MAGE)
+          cards.push(<GameComponent key={id+'_back_mage_1'} component={{...cardMage, id: 'back_mage_1'}}/>)
+          if (G.publicData.players[id].status !== 'READY') {
+            cards.push(<GameComponent key={id+'_back_mage_2'} component={{...cardMage, id: 'back_mage_2'}}/>)
+          }
+          return (
+            <div key={id}>
+              {playerRuban}
+              <div className={'card-row ' + profile.cardSize}>
+                {cards}
+                {drawPileAndDiscard(id)}
+              </div>
+            </div>
+          )
+        })
+        break
       case 'SELECTING_MAGE':
         boards = othersId.map((id) =>{
           const playerRuban = this.renderPlayerRuban(id)
@@ -315,7 +347,7 @@ class ResArcanaBoard extends Component {
             <div key={id}>
               {playerRuban}
               <div className={'card-row ' + profile.cardSize}>
-                {drawPileAndDiscard}
+                {drawPileAndDiscard(id)}
               </div>
             </div>
           )
@@ -429,9 +461,8 @@ class ResArcanaBoard extends Component {
         break
       case 'READY':
         title = `Get Ready to pick your magic item`
-        hand = this.renderPlayerHand()
         showCards = false
-        console.log('READY ',G.publicData)
+        
         const playersNotReady = Object.entries(G.publicData.players).filter((player) => {
           return player[1].status !== 'READY'
         })
@@ -444,6 +475,7 @@ class ResArcanaBoard extends Component {
         })
         waiting = true
         showButtons = false
+        hand = this.renderPlayerHand()
         break
       default:
     }
@@ -461,11 +493,7 @@ class ResArcanaBoard extends Component {
         {showButtons && <div className={waiting ? 'game-button hidden': 'game-button'}>
           {confirmButton} {cancelButton}
         </div>}
-        <div className={'draft-card card-row ' + profile.cardSize}>
-          <div className="separator"></div>
-          <h5>Cards in hand</h5>
-          {hand}
-        </div>
+        {hand}
       </div>
     </>
   }
@@ -513,11 +541,7 @@ class ResArcanaBoard extends Component {
         {showButtons && <div className={waiting ? 'game-button hidden': 'game-button'}>
           {confirmButton} {cancelButton}
         </div>}
-        <div className={'draft-card card-row ' + profile.cardSize}>
-          <div className="separator"></div>
-          <h5>Cards in hand</h5>
-          {hand}
-        </div>
+        {hand}
       </div>
     </>
   }
@@ -543,11 +567,7 @@ class ResArcanaBoard extends Component {
         {showButtons && <div className={waiting ? 'game-button hidden': 'game-button'}>
           {confirmButton} {cancelButton}
         </div>}
-        <div className={'draft-card card-row ' + profile.cardSize}>
-          <div className="separator"></div>
-          <h5>Cards in hand</h5>
-          {hand}
-        </div>
+        {hand}
       </div>
     </>
   }
@@ -577,7 +597,7 @@ class ResArcanaBoard extends Component {
   }
 
   render() {
-    const { G, ctx, game, cardToZoom, profile } = this.props
+    const { G, ctx, chatDisplay, game, cardToZoom, profile } = this.props
     console.log('G',G, ctx)
     
     if (!isLoaded(game)) {
@@ -609,7 +629,7 @@ class ResArcanaBoard extends Component {
       </div>
       <div className="right-panel">
         {cardToZoom && this.renderCardZoom()}
-        {this.renderChat()}
+        {chatDisplay && this.renderChat()}
       </div>
     </div>
   }
@@ -619,6 +639,7 @@ const mapStateToProps = (state) => {
   return {
     auth: state.firebase.auth,
     chat : state.firestore.ordered.chat && state.firestore.ordered.chat[0],
+    chatDisplay: state.chat.chatDisplay,
     cardToZoom: state.game.zoomCard,
     currentGame: state.firestore.data.currentGame,
     game: state.firestore.ordered.game && state.firestore.ordered.game[0],
@@ -631,7 +652,8 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => {
   return {
     selectCard: (card) => dispatch(selectCard(card)),
-    tapComponent: (card) => dispatch(tapComponent(card))
+    tapComponent: (card) => dispatch(tapComponent(card)),
+    toggleChat: () => dispatch(toggleChat())
   }
 }
 

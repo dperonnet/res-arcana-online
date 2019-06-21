@@ -273,7 +273,10 @@ div.place-of-power, div.magic-item, div.card {
 }
 
 .card.active {
-  border : 2px solid #F5B041;
+  box-shadow: 0 0 2pt 2pt #F5B041;
+}
+.magic-item.active {
+  box-shadow: 0 0 2pt 2pt #F5B041;
 }
 
 img {
