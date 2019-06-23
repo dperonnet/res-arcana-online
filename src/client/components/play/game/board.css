@@ -221,15 +221,15 @@
 }
 
 .essence.life {
-  background-position: -44px 5px;
+  background-position: -43px 5px;
 }
 
 .essence.calm {
-  background-position: -91px 5px;
+  background-position: -90px 5px;
 }
 
 .essence.death {
-  background-position: -138px 5px;
+  background-position: -137px 5px;
 }
 
 .essence.gold {
@@ -250,10 +250,6 @@ width: 61px;
   text-align: left;
 background-position: -151px -81px;
 width: 75px;
-}
-
-.essence-count {
-  margin-left: -3px;
 }
 
 .cards-in-hand {
@@ -321,4 +317,10 @@ width: 75px;
 .discard .component-legend {
   left: unset;
   right: 0;
+}
+
+.close-chat {
+  position: absolute;
+  right: 4px;
+  top: 42px;
 }

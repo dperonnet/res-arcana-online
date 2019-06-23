@@ -12,9 +12,7 @@ export const COMPONENTS_TYPE = [
 
 export const DEFAULT_STANDARD_COLLECT_ABILITY = {
   multipleCollectOptions: false,
-  essenceList: {
-    elan: 0, life: 0, calm: 0, death: 0, gold: 0, any: 0, anyButGold: 0, anyButDeathGold: 0,
-  }
+  essenceList: {}
 };
 
 export const DEFAULT_COMPONENT = {

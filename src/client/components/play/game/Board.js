@@ -1,5 +1,7 @@
 import React, { Component } from 'react'
 import { Button } from 'react-bootstrap'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import PropTypes from 'prop-types'
 import './board.css'
 import './essence.scss'
@@ -71,17 +73,27 @@ class ResArcanaBoard extends Component {
    */
   renderChat = () => {
     const { chat, game } = this.props
-    return <Chat chat={chat} chatId={game.id} chatName={game.name + ' Chat'}/>
+    return <>
+      <Chat chat={chat} chatId={game.id} chatName={game.name + ' Chat'}/>
+        <div className="close close-chat" onClick={this.toggleChat}>
+        <FontAwesomeIcon icon={faTimes} size="lg" />
+      </div>
+    </>
   }
 
   /**
    * Render the component to Zoom.
    */
   renderCardZoom = () => {
-    const { cardToZoom, profile } = this.props
+    const { G, cardToZoom, profile } = this.props
     const src = require('../../../assets/image/components/' + cardToZoom.type + '/' + cardToZoom.class + '.png')
+    const playerOwningCard = Object.values(G.publicData.players).filter((player) => {
+      return Object.keys(player.essencesOnComponent).includes(cardToZoom.id)
+    })[0]
+    const essencesOnComponent = playerOwningCard ? playerOwningCard.essencesOnComponent[cardToZoom.id] : null
+    console.log('essencesOnComponent',essencesOnComponent)
     return <div className={'card-zoom-frame ' + (profile.cardSize ? profile.cardSize : 'normal')}>
-      <CardZoom src={src} show={true} alt={cardToZoom.name}  />
+      <CardZoom src={src} show={true} alt={cardToZoom.name} essencesOnComponent={essencesOnComponent} />
     </div>
   }
 
@@ -94,7 +106,6 @@ class ResArcanaBoard extends Component {
 
   renderPlayerPool = (id) => {
     const { G } = this.props
-    console.log('id',id, G)
     const essences = ['elan', 'life', 'calm', 'death', 'gold']
     return essences.map((essence, index) => {
       return <div className={'essence ' + essence} key={index}>
@@ -219,7 +230,7 @@ class ResArcanaBoard extends Component {
     const playerPool = this.renderPlayerPool(playerId)
     const handSize = G.publicData.players[playerId].handSize
     const cardsInHand = <div>{handSize}</div>
-    const activePlayer = G.phase !== 'DRAFT_PHASE' && playerId == ctx.currentPlayer ? ' active-player': ''
+    const activePlayer = G.phase !== 'DRAFT_PHASE' && playerId === ctx.currentPlayer ? ' active-player': ''
     const passed = G.passOrder && G.passOrder.includes(playerId) ? ' passed': ''
     return <div className={'ruban ' + activePlayer + passed}>
       <div className="leftCell">
@@ -547,7 +558,7 @@ class ResArcanaBoard extends Component {
   }
   
   renderActionBoard = () => {
-    const { G, playerID, profile, selectedCard } = this.props
+    const { playerID, selectedCard } = this.props
     if (!Number.isInteger(parseInt(playerID))) return null
 
     let title = 'Play Phase'

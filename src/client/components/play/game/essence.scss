@@ -70,7 +70,7 @@
   }
 }
 
-.normal {
+.noarmal {
   .essence-on-component .essence {
     background-size: 175px;
     height: 35px;
@@ -96,14 +96,22 @@
   }
 }
 
-.large, .x-large {
-  .essence-on-component {
-    width: 125px;
+.normal {
+  .essence-on-component .essence {
+    height: 42px;
+    padding-top: 26px;
+  
   }
 }
 
-.normal .essence-on-component {
-  top: 10px;
+.large, .x-large {
+  .essence-on-component {
+    width: 125px;
+
+    .essence {
+      padding-top: 26px;
+    }
+  }
 }
 
 .large .essence-on-component {
@@ -112,4 +120,18 @@
 
 .x-large .essence-on-component {
   top: 75px;
+}
+
+.card-zoom-frame {
+  &.normal, &.large, &.x-large {
+    .essence-on-component {
+      top: 0px;
+      width: 100%;
+    }
+  }
+  &.normal {
+    .essence-on-component {
+      height: 50px;
+    }
+  }
 }

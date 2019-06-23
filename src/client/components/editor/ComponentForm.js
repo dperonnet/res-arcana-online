@@ -1,15 +1,15 @@
 import React, { Component } from 'react'
 import { Button, ButtonToolbar, Form, InputGroup} from 'react-bootstrap'
 import { COMPONENTS_TYPE, DEFAULT_COMPONENT, DEFAULT_STANDARD_COLLECT_ABILITY } from './EditorConstants'
-import { connect } from 'react-redux';
+import { connect } from 'react-redux'
 import { deleteComponent, saveComponent } from '../../../store/actions/editorActions'
 
 class ComponentForm extends Component {
   constructor(props) {
-    super(props);
+    super(props)
     this.state = {
       component: this.getDefaultComponent()
-    };
+    }
   }
 
   componentDidUpdate(prevProps) {
@@ -21,68 +21,68 @@ class ComponentForm extends Component {
   }
 
   getDefaultComponent = () => {
-    const { pristineComponent } = this.props;
+    const { pristineComponent } = this.props
     const component = Object.keys(pristineComponent).length !== 0 ?
-      pristineComponent : DEFAULT_COMPONENT;
+      pristineComponent : DEFAULT_COMPONENT
     return JSON.parse(JSON.stringify(component))
   }
 
   handleReset = () => {
     this.setState({ component: this.getDefaultComponent()})
-    this.props.onReset();
+    this.props.onReset()
   }
 
   handleFormChange = (changeEvent) => {
-    const { checked, name, value, type } = changeEvent.target;
-    const { component } = this.state;
-    const valueToUpdate = type === 'checkbox' ? checked : value;
-    let newComponent;
+    const { checked, name, value, type } = changeEvent.target
+    const { component } = this.state
+    const valueToUpdate = type === 'checkbox' ? checked : value
+    let newComponent
     if (name === 'hasStandardCollectAbility') {
       if (valueToUpdate === true) {
-        const newSCA = JSON.parse(JSON.stringify(DEFAULT_STANDARD_COLLECT_ABILITY));
-        component.standardCollectAbility = newSCA;
+        const newSCA = JSON.parse(JSON.stringify(DEFAULT_STANDARD_COLLECT_ABILITY))
+        component.standardCollectAbility = newSCA
       } else {
-        delete component.standardCollectAbility;
+        delete component.standardCollectAbility
       }
       newComponent = {
         ...component,
         [name]: valueToUpdate
-      };
+      }
     }
     else {
       newComponent = {
         ...component,
         [name]: valueToUpdate
-      };
+      }
     }
-    this.setState({component: newComponent});
-    this.props.showComponentJSON(newComponent);
+    this.setState({component: newComponent})
+    this.props.showComponentJSON(newComponent)
   }
 
   handleFormChangeByName = (name, valueToUpdate) => {
-    const { component } = this.state;
+    const { component } = this.state
     let newComponent = {
       ...component,
       [name]: valueToUpdate
     }
-    this.setState({component: newComponent});
-    this.props.showComponentJSON(newComponent);
+    this.setState({component: newComponent})
+    this.props.showComponentJSON(newComponent)
   }
 
   clearCollectOptions = () => {
-    let data = {...this.state.component.standardCollectAbility};
+    let data = {...this.state.component.standardCollectAbility}
     for (var property in data.essenceList) {
       if (data.essenceList.hasOwnProperty(property)) {
-          data.essenceList[property] = 0;
+          data.essenceList[property] = 0
       }
     }
-    this.handleFormChangeByName('standardCollectAbility', data);
+    this.handleFormChangeByName('standardCollectAbility', data)
   }
 
   render() {
-    const { onSave } = this.props;
-    const { component } = this.state;
-    const componentsType = JSON.parse(JSON.stringify(COMPONENTS_TYPE));
+    const { onSave } = this.props
+    const { component } = this.state
+    const componentsType = JSON.parse(JSON.stringify(COMPONENTS_TYPE))
 
     return (
       <div className="form-panel flex-grow">
@@ -190,7 +190,7 @@ class ComponentForm extends Component {
           </form>
         }
       </div>
-    );
+    )
   }
 }
 
@@ -215,44 +215,48 @@ export default connect(mapStateToProps, mapDispatchToProps)(ComponentForm)
 class EssencePanel extends Component {
 
   handleFormChange = (changeEvent) => {
-    const { checked, name, value, type } = changeEvent.target;
-    const valueToUpdate = type === 'checkbox' ? checked: value;
-    let data = {...this.props.standardCollectAbility};
-    data[name] = valueToUpdate;
-    this.props.onChangeByName('standardCollectAbility', data);
+    const { checked, name, value, type } = changeEvent.target
+    const valueToUpdate = type === 'checkbox' ? checked: value
+    let data = {...this.props.standardCollectAbility}
+    data[name] = valueToUpdate
+    this.props.onChangeByName('standardCollectAbility', data)
   }
 
   decrement = (type) => {
-    let data = {...this.props.standardCollectAbility};
-    data.essenceList[type] = this.props.standardCollectAbility.essenceList[type] > 0 ? --this.props.standardCollectAbility.essenceList[type] : 0;
-    this.props.onChangeByName('standardCollectAbility', data);
+    let data = {...this.props.standardCollectAbility}
+    if(this.props.standardCollectAbility.essenceList[type] > 1) {
+      data.essenceList[type] =  --this.props.standardCollectAbility.essenceList[type]
+    } else {
+      delete data.essenceList[type]
+    }
+    this.props.onChangeByName('standardCollectAbility', data)
   }
 
   increment = (type) => {
-    let data = {...this.props.standardCollectAbility};
-    data.essenceList[type] = this.props.standardCollectAbility.essenceList[type] >= 0 ? ++this.props.standardCollectAbility.essenceList[type] : 1;
-    this.props.onChangeByName('standardCollectAbility', data);
+    let data = {...this.props.standardCollectAbility}
+    data.essenceList[type] = this.props.standardCollectAbility.essenceList[type] >= 0 ? ++this.props.standardCollectAbility.essenceList[type] : 1
+    this.props.onChangeByName('standardCollectAbility', data)
   }
 
   render() {
     const { hasStandardCollectAbility, standardCollectAbility } = this.props
-    const essenceListFromProps = standardCollectAbility.essenceList;
-    const essenceList = [ 'elan', 'life', 'calm', 'death', 'gold', 'any', 'anyButGold', 'anyButDeathGold'];
+    const essenceListFromProps = standardCollectAbility.essenceList
+    const essenceList = [ 'elan', 'life', 'calm', 'death', 'gold', 'any', 'anyButGold', 'anyButDeathGold']
     const components = essenceList.map((type, index) => (
     <div className="essence-list" key={index} >
         <InputGroup.Prepend>
-          <InputGroup.Text className={"help-card-min "+type} id={type+'Essence'}>{essenceListFromProps[type]}</InputGroup.Text>
+          <InputGroup.Text className={"help-card-min "+type} id={type+'Essence'}>{essenceListFromProps[type] || 0}</InputGroup.Text>
         </InputGroup.Prepend>
         <InputGroup.Append>
           <div className="vertical-buttons">
             <Button variant="secondary" id={'lower'+type+'CollectOptions'}
-            onClick={() => this.increment(type)}><span>+</span></Button>
+              onClick={() => this.increment(type)}><span>+</span></Button>
             <Button variant="secondary" id={'raise'+type+'Essence'}
-            onClick={() => this.decrement(type)}><span>-</span></Button>
+              onClick={() => this.decrement(type)}><span>-</span></Button>
           </div>
         </InputGroup.Append>
       </div>
-    ));
+    ))
     return (
       <div>
         { hasStandardCollectAbility === true ?
@@ -273,6 +277,6 @@ class EssencePanel extends Component {
           : <div></div>
         }
       </div> 
-    );
+    )
   }
 }
