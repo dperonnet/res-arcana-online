@@ -70,37 +70,10 @@
   }
 }
 
-.noarmal {
-  .essence-on-component .essence {
-    background-size: 175px;
-    height: 35px;
-    width: 33px;
-    padding-top: 18px;
-    
-    &.elan {
-      background-position: 3px 0;
-    }
-    &.life {
-      background-position: -33px 0;
-    }
-    &.calm {
-      background-position: -71px 0;
-    }
-    &.death {
-      background-position: -108px 0;
-    }
-    &.gold {
-      background-position: -145px 0;
-    }
-
-  }
-}
-
 .normal {
   .essence-on-component .essence {
     height: 42px;
     padding-top: 26px;
-  
   }
 }
 
@@ -134,4 +107,111 @@
       height: 50px;
     }
   }
+}
+
+.collect-options {
+  .collect-option {
+    display: inline-block;
+    vertical-align: bottom;
+
+    .btn {
+      outline: none !important;
+      box-shadow: none !important;
+    }
+  }
+
+  .option-reset {
+    font-size: 1rem;
+    opacity: 0.5;
+    margin-left: 4px;
+    color: white;
+
+    &:hover {
+      text-decoration: none;
+      cursor: pointer;
+    }
+    
+    &:not(:disabled):not(.disabled):focus, &:not(:disabled):not(.disabled):hover {
+      opacity: 0.75;
+    }
+  }
+
+  .option-and, .option-or, .option-reset {
+    display: inline-block;
+    padding-top: 5px;
+  }
+
+  .btn, .type {
+    background-color: unset;
+    border: none;
+    
+    background-size: 175px;
+    height: 35px;
+    width: 35px;
+    padding-top: 5px;
+    margin-left: 0;
+    
+    &:hover {
+      background-color: unset;
+    }
+
+    &.elan {
+      background-position: 5px 1px;
+    }
+    &.life {
+      background-position: -32px 1px;
+    }
+    &.calm {
+      background-position: -70px 1px;
+    }
+    &.death {
+      background-position: -107px 1px;
+    }
+    &.gold {
+      background-position: -145px 1px;
+    }
+  }
+}
+
+.essence-picker {
+  display: inline-block;
+  vertical-align: top;
+
+  .active {
+    box-shadow: 0 0 2pt 2pt #FF6031;
+  }
+}
+
+.collect-icon {
+  display: inline-block;
+  color: ghostwhite;
+  font-weight: bold;
+  font-size: large;
+  text-align: center;
+  background-image: url("../../../assets/image/collect_icon.png");
+  background-repeat: no-repeat;
+  background-size: 24px;
+  height: 30px;
+  width: 24px;
+  margin-right: 4px;
+  padding-top: 2px;
+  vertical-align: top;
+  background-position: 0 5px;
+}
+
+.on-component-icon {
+  display: inline-block;
+  color: ghostwhite;
+  font-weight: bold;
+  font-size: large;
+  text-align: center;
+  background-image: url("../../../assets/image/on_component.png");
+  background-repeat: no-repeat;
+  background-size: 24px;
+  height: 30px;
+  width: 24px;
+  margin-right: 4px;
+  padding-top: 2px;
+  vertical-align: top;
+  background-position: 0 5px;
 }

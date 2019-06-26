@@ -8,11 +8,12 @@ import './essence.scss'
 import { compose } from 'redux'
 import { connect } from 'react-redux'
 import { firestoreConnect, isLoaded } from 'react-redux-firebase'
-import { selectCard, tapComponent } from '../../../../store/actions/gameActions'
+import { resetCollect, selectCard, setCollectAction, tapComponent } from '../../../../store/actions/gameActions'
 import { toggleChat } from '../../../../store/actions/chatActions'
 import CardZoom from '../../common/card/CardZoom.js'
 import Chat from '../../common/chat/Chat'
 import GameComponent from './GameComponent'
+import EssencePicker from './EssencePicker'
 
 
 const CARD_BACK_ARTEFACT = {
@@ -91,7 +92,6 @@ class ResArcanaBoard extends Component {
       return Object.keys(player.essencesOnComponent).includes(cardToZoom.id)
     })[0]
     const essencesOnComponent = playerOwningCard ? playerOwningCard.essencesOnComponent[cardToZoom.id] : null
-    console.log('essencesOnComponent',essencesOnComponent)
     return <div className={'card-zoom-frame ' + (profile.cardSize ? profile.cardSize : 'normal')}>
       <CardZoom src={src} show={true} alt={cardToZoom.name} essencesOnComponent={essencesOnComponent} />
     </div>
@@ -159,6 +159,10 @@ class ResArcanaBoard extends Component {
     this.props.selectCard(card)
   }
 
+  handleResetCollect = () => {
+    this.props.resetCollect()
+  }
+
   /**
    * Render the common components for the game:
    * Places of Power, Magic Items and Monuments.
@@ -204,7 +208,6 @@ class ResArcanaBoard extends Component {
    */
   renderBoard = (dialogBoard) => {
     const { playerID } = this.props
-    console.log('playerID',playerID)
     const playerRuban = this.renderPlayerRuban(playerID)
     const playerBoard = this.renderPlayerBoard(playerID)
     const othersBoard = this.renderOthersBoard()
@@ -425,7 +428,7 @@ class ResArcanaBoard extends Component {
     let draftCards = null
     let hand = null
     let directive = null
-    let handleConfirm= null;
+    let handleConfirm = null;
     const lastDraftCard = G.players[playerID].draftCards.length && G.players[playerID].draftCards[0].length === 1
     const nextPlayer = this.getNextPlayer()
     const playersName = this.getPlayersName()
@@ -527,7 +530,7 @@ class ResArcanaBoard extends Component {
     })
   
     let directive = null
-    let handleConfirm= null;
+    let handleConfirm = null;
 
     switch (G.publicData.players[playerID].status) {
       case 'SELECTING_MAGIC_ITEM':
@@ -556,7 +559,80 @@ class ResArcanaBoard extends Component {
       </div>
     </>
   }
-  
+
+  renderCollectDialog = () => {
+    const { G, ctx, playerID, profile, collectActions } = this.props
+    if (!Number.isInteger(parseInt(playerID))) return null
+    const playersName = this.getPlayersName()
+    const essencesOnComponent = G.publicData.players[playerID].essencesOnComponent
+    let components = G.publicData.players[playerID].inPlay.filter((component) => {
+      return Object.keys(essencesOnComponent).includes(component.id) ||
+        component.hasStandardCollectAbility || component.hasSpecificCollectAbility && component.id === 'forgeMaudite'
+    })
+
+    let collectComponents = components.map((component, index) => {
+      const requireAction = (component.hasStandardCollectAbility && component.standardCollectAbility.multipleCollectOptions 
+      || component.hasSpecificCollectAbility)
+      const valid = Object.keys(collectActions).includes(component.id) && collectActions[component.id].valid
+      const classes = requireAction && !valid ? ' active ' : ''
+      return <div className="essence-picker" key={component.id + '_' + index} >
+        <GameComponent component={component} classes={classes}  essencesOnComponent={essencesOnComponent[component.id]} />
+        <EssencePicker component={component} />
+      </div>
+    })
+
+    let title = 'Collect Phase'
+    let waiting = playerID !== ctx.currentPlayer
+    let waitingFor = ' - ' + playersName[parseInt(ctx.currentPlayer)] + '\'s turn.'
+    let hand = this.renderPlayerHand()
+    let showButtons = !waiting
+    let directive = null
+    let handleConfirm = null
+    let collectValid = true
+
+    components.forEach((component) => {
+      console.log('test1',component.hasStandardCollectAbility && component.standardCollectAbility.multipleCollectOptions)
+      console.log('test2', component.hasSpecificCollectAbility)
+      if (component.hasStandardCollectAbility && component.standardCollectAbility.multipleCollectOptions 
+        || component.hasSpecificCollectAbility) {
+        collectValid = collectValid && Object.keys(collectActions).includes(component.id)
+          && collectActions[component.id].valid
+      }
+    })
+
+    switch (G.publicData.players[playerID].status) {
+      case 'COLLECT_ACTION_AVAILABLE':
+        directive = <div className="info">You may collect essence.</div>
+        break
+      case 'COLLECT_ACTION_REQUIRED':
+        directive = collectValid ?
+            <div className="info">Confirm your collect option(s).</div>
+          :
+            <div className="info">You have to select collect option(s).</div>
+        break
+      case 'READY':
+      default:
+        
+    }
+
+    const confirmButton = <Button variant="primary" size="sm" onClick={handleConfirm} disabled={!collectValid}>Confirm</Button>
+    const resetButton = <Button variant="secondary" size="sm" onClick={() => this.handleResetCollect()}>Reset</Button>
+    
+    return <>
+      <div className='draft-card-panel'>
+        <h5>{title}{waitingFor}</h5>
+        <div className={'draft-card card-row ' + profile.cardSize}>
+          {collectComponents}
+        </div>
+        {directive}
+        {showButtons && <div className={waiting ? 'game-button hidden': 'game-button'}>
+          {confirmButton} {resetButton}
+        </div>}
+        {hand}
+      </div>
+    </>
+  }
+
   renderActionBoard = () => {
     const { playerID, selectedCard } = this.props
     if (!Number.isInteger(parseInt(playerID))) return null
@@ -592,7 +668,7 @@ class ResArcanaBoard extends Component {
   }
   
   /**
-   * This function render the board during Magic Item Phase
+   * This function render the board during Magic Item Phase.
    */
   renderMagicItemPhaseBoard = () => {
     const dialogBoard = this.renderMagicItemDialog()
@@ -600,7 +676,15 @@ class ResArcanaBoard extends Component {
   }
 
   /**
-   * This function render the board during Action Phase
+   * This functio render the board during Collect Phase.
+   */
+  renderCollectPhaseBoard = () => {
+    const dialogBoard = this.renderCollectDialog()
+    return this.renderBoard(dialogBoard)
+  }
+
+  /**
+   * This function render the board during Action Phase.
    */
   renderActionPhaseBoard = () => {
     const dialogBoard = this.renderActionBoard()
@@ -608,8 +692,8 @@ class ResArcanaBoard extends Component {
   }
 
   render() {
-    const { G, ctx, chatDisplay, game, cardToZoom, profile } = this.props
-    console.log('G',G, ctx)
+    const { G, chatDisplay, game, cardToZoom, profile } = this.props
+    //console.log('G',G, ctx)
     
     if (!isLoaded(game)) {
       return <div className="loading-panel align-center"><img className="loader" alt="Loading..."/>Loading...</div>
@@ -623,6 +707,9 @@ class ResArcanaBoard extends Component {
         break
       case 'PICK_MAGIC_ITEM_PHASE':
         board = this.renderMagicItemPhaseBoard()
+        break
+      case 'COLLECT_PHASE':
+        board = this.renderCollectPhaseBoard()
         break
       case 'PLAY_PHASE':
         board = this.renderActionPhaseBoard()
@@ -652,6 +739,7 @@ const mapStateToProps = (state) => {
     chat : state.firestore.ordered.chat && state.firestore.ordered.chat[0],
     chatDisplay: state.chat.chatDisplay,
     cardToZoom: state.game.zoomCard,
+    collectActions: state.game.collectActions,
     currentGame: state.firestore.data.currentGame,
     game: state.firestore.ordered.game && state.firestore.ordered.game[0],
     profile: state.firebase.profile,
@@ -662,7 +750,9 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
+    resetCollect: () => dispatch(resetCollect()),
     selectCard: (card) => dispatch(selectCard(card)),
+    setCollectAction: (action) => dispatch(setCollectAction(action)),
     tapComponent: (card) => dispatch(tapComponent(card)),
     toggleChat: () => dispatch(toggleChat())
   }

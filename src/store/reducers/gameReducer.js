@@ -2,11 +2,14 @@ const initState = {
   cardToZoom: undefined,
   games: [],
   selectedCard: undefined,
-  tappedComponents: []
+  tappedComponents: [],
+  collectActions: {},
+  collectOnComponentActions: {}
 }
 
 const gameReducer = (state = initState, action) => {
-  const debug = false;
+  const debug = false
+  let collectActions
   switch (action.type) {
     case 'CREATE_GAME':
       debug && console.log('create game', action.doc.id);
@@ -56,6 +59,28 @@ const gameReducer = (state = initState, action) => {
       }
       return Object.assign({}, state, {
         tappedComponents
+      });
+    case 'RESET_COLLECT':
+      return Object.assign({}, state, {
+        collectActions: {}
+      });
+    case 'RESET_COLLECT_ACTION':
+      collectActions = JSON.parse(JSON.stringify(state.collectActions))
+      delete collectActions[action.id]
+      return Object.assign({}, state, {
+        collectActions
+      });
+    case 'SET_COLLECT_ACTION':
+      collectActions = JSON.parse(JSON.stringify(state.collectActions))
+      collectActions[action.action.id] = action.action
+      return Object.assign({}, state, {
+        collectActions
+      });
+    case 'SET_COLLECT_ON_COMPONENT_ACTION':
+      let collectOnComponentActions = JSON.parse(JSON.stringify(state.collectOnComponentActions))
+      collectOnComponentActions[action.action.id] = action.action
+      return Object.assign({}, state, {
+        collectOnComponentActions
       });
     default:
       return state;

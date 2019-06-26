@@ -571,11 +571,17 @@ export const GameComponents = [
       "id":"montureCeleste",
       "class":"monture_celeste",
       "hasSpecificCollectAbility":false,
-      "hasStandardCollectAbility":false,
+      "hasStandardCollectAbility":true,
       "isCreature":false,
       "isDragon":false,
       "name":"Monture Céleste",
-      "type":"artefact"
+      "type":"artefact",
+      "standardCollectAbility":{
+         "essenceList":{
+            "anyButDeathGold":2
+         },
+         "multipleCollectOptions":true,
+      }
    },
    {
       "id":"mortVie",

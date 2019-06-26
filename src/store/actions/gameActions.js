@@ -367,3 +367,30 @@ export function tapComponent(card) {
     card: card
   }
 }
+
+export function resetCollect() {
+  return {
+    type: 'RESET_COLLECT'
+  }
+}
+
+export function resetCollectAction(id) {
+  return {
+    type: 'RESET_COLLECT_ACTION',
+    id
+  }
+}
+
+export function setCollectAction(action) {
+  return {
+    type: 'SET_COLLECT_ACTION',
+    action: action
+  }
+}
+
+export function setCollectOnComponentAction(action) {
+  return {
+    type: 'SET_COLLECT_ON_COMPONENT_ACTION',
+    action: action
+  }
+}

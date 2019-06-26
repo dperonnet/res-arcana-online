@@ -61,3 +61,8 @@ body {
 .hidden {
   visibility: hidden;
 }
+
+.game-button .btn {
+  outline: none !important;
+  box-shadow: none !important;
+}

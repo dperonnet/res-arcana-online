@@ -46,7 +46,9 @@
 .close:hover {
   color: white;
   text-decoration: none;
+  cursor: pointer;
 }
+
 .close:not(:disabled):not(.disabled):focus, .close:not(:disabled):not(.disabled):hover {
   opacity: 1;
 }

@@ -3,7 +3,10 @@ import { GameComponents } from '../../../../database'
 import logger from 'redux-logger'
 import { applyMiddleware } from 'redux'
 
-// SETUP
+/**
+ * Role: setup
+ * This function initialize the game components and board areas.
+ */
 const getInitialState = (ctx, setupData) => {
   const G = {
     secret: {
@@ -38,6 +41,7 @@ const getInitialState = (ctx, setupData) => {
       inPlay: [],
       mage: null,
       magicItem: null,
+      requiredAction: [],
       status: 'DRAFTING_ARTEFACTS'
     }
   }
@@ -75,7 +79,7 @@ const getInitialState = (ctx, setupData) => {
   // Define the first player
   G.publicData.firstPlayer = (ctx.random.Die(ctx.numPlayers) -1).toString()
   
-  const skip = false
+  const skip = true
   
   if (skip) {
     console.log('[setupGameComponents] skipDraftPhase')
@@ -91,6 +95,19 @@ const getInitialState = (ctx, setupData) => {
       G.publicData.players[i].status = 'READY'
       G.publicData.players[i].deckSize = G.players[i].deck.length
       G.publicData.players[i].handSize = G.players[i].hand.length
+      G.publicData.players[i].inPlay.push(G.players[i].deck[0])
+      G.publicData.players[i].inPlay.push(G.players[i].deck[1])
+      G.publicData.players[i].inPlay.push(G.players[i].deck[2])
+      G.publicData.players[i].inPlay.push(G.players[i].deck[3])
+      G.publicData.players[i].inPlay.push(G.players[i].deck[4])
+      
+      const essencesTypes = ['elan', 'life', 'calm', 'death', 'gold']
+      const essencesTypeNumber = 5
+      for (let j = 0; j < essencesTypeNumber; j++){
+        for (let k = 0; k < essencesTypeNumber; k++){
+          addEssenceOnComponent(G, i, G.players[i].deck[j].id, essencesTypes[k], ctx.random.Die(5))
+        }
+      }
     }
   }
   G.skipDraftPhase = skip
@@ -99,6 +116,10 @@ const getInitialState = (ctx, setupData) => {
   return G
 }
 
+/**
+ * This function return the game components gathered by their type.
+ * @param {*} components array of game components to parse.
+ */
 const getComponentsByType = (components) => {
   const res = {}
   if (components) {
@@ -110,7 +131,15 @@ const getComponentsByType = (components) => {
   return res
 }
 
-// DRAFT PHASE
+// ########## DRAFT PHASE ##########
+
+/**
+ * Role: onPhaseBegin
+ * This function deal, pass or draw cards depending on what should be done.
+ * If a player have 8 cards, then it draw 3 cards for this player.
+ * If a player have cards aside then it pass them to the next player.
+ * If none of the players have draft cards left, then it deals 4 cards to each players.
+ */
 const initDraftPhase = (G, ctx) => {
   G.phase = 'DRAFT_PHASE'
   console.log('[initDraftPhase] Call to initDraftPhase()')
@@ -132,6 +161,10 @@ const initDraftPhase = (G, ctx) => {
   }
   return G
 }
+
+/**
+ * This function deal 4 cards to each player.
+ */
 const dealDraftCards = (G, ctx) => {
   console.log('[dealDraftCards] Call to dealDraftCards()')
   for (let i= 0; i < ctx.numPlayers; i++) {
@@ -141,6 +174,10 @@ const dealDraftCards = (G, ctx) => {
   }
   return G
 }
+
+/**
+ * This function pass cards to the next player.
+ */
 const getNextCards = (G, ctx) => {
     console.log('[getNextCards] Call to getNextCards()')
   for (let i= 0; i < ctx.numPlayers; i++) {
@@ -157,6 +194,10 @@ const getNextCards = (G, ctx) => {
   }
   return G
 }
+
+/**
+ * Shuffle player's decks then draw 3 cards and place them in players hand.
+ */
 const drawStartingCards = (G, ctx) => {
   console.log('[drawStartingCards] Call to drawStartingCards()')
   for (let i= 0; i < ctx.numPlayers; i++) {
@@ -173,6 +214,14 @@ const drawStartingCards = (G, ctx) => {
   return G
 }
 
+/**
+ * Role: Move
+ * Keep an artefact from the draft cards.
+ * Place the others cards aside to the next player. 
+ * 
+ * @param {*} playerID player selecting the artefact.
+ * @param {*} cardId id of the selected artefact.
+ */
 const pickArtefact = (G, ctx, playerID, cardId) => {
   console.log('[pickArtefact] The player', playerID, 'picked artefact', cardId)
   const selectedCard = copy(G.players[playerID].draftCards[0].filter((card) => {
@@ -197,6 +246,14 @@ const pickArtefact = (G, ctx, playerID, cardId) => {
   return G
 }
 
+/**
+ * This function place essences on a game component.
+ * 
+ * @param {*} playerId player's id owning the component.
+ * @param {*} componentId id of the component.
+ * @param {*} essenceType type of essence to place on component.
+ * @param {*} essenceNumber number of essence to place on component.
+ */
 const addEssenceOnComponent = (G, playerId, componentId, essenceType, essenceNumber) => {
   let component = G.publicData.players[playerId].essencesOnComponent[componentId]
   if (!component) {
@@ -210,6 +267,12 @@ const addEssenceOnComponent = (G, playerId, componentId, essenceType, essenceNum
   }
 }
 
+/**
+ * Role: Move
+ * This function define which mage the player will embody for the game and place it into play.
+ * @param {*} playerID player selecting the mage.
+ * @param {*} mageId id of the selected mage card.
+ */
 const pickMage = (G, ctx, playerID, mageId) => {
   console.log('[pickMage] The player', playerID, 'picked mage', mageId)
   const selectedCard = copy(G.players[playerID].mages.filter((mage) => {
@@ -223,6 +286,11 @@ const pickMage = (G, ctx, playerID, mageId) => {
   G.publicData.players[playerID].status = 'READY'
   return G
 }
+
+/**
+ * Role: endPhaseIf
+ * This function define what should be the next phase depending on the current game context.
+ */
 const checkIfAllCardsDrafted = (G, ctx) => {
   console.log('[checkIfAllCardsDrafted] Call to checkIfAllCardsDrafted()')
   let hasCardsToPass = false
@@ -253,7 +321,16 @@ const checkIfAllCardsDrafted = (G, ctx) => {
   }
   console.log('[checkIfAllCardsDrafted] There is no need to return a specific Phase')
 }
-// PICK MAGIC ITEM PHASE
+
+
+
+
+// ########## PICK MAGIC ITEM PHASE ##########
+
+/**
+ * Role: onPhaseBegin
+ * This function update players's status so they could pick a magic item.
+ */
 const initPickMagicItemPhase = (G, ctx) => {
   console.log('[initPickMagicItemPhase] Call to initPickMagicItemPhase()')
   G.phase = 'PICK_MAGIC_ITEM_PHASE'
@@ -264,6 +341,14 @@ const initPickMagicItemPhase = (G, ctx) => {
   })
   return G
 }
+
+/**
+ * Role: Move
+ * Pick a magic item from the the magic item pool.
+ * 
+ * @param {*} playerID player selecting the magic item.
+ * @param {*} magicItemId id of the selected magic item.
+ */
 const pickMagicItem = (G, ctx, playerID, magicItemId) => {
   console.log('[pickMagicItem] The player', playerID, 'picked magic item', magicItemId)
   let selectedItemIndex = 0
@@ -283,22 +368,102 @@ const pickMagicItem = (G, ctx, playerID, magicItemId) => {
   G.publicData.magicItems.splice(selectedItemIndex, 1)
   return G
 }
+
+/**
+ * Role: endPhaseIf
+ * This function check if all players have picked their magic item
+ * and define the next phase.
+ */
 const allMagicItemsReady = (G, ctx) => {
   console.log('[allMagicItemsReady] Call to allMagicItemsReady()')
   let magicItemsReady = true  
   for (let i= 0; i < ctx.numPlayers; i++) {
     magicItemsReady = magicItemsReady && G.publicData.players[i].magicItem
   }
-  if (magicItemsReady) return {next: 'playPhase' }
+  if (magicItemsReady) return {next: 'collectPhase' }
 }
 
+/**
+ * Role: turnOrder
+ * Define the turn order counter-clockwise starting from the last player.
+ */
 const getTurnOrderFromLastPlayer = (G, ctx) => {
   const order = getTurnOrder(G, ctx).reverse()
   console.log('order',order)
   return order
 }
 
-// PLAY PHASE
+// ########## COLLECT PHASE ##########
+
+/**
+ * Role: onPhaseBegin
+ * This function update players's status according their collect ability in play.
+ * If player doesn't have collect ability in play, set status to ready.
+ * If player has standard collect ability in play without choice, set status to ready.
+ * If player has standard collect ability in play with choice, set status to collect action required.
+ * If player has specific collect ability in play, may set status to collect action required.
+ * If player has essence on components in play, set status to collect action available.
+ */
+const initCollectPhase = (G, ctx) => {
+  console.log('[initCollectPhase] Call to initCollectPhase()')
+  G.phase = "COLLECT_PHASE"
+  for (let i= 0; i < ctx.numPlayers; i++) {
+    const collectActions = []
+    
+    if (Object.keys(G.publicData.players[i].essencesOnComponent).length > 0) {
+      G.publicData.players[i].status ='COLLECT_ACTION_AVAILABLE'
+    } else {
+      G.publicData.players[i].status = 'READY'
+    }
+
+    G.publicData.players[i].inPlay.forEach((component) => {
+      if (component.hasStandardCollectAbility) {
+        if(component.standardCollectAbility.multipleCollectOptions) {
+          G.publicData.players[i].status = 'COLLECT_ACTION_REQUIRED'
+        } else {
+          const collectAction = {
+            id: component.id,
+            name: component.name,
+            essences: component.standardCollectAbility.essenceList,
+            from: 'COLLECT_ABILITY',
+            type: 'GAIN'
+          }
+          collectActions.push(collectAction)
+        }
+      }
+
+      if (component.hasSpecificCollectAbility) {
+        let essences
+        switch (component.id) {
+          case 'automate':
+            essences = G.publicData.players[i].essencesOnComponent[component.id]
+            if (essences && essences.length > 0) {
+              G.publicData.players[i].status = 'COLLECT_ACTION_REQUIRED'
+            }
+            break
+          case 'coffreFort':
+            essences = G.publicData.players[i].essencesOnComponent[component.id]
+            if (essences && essences['gold'] > 0) {
+              G.publicData.players[i].status = 'COLLECT_ACTION_REQUIRED'
+              G.publicData.players[i].requiredAction.push('coffreFort')
+            }
+            break
+          case 'forgeMaudite':
+          default:
+            G.publicData.players[i].status = 'COLLECT_ACTION_REQUIRED'
+        }
+      }
+    })
+    G.publicData.players[i].collectActions = collectActions
+  }
+  return G
+}
+
+const collectEssences = (G, ctx, collectActions) => {
+  return G
+}
+
+// ########## PLAY PHASE ##########
 const initPlayPhase = (G, ctx) => {
   console.log('[initPlayPhase] Call to initPlayPhase()')
   G.phase = 'PLAY_PHASE'
@@ -353,13 +518,15 @@ const getStartingPhase = (G) => {
   console.log('[getStartingPhase] Call to getStartingPhase, G.startingPhase', G.startingPhase)
   return G.startingPhase;
 }
-// GAME
+
+// ########## GAME ##########
 export const ResArcanaGame = Game({
   name: 'res-arcana',
 
   setup: (G,ctx) => getInitialState(G, ctx),
 
   moves: {
+    collectEssences: collectEssences,
     pickArtefact: pickArtefact,
     playArtefact: playArtefact,
     pickMage: pickMage,
@@ -370,7 +537,7 @@ export const ResArcanaGame = Game({
   flow: {
     onMove: (G, ctx) => G,
     movesPerTurn: 1,
-    startingPhase: 'draftPhase',
+    startingPhase: 'pickMagicItemPhase',
 
     phases: {
       setupPhase: {
@@ -390,6 +557,19 @@ export const ResArcanaGame = Game({
           playOrder: (G, ctx) => getTurnOrderFromLastPlayer(G, ctx),
           first: (G, ctx) => 0,
           next: (G, ctx) => (ctx.playOrderPos + 1) % ctx.numPlayers,
+        },
+        endPhaseIf: allMagicItemsReady
+      },
+      collectPhase: {
+        onPhaseBegin: (G, ctx) => initCollectPhase(G, ctx),
+        allowedMoves: ['collectEssences'],
+        turnOrder: {
+          playOrder: (G, ctx) => getTurnOrder(G, ctx),
+          first: (G, ctx) => 0,
+          next: (G, ctx) => (ctx.playOrderPos + 1) % ctx.numPlayers,
+          actionPlayers: {
+            once: true,
+          },
         },
         endPhaseIf: allMagicItemsReady
       },

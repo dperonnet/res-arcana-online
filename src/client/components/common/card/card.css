@@ -272,10 +272,7 @@ div.place-of-power, div.magic-item, div.card {
   pointer-events: none;
 }
 
-.card.active {
-  box-shadow: 0 0 2pt 2pt #F5B041;
-}
-.magic-item.active {
+.card.active, .magic-item.active {
   box-shadow: 0 0 2pt 2pt #F5B041;
 }
 

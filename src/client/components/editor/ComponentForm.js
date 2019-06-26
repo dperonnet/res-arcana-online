@@ -267,7 +267,7 @@ class EssencePanel extends Component {
             <div className="mb-3">
               <InputGroup className="mb-3">
                 <Form.Check inline type="checkbox" name="multipleCollectOptions"
-                  id="multipleCollectOptions" label="Choose one"
+                  id="multipleCollectOptions" label="Player's choice"
                   value={standardCollectAbility.multipleCollectOptions}
                   checked={standardCollectAbility.multipleCollectOptions}
                   onChange={(e) => this.handleFormChange(e)}/>
