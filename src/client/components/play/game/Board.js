@@ -92,7 +92,7 @@ class ResArcanaBoard extends Component {
       return Object.keys(player.essencesOnComponent).includes(cardToZoom.id)
     })[0]
     const essencesOnComponent = playerOwningCard ? playerOwningCard.essencesOnComponent[cardToZoom.id] : null
-    return <div className={'card-zoom-frame ' + (profile.cardSize ? profile.cardSize : 'normal')}>
+    return <div className="card-zoom-frame normal">
       <CardZoom src={src} show={true} alt={cardToZoom.name} essencesOnComponent={essencesOnComponent} />
     </div>
   }
@@ -311,7 +311,7 @@ class ResArcanaBoard extends Component {
     }
 
     return <>
-      <div className={'artefacts card-row ' + profile.cardSize}>
+      <div className={'in-play card-row ' + profile.cardSize}>
         {drawPileAndDiscard}
         {cards}
       </div>
@@ -561,24 +561,18 @@ class ResArcanaBoard extends Component {
   }
 
   renderCollectDialog = () => {
-    const { G, ctx, playerID, profile, collectActions } = this.props
+    const { G, ctx, playerID, profile, collectActions, collectOnComponentActions } = this.props
     if (!Number.isInteger(parseInt(playerID))) return null
     const playersName = this.getPlayersName()
     const essencesOnComponent = G.publicData.players[playerID].essencesOnComponent
     let components = G.publicData.players[playerID].inPlay.filter((component) => {
       return Object.keys(essencesOnComponent).includes(component.id) ||
-        component.hasStandardCollectAbility || component.hasSpecificCollectAbility && component.id === 'forgeMaudite'
+        component.hasStandardCollectAbility || (component.hasSpecificCollectAbility && component.id === 'forgeMaudite')
     })
 
     let collectComponents = components.map((component, index) => {
-      const requireAction = (component.hasStandardCollectAbility && component.standardCollectAbility.multipleCollectOptions 
-      || component.hasSpecificCollectAbility)
-      const valid = Object.keys(collectActions).includes(component.id) && collectActions[component.id].valid
-      const classes = requireAction && !valid ? ' active ' : ''
-      return <div className="essence-picker" key={component.id + '_' + index} >
-        <GameComponent component={component} classes={classes}  essencesOnComponent={essencesOnComponent[component.id]} />
-        <EssencePicker component={component} />
-      </div>
+      let essences = Object.keys(collectOnComponentActions).includes(component.id) ? null : essencesOnComponent[component.id]
+      return <EssencePicker key={component.id + '_' + index} component={component} essencesOnComponent={essences}/>
     })
 
     let title = 'Collect Phase'
@@ -591,9 +585,7 @@ class ResArcanaBoard extends Component {
     let collectValid = true
 
     components.forEach((component) => {
-      console.log('test1',component.hasStandardCollectAbility && component.standardCollectAbility.multipleCollectOptions)
-      console.log('test2', component.hasSpecificCollectAbility)
-      if (component.hasStandardCollectAbility && component.standardCollectAbility.multipleCollectOptions 
+      if ((component.hasStandardCollectAbility && component.standardCollectAbility.multipleCollectOptions)
         || component.hasSpecificCollectAbility) {
         collectValid = collectValid && Object.keys(collectActions).includes(component.id)
           && collectActions[component.id].valid
@@ -740,6 +732,7 @@ const mapStateToProps = (state) => {
     chatDisplay: state.chat.chatDisplay,
     cardToZoom: state.game.zoomCard,
     collectActions: state.game.collectActions,
+    collectOnComponentActions: state.game.collectOnComponentActions,
     currentGame: state.firestore.data.currentGame,
     game: state.firestore.ordered.game && state.firestore.ordered.game[0],
     profile: state.firebase.profile,

@@ -344,14 +344,14 @@ export const getComponents = () => {
 export function selectCard(card) {
   return {
       type: 'SELECT_CARD',
-      card: card
+      card
   };
 }
 
 export function zoomCard(card) {
   return {
       type: 'ZOOM_CARD',
-      card: card
+      card
   };
 }
 
@@ -364,7 +364,7 @@ export function clearZoom() {
 export function tapComponent(card) {
   return {
     type: 'TAP_COMPONENT',
-    card: card
+    card
   }
 }
 
@@ -384,13 +384,19 @@ export function resetCollectAction(id) {
 export function setCollectAction(action) {
   return {
     type: 'SET_COLLECT_ACTION',
-    action: action
+    action
   }
 }
 
+export function resetCollectOnComponentAction(id) {
+  return {
+    type: 'RESET_COLLECT_ON_COMPONENT_ACTION',
+    id
+  }
+}
 export function setCollectOnComponentAction(action) {
   return {
     type: 'SET_COLLECT_ON_COMPONENT_ACTION',
-    action: action
+    action
   }
 }

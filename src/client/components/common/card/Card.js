@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react';
-import './card.css';
+import './card.scss';
 
 export default class Card extends PureComponent {
   render() {

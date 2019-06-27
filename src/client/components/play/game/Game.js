@@ -100,12 +100,13 @@ const getInitialState = (ctx, setupData) => {
       G.publicData.players[i].inPlay.push(G.players[i].deck[2])
       G.publicData.players[i].inPlay.push(G.players[i].deck[3])
       G.publicData.players[i].inPlay.push(G.players[i].deck[4])
+      G.publicData.players[i].inPlay.push(G.publicData.placesOfPowerInGame[i])
       
       const essencesTypes = ['elan', 'life', 'calm', 'death', 'gold']
       const essencesTypeNumber = 5
       for (let j = 0; j < essencesTypeNumber; j++){
-        for (let k = 0; k < essencesTypeNumber; k++){
-          addEssenceOnComponent(G, i, G.players[i].deck[j].id, essencesTypes[k], ctx.random.Die(5))
+        for (let k = 0; k < ctx.random.Die(5); k++){
+          addEssenceOnComponent(G, i, G.players[i].deck[j].id, essencesTypes[ctx.random.Die(5)-1], ctx.random.Die(5))
         }
       }
     }

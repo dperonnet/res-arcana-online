@@ -10,6 +10,7 @@ const initState = {
 const gameReducer = (state = initState, action) => {
   const debug = false
   let collectActions
+  let collectOnComponentActions
   switch (action.type) {
     case 'CREATE_GAME':
       debug && console.log('create game', action.doc.id);
@@ -62,7 +63,8 @@ const gameReducer = (state = initState, action) => {
       });
     case 'RESET_COLLECT':
       return Object.assign({}, state, {
-        collectActions: {}
+        collectActions: {},
+        collectOnComponentActions: {}
       });
     case 'RESET_COLLECT_ACTION':
       collectActions = JSON.parse(JSON.stringify(state.collectActions))
@@ -76,8 +78,14 @@ const gameReducer = (state = initState, action) => {
       return Object.assign({}, state, {
         collectActions
       });
+    case 'RESET_COLLECT_ON_COMPONENT_ACTION':
+      collectOnComponentActions = JSON.parse(JSON.stringify(state.collectOnComponentActions))
+      delete collectOnComponentActions[action.id]
+      return Object.assign({}, state, {
+        collectOnComponentActions
+      });
     case 'SET_COLLECT_ON_COMPONENT_ACTION':
-      let collectOnComponentActions = JSON.parse(JSON.stringify(state.collectOnComponentActions))
+      collectOnComponentActions = JSON.parse(JSON.stringify(state.collectOnComponentActions))
       collectOnComponentActions[action.action.id] = action.action
       return Object.assign({}, state, {
         collectOnComponentActions

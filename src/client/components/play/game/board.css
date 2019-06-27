@@ -272,6 +272,7 @@ width: 75px;
 .draw-pile {
   position: relative;
   margin-right: 58px;
+  margin-left: 20px;
   float: right;
   right: 16px;
 }
@@ -323,4 +324,8 @@ width: 75px;
   position: absolute;
   right: 4px;
   top: 42px;
+}
+
+.in-play div {
+  vertical-align: middle;
 }

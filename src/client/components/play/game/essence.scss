@@ -74,6 +74,22 @@
   .essence-on-component .essence {
     height: 42px;
     padding-top: 26px;
+    
+    &.elan {
+      background-position: 4px 4px;
+    }
+    &.life {
+      background-position: -43px 4px;
+    }
+    &.calm {
+      background-position: -90px 4px;
+    }
+    &.death {
+      background-position: -137px 4px;
+    }
+    &.gold {
+      background-position: -184px 4px;
+    }
   }
 }
 
@@ -96,20 +112,17 @@
 }
 
 .card-zoom-frame {
-  &.normal, &.large, &.x-large {
+  &.x-small, &.small, &.normal, &.large, &.x-large {
     .essence-on-component {
       top: 0px;
-      width: 100%;
-    }
-  }
-  &.normal {
-    .essence-on-component {
       height: 50px;
+      width: 100%;
     }
   }
 }
 
 .collect-options {
+  min-height: 35px;
   .collect-option {
     display: inline-block;
     vertical-align: bottom;
@@ -176,9 +189,11 @@
 .essence-picker {
   display: inline-block;
   vertical-align: top;
-
+  padding-left: 5px;
+  padding-right: 5px;
+  
   .active {
-    box-shadow: 0 0 2pt 2pt #FF6031;
+    box-shadow: 0 0 2pt 2pt #F22C2C;
   }
 }
 
@@ -214,4 +229,12 @@
   padding-top: 2px;
   vertical-align: top;
   background-position: 0 5px;
+}
+
+.delete-cursor {
+  cursor: url("../../../assets/image/delete.png") 0 0, auto;
+}
+
+.pointer-cursor {
+  cursor: pointer;
 }

@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import './card.css';
+import './card.scss';
 
 class CardZoom extends React.Component {
 
