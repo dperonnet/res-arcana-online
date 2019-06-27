@@ -375,6 +375,7 @@ export function resetCollect() {
 }
 
 export function resetCollectAction(id) {
+  console.log('reset',id)
   return {
     type: 'RESET_COLLECT_ACTION',
     id

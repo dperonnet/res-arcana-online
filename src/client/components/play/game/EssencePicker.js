@@ -53,8 +53,8 @@ class EssencePicker extends Component {
     }
   }
 
-  renderCollectAbility = (essenceList, handleOnClick) => {
-    return Object.entries(essenceList).map((essence, index) => {
+  renderCollectAbility = (essenceList, handleOnClick, onComponent) => {
+    let essences = Object.entries(essenceList).map((essence, index) => {
       let isLast =  index === Object.entries(essenceList).length -1
       return <div key={essence[0]} className="collect-option" onClick={handleOnClick}>
         {index === 0 && <div className="collect-icon"></div>}
@@ -64,11 +64,15 @@ class EssencePicker extends Component {
         </div>}
       </div>
     })
+    return <>
+      {essences}
+      {onComponent && <div className="on-component-icon"></div>}
+    </>
   }
 
-  renderEssencePicker = () => {
+  renderEssencePicker = (essenceList) => {
     const { component, collectActions } = this.props
-    let typeIsAny = Object.keys(component.standardCollectAbility.essenceList).filter((type)=>{
+    let typeIsAny = Object.keys(essenceList).filter((type)=>{
       return type.startsWith('any')
     })
 
@@ -101,8 +105,8 @@ class EssencePicker extends Component {
 
     } else {
       // else display selection buttons for each possible collect option
-      return Object.entries(component.standardCollectAbility.essenceList).map((essence, index) => {
-        let isLast =  index === Object.entries(component.standardCollectAbility.essenceList).length -1
+      return Object.entries(essenceList).map((essence, index) => {
+        let isLast =  index === Object.entries(essenceList).length -1
         return <div key={essence[0]} className="collect-option">
           <Button variant="secondary" className={'essence ' + essence[0]} onClick={() => this.handleSelectOption(essence[0])}>{essence[1]}</Button>
           {!isLast && <div className="option-or">
@@ -138,67 +142,75 @@ class EssencePicker extends Component {
     }
   }
 
-  renderAutomateCollectAbility = () => {
-    return <div className="collect-option">
-      <Button variant="secondary" className="collect-icon" onClick={null}></Button>
-      <div className="option-or">
-        <FontAwesomeIcon icon={faSlash} size="sm" rotation={90} />
-      </div>
-      <Button variant="secondary" className="on-component-icon" onClick={null}></Button>
-    </div>
-  }
-
   render() {
     const { component, collectActions, collectOnComponentActions, essencesOnComponent, resetCollectAction } = this.props
     let collectAbilities
-    let collectOnComponent
+    let collectOnComponent = this.renderCollectOnComponent()
+    
+    let handleClickComponent = collectOnComponentActions[component.id] ? null : (() => this.handleCollectEssenceOnComponent())
+    let handleClickEssenceOnComponent = (() => this.handleCollectEssenceOnComponent())
+
     let actionValid = Object.keys(collectActions).includes(component.id)
-    if (actionValid && collectActions[component.id].valid) {
-      collectAbilities = this.renderCollectAbility(collectActions[component.id].essences , () => resetCollectAction(component.id))
-      collectOnComponent = this.renderCollectOnComponent()
-    } else if (component.hasStandardCollectAbility) {
-      if (component.standardCollectAbility.multipleCollectOptions) {
-        collectAbilities = this.renderEssencePicker()
-      } else {
-        collectAbilities = this.renderCollectAbility(component.standardCollectAbility.essenceList)
-      }
-      collectOnComponent = this.renderCollectOnComponent()
-    } else if (component.hasSpecificCollectAbility) {
+    const componentsWithSpecificAction = ['coffreFort','forgeMaudite']
+    let validSpecific = false
+
+    if (component.hasSpecificCollectAbility) {
       switch (component.id) {
         case 'automate':
-          if (essencesOnComponent && essencesOnComponent.length > 0) {
-            collectAbilities = this.renderAutomateCollectAbility()
-            collectOnComponent = this.renderCollectOnComponent()
+          if (essencesOnComponent && Object.keys(essencesOnComponent).length > 0) {
+            let essenceList = {}
+            Object.keys(essencesOnComponent).forEach((type) => essenceList[type] = 2)
+
+            collectAbilities = collectOnComponentActions[component.id] ? null : this.renderCollectAbility(essenceList, null, true)
+            handleClickComponent = collectOnComponentActions[component.id] ? null : (() => this.handleCollectEssenceOnComponent())
+            handleClickEssenceOnComponent = (() => this.handleCollectEssenceOnComponent())
           }
           break
         case 'coffreFort':
-          if (essencesOnComponent && essencesOnComponent['gold'] > 0) {
-            
+          if (essencesOnComponent && essencesOnComponent['elan'] > 0 && !collectOnComponentActions[component.id]) {
+            if (actionValid && collectActions[component.id].valid) {
+              collectAbilities = this.renderCollectAbility(collectActions[component.id].essences , () => resetCollectAction(component.id))
+            } else {
+              collectAbilities = this.renderEssencePicker(component.standardCollectAbility.essenceList)
+            }
           }
-          collectOnComponent = collectOnComponentActions[component.id] ? null : this.renderCollectOnComponent()
+          validSpecific = collectOnComponentActions[component.id]
+          handleClickComponent = collectOnComponentActions[component.id] ? null : (() => {
+            this.handleCollectEssenceOnComponent()
+            resetCollectAction(component.id)
+          })
+          handleClickEssenceOnComponent = (() => {
+            this.handleCollectEssenceOnComponent()
+            resetCollectAction(component.id)
+          })
           break
         case 'forgeMaudite':
-          collectOnComponent = this.renderCollectOnComponent()
           break
         default:
       }
+    } else if (component.hasStandardCollectAbility) {
+      if (actionValid && collectActions[component.id].valid) {
+        collectAbilities = this.renderCollectAbility(collectActions[component.id].essences , () => resetCollectAction(component.id))
+      } else if (component.standardCollectAbility.multipleCollectOptions) {
+        collectAbilities = this.renderEssencePicker(component.standardCollectAbility.essenceList)
+      } else {
+        collectAbilities = this.renderCollectAbility(component.standardCollectAbility.essenceList)
+      }
     }
-    
 
     const requireAction = ((component.hasStandardCollectAbility && component.standardCollectAbility.multipleCollectOptions)
-      || component.hasSpecificCollectAbility)
-      const valid = Object.keys(collectActions).includes(component.id) && collectActions[component.id].valid
-      const classes = requireAction && !valid ? ' active ' : ''
+      || componentsWithSpecificAction.includes(component.id))
+    const valid = (collectActions[component.id] && collectActions[component.id].valid) || validSpecific
+    const classes = requireAction && !valid ? ' active ' : ''
     const cursorCollectAbility = collectActions[component.id] ? ' delete-cursor' : ' '
     const cursorOnComponent = collectOnComponentActions[component.id] ? ' delete-cursor' : ' pointer-cursor'
-    const onClickEvent = collectOnComponentActions[component.id] ? null : (() => this.handleCollectEssenceOnComponent())
 
     return <div className="essence-picker">
       <div className={'collect-options '+ cursorCollectAbility}>
         {collectAbilities}
       </div>
-      <GameComponent component={component} classes={classes} essencesOnComponent={essencesOnComponent} onClick={onClickEvent}/>
-      <div className={'collect-options '+ cursorOnComponent} onClick={() => this.handleCollectEssenceOnComponent()}>
+      <GameComponent component={component} classes={classes} essencesOnComponent={essencesOnComponent} onClick={handleClickComponent}/>
+      <div className={'collect-options '+ cursorOnComponent} onClick={handleClickEssenceOnComponent}>
         {collectOnComponent}
       </div>
     </div>

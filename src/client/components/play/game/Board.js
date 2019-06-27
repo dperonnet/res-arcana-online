@@ -585,10 +585,19 @@ class ResArcanaBoard extends Component {
     let collectValid = true
 
     components.forEach((component) => {
-      if ((component.hasStandardCollectAbility && component.standardCollectAbility.multipleCollectOptions)
-        || component.hasSpecificCollectAbility) {
-        collectValid = collectValid && Object.keys(collectActions).includes(component.id)
-          && collectActions[component.id].valid
+      if (component.hasSpecificCollectAbility) {
+        switch (component.id) {
+          case 'coffreFort':
+            collectValid = (collectValid && collectActions[component.id] && collectActions[component.id].valid)
+              || (collectValid && collectOnComponentActions[component.id])
+            break
+          case 'forgeMaudite':
+            collectValid = collectValid && collectActions[component.id] && collectActions[component.id].valid
+            break
+          default:
+        }
+      } else if (component.hasStandardCollectAbility && component.standardCollectAbility.multipleCollectOptions) {
+        collectValid = collectValid && collectActions[component.id] && collectActions[component.id].valid
       }
     })
 

@@ -166,11 +166,17 @@ export const GameComponents = [
       "id":"coffreFort",
       "class":"coffre_fort",
       "hasSpecificCollectAbility":true,
-      "hasStandardCollectAbility":false,
+      "hasStandardCollectAbility":true,
       "isCreature":false,
       "isDragon":false,
       "name":"Coffre Fort",
-      "type":"artefact"
+      "type":"artefact",
+      "standardCollectAbility":{
+         "essenceList":{
+            "anyButGold":2
+         },
+         "multipleCollectOptions":true
+      }
    },
    {
       "id":"colosse",
