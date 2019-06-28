@@ -155,6 +155,13 @@ class ResArcanaBoard extends Component {
     this.props.selectCard(undefined)
   }
   
+  collectEssences = () => {
+    const { playerID, collectActions, collectOnComponentActions } = this.props
+    console.log('collectEssences',playerID, collectActions, collectOnComponentActions)
+    this.props.moves.collectEssences(playerID, collectActions, collectOnComponentActions)
+    this.props.events.endTurn()
+  }
+
   handleClick = (card) => {
     this.props.selectCard(card)
   }
@@ -512,6 +519,11 @@ class ResArcanaBoard extends Component {
     </>
   }
 
+  /**
+   * Render the board Magic Item selection Phase.
+   * This board is player specific and will not be available for spectators.
+   * The board show magic items available and allow the player to swap his magic item on his turn.
+   */
   renderMagicItemDialog = () => {
     const { G, ctx, playerID, profile, selectedCard } = this.props
     if (!Number.isInteger(parseInt(playerID))) return null
@@ -560,21 +572,18 @@ class ResArcanaBoard extends Component {
     </>
   }
 
+  /**
+   * Render the board during Collect Phase.
+   * This board is player specific and will not be available for spectators.
+   * The board show all the components that can or must be activated on collect Phase.
+   */
   renderCollectDialog = () => {
     const { G, ctx, playerID, profile, collectActions, collectOnComponentActions } = this.props
     if (!Number.isInteger(parseInt(playerID))) return null
+
     const playersName = this.getPlayersName()
     const essencesOnComponent = G.publicData.players[playerID].essencesOnComponent
-    let components = G.publicData.players[playerID].inPlay.filter((component) => {
-      return Object.keys(essencesOnComponent).includes(component.id) ||
-        component.hasStandardCollectAbility || (component.hasSpecificCollectAbility && component.id === 'forgeMaudite')
-    })
-
-    let collectComponents = components.map((component, index) => {
-      let essences = Object.keys(collectOnComponentActions).includes(component.id) ? null : essencesOnComponent[component.id]
-      return <EssencePicker key={component.id + '_' + index} component={component} essencesOnComponent={essences}/>
-    })
-
+    const componentsWithSpecificAction = ['coffreFort','forgeMaudite']
     let title = 'Collect Phase'
     let waiting = playerID !== ctx.currentPlayer
     let waitingFor = ' - ' + playersName[parseInt(ctx.currentPlayer)] + '\'s turn.'
@@ -583,45 +592,88 @@ class ResArcanaBoard extends Component {
     let directive = null
     let handleConfirm = null
     let collectValid = true
+    let costValid = true
+    let sumCollects = {}
+    let missingEssences = {}
 
+    // Only components containing essences or collect ability are concerned.
+    let components = G.publicData.players[playerID].inPlay.filter((component) => {
+      return Object.keys(essencesOnComponent).includes(component.id) ||
+        component.hasStandardCollectAbility || component.hasSpecificCollectAbility
+    })
+    // Render those components with essence picker to collect essence.
+    let collectComponents = components.map((component, index) => {
+      let essences = Object.keys(collectOnComponentActions).includes(component.id) ? null : essencesOnComponent[component.id]
+      return <EssencePicker key={component.id + '_' + index} component={component} essencesOnComponent={essences}/>
+    })
+
+    // Check if player can pay all collect costs.
+    Object.values(collectActions).forEach((action) => {
+      Object.entries(action.essences).forEach((essence) => {
+        if (!sumCollects[essence[0]]) sumCollects[essence[0]] = 0
+        sumCollects[essence[0]] = sumCollects[essence[0]] + (action.type === 'COST' ?  - essence[1] : essence[1])
+      })
+    })
+    Object.values(collectOnComponentActions).forEach((action) => {
+      Object.entries(action.essences).forEach((essence) => {
+        if (!sumCollects[essence[0]]) sumCollects[essence[0]] = 0
+        sumCollects[essence[0]] = sumCollects[essence[0]] + (action.type === 'COST' ?  - essence[1] : essence[1])
+      })
+    })
+    Object.entries(sumCollects).forEach((essence) => {
+      if (essence[1] + G.publicData.players[playerID].essencesPool[essence[0]] < 0) {
+        costValid = false
+        missingEssences[essence[0]] = Math.abs(essence[1] + G.publicData.players[playerID].essencesPool[essence[0]])
+      }
+    })
+
+    // Check if all the actions required are done.
     components.forEach((component) => {
-      if (component.hasSpecificCollectAbility) {
+      if (component.hasSpecificCollectAbility && componentsWithSpecificAction.includes(component.id)) {
         switch (component.id) {
           case 'coffreFort':
-            collectValid = (collectValid && collectActions[component.id] && collectActions[component.id].valid)
-              || (collectValid && collectOnComponentActions[component.id])
+            const hasEssence = essencesOnComponent[component.id]
+            if (hasEssence && hasEssence['gold']) {
+              collectValid = collectValid && (Object.keys(collectActions).includes(component.id) && collectActions[component.id].valid)
+            }
             break
           case 'forgeMaudite':
-            collectValid = collectValid && collectActions[component.id] && collectActions[component.id].valid
-            break
           default:
+            collectValid = collectValid && (Object.keys(collectActions).includes(component.id) && collectActions[component.id].valid)
+              || (Object.keys(collectOnComponentActions).includes(component.id) && collectOnComponentActions[component.id].valid)
         }
       } else if (component.hasStandardCollectAbility && component.standardCollectAbility.multipleCollectOptions) {
-        collectValid = collectValid && collectActions[component.id] && collectActions[component.id].valid
+        collectValid = collectValid && Object.keys(collectActions).includes(component.id) && collectActions[component.id].valid
       }
     })
 
     switch (G.publicData.players[playerID].status) {
       case 'COLLECT_ACTION_AVAILABLE':
         directive = <div className="info">You may collect essence.</div>
+        handleConfirm = () => this.collectEssences()
         break
       case 'COLLECT_ACTION_REQUIRED':
-        directive = collectValid ?
+        directive = collectValid && costValid ?
             <div className="info">Confirm your collect option(s).</div>
-          :
+          : costValid ?
             <div className="info">You have to select collect option(s).</div>
+          :
+            <div className="info">You need {Object.entries(missingEssences).map((essence) => {
+              return <div className="collect-options collect-info">
+              <div className={'type essence '+essence[0]}>{essence[1]}</div>
+            </div>})} more essence(s) for your collect to be valid.</div>
+        handleConfirm = () => this.collectEssences()
         break
       case 'READY':
       default:
-        
     }
 
-    const confirmButton = <Button variant="primary" size="sm" onClick={handleConfirm} disabled={!collectValid}>Confirm</Button>
+    const confirmButton = <Button variant="primary" size="sm" onClick={handleConfirm} disabled={!(collectValid && costValid)}>Confirm</Button>
     const resetButton = <Button variant="secondary" size="sm" onClick={() => this.handleResetCollect()}>Reset</Button>
-    
+
     return <>
       <div className='draft-card-panel'>
-        <h5>{title}{waitingFor}</h5>
+        <h5><div className="collect-icon"></div>{title}{waitingFor}</h5>
         <div className={'draft-card card-row ' + profile.cardSize}>
           {collectComponents}
         </div>
@@ -644,10 +696,10 @@ class ResArcanaBoard extends Component {
     let hand = this.renderPlayerHand()
     let showButtons = false
     let directive = null
-    
+
     const confirmButton = <Button variant="primary" size="sm" onClick={() => this.pickArtefact(selectedCard.id)} disabled={!selectedCard}>Confirm</Button>
     const cancelButton = <Button variant={!selectedCard ? 'primary' : 'secondary'} size="sm" onClick={() => this.handleClick(undefined)} disabled={!selectedCard}>Cancel</Button>
-    
+
     return <>
       <div className='draft-card-panel'>
         <h5>{title}</h5>
@@ -667,7 +719,7 @@ class ResArcanaBoard extends Component {
     const dialogBoard = this.renderDraftDialog()
     return this.renderBoard(dialogBoard)
   }
-  
+
   /**
    * This function render the board during Magic Item Phase.
    */

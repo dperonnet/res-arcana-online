@@ -178,6 +178,7 @@
   box-shadow: 0 0 12px rgba(0,0,0,.4), inset 0 0 0 1px hsla(0,0%,100%,.1);
   overflow: hidden;
   z-index: 10;
+  user-select: none;
 }
 
 div.magic-item, div.card, div.place-of-power {

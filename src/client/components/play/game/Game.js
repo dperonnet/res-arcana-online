@@ -367,6 +367,7 @@ const pickMagicItem = (G, ctx, playerID, magicItemId) => {
   G.publicData.players[playerID].magicItem = selectedItem
   G.publicData.players[playerID].inPlay.push(selectedItem);
   G.publicData.magicItems.splice(selectedItemIndex, 1)
+  G.publicData.players[ctx.currentPlayer].status = 'READY'
   return G
 }
 
@@ -378,10 +379,12 @@ const pickMagicItem = (G, ctx, playerID, magicItemId) => {
 const allMagicItemsReady = (G, ctx) => {
   console.log('[allMagicItemsReady] Call to allMagicItemsReady()')
   let magicItemsReady = true  
+  let playersReady = true  
   for (let i= 0; i < ctx.numPlayers; i++) {
     magicItemsReady = magicItemsReady && G.publicData.players[i].magicItem
+    playersReady = playersReady && G.publicData.players[i].status === 'READY'
   }
-  if (magicItemsReady) return {next: 'collectPhase' }
+  if (magicItemsReady && playersReady) return {next: 'collectPhase' }
 }
 
 /**
@@ -407,61 +410,114 @@ const getTurnOrderFromLastPlayer = (G, ctx) => {
  */
 const initCollectPhase = (G, ctx) => {
   console.log('[initCollectPhase] Call to initCollectPhase()')
-  G.phase = "COLLECT_PHASE"
-  for (let i= 0; i < ctx.numPlayers; i++) {
-    const collectActions = []
+  if (G.phase !== "COLLECT_PHASE") {
+    G.phase = "COLLECT_PHASE"
     
-    if (Object.keys(G.publicData.players[i].essencesOnComponent).length > 0) {
-      G.publicData.players[i].status ='COLLECT_ACTION_AVAILABLE'
-    } else {
-      G.publicData.players[i].status = 'READY'
-    }
-
-    G.publicData.players[i].inPlay.forEach((component) => {
-      if (component.hasStandardCollectAbility) {
-        if(component.standardCollectAbility.multipleCollectOptions) {
-          G.publicData.players[i].status = 'COLLECT_ACTION_REQUIRED'
-        } else {
-          const collectAction = {
-            id: component.id,
-            name: component.name,
-            essences: component.standardCollectAbility.essenceList,
-            from: 'COLLECT_ABILITY',
-            type: 'GAIN'
-          }
-          collectActions.push(collectAction)
-        }
+    for (let i= 0; i < ctx.numPlayers; i++) {
+      const collectActions = []
+      
+      if (Object.keys(G.publicData.players[i].essencesOnComponent).length > 0) {
+        G.publicData.players[i].status ='COLLECT_ACTION_AVAILABLE'
+      } else {
+        G.publicData.players[i].status = 'READY'
       }
 
-      if (component.hasSpecificCollectAbility) {
-        let essences
-        switch (component.id) {
-          case 'automate':
-            essences = G.publicData.players[i].essencesOnComponent[component.id]
-            if (essences && essences.length > 0) {
-              G.publicData.players[i].status = 'COLLECT_ACTION_REQUIRED'
-            }
-            break
-          case 'coffreFort':
-            essences = G.publicData.players[i].essencesOnComponent[component.id]
-            if (essences && essences['gold'] > 0) {
-              G.publicData.players[i].status = 'COLLECT_ACTION_REQUIRED'
-              G.publicData.players[i].requiredAction.push('coffreFort')
-            }
-            break
-          case 'forgeMaudite':
-          default:
+      G.publicData.players[i].inPlay.forEach((component) => {
+        if (component.hasStandardCollectAbility) {
+          if(component.standardCollectAbility.multipleCollectOptions) {
             G.publicData.players[i].status = 'COLLECT_ACTION_REQUIRED'
+          } else {
+            const collectAction = {
+              id: component.id,
+              name: component.name,
+              essences: component.standardCollectAbility.essenceList,
+              from: 'COLLECT_ABILITY',
+              type: 'GAIN'
+            }
+            collectActions.push(collectAction)
+          }
         }
-      }
-    })
-    G.publicData.players[i].collectActions = collectActions
+
+        if (component.hasSpecificCollectAbility) {
+          let essences
+          switch (component.id) {
+            case 'automate':
+              essences = G.publicData.players[i].essencesOnComponent[component.id]
+              if (essences && essences.length > 0) {
+                G.publicData.players[i].status = 'COLLECT_ACTION_REQUIRED'
+              }
+              break
+            case 'coffreFort':
+              essences = G.publicData.players[i].essencesOnComponent[component.id]
+              if (essences && essences['gold'] > 0) {
+                G.publicData.players[i].status = 'COLLECT_ACTION_REQUIRED'
+                G.publicData.players[i].requiredAction.push('coffreFort')
+              }
+              break
+            case 'forgeMaudite':
+            default:
+              G.publicData.players[i].status = 'COLLECT_ACTION_REQUIRED'
+          }
+        }
+      })
+      G.publicData.players[i].collectActions = collectActions
+    }
   }
   return G
 }
 
-const collectEssences = (G, ctx, collectActions) => {
+const collectEssences = (G, ctx, playerID, collectActions, collectOnComponentActions) => {
+  console.log('[collectEssences] Call to collectEssences()',collectActions, collectOnComponentActions)
+  collectActions && Object.values(collectActions).forEach((action) => {
+    if (action.collectType === 'GAIN') {
+      Object.entries(action.essences).forEach((essence) => {
+        console.log('add',essence[0],essence[1])
+        G.publicData.players[playerID].essencesPool[essence[0]] = G.publicData.players[playerID].essencesPool[essence[0]] + essence[1]
+      })
+    } else if (action.collectType === 'COST') {
+      Object.entries(action.essences).forEach((essence) => {
+        console.log('remove',essence[0],essence[1])
+        G.publicData.players[playerID].essencesPool[essence[0]] = G.publicData.players[playerID].essencesPool[essence[0]]- essence[1]
+      })
+    }
+  })
+  collectOnComponentActions && Object.values(collectOnComponentActions).forEach((action) => {
+    Object.entries(action.essences).forEach((essence) => {
+      console.log('add',essence[0],essence[1])
+      G.publicData.players[playerID].essencesPool[essence[0]] = G.publicData.players[playerID].essencesPool[essence[0]] + essence[1]
+    })
+  })
+  G.publicData.players[playerID].collectActions && Object.values(G.publicData.players[playerID].collectActions).forEach((action) => {
+    Object.entries(action.essences).forEach((essence) => {
+      console.log('add',essence[0],essence[1])
+      G.publicData.players[playerID].essencesPool[essence[0]] = G.publicData.players[playerID].essencesPool[essence[0]] + essence[1]
+    })
+  })
+  G.publicData.players[playerID].status = 'READY'
   return G
+}
+
+const allCollectsReady = (G, ctx) => {
+  console.log('[allCollectsReady] Call to allCollectsReady()')
+  let playersReady = true
+  for (let i= 0; i < ctx.numPlayers; i++) {
+    playersReady = playersReady && G.publicData.players[i].status === 'READY'
+  }
+  if (playersReady) {
+    console.log('[allCollectsReady] All players are ready, return "playPhase"')
+    return {next: 'playPhase' }
+  }
+  console.log('[allCollectsReady] One player at least is not ready, return "collectPhase"')
+}
+
+const getCollectTurnOrder = (G, ctx) => {
+  let firstPlayer = G.publicData.firstPlayer
+  let order = []
+  for (let i = 0; i < ctx.numPlayers; i++ ) {
+    let nextPlayerId = (parseInt(firstPlayer) + i) % ctx.numPlayers
+    order.push((nextPlayerId).toString())
+  }
+  return order
 }
 
 // ########## PLAY PHASE ##########
@@ -565,14 +621,11 @@ export const ResArcanaGame = Game({
         onPhaseBegin: (G, ctx) => initCollectPhase(G, ctx),
         allowedMoves: ['collectEssences'],
         turnOrder: {
-          playOrder: (G, ctx) => getTurnOrder(G, ctx),
+          playOrder: (G, ctx) => getCollectTurnOrder(G, ctx),
           first: (G, ctx) => 0,
           next: (G, ctx) => (ctx.playOrderPos + 1) % ctx.numPlayers,
-          actionPlayers: {
-            once: true,
-          },
         },
-        endPhaseIf: allMagicItemsReady
+        endPhaseIf: allCollectsReady
       },
       playPhase: {
         onPhaseBegin: initPlayPhase,
