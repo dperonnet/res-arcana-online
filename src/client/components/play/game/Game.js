@@ -28,7 +28,10 @@ const getInitialState = (ctx, setupData) => {
       deniedCards: [],
       hand: [],
       mages: [],
-      reminder: []
+      reminder: [],
+      uiTemp: {
+        essencesOnComponent: {}
+      }
     }
     G.publicData.players[i] = {
       essencesOnComponent: {},
@@ -250,22 +253,30 @@ const pickArtefact = (G, ctx, playerID, cardId) => {
 /**
  * This function place essences on a game component.
  * 
- * @param {*} playerId player's id owning the component.
+ * @param {*} playerID player's id owning the component.
  * @param {*} componentId id of the component.
  * @param {*} essenceType type of essence to place on component.
  * @param {*} essenceNumber number of essence to place on component.
  */
-const addEssenceOnComponent = (G, playerId, componentId, essenceType, essenceNumber) => {
-  let component = G.publicData.players[playerId].essencesOnComponent[componentId]
+const addEssenceOnComponent = (G, playerID, componentId, essenceType, essenceNumber) => {
+  let component = G.publicData.players[playerID].essencesOnComponent[componentId]
   if (!component) {
-    G.publicData.players[playerId].essencesOnComponent[componentId] = {}
-    component = G.publicData.players[playerId].essencesOnComponent[componentId]
+    G.publicData.players[playerID].essencesOnComponent[componentId] = {}
+    component = G.publicData.players[playerID].essencesOnComponent[componentId]
   }
   if (component[essenceType]) {
     component[essenceType] += essenceNumber
   } else {
     component[essenceType] = essenceNumber
   }
+}
+
+const removeFromComponent = (G, playerID, componentId, essenceList ) => {
+
+}
+
+const removeAllFromComponent = (G, playerID, componentId) => {
+  delete G.publicData.players[playerID].essencesOnComponent[componentId]
 }
 
 /**
@@ -418,6 +429,7 @@ const initCollectPhase = (G, ctx) => {
       
       if (Object.keys(G.publicData.players[i].essencesOnComponent).length > 0) {
         G.publicData.players[i].status ='COLLECT_ACTION_AVAILABLE'
+        G.players[i].uiTemp.essencesOnComponent = copy(G.publicData.players[i].essencesOnComponent)
       } else {
         G.publicData.players[i].status = 'READY'
       }
@@ -481,11 +493,12 @@ const collectEssences = (G, ctx, playerID, collectActions, collectOnComponentAct
       })
     }
   })
-  collectOnComponentActions && Object.values(collectOnComponentActions).forEach((action) => {
-    Object.entries(action.essences).forEach((essence) => {
+  collectOnComponentActions && Object.entries(collectOnComponentActions).forEach((action) => {
+    Object.entries(action[1].essences).forEach((essence) => {
       console.log('add',essence[0],essence[1])
       G.publicData.players[playerID].essencesPool[essence[0]] = G.publicData.players[playerID].essencesPool[essence[0]] + essence[1]
     })
+    removeAllFromComponent(G, playerID, action[0])
   })
   G.publicData.players[playerID].collectActions && Object.values(G.publicData.players[playerID].collectActions).forEach((action) => {
     Object.entries(action.essences).forEach((essence) => {
@@ -493,6 +506,19 @@ const collectEssences = (G, ctx, playerID, collectActions, collectOnComponentAct
       G.publicData.players[playerID].essencesPool[essence[0]] = G.publicData.players[playerID].essencesPool[essence[0]] + essence[1]
     })
   })
+  let automate = G.publicData.players[playerID].inPlay.filter((component) => {
+    return component.id === 'automate'
+  })
+  if (automate && automate[0]) {
+    console.log('automate in play')
+    if (!Object.keys(collectOnComponentActions).includes('automate')) {
+      if (G.publicData.players[playerID].essencesOnComponent['automate']) {
+        Object.keys(G.publicData.players[playerID].essencesOnComponent['automate']).forEach((essence) => {
+          addEssenceOnComponent(G, playerID, 'automate', essence, 2)
+        })
+      }
+    }
+  }
   G.publicData.players[playerID].status = 'READY'
   return G
 }

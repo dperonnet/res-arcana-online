@@ -13,7 +13,7 @@ import { toggleChat } from '../../../../store/actions/chatActions'
 import CardZoom from '../../common/card/CardZoom.js'
 import Chat from '../../common/chat/Chat'
 import GameComponent from './GameComponent'
-import EssencePicker from './EssencePicker'
+import CollectComponent from './CollectComponent'
 
 
 const CARD_BACK_ARTEFACT = {
@@ -582,7 +582,7 @@ class ResArcanaBoard extends Component {
     if (!Number.isInteger(parseInt(playerID))) return null
 
     const playersName = this.getPlayersName()
-    const essencesOnComponent = G.publicData.players[playerID].essencesOnComponent
+    const essencesOnComponent = G.players[playerID].uiTemp.essencesOnComponent
     const componentsWithSpecificAction = ['coffreFort','forgeMaudite']
     let title = 'Collect Phase'
     let waiting = playerID !== ctx.currentPlayer
@@ -604,7 +604,7 @@ class ResArcanaBoard extends Component {
     // Render those components with essence picker to collect essence.
     let collectComponents = components.map((component, index) => {
       let essences = Object.keys(collectOnComponentActions).includes(component.id) ? null : essencesOnComponent[component.id]
-      return <EssencePicker key={component.id + '_' + index} component={component} essencesOnComponent={essences}/>
+      return <CollectComponent key={component.id + '_' + index} component={component} essencesOnComponent={essences} status={G.publicData.players[playerID].status}/>
     })
 
     // Check if player can pay all collect costs.

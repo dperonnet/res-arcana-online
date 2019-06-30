@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faSlash, faUndoAlt } from '@fortawesome/free-solid-svg-icons';
 import GameComponent from './GameComponent'
 
-class EssencePicker extends Component {
+class CollectComponent extends Component {
   
   buildCollectAction = (component, essenceList = {}) => {
     return {
@@ -55,9 +55,11 @@ class EssencePicker extends Component {
   }
 
   renderCollectAbility = (essenceList, handleOnClick, onComponent, cost) => {
+    const { status } = this.props
+    const ready = status === 'READY'
     let essences = Object.entries(essenceList).map((essence, index) => {
       let isLast =  index === Object.entries(essenceList).length -1
-      return <div key={essence[0]} className="collect-option" onClick={handleOnClick}>
+      return <div key={essence[0]} className="collect-option" onClick={!ready ? handleOnClick : null}>
         {cost ?
             <div className={'type essence ' + essence[0] + ' cost-container'}><div className="cost"></div>{essence[1]}</div>
           :
@@ -141,7 +143,8 @@ class EssencePicker extends Component {
   }
 
   renderForgeMauditePicker = () => {
-    const { component, setCollectAction } = this.props
+    const { component, setCollectAction, status } = this.props
+    const ready = status === 'READY'
     const handleCost = () => {
       const action = this.buildCollectAction(component, { death: 1 })
       action.type = 'COST'
@@ -153,7 +156,7 @@ class EssencePicker extends Component {
       setCollectAction(action)
     }
     return <div className="collect-option">
-      <Button variant="secondary" className="type essence death cost-container" onClick={() => handleCost()}><div className="cost"></div>1</Button>
+      <Button variant="secondary" className="type essence death cost-container" onClick={!ready ? () => handleCost() : null}><div className="cost"></div>1</Button>
       <div className="option-or">
         <FontAwesomeIcon icon={faSlash} size="sm" rotation={90} />
       </div>
@@ -162,22 +165,26 @@ class EssencePicker extends Component {
   }
 
   renderTapComponent = (handleOnClick) => {
-    return <div className="collect-option" onClick={handleOnClick}>
+    const { status } = this.props
+    const ready = status === 'READY'
+    return <div className="collect-option" onClick={!ready ? handleOnClick : null}>
       <div className="tap-component-icon"></div>
     </div>
   }
 
   render() {
-    const { component, collectActions, collectOnComponentActions, essencesOnComponent, resetCollectAction } = this.props
+    const { component, collectActions, collectOnComponentActions, essencesOnComponent, resetCollectAction, status } = this.props
     let collectAbilities
     let collectOnComponent = this.renderCollectOnComponent()
     
     let handleClickComponent = collectOnComponentActions[component.id] ? null : (() => this.handleCollectEssenceOnComponent())
-    let handleClickEssenceOnComponent = (() => this.handleCollectEssenceOnComponent())
+    let handleClickEssenceOnComponent = !collectOnComponentActions[component.id] ? null :  (() => this.handleCollectEssenceOnComponent())
 
     let actionValid = Object.keys(collectActions).includes(component.id)
     const componentsWithSpecificAction = ['coffreFort','forgeMaudite']
     let validSpecific = false
+
+    const ready = status === 'READY'
 
     if (component.hasSpecificCollectAbility) {
       switch (component.id) {
@@ -213,8 +220,9 @@ class EssencePicker extends Component {
           break
         case 'forgeMaudite':
           if (actionValid && collectActions[component.id].valid) {
+            const handleClick = !ready ? () => resetCollectAction(component.id) : null
             collectAbilities = collectActions[component.id].type === 'COST' ? 
-                this.renderCollectAbility(collectActions[component.id].essences , () => resetCollectAction(component.id), false, true)
+                this.renderCollectAbility(collectActions[component.id].essences , handleClick, false, true)
               :
                 this.renderTapComponent(() => resetCollectAction(component.id))
           } else {
@@ -236,16 +244,18 @@ class EssencePicker extends Component {
     const requireAction = ((component.hasStandardCollectAbility && component.standardCollectAbility.multipleCollectOptions)
       || componentsWithSpecificAction.includes(component.id))
     const valid = (collectActions[component.id] && collectActions[component.id].valid) || validSpecific
-    const classes = requireAction && !valid ? ' active ' : ''
-    const cursorCollectAbility = collectActions[component.id] ? ' delete-cursor' : ' '
-    const cursorOnComponent = collectOnComponentActions[component.id] ? ' delete-cursor' : ' pointer-cursor'
+    const active = requireAction && !valid ? ' active ' : ''
+    const cursorGameComponent = !ready && essencesOnComponent && Object.keys(essencesOnComponent).length > 0 ? ' pointer-cursor ' : ''
+    const classes = active + cursorGameComponent
+    const cursorCollectAbility = !ready && collectActions[component.id] ? ' delete-cursor' : ' '
+    const cursorOnComponent = !ready && collectOnComponentActions[component.id] ? ' delete-cursor' : ' '
 
     return <div className="essence-picker">
       <div className={'collect-options '+ cursorCollectAbility}>
         {collectAbilities}
       </div>
-      <GameComponent component={component} classes={classes} essencesOnComponent={essencesOnComponent} onClick={handleClickComponent}/>
-      <div className={'collect-options '+ cursorOnComponent} onClick={handleClickEssenceOnComponent}>
+      <GameComponent component={component} classes={classes} essencesOnComponent={essencesOnComponent} onClick={!ready ? handleClickComponent : null}/>
+      <div className={'collect-options '+ cursorOnComponent} onClick={!ready ? handleClickEssenceOnComponent : null}>
         {collectOnComponent}
       </div>
     </div>
@@ -253,6 +263,7 @@ class EssencePicker extends Component {
 }
 
 const mapStateToProps = (state) => {
+  console.log('state',state)
   return {
     collectActions: state.game.collectActions,
     collectOnComponentActions: state.game.collectOnComponentActions,
@@ -272,4 +283,4 @@ const mapDispatchToProps = (dispatch) => {
   }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(EssencePicker)
+export default connect(mapStateToProps, mapDispatchToProps)(CollectComponent)
