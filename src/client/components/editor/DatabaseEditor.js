@@ -53,7 +53,6 @@ class DatabaseEditor extends Component {
         card = <div className="card-zoom-frame">
           <CardZoom
             src={ src }
-            show={ true } 
             alt={ pristineComponent.name ? pristineComponent.name : null } 
             />
         </div>

@@ -18,27 +18,22 @@ class CardZoom extends React.Component {
   }
 
   render() {
-    const { alt, show, src, essencesOnComponent } = this.props;
+    const { alt, src, essencesOnComponent } = this.props;
     const essences = essencesOnComponent ? this.renderEssences() : null
-    return (
-      show ?
-        <>
-          <div className='card-zoomed shadow no-highlight'>
-            <span className='card-name'>{alt}</span>
-            <img src={src} alt={alt} />
-          </div>
-          {essences}
-        </>
-        : null
-    )
+    return src && <>
+      <div className='card-zoomed shadow no-highlight'>
+        <span className='card-name'>{alt}</span>
+        <img src={src} alt={alt} />
+      </div>
+      {essences}
+    </>
   }
 }
 
 CardZoom.displayName = 'CardZoom';
 CardZoom.propTypes = {
   src: PropTypes.string,
-  alt: PropTypes.string,
-  show: PropTypes.bool
+  alt: PropTypes.string
 };
 
 export default CardZoom;

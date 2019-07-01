@@ -8,7 +8,7 @@ import './essence.scss'
 import { compose } from 'redux'
 import { connect } from 'react-redux'
 import { firestoreConnect, isLoaded } from 'react-redux-firebase'
-import { resetCollect, selectCard, setCollectAction, tapComponent } from '../../../../store/actions/gameActions'
+import { resetCollect, clearZoom, selectCard, zoomCard, setCollectAction } from '../../../../store/actions/gameActions'
 import { toggleChat } from '../../../../store/actions/chatActions'
 import CardZoom from '../../common/card/CardZoom.js'
 import Chat from '../../common/chat/Chat'
@@ -37,6 +37,8 @@ const CARD_BACK_MONUMENT = {
   type: 'back',
 }
 
+let interval
+
 class ResArcanaBoard extends Component {
 
   static propTypes = {
@@ -46,6 +48,10 @@ class ResArcanaBoard extends Component {
     playerID: PropTypes.string,
     isActive: PropTypes.bool,
     isMultiplayer: PropTypes.bool,
+  }
+
+  componentDidMount = () => {
+    this.props.resetCollect()
   }
 
   /**
@@ -93,7 +99,7 @@ class ResArcanaBoard extends Component {
     })[0]
     const essencesOnComponent = playerOwningCard ? playerOwningCard.essencesOnComponent[cardToZoom.id] : null
     return <div className="card-zoom-frame normal">
-      <CardZoom src={src} show={true} alt={cardToZoom.name} essencesOnComponent={essencesOnComponent} />
+      <CardZoom src={src} alt={cardToZoom.name} essencesOnComponent={essencesOnComponent}/>
     </div>
   }
 
@@ -112,10 +118,6 @@ class ResArcanaBoard extends Component {
         <div className="essence-count">{G.publicData.players[id].essencesPool[essence]}</div>
       </div>
     })
-  }
-
-  tapComponent = (card) => {
-    this.props.tapComponent(card)
   }
 
   toggleChat = () => {
@@ -166,8 +168,35 @@ class ResArcanaBoard extends Component {
     this.props.selectCard(card)
   }
 
+  /**
+   * Define the component to zoom on mouse over.
+   */
+  handleMouseOver = (component) => {
+    clearInterval(interval)
+    if (component.type !== 'back')
+    this.props.zoomCard(component)
+  }
+
+  /**
+   * Hide the card to zoom on mouse out.
+   */
+  handleMouseOut = () => {
+    interval = setInterval(() => this.props.clearZoom(), 5000)
+    return () => clearInterval(interval)
+  }
+
   handleResetCollect = () => {
     this.props.resetCollect()
+  }
+
+  renderGameComponent = (component, args) => {
+    return <GameComponent
+      component={component} 
+      onMouseOver={() => this.handleMouseOver(component)} 
+      onMouseOut={() => this.handleMouseOut()}
+      key={component.id}
+      {...args}
+    />
   }
 
   /**
@@ -177,15 +206,15 @@ class ResArcanaBoard extends Component {
   renderCommonBoard = () => {
     const { G } = this.props
     const placesOfPower = G.publicData.placesOfPowerInGame.map((pop)=>{
-      return <GameComponent key={pop.id} component={pop} onClick={() => this.tapComponent(pop)} />
+      return this.renderGameComponent(pop)
     })
     const magicItems = G.publicData.magicItems.map((magicItem)=>{
-      return <GameComponent key={magicItem.id} component={magicItem} onClick={() => this.tapComponent(magicItem)} />
+      return this.renderGameComponent(magicItem)
     })
     const monuments = G.publicData.monumentsRevealed.map((monument)=>{
-      return <GameComponent key={monument.id} component={monument} onClick={() => this.tapComponent(monument)} />
+      return this.renderGameComponent(monument)
     })
-    const monumentsStack = <GameComponent component={copy(CARD_BACK_MONUMENT)}/>
+    const monumentsStack = this.renderGameComponent(copy(CARD_BACK_MONUMENT))
     return <>
       <div className="components">
         <h5>Places of power ({G.publicData.placesOfPowerInGame.length} left)</h5>
@@ -264,11 +293,11 @@ class ResArcanaBoard extends Component {
     return <div className="draw-pile">
       <div className="card-container discard">
         <span className="component-legend">Discard ({countDiscard})</span>
-        <GameComponent component={{...drawPile, class: countDiscard > 0 ? drawPile.class : null}} discard={true}/>
+        {this.renderGameComponent({...drawPile, class: countDiscard > 0 ? drawPile.class : null}, {discard: true})}
       </div>
       <div className="card-container">
         <span className="component-legend">Draw pile ({countDeck})</span>
-        <GameComponent component={{...drawPile, class: countDeck > 0 ? drawPile.class : null}}/>
+        {this.renderGameComponent({...drawPile, class: countDeck > 0 ? drawPile.class : null})}
       </div>
     </div>
   }
@@ -276,7 +305,7 @@ class ResArcanaBoard extends Component {
   renderPlayerHand = () => {
     const { G, playerID, profile } = this.props
     const hand = G.players[playerID].hand.map((card)=>{
-      return <GameComponent key={card.id} component={card} />
+      return this.renderGameComponent(card)
     })
     return <div className={'draft-card card-row ' + profile.cardSize}>
       <div className="separator"></div>
@@ -296,14 +325,15 @@ class ResArcanaBoard extends Component {
     let cards = null
     let drawPileAndDiscard = this.renderPlayerDrawPileAndDiscard(id)
     let essencesOnComponent = null
+    let tappedComponents = G.publicData.tappedComponents
     switch (G.publicData.players[playerID].status) {
       case 'DRAFTING_ARTEFACTS':
         const mages = G.players[playerID].mages.map((card)=>{
-          return <GameComponent key={card.id} component={card} />
+          return this.renderGameComponent(card)
         })
         essencesOnComponent = G.publicData.players[id].essencesOnComponent
         const deck = G.players[playerID].hand.map((card)=>{
-          return <GameComponent key={card.id} component={card} essencesOnComponent={essencesOnComponent[card.id]} />
+          return this.renderGameComponent(card, {essencesOnComponent: essencesOnComponent[card.id]})
         })
         cards = <>{mages}{deck}</>
         break
@@ -313,7 +343,7 @@ class ResArcanaBoard extends Component {
       default:
         essencesOnComponent = G.publicData.players[id].essencesOnComponent
         cards = G.publicData.players[id].inPlay.map((card)=>{
-          return <GameComponent key={card.id} component={card} essencesOnComponent={essencesOnComponent[card.id]} />
+          return this.renderGameComponent(card, {essencesOnComponent: essencesOnComponent[card.id], tappedComponents})
         })
     }
 
@@ -346,9 +376,9 @@ class ResArcanaBoard extends Component {
           const playerRuban = this.renderPlayerRuban(id)
           let cards = []
           let cardMage = copy(CARD_BACK_MAGE)
-          cards.push(<GameComponent key={id+'_back_mage_1'} component={{...cardMage, id: 'back_mage_1'}}/>)
+          cards.push(this.renderGameComponent({...cardMage, id: 'back_mage_1'}))
           if (G.publicData.players[id].status !== 'READY') {
-            cards.push(<GameComponent key={id+'_back_mage_2'} component={{...cardMage, id: 'back_mage_2'}}/>)
+            cards.push(this.renderGameComponent({...cardMage, id: '_back_mage_2'}))
           }
           return (
             <div key={id}>
@@ -397,14 +427,15 @@ class ResArcanaBoard extends Component {
           
     let cards = []
     let cardMage = copy(CARD_BACK_MAGE)
-    cards.push(<GameComponent key={id+'_back_mage_1'} component={{...cardMage, id: 'back_mage_1'}}/>)
+    
+    cards.push(this.renderGameComponent({...cardMage, id: '_back_mage_1'}))
     if (G.publicData.players[id].status !== 'READY') {
-      cards.push(<GameComponent key={id+'_back_mage_2'} component={{...cardMage, id: 'back_mage_2'}}/>)
+      cards.push(this.renderGameComponent({...cardMage, id: 'back_mage_2'}))
     }
     for (let i = 0; i< deckSize; i++) {
       let cardArtefact = copy(CARD_BACK_ARTEFACT)
       cardArtefact.id = id + '_' + i + '_back_artefact'
-      cards.push(<GameComponent key={id+'_back_artefact'} component={cardArtefact}/>)
+      cards.push(this.renderGameComponent(cardArtefact))
     }
 
     const playerRuban = this.renderPlayerRuban(id)
@@ -448,7 +479,7 @@ class ResArcanaBoard extends Component {
         waiting = emptyHand
         
         draftCards = G.players[playerID].draftCards.length > 0 && G.players[playerID].draftCards[0].map((card) => {
-          return <GameComponent key={card.id} component={card} onClick={() => this.handleClick(card)} onDoubleClick={() => this.pickArtefact(card.id)}/>
+          return this.renderGameComponent(card, {onClick: () => this.handleClick(card), onDoubleClick: () => this.pickArtefact(card.id)})
         })
       
         directive = selectedCard ?
@@ -469,7 +500,7 @@ class ResArcanaBoard extends Component {
         title += ` - Mage selection`
         
         draftCards = G.players[playerID].mages.length > 0 && G.players[playerID].mages.map((card) => {
-          return <GameComponent key={card.id} component={card} onClick={() => this.handleClick(card)} onDoubleClick={() => this.pickMage(card.id)}/>
+          return this.renderGameComponent(card, {onClick: () => this.handleClick(card), onDoubleClick: () => this.pickMage(card.id)})
         })
         directive = selectedCard ?
           <div className="info">Keep {selectedCard.name} ?</div>
@@ -536,9 +567,9 @@ class ResArcanaBoard extends Component {
     let showButtons = !waiting
     let magicItems = G.publicData.magicItems.map((magicItem) => {
       return waiting ?
-        <GameComponent key={magicItem.id} component={magicItem}/>
+        this.renderGameComponent(magicItem)
       :
-        <GameComponent key={magicItem.id} component={magicItem} onClick={() => this.handleClick(magicItem)} onDoubleClick={() => this.pickMagicItem(magicItem.id)}/>
+      this.renderGameComponent(magicItem, {onClick: () => this.handleClick(magicItem), onDoubleClick: () => this.pickMagicItem(magicItem.id)})
     })
   
     let directive = null
@@ -582,7 +613,9 @@ class ResArcanaBoard extends Component {
     if (!Number.isInteger(parseInt(playerID))) return null
 
     const playersName = this.getPlayersName()
-    const essencesOnComponent = G.players[playerID].uiTemp.essencesOnComponent
+    const essencesOnComponent = G.publicData.players[playerID].essencesOnComponent
+    // essencesOnComponentRef is used to maintain the display of the component once his essences have been removed by collect.
+    const essencesOnComponentRef = G.players[playerID].uiTemp.essencesOnComponent
     const componentsWithSpecificAction = ['coffreFort','forgeMaudite']
     let title = 'Collect Phase'
     let waiting = playerID !== ctx.currentPlayer
@@ -598,13 +631,21 @@ class ResArcanaBoard extends Component {
 
     // Only components containing essences or collect ability are concerned.
     let components = G.publicData.players[playerID].inPlay.filter((component) => {
-      return Object.keys(essencesOnComponent).includes(component.id) ||
+      return Object.keys(essencesOnComponentRef).includes(component.id) ||
         component.hasStandardCollectAbility || component.hasSpecificCollectAbility
     })
-    // Render those components with essence picker to collect essence.
+    // Render those components with CollectComponent to collect essence.
     let collectComponents = components.map((component, index) => {
-      let essences = Object.keys(collectOnComponentActions).includes(component.id) ? null : essencesOnComponent[component.id]
-      return <CollectComponent key={component.id + '_' + index} component={component} essencesOnComponent={essences} status={G.publicData.players[playerID].status}/>
+      let essences = collectOnComponentActions[component.id] ? null : essencesOnComponent[component.id]
+      return <CollectComponent 
+        component={component} 
+        essencesOnComponent={essences} 
+        key={component.id + '_' + index} 
+        onMouseOut={() => this.handleMouseOut()}
+        onMouseOver={() => this.handleMouseOver(component)} 
+        status={G.publicData.players[playerID].status}
+        ui={G.players[playerID].uiTemp} 
+      />
     })
 
     // Check if player can pay all collect costs.
@@ -634,16 +675,16 @@ class ResArcanaBoard extends Component {
           case 'coffreFort':
             const hasEssence = essencesOnComponent[component.id]
             if (hasEssence && hasEssence['gold']) {
-              collectValid = collectValid && (Object.keys(collectActions).includes(component.id) && collectActions[component.id].valid)
+              collectValid = collectValid && ((collectActions[component.id] && collectActions[component.id].valid)
+              || (collectOnComponentActions[component.id] && collectOnComponentActions[component.id].valid))
             }
             break
           case 'forgeMaudite':
           default:
-            collectValid = collectValid && (Object.keys(collectActions).includes(component.id) && collectActions[component.id].valid)
-              || (Object.keys(collectOnComponentActions).includes(component.id) && collectOnComponentActions[component.id].valid)
+            collectValid = collectValid && (collectActions[component.id] && collectActions[component.id].valid)
         }
       } else if (component.hasStandardCollectAbility && component.standardCollectAbility.multipleCollectOptions) {
-        collectValid = collectValid && Object.keys(collectActions).includes(component.id) && collectActions[component.id].valid
+        collectValid = collectValid && collectActions[component.id] && collectActions[component.id].valid
       }
     })
 
@@ -659,7 +700,7 @@ class ResArcanaBoard extends Component {
             <div className="info">You have to select collect option(s).</div>
           :
             <div className="info">You need {Object.entries(missingEssences).map((essence) => {
-              return <div className="collect-options collect-info">
+              return <div key={essence[0]}className="collect-options collect-info">
               <div className={'type essence '+essence[0]}>{essence[1]}</div>
             </div>})} more essence(s) for your collect to be valid.</div>
         handleConfirm = () => this.collectEssences()
@@ -798,7 +839,6 @@ const mapStateToProps = (state) => {
     game: state.firestore.ordered.game && state.firestore.ordered.game[0],
     profile: state.firebase.profile,
     selectedCard: state.game.selectedCard,
-    tappedComponents: state.game.tappedComponents,
   }
 }
 
@@ -807,8 +847,10 @@ const mapDispatchToProps = (dispatch) => {
     resetCollect: () => dispatch(resetCollect()),
     selectCard: (card) => dispatch(selectCard(card)),
     setCollectAction: (action) => dispatch(setCollectAction(action)),
-    tapComponent: (card) => dispatch(tapComponent(card)),
-    toggleChat: () => dispatch(toggleChat())
+    toggleChat: () => dispatch(toggleChat()),
+    clearZoom: () => dispatch(clearZoom()),
+    selectCard: (card) => dispatch(selectCard(card)),
+    zoomCard: (card) => dispatch(zoomCard(card)),
   }
 }
 

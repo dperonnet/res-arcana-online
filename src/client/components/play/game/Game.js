@@ -18,6 +18,7 @@ const getInitialState = (ctx, setupData) => {
       monumentsStack: [],
       monumentsRevealed: [],
       players: {},
+      tappedComponents: {},
       waitingFor: []
     },
   }
@@ -104,6 +105,7 @@ const getInitialState = (ctx, setupData) => {
       G.publicData.players[i].inPlay.push(G.players[i].deck[3])
       G.publicData.players[i].inPlay.push(G.players[i].deck[4])
       G.publicData.players[i].inPlay.push(G.publicData.placesOfPowerInGame[i])
+      G.publicData.players[i].inPlay.push(G.publicData.magicItems[ctx.random.Die(Object.keys(G.publicData.magicItems).length)-1])
       
       const essencesTypes = ['elan', 'life', 'calm', 'death', 'gold']
       const essencesTypeNumber = 5
@@ -115,7 +117,7 @@ const getInitialState = (ctx, setupData) => {
     }
   }
   G.skipDraftPhase = skip
-  G.startingPhase = skip ? { next: 'pickMagicItemPhase' } : { next: 'draftPhase' }
+  G.startingPhase = skip ? { next: 'collectPhase' } : { next: 'draftPhase' }
 
   return G
 }
@@ -481,16 +483,18 @@ const initCollectPhase = (G, ctx) => {
 const collectEssences = (G, ctx, playerID, collectActions, collectOnComponentActions) => {
   console.log('[collectEssences] Call to collectEssences()',collectActions, collectOnComponentActions)
   collectActions && Object.values(collectActions).forEach((action) => {
-    if (action.collectType === 'GAIN') {
+    if (action.type === 'GAIN') {
       Object.entries(action.essences).forEach((essence) => {
         console.log('add',essence[0],essence[1])
         G.publicData.players[playerID].essencesPool[essence[0]] = G.publicData.players[playerID].essencesPool[essence[0]] + essence[1]
       })
-    } else if (action.collectType === 'COST') {
+    } else if (action.type === 'COST') {
       Object.entries(action.essences).forEach((essence) => {
         console.log('remove',essence[0],essence[1])
         G.publicData.players[playerID].essencesPool[essence[0]] = G.publicData.players[playerID].essencesPool[essence[0]]- essence[1]
       })
+    } else if (action.type === 'TAP') {
+      G.publicData.tappedComponents[action.id] = true
     }
   })
   collectOnComponentActions && Object.entries(collectOnComponentActions).forEach((action) => {
@@ -519,7 +523,10 @@ const collectEssences = (G, ctx, playerID, collectActions, collectOnComponentAct
       }
     }
   }
+
   G.publicData.players[playerID].status = 'READY'
+  G.players[playerID].uiTemp.collectActions = collectActions
+  G.players[playerID].uiTemp.collectOnComponentActions = collectOnComponentActions
   return G
 }
 
@@ -620,7 +627,7 @@ export const ResArcanaGame = Game({
   flow: {
     onMove: (G, ctx) => G,
     movesPerTurn: 1,
-    startingPhase: 'pickMagicItemPhase',
+    startingPhase: 'collectPhase',
 
     phases: {
       setupPhase: {

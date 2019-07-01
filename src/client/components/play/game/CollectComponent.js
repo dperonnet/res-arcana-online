@@ -14,7 +14,7 @@ class CollectComponent extends Component {
       name: component.name,
       essences: essenceList,
       from: 'COLLECT_ABILITY',
-      collectType: 'GAIN',
+      type: 'GAIN',
       valid: true
     }
   }
@@ -76,10 +76,10 @@ class CollectComponent extends Component {
     </>
   }
 
-  renderCollectOnComponent = () => {
-    const { component, collectOnComponentActions, essencesOnComponent } = this.props
-    if (essencesOnComponent || collectOnComponentActions[component.id]) {
-      const essences = collectOnComponentActions[component.id] ? collectOnComponentActions[component.id].essences : null
+  renderCollectOnComponent = (collectOnComponentActionsRef) => {
+    const { component, essencesOnComponent } = this.props
+    if (essencesOnComponent || collectOnComponentActionsRef[component.id]) {
+      const essences = collectOnComponentActionsRef[component.id] ? collectOnComponentActionsRef[component.id].essences : null
       return essences &&
         Object.entries(essences).map((essence, index) => {
           let isLast =  index === Object.entries(essences).length -1
@@ -160,7 +160,7 @@ class CollectComponent extends Component {
       <div className="option-or">
         <FontAwesomeIcon icon={faSlash} size="sm" rotation={90} />
       </div>
-      <div className="tap-component-icon" onClick={() => handleTap()}></div>
+      <div className="tap-component-icon pointer-cursor" onClick={() => handleTap()}></div>
     </div>
   }
 
@@ -173,14 +173,18 @@ class CollectComponent extends Component {
   }
 
   render() {
-    const { component, collectActions, collectOnComponentActions, essencesOnComponent, resetCollectAction, status } = this.props
-    let collectAbilities
-    let collectOnComponent = this.renderCollectOnComponent()
+    const { component, collectActions, collectOnComponentActions, essencesOnComponent, onMouseOut, onMouseOver, resetCollectAction, status, ui } = this.props
+    // Once the collect phase is done for a player, the ui.collectAction keep tracks of player's actions until all players are
+    let collectActionsRef = ui.collectActions ? ui.collectActions : collectActions
+    let collectOnComponentActionsRef = ui.collectOnComponentActions ? ui.collectOnComponentActions : collectOnComponentActions
     
-    let handleClickComponent = collectOnComponentActions[component.id] ? null : (() => this.handleCollectEssenceOnComponent())
-    let handleClickEssenceOnComponent = !collectOnComponentActions[component.id] ? null :  (() => this.handleCollectEssenceOnComponent())
+    let collectAbilities
+    let collectOnComponent = this.renderCollectOnComponent(collectOnComponentActionsRef)
+    
+    let handleClickComponent = collectOnComponentActionsRef[component.id] ? null : (() => this.handleCollectEssenceOnComponent())
+    let handleClickEssenceOnComponent = !collectOnComponentActionsRef[component.id] ? null :  (() => this.handleCollectEssenceOnComponent())
 
-    let actionValid = Object.keys(collectActions).includes(component.id)
+    let actionValid = Object.keys(collectActionsRef).includes(component.id)
     const componentsWithSpecificAction = ['coffreFort','forgeMaudite']
     let validSpecific = false
 
@@ -193,23 +197,23 @@ class CollectComponent extends Component {
             let essenceList = {}
             Object.keys(essencesOnComponent).forEach((type) => essenceList[type] = 2)
 
-            collectAbilities = collectOnComponentActions[component.id] ? null : this.renderCollectAbility(essenceList, null, true)
-            handleClickComponent = collectOnComponentActions[component.id] ? null : (() => this.handleCollectEssenceOnComponent())
+            collectAbilities = collectOnComponentActionsRef[component.id] ? null : this.renderCollectAbility(essenceList, null, true)
+            handleClickComponent = collectOnComponentActionsRef[component.id] ? null : (() => this.handleCollectEssenceOnComponent())
             handleClickEssenceOnComponent = (() => this.handleCollectEssenceOnComponent())
           }
           break
         case 'coffreFort':
-          if (essencesOnComponent && essencesOnComponent['gold'] > 0 && !collectOnComponentActions[component.id]) {
-            if (actionValid && collectActions[component.id].valid) {
-              collectAbilities = this.renderCollectAbility(collectActions[component.id].essences , () => resetCollectAction(component.id))
+          if (essencesOnComponent && essencesOnComponent['gold'] > 0 && !collectOnComponentActionsRef[component.id]) {
+            if (actionValid && collectActionsRef[component.id].valid) {
+              collectAbilities = this.renderCollectAbility(collectActionsRef[component.id].essences , () => resetCollectAction(component.id))
             } else {
               collectAbilities = this.renderEssencePicker(component.standardCollectAbility.essenceList)
             }
-            validSpecific = collectOnComponentActions[component.id]
+            validSpecific = collectOnComponentActionsRef[component.id]
           } else {
             validSpecific = true
           }
-          handleClickComponent = collectOnComponentActions[component.id] ? null : (() => {
+          handleClickComponent = collectOnComponentActionsRef[component.id] ? null : (() => {
             this.handleCollectEssenceOnComponent()
             resetCollectAction(component.id)
           })
@@ -219,10 +223,10 @@ class CollectComponent extends Component {
           })
           break
         case 'forgeMaudite':
-          if (actionValid && collectActions[component.id].valid) {
+          if (actionValid && collectActionsRef[component.id].valid) {
             const handleClick = !ready ? () => resetCollectAction(component.id) : null
-            collectAbilities = collectActions[component.id].type === 'COST' ? 
-                this.renderCollectAbility(collectActions[component.id].essences , handleClick, false, true)
+            collectAbilities = collectActionsRef[component.id].type === 'COST' ? 
+                this.renderCollectAbility(collectActionsRef[component.id].essences , handleClick, false, true)
               :
                 this.renderTapComponent(() => resetCollectAction(component.id))
           } else {
@@ -232,8 +236,8 @@ class CollectComponent extends Component {
         default:
       }
     } else if (component.hasStandardCollectAbility) {
-      if (actionValid && collectActions[component.id].valid) {
-        collectAbilities = this.renderCollectAbility(collectActions[component.id].essences , () => resetCollectAction(component.id))
+      if (actionValid && collectActionsRef[component.id].valid) {
+        collectAbilities = this.renderCollectAbility(collectActionsRef[component.id].essences , () => resetCollectAction(component.id))
       } else if (component.standardCollectAbility.multipleCollectOptions) {
         collectAbilities = this.renderEssencePicker(component.standardCollectAbility.essenceList)
       } else {
@@ -243,18 +247,25 @@ class CollectComponent extends Component {
 
     const requireAction = ((component.hasStandardCollectAbility && component.standardCollectAbility.multipleCollectOptions)
       || componentsWithSpecificAction.includes(component.id))
-    const valid = (collectActions[component.id] && collectActions[component.id].valid) || validSpecific
+    const valid = (collectActionsRef[component.id] && collectActionsRef[component.id].valid) || validSpecific
     const active = requireAction && !valid ? ' active ' : ''
     const cursorGameComponent = !ready && essencesOnComponent && Object.keys(essencesOnComponent).length > 0 ? ' pointer-cursor ' : ''
     const classes = active + cursorGameComponent
-    const cursorCollectAbility = !ready && collectActions[component.id] ? ' delete-cursor' : ' '
-    const cursorOnComponent = !ready && collectOnComponentActions[component.id] ? ' delete-cursor' : ' '
+    const cursorCollectAbility = !ready && collectActionsRef[component.id] ? ' delete-cursor' : ' '
+    const cursorOnComponent = !ready && collectOnComponentActionsRef[component.id] ? ' delete-cursor' : ' '
 
     return <div className="essence-picker">
       <div className={'collect-options '+ cursorCollectAbility}>
         {collectAbilities}
       </div>
-      <GameComponent component={component} classes={classes} essencesOnComponent={essencesOnComponent} onClick={!ready ? handleClickComponent : null}/>
+      <GameComponent 
+        component={component}
+        classes={classes}
+        essencesOnComponent={essencesOnComponent}
+        onClick={!ready ? handleClickComponent : null}
+        onMouseOut={() => onMouseOut()}
+        onMouseOver={() => onMouseOver(component)}
+      />
       <div className={'collect-options '+ cursorOnComponent} onClick={!ready ? handleClickEssenceOnComponent : null}>
         {collectOnComponent}
       </div>
@@ -263,7 +274,6 @@ class CollectComponent extends Component {
 }
 
 const mapStateToProps = (state) => {
-  console.log('state',state)
   return {
     collectActions: state.game.collectActions,
     collectOnComponentActions: state.game.collectOnComponentActions,

@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import Card from '../../common/card/Card'
-import { clearZoom, selectCard, tapComponent, zoomCard } from '../../../../store/actions/gameActions'
 import { connect } from 'react-redux';
 
 const COMPONENTS_STYLES = {
@@ -14,21 +13,6 @@ const COMPONENTS_STYLES = {
 
 class GameComponent extends Component {
   
-  /**
-   * Define the component to zoom on mouse over.
-   */
-  handleMouseOver = (component) => {
-    if (component.type !== 'back')
-    this.props.zoomCard(component)
-  }
-
-  /**
-   * Hide the card to zoom on mouse out.
-   */
-  handleMouseOut = () => {
-    this.props.clearZoom()
-  }
-
   renderEssences = () => {
     const {essencesOnComponent} = this.props
     let essences
@@ -43,7 +27,7 @@ class GameComponent extends Component {
   }
 
   render() {
-    const {component, classes, discard, onClick, onDoubleClick, profile, selectedCard, tappedComponents } = this.props
+    const {component, classes, discard, onClick, onDoubleClick, onMouseOut, onMouseOver, profile, selectedCard, tappedComponents } = this.props
     let src = null
     if (component.class) {
       src = require('../../../assets/image/components/' + component.type + '/' + component.class + '.png')
@@ -52,7 +36,7 @@ class GameComponent extends Component {
     const componentType = COMPONENTS_STYLES[component.type]
     const propsClasses = classes ? classes : ''
     const active = selectedCard && selectedCard.id === component.id ? ' active ' : ''
-    const tapped = (tappedComponents.indexOf(component.id) >= 0) || discard ? ' tapped ' : ''
+    const tapped = (tappedComponents && tappedComponents[component.id]) || discard ? ' tapped ' : ''
     const layout = ' vertical ';
     const essences = this.renderEssences()
     return (
@@ -61,8 +45,8 @@ class GameComponent extends Component {
         className={cardSize + layout + componentType + active + tapped + propsClasses}
         onClick={onClick}
         onDoubleClick={onDoubleClick}
-        onMouseOver={() => this.handleMouseOver(component)}
-        onMouseOut={() => this.handleMouseOut()}
+        onMouseOver={onMouseOver}
+        onMouseOut={onMouseOut}
       >
         {essences}
         {component.class && <Card
@@ -80,17 +64,7 @@ const mapStateToProps = (state) => {
   return {
     profile: state.firebase.profile,
     selectedCard: state.game.selectedCard,
-    tappedComponents: state.game.tappedComponents,
   }
 }
 
-const mapDispatchToProps = (dispatch) => {
-  return {
-    clearZoom: () => dispatch(clearZoom()),
-    selectCard: (card) => dispatch(selectCard(card)),
-    tapComponent: (card) => dispatch(tapComponent(card)),
-    zoomCard: (card) => dispatch(zoomCard(card)),
-  }
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(GameComponent)
+export default connect(mapStateToProps)(GameComponent)
