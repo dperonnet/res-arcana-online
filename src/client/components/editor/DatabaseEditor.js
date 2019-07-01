@@ -49,7 +49,7 @@ class DatabaseEditor extends Component {
     let card;
     if (pristineComponent && pristineComponent.class) {
       try {
-        const src = require('../../assets/image/components/' + pristineComponent.type + '/' + pristineComponent.class + '.png');
+        const src = require('../../assets/image/components/' + pristineComponent.type + '/' + pristineComponent.class + '.jpg');
         card = <div className="card-zoom-frame">
           <CardZoom
             src={ src }
@@ -57,7 +57,7 @@ class DatabaseEditor extends Component {
             />
         </div>
       } catch (err) {
-        card = <div>No file found for {pristineComponent.class}.png</div>
+        card = <div>No file found for {pristineComponent.class}.jpg</div>
       }
     }
 

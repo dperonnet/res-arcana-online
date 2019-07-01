@@ -93,7 +93,7 @@ class ResArcanaBoard extends Component {
    */
   renderCardZoom = () => {
     const { G, cardToZoom, profile } = this.props
-    const src = require('../../../assets/image/components/' + cardToZoom.type + '/' + cardToZoom.class + '.png')
+    const src = require('../../../assets/image/components/' + cardToZoom.type + '/' + cardToZoom.class + '.jpg')
     const playerOwningCard = Object.values(G.publicData.players).filter((player) => {
       return Object.keys(player.essencesOnComponent).includes(cardToZoom.id)
     })[0]

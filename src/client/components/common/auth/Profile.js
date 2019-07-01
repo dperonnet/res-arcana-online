@@ -98,7 +98,7 @@ class Profile extends Component {
 
   renderCard = (size) => {
     const { profile } = this.state;
-    const src = require('../../../assets/image/components/back/back_artefact.png');
+    const src = require('../../../assets/image/components/back/back_artefact.jpg');
     return (
       <div className="card-settings">
         <div

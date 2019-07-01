@@ -30,7 +30,7 @@ class GameComponent extends Component {
     const {component, classes, discard, onClick, onDoubleClick, onMouseOut, onMouseOver, profile, selectedCard, tappedComponents } = this.props
     let src = null
     if (component.class) {
-      src = require('../../../assets/image/components/' + component.type + '/' + component.class + '.png')
+      src = require('../../../assets/image/components/' + component.type + '/' + component.class + '.jpg')
     }
     const cardSize = (profile.cardSize ? profile.cardSize : ' normal ')
     const componentType = COMPONENTS_STYLES[component.type]
