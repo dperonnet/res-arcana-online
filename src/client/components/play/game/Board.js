@@ -164,7 +164,9 @@ class ResArcanaBoard extends Component {
     this.props.events.endTurn()
   }
 
-  handleClick = (card) => {
+  handleClick = (e, card) => {
+    console.log('stopPropagation ???')
+    e.stopPropagation();
     this.props.selectCard(card)
   }
 
@@ -175,6 +177,11 @@ class ResArcanaBoard extends Component {
     clearInterval(interval)
     if (component.type !== 'back')
     this.props.zoomCard(component)
+  }
+
+  handleBoardClick = () => {
+    this.props.zoomCard()
+    clearInterval(interval)
   }
 
   /**
@@ -195,6 +202,7 @@ class ResArcanaBoard extends Component {
       onMouseOver={() => this.handleMouseOver(component)} 
       onMouseOut={() => this.handleMouseOut()}
       key={component.id}
+      onClick={args && args.onClick ? args.onClick : (event) => event.stopPropagation()}
       {...args}
     />
   }
@@ -479,7 +487,7 @@ class ResArcanaBoard extends Component {
         waiting = emptyHand
         
         draftCards = G.players[playerID].draftCards.length > 0 && G.players[playerID].draftCards[0].map((card) => {
-          return this.renderGameComponent(card, {onClick: () => this.handleClick(card), onDoubleClick: () => this.pickArtefact(card.id)})
+          return this.renderGameComponent(card, {onClick: (event) => this.handleClick(event, card), onDoubleClick: () => this.pickArtefact(card.id)})
         })
       
         directive = selectedCard ?
@@ -500,7 +508,7 @@ class ResArcanaBoard extends Component {
         title += ` - Mage selection`
         
         draftCards = G.players[playerID].mages.length > 0 && G.players[playerID].mages.map((card) => {
-          return this.renderGameComponent(card, {onClick: () => this.handleClick(card), onDoubleClick: () => this.pickMage(card.id)})
+          return this.renderGameComponent(card, {onClick: (event) => this.handleClick(event, card), onDoubleClick: () => this.pickMage(card.id)})
         })
         directive = selectedCard ?
           <div className="info">Keep {selectedCard.name} ?</div>
@@ -644,7 +652,7 @@ class ResArcanaBoard extends Component {
         onMouseOut={() => this.handleMouseOut()}
         onMouseOver={() => this.handleMouseOver(component)} 
         status={G.publicData.players[playerID].status}
-        ui={G.players[playerID].uiTemp} 
+        ui={G.players[playerID].uiTemp}
       />
     })
 
@@ -812,7 +820,7 @@ class ResArcanaBoard extends Component {
     }
     const sizeSetting = profile && profile.cardSize ? profile.cardSize : 'normal'
     const layoutSetting = profile && profile.layout ? profile.layout : 'vertical'
-    return <div className={'board-'+layoutSetting}>
+    return <div className={'board-'+layoutSetting} onClick={() => this.handleBoardClick()}>
       <div className={'common-board ' + sizeSetting}>
         {this.renderCommonBoard()}
       </div>

@@ -254,6 +254,11 @@ class CollectComponent extends Component {
     const cursorCollectAbility = !ready && collectActionsRef[component.id] ? ' delete-cursor' : ' '
     const cursorOnComponent = !ready && collectOnComponentActionsRef[component.id] ? ' delete-cursor' : ' '
 
+    const handleOnClick = (event) => {
+      event.stopPropagation(); 
+      handleClickComponent && !ready && handleClickComponent()
+    }
+
     return <div className="essence-picker">
       <div className={'collect-options '+ cursorCollectAbility}>
         {collectAbilities}
@@ -262,7 +267,7 @@ class CollectComponent extends Component {
         component={component}
         classes={classes}
         essencesOnComponent={essencesOnComponent}
-        onClick={!ready ? handleClickComponent : null}
+        onClick={(event) => handleOnClick(event)}
         onMouseOut={() => onMouseOut()}
         onMouseOver={() => onMouseOver(component)}
       />
