@@ -3,7 +3,7 @@ import { Button } from 'react-bootstrap'
 import { resetCollectAction, resetCollectOnComponentAction, setCollectAction, setCollectOnComponentAction, tapComponent } from '../../../../store/actions/gameActions'
 import { connect } from 'react-redux';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus, faSlash, faUndoAlt } from '@fortawesome/free-solid-svg-icons';
+import { faPlus, faSlash } from '@fortawesome/free-solid-svg-icons';
 import GameComponent from './GameComponent'
 
 class CollectComponent extends Component {

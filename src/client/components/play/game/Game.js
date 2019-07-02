@@ -83,7 +83,7 @@ const getInitialState = (ctx, setupData) => {
   // Define the first player
   G.publicData.firstPlayer = (ctx.random.Die(ctx.numPlayers) -1).toString()
   
-  const skip = true
+  const skip = false
   
   if (skip) {
     console.log('[setupGameComponents] skipDraftPhase')
@@ -124,6 +124,7 @@ const getInitialState = (ctx, setupData) => {
 
 /**
  * This function return the game components gathered by their type.
+ * 
  * @param {*} components array of game components to parse.
  */
 const getComponentsByType = (components) => {
@@ -273,10 +274,6 @@ const addEssenceOnComponent = (G, playerID, componentId, essenceType, essenceNum
   }
 }
 
-const removeFromComponent = (G, playerID, componentId, essenceList ) => {
-
-}
-
 const removeAllFromComponent = (G, playerID, componentId) => {
   delete G.publicData.players[playerID].essencesOnComponent[componentId]
 }
@@ -284,6 +281,7 @@ const removeAllFromComponent = (G, playerID, componentId) => {
 /**
  * Role: Move
  * This function define which mage the player will embody for the game and place it into play.
+ * 
  * @param {*} playerID player selecting the mage.
  * @param {*} mageId id of the selected mage card.
  */
@@ -428,6 +426,9 @@ const initCollectPhase = (G, ctx) => {
     
     for (let i= 0; i < ctx.numPlayers; i++) {
       const collectActions = []
+      G.players[i].uiTemp= {
+        essencesOnComponent: {}
+      }
       
       if (Object.keys(G.publicData.players[i].essencesOnComponent).length > 0) {
         G.publicData.players[i].status ='COLLECT_ACTION_AVAILABLE'
@@ -480,6 +481,14 @@ const initCollectPhase = (G, ctx) => {
   return G
 }
 
+/**
+ * Role: Move
+ * This function execute all collect moves made by a player.
+ * 
+ * @param {*} playerID player collecting.
+ * @param {*} collectActions contains all the collect ability choices made by the player.
+ * @param {*} collectOnComponentActions contains all the collect on component choices made by the player.
+*/
 const collectEssences = (G, ctx, playerID, collectActions, collectOnComponentActions) => {
   console.log('[collectEssences] Call to collectEssences()',collectActions, collectOnComponentActions)
   collectActions && Object.values(collectActions).forEach((action) => {
@@ -537,8 +546,8 @@ const allCollectsReady = (G, ctx) => {
     playersReady = playersReady && G.publicData.players[i].status === 'READY'
   }
   if (playersReady) {
-    console.log('[allCollectsReady] All players are ready, return "playPhase"')
-    return {next: 'playPhase' }
+    console.log('[allCollectsReady] All players are ready, return "actionPhase"')
+    return {next: 'actionPhase' }
   }
   console.log('[allCollectsReady] One player at least is not ready, return "collectPhase"')
 }
@@ -553,14 +562,14 @@ const getCollectTurnOrder = (G, ctx) => {
   return order
 }
 
-// ########## PLAY PHASE ##########
-const initPlayPhase = (G, ctx) => {
-  console.log('[initPlayPhase] Call to initPlayPhase()')
+// ########## ACTION PHASE ##########
+const initActionPhase = (G, ctx) => {
+  console.log('[initActionPhase] Call to initActionPhase()')
   G.phase = 'PLAY_PHASE'
   return G
 }
 
-const playArtefact = (G, ctx, artefactId) => {
+const placeArtefact = (G, ctx, artefactId) => {
   let artefactIndex = G.artefacts.findIndex(
     artefact => artefact.id === artefactId
   )
@@ -569,7 +578,38 @@ const playArtefact = (G, ctx, artefactId) => {
   if (!G.artefactsInPlay) G.artefactsInPlay= {}
   G.artefactsInPlay[ctx.currentPlayer].push(artefact)
 }
+const claimMonument = (G, ctx) => {
+  return G
+}
+const claimPlaceOfPower = (G, ctx) => {
+  return G
+}
+/**
+ * Role: Move
+ * Discard a card to gain essences.
+ * 
+ * @param {*} playerID player discarding a card.
+ * @param {*} cardId id of the discarded card.
+ * @param {*} essenceList essences to add in player's pool.
+ */
+const discardArtefact = (G, ctx, playerID, cardId, essenceList) => {
+  const selectedCard = copy(G.players[playerID].hand.filter((card) => {
+    return card.id === cardId
+  })[0])
+  G.publicData.players[playerID].discard.push(selectedCard)
+  G.players[playerID].hand = copy(G.players[playerID].hand.filter((card) => {
+    return card.id !== cardId
+  }))
+  Object.entries(essenceList).forEach((essence) => {
+    console.log('add',essence[0],essence[1])
+    G.publicData.players[playerID].essencesPool[essence[0]] = G.publicData.players[playerID].essencesPool[essence[0]] + essence[1]
+  })
+  return G
+}
 
+const activatePower = (G, ctx) => {
+  return G
+}
 const getTurnOrder = (G, ctx) => {
   let firstPlayer = G.publicData.firstPlayer
   let order = []
@@ -580,9 +620,15 @@ const getTurnOrder = (G, ctx) => {
   return order
 }
 
+const allPlayersPassed = (G, ctx) => {
+
+}
+
 function copy(value) {
   return JSON.parse(JSON.stringify(value))
 }
+
+// ########## game options setup (KO) ##########
 const setupGameComponents = (G, ctx) => {
   console.log('[setupGameComponents] Call to setupGameComponents')
   if (G && G.skipDraftPhase) {
@@ -603,7 +649,6 @@ const setupGameComponents = (G, ctx) => {
   }
   return G
 }
-
 const getStartingPhase = (G) => {
   console.log('[getStartingPhase] Call to getStartingPhase, G.startingPhase', G.startingPhase)
   return G.startingPhase;
@@ -618,16 +663,20 @@ export const ResArcanaGame = Game({
   moves: {
     collectEssences: collectEssences,
     pickArtefact: pickArtefact,
-    playArtefact: playArtefact,
     pickMage: pickMage,
     pickMagicItem: pickMagicItem,
+    placeArtefact: placeArtefact,
+    claimMonument: claimMonument,
+    claimPlaceOfPower: claimPlaceOfPower,
+    discardArtefact: discardArtefact,
+    activatePower: activatePower,
     pass: Pass,
   },
 
   flow: {
     onMove: (G, ctx) => G,
     movesPerTurn: 1,
-    startingPhase: 'collectPhase',
+    startingPhase: 'draftPhase',
 
     phases: {
       setupPhase: {
@@ -648,7 +697,7 @@ export const ResArcanaGame = Game({
           first: (G, ctx) => 0,
           next: (G, ctx) => (ctx.playOrderPos + 1) % ctx.numPlayers,
         },
-        endPhaseIf: allMagicItemsReady
+        endPhaseIf: (G, ctx) => allMagicItemsReady(G, ctx)
       },
       collectPhase: {
         onPhaseBegin: (G, ctx) => initCollectPhase(G, ctx),
@@ -658,17 +707,17 @@ export const ResArcanaGame = Game({
           first: (G, ctx) => 0,
           next: (G, ctx) => (ctx.playOrderPos + 1) % ctx.numPlayers,
         },
-        endPhaseIf: allCollectsReady
+        endPhaseIf: (G, ctx) => allCollectsReady(G, ctx)
       },
-      playPhase: {
-        onPhaseBegin: initPlayPhase,
-        allowedMoves: ['pass','playArtefact'],
-        endPhaseIf: G => G.passed,
+      actionPhase: {
+        onPhaseBegin: (G, ctx) => initActionPhase(G, ctx),
+        allowedMoves: ['placeArtefact','claimMonument','claimPlaceOfPower','discardArtefact','activatePower','pass'],
         turnOrder: {
           playOrder: (G, ctx) => getTurnOrder(G, ctx),
-          first: (G, ctx) => G.publicData.firstPlayer,
+          first: (G, ctx) => 0,
           next: (G, ctx) => (ctx.playOrderPos + 1) % ctx.numPlayers,
         },
+        endPhaseIf: (G, ctx) => allPlayersPassed(G, ctx)
       }
     },
   },

@@ -4,7 +4,8 @@ const initState = {
   selectedCard: undefined,
   tappedComponents: [],
   collectActions: {},
-  collectOnComponentActions: {}
+  collectOnComponentActions: {},
+  focusZoom: true
 }
 
 const gameReducer = (state = initState, action) => {
@@ -89,6 +90,10 @@ const gameReducer = (state = initState, action) => {
       collectOnComponentActions[action.action.id] = action.action
       return Object.assign({}, state, {
         collectOnComponentActions
+      });
+    case 'SET_FOCUS_ZOOM':
+      return Object.assign({}, state, {
+        focusZoom: action.flag
       });
     default:
       return state;

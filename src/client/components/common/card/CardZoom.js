@@ -21,7 +21,7 @@ class CardZoom extends React.Component {
     const { alt, src, essencesOnComponent } = this.props;
     const essences = essencesOnComponent ? this.renderEssences() : null
     return src && <>
-      <div className='card-zoomed shadow no-highlight'>
+      <div className='card-zoomed'>
         <span className='card-name'>{alt}</span>
         <img src={src} alt={alt} />
       </div>

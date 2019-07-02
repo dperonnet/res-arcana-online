@@ -34,7 +34,9 @@
 }
 
 /* Card row */
-.card-row {  
+.card-row {
+  margin-bottom: 10px;
+  
   &.x-small {
     min-height: 54.6px;
   }

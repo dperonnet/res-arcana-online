@@ -3,12 +3,12 @@ import { Button } from 'react-bootstrap'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import PropTypes from 'prop-types'
-import './board.css'
+import './board.scss'
 import './essence.scss'
 import { compose } from 'redux'
 import { connect } from 'react-redux'
 import { firestoreConnect, isLoaded } from 'react-redux-firebase'
-import { resetCollect, clearZoom, selectCard, zoomCard, setCollectAction } from '../../../../store/actions/gameActions'
+import { resetCollect, clearZoom, selectCard, setFocusZoom, zoomCard, setCollectAction } from '../../../../store/actions/gameActions'
 import { toggleChat } from '../../../../store/actions/chatActions'
 import CardZoom from '../../common/card/CardZoom.js'
 import Chat from '../../common/chat/Chat'
@@ -89,17 +89,31 @@ class ResArcanaBoard extends Component {
   }
 
   /**
+   * Toggle focus on zoom frame in order to deal with card superposition on small screen.
+   */
+  handleMouseClickZoom = (event) => {
+    event.stopPropagation()
+    const { focusZoom } = this.props
+    this.props.setFocusZoom(!focusZoom)
+  }  
+
+  /**
    * Render the component to Zoom.
    */
   renderCardZoom = () => {
-    const { G, cardToZoom, profile } = this.props
-    const src = require('../../../assets/image/components/' + cardToZoom.type + '/' + cardToZoom.class + '.jpg')
+    const { G, cardToZoom, focusZoom } = this.props
+    const component = cardToZoom
+    const src = require('../../../assets/image/components/' + component.type + '/' + component.class + '.jpg')
     const playerOwningCard = Object.values(G.publicData.players).filter((player) => {
-      return Object.keys(player.essencesOnComponent).includes(cardToZoom.id)
+      return Object.keys(player.essencesOnComponent).includes(component.id)
     })[0]
-    const essencesOnComponent = playerOwningCard ? playerOwningCard.essencesOnComponent[cardToZoom.id] : null
-    return <div className="card-zoom-frame normal">
-      <CardZoom src={src} alt={cardToZoom.name} essencesOnComponent={essencesOnComponent}/>
+    const focus = focusZoom ? ' focus ': ''
+    const essencesOnComponent = playerOwningCard ? playerOwningCard.essencesOnComponent[component.id] : null
+    return <div className={'card-zoom-frame normal' + focus} 
+      onClick={(event) => this.handleMouseClickZoom(event)} 
+      onMouseOver={() => this.handleMouseOver(component)} 
+      onMouseOut={() => this.handleMouseOut()}>
+      <CardZoom src={src} alt={component.name} essencesOnComponent={essencesOnComponent}/>
     </div>
   }
 
@@ -133,6 +147,7 @@ class ResArcanaBoard extends Component {
       this.props.moves.pickArtefact(playerID, cardId)
     }
     this.props.selectCard(undefined)
+    this.handleBoardClick()
   }
 
   /**
@@ -144,6 +159,7 @@ class ResArcanaBoard extends Component {
       this.props.moves.pickMage(playerID, cardId)
     }
     this.props.selectCard(undefined)
+    this.handleBoardClick()
   }
   
   /**
@@ -155,19 +171,23 @@ class ResArcanaBoard extends Component {
       this.props.moves.pickMagicItem(playerID, cardId)
     }
     this.props.selectCard(undefined)
+    this.handleBoardClick()
   }
   
   collectEssences = () => {
     const { playerID, collectActions, collectOnComponentActions } = this.props
-    console.log('collectEssences',playerID, collectActions, collectOnComponentActions)
     this.props.moves.collectEssences(playerID, collectActions, collectOnComponentActions)
     this.props.events.endTurn()
   }
 
   handleClick = (e, card) => {
-    console.log('stopPropagation ???')
     e.stopPropagation();
     this.props.selectCard(card)
+  }
+
+  handleBoardClick = () => {
+    this.props.zoomCard()
+    clearInterval(interval)
   }
 
   /**
@@ -179,16 +199,12 @@ class ResArcanaBoard extends Component {
     this.props.zoomCard(component)
   }
 
-  handleBoardClick = () => {
-    this.props.zoomCard()
-    clearInterval(interval)
-  }
-
   /**
    * Hide the card to zoom on mouse out.
    */
   handleMouseOut = () => {
-    interval = setInterval(() => this.props.clearZoom(), 5000)
+    const { profile } = this.props
+    interval = setInterval(() => this.props.clearZoom(), profile.zoomFadeTime ? profile.zoomFadeTime : 3000)
     return () => clearInterval(interval)
   }
 
@@ -291,6 +307,9 @@ class ResArcanaBoard extends Component {
     </div>
   }
 
+  /**
+   * This function render the draw pile and the discard pile of a player.
+   */
   renderPlayerDrawPileAndDiscard = (playerId) => {
     const { G } = this.props
     
@@ -315,7 +334,7 @@ class ResArcanaBoard extends Component {
     const hand = G.players[playerID].hand.map((card)=>{
       return this.renderGameComponent(card)
     })
-    return <div className={'draft-card card-row ' + profile.cardSize}>
+    return <div className={'card-row ' + profile.cardSize}>
       <div className="separator"></div>
       <h5>Cards in hand</h5>
       {hand}
@@ -336,12 +355,11 @@ class ResArcanaBoard extends Component {
     let tappedComponents = G.publicData.tappedComponents
     switch (G.publicData.players[playerID].status) {
       case 'DRAFTING_ARTEFACTS':
-        const mages = G.players[playerID].mages.map((card)=>{
+        const mages = G.players[playerID].mages.map((card) => {
           return this.renderGameComponent(card)
         })
-        essencesOnComponent = G.publicData.players[id].essencesOnComponent
-        const deck = G.players[playerID].hand.map((card)=>{
-          return this.renderGameComponent(card, {essencesOnComponent: essencesOnComponent[card.id]})
+        const deck = G.players[playerID].hand.map((card) => {
+          return this.renderGameComponent(card)
         })
         cards = <>{mages}{deck}</>
         break
@@ -350,7 +368,7 @@ class ResArcanaBoard extends Component {
       case 'READY':
       default:
         essencesOnComponent = G.publicData.players[id].essencesOnComponent
-        cards = G.publicData.players[id].inPlay.map((card)=>{
+        cards = G.publicData.players[id].inPlay.map((card) => {
           return this.renderGameComponent(card, {essencesOnComponent: essencesOnComponent[card.id], tappedComponents})
         })
     }
@@ -380,7 +398,8 @@ class ResArcanaBoard extends Component {
     let drawPileAndDiscard = (id) => this.renderPlayerDrawPileAndDiscard(id)
     switch (G.publicData.players[playerID].status) {
       case 'DRAFTING_ARTEFACTS':
-        boards = othersId.map((id) =>{
+      case 'SELECTING_MAGE':
+        boards = othersId.map((id) => {
           const playerRuban = this.renderPlayerRuban(id)
           let cards = []
           let cardMage = copy(CARD_BACK_MAGE)
@@ -399,24 +418,18 @@ class ResArcanaBoard extends Component {
           )
         })
         break
-      case 'SELECTING_MAGE':
-        boards = othersId.map((id) =>{
-          const playerRuban = this.renderPlayerRuban(id)
-          return (
-            <div key={id}>
-              {playerRuban}
-              <div className={'card-row ' + profile.cardSize}>
-                {drawPileAndDiscard(id)}
-              </div>
-            </div>
-          )
-        })
-        break
       case 'READY':
       default:
         boards = othersId.map((id) =>{
           const playerRuban = this.renderPlayerRuban(id)
-          const cards = this.renderPlayerBoard(id)
+          let cards = []
+          if (G.publicData.players[id].status === 'SELECTING_MAGE' || G.publicData.players[id].status === 'DRAFTING_ARTEFACTS') {
+            let cardMage = copy(CARD_BACK_MAGE)
+            cards.push(this.renderGameComponent({...cardMage, id: 'back_mage_1'}))
+            cards.push(this.renderGameComponent({...cardMage, id: '_back_mage_2'}))
+          } else {
+            cards = this.renderPlayerBoard(id)
+          }
           return (
             <div key={id}>
               {playerRuban}
@@ -541,12 +554,12 @@ class ResArcanaBoard extends Component {
     }
 
     const confirmButton = <Button variant="primary" size="sm" onClick={handleConfirm} disabled={!selectedCard}>Confirm</Button>
-    const cancelButton = !lastDraftCard && <Button variant={!selectedCard ? 'primary' : 'secondary'} size="sm" onClick={() => this.handleClick(undefined)} disabled={!selectedCard}>Cancel</Button>
+    const cancelButton = !lastDraftCard && <Button variant={!selectedCard ? 'primary' : 'secondary'} size="sm" onClick={(event) => this.handleClick(event)} disabled={!selectedCard}>Cancel</Button>
     
     return <>
-      <div className='draft-card-panel'>
+      <div className='dialog-panel'>
         <h5>{title}</h5>
-        {showCards && <div className={'draft-card card-row ' + profile.cardSize}>
+        {showCards && <div className={'card-row ' + profile.cardSize}>
           {draftCards}
         </div>}
         {waiting ? <h5>{waitingFor}</h5> : <>{directive}</>}
@@ -577,7 +590,7 @@ class ResArcanaBoard extends Component {
       return waiting ?
         this.renderGameComponent(magicItem)
       :
-      this.renderGameComponent(magicItem, {onClick: () => this.handleClick(magicItem), onDoubleClick: () => this.pickMagicItem(magicItem.id)})
+      this.renderGameComponent(magicItem, {onClick: (event) => this.handleClick(event, magicItem), onDoubleClick: () => this.pickMagicItem(magicItem.id)})
     })
   
     let directive = null
@@ -594,12 +607,12 @@ class ResArcanaBoard extends Component {
     }
 
     const confirmButton = <Button variant="primary" size="sm" onClick={handleConfirm} disabled={!selectedCard}>Confirm</Button>
-    const cancelButton = <Button variant={!selectedCard ? 'primary' : 'secondary'} size="sm" onClick={() => this.handleClick(undefined)} disabled={!selectedCard}>Cancel</Button>
+    const cancelButton = <Button variant={!selectedCard ? 'primary' : 'secondary'} size="sm" onClick={(event) => this.handleClick(event)} disabled={!selectedCard}>Cancel</Button>
     
     return <>
-      <div className='draft-card-panel'>
+      <div className='dialog-panel'>
         <h5>{title}</h5>
-        <div className={'draft-card card-row ' + profile.cardSize}>
+        <div className={'card-row ' + profile.cardSize}>
           {magicItems}
         </div>
         {waiting ? <h5>{waitingFor}</h5> : <>{directive}</>}
@@ -721,9 +734,9 @@ class ResArcanaBoard extends Component {
     const resetButton = <Button variant="secondary" size="sm" onClick={() => this.handleResetCollect()}>Reset</Button>
 
     return <>
-      <div className='draft-card-panel'>
+      <div className='dialog-panel'>
         <h5><div className="collect-icon"></div>{title}{waitingFor}</h5>
-        <div className={'draft-card card-row ' + profile.cardSize}>
+        <div className={'card-row ' + profile.cardSize}>
           {collectComponents}
         </div>
         {directive}
@@ -735,13 +748,21 @@ class ResArcanaBoard extends Component {
     </>
   }
 
-  renderActionBoard = () => {
-    const { playerID, selectedCard } = this.props
+  /**
+   * Render the board during Action Phase.
+   * This board is player specific and will not be available for spectators.
+   * The board show the actions available for the player.
+   * When a component is selected the board show the selected component and the actions available for this component.
+   */
+  renderActionDialog = () => {
+    const { G, ctx, playerID, selectedCard } = this.props
     if (!Number.isInteger(parseInt(playerID))) return null
+
+    const playersName = this.getPlayersName()
 
     let title = 'Play Phase'
     let waiting = false
-    let waitingFor = 'Waiting for '
+    let waitingFor = ' - ' + playersName[parseInt(ctx.currentPlayer)] + '\'s turn.'
     let hand = this.renderPlayerHand()
     let showButtons = false
     let directive = null
@@ -750,8 +771,8 @@ class ResArcanaBoard extends Component {
     const cancelButton = <Button variant={!selectedCard ? 'primary' : 'secondary'} size="sm" onClick={() => this.handleClick(undefined)} disabled={!selectedCard}>Cancel</Button>
 
     return <>
-      <div className='draft-card-panel'>
-        <h5>{title}</h5>
+      <div className='dialog-panel'>
+        <h5><div className="collect-icon"></div>{title}{waitingFor}</h5>
         {waiting ? <h5>{waitingFor}</h5> : <>{directive}</>}
         {showButtons && <div className={waiting ? 'game-button hidden': 'game-button'}>
           {confirmButton} {cancelButton}
@@ -789,7 +810,7 @@ class ResArcanaBoard extends Component {
    * This function render the board during Action Phase.
    */
   renderActionPhaseBoard = () => {
-    const dialogBoard = this.renderActionBoard()
+    const dialogBoard = this.renderActionDialog()
     return this.renderBoard(dialogBoard)
   }
 
@@ -844,6 +865,7 @@ const mapStateToProps = (state) => {
     collectActions: state.game.collectActions,
     collectOnComponentActions: state.game.collectOnComponentActions,
     currentGame: state.firestore.data.currentGame,
+    focusZoom: state.game.focusZoom,
     game: state.firestore.ordered.game && state.firestore.ordered.game[0],
     profile: state.firebase.profile,
     selectedCard: state.game.selectedCard,
@@ -852,12 +874,12 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    resetCollect: () => dispatch(resetCollect()),
-    selectCard: (card) => dispatch(selectCard(card)),
-    setCollectAction: (action) => dispatch(setCollectAction(action)),
-    toggleChat: () => dispatch(toggleChat()),
     clearZoom: () => dispatch(clearZoom()),
+    resetCollect: () => dispatch(resetCollect()),
+    setCollectAction: (action) => dispatch(setCollectAction(action)),
+    setFocusZoom: (flag) => dispatch(setFocusZoom(flag)),
     selectCard: (card) => dispatch(selectCard(card)),
+    toggleChat: () => dispatch(toggleChat()),
     zoomCard: (card) => dispatch(zoomCard(card)),
   }
 }

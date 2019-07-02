@@ -401,3 +401,10 @@ export function setCollectOnComponentAction(action) {
     action
   }
 }
+
+export function setFocusZoom(flag) {
+  return {
+    type: 'SET_FOCUS_ZOOM',
+    flag
+  }
+}

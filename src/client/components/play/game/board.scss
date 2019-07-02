@@ -109,27 +109,35 @@
   top: 45px;
   right: 0px;
 }
-
+.card-zoom-frame {
+  &.focus {
+    z-index: 50;
+  }
+}
 .board-container {
   flex-shrink: 0;
   width: fit-content;
   min-width: 100%;
 }
+.board-container h5, .common-board h5 {
+  text-align: center;
+}
 
-.draft-card-panel {
+.dialog-panel {
   display: block;
   margin: 0 auto;
   padding: 8px;
   background-color: rgba(150,100,50,0.3);
   min-width: 320px;
-}
-.board-container h5, .common-board h5 {
-  text-align: center;
-}
-
-.draft-card {
-  margin: auto;
-  text-align: center;
+  
+  .card-row {
+    margin: auto;
+    text-align: center;
+    
+    .card, .magic-item, .monument, .place-of-power {
+      z-index: 50;
+    }
+  }
 }
 
 .info {
