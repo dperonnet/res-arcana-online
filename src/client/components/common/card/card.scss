@@ -37,20 +37,17 @@
 .card-row {
   margin-bottom: 10px;
   
-  &.x-small {
-    min-height: 54.6px;
-  }
   &.small {
-    min-height: 91px;
+    min-height: 103px;
   }
   &.normal {
-    min-height: 127.4px;
+    min-height: 140px;
   }
   &.large {
-    min-height: 182px;
+    min-height: 194px;
   }
   &.x-large {
-    min-height: 220px;
+    min-height: 232px;
   }
 }
 
@@ -115,6 +112,19 @@
   }
 }
 
+%xx-large {
+  height: 270px;
+  width: 192px;
+  &.tapped {
+    height: 192px;
+    width: 270px;
+    img {
+      top: -46px;
+      left: 46px;
+    }
+  }
+}
+
 /* Magic Item Size */
 .magic-item {
   &.x-small, &.small {
@@ -158,8 +168,11 @@
   &.normal {
     @extend %large;
   }
-  &.large, &.x-large {
+  &.large {
     @extend %x-large;
+  }
+  &.x-large {
+    @extend %xx-large;
   }
 }
 

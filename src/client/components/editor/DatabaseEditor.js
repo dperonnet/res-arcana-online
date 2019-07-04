@@ -122,7 +122,7 @@ const mapDispatchToProps = (dispatch) => {
   return {
     deleteComponent: () => dispatch(deleteComponent()),
     saveComponent: (component) => dispatch(saveComponent(component)),
-    selectComponent: (component) => dispatch({type: 'SELECT_COMPONENT', component}),
+    selectComponent: (component) => dispatch({type: 'SELECT_COMPONENT_TO_EDIT', component}),
     resetComponent: () => dispatch({type: 'RESET_COMPONENT'})
   }
 }

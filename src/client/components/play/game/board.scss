@@ -95,13 +95,14 @@
 .common-board.x-small, .common-board.small {
   width: 230px;
 }
-
-.common-board.normal, .common-board.large {
+.common-board.normal {
   width: 340px;
 }
-
-.common-board.x-large {
+.common-board.large {
   width: 360px;
+}
+.common-board.x-large {
+  width: 425px;
 }
 
 .game-board .card-zoom-frame {
@@ -137,6 +138,19 @@
     
     .card, .magic-item, .monument, .place-of-power {
       z-index: 30;
+    }
+
+    &.action.small {
+      min-height: 140px;
+    }
+    &.action.normal {
+      min-height: 194px;
+    }
+    &.action.large {
+      min-height: 232px;
+    }
+    &.action.x-large {
+      min-height: 282px;
     }
   }
 }

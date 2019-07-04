@@ -79,7 +79,9 @@ class ResArcanaBoard extends Component {
    * Select the clicked component.
    */
   handleClick = (e, component) => {
+    const { board } = this.refs
     e.stopPropagation();
+    board.scrollTop = 0
     this.props.selectComponent(component)
   }
 
@@ -255,16 +257,19 @@ class ResArcanaBoard extends Component {
    */
   renderCommonBoard = () => {
     const { G } = this.props
-    const placesOfPower = G.publicData.placesOfPowerInGame.map((pop)=>{
-      return this.renderGameComponent(pop)
-    })
-    const magicItems = G.publicData.magicItems.map((magicItem)=>{
-      return this.renderGameComponent(magicItem)
-    })
-    const monuments = G.publicData.monumentsRevealed.map((monument)=>{
-      return this.renderGameComponent(monument)
-    })
-    const monumentsStack = this.renderGameComponent(copy(CARD_BACK_MONUMENT))
+    const handleClick = (component) => {
+      return G.phase === 'PLAY_PHASE' ? {onClick: (event) => this.handleClick(event, component)} : null
+    }
+    const renderGameComponents = (components) => {
+      return components && components.map((component) => {
+        return this.renderGameComponent(component, handleClick(component))
+      })
+    }
+
+    const placesOfPower = renderGameComponents(G.publicData.placesOfPowerInGame)
+    const magicItems = renderGameComponents(G.publicData.magicItems)
+    const monumentsStack = renderGameComponents([copy(CARD_BACK_MONUMENT)])
+    const monuments = renderGameComponents(G.publicData.monumentsRevealed)
     return <>
       <div className="components">
         <h5>Places of power ({G.publicData.placesOfPowerInGame.length} left)</h5>
@@ -359,9 +364,18 @@ class ResArcanaBoard extends Component {
    */
   renderPlayerHand = () => {
     const { G, playerID, profile } = this.props
-    const hand = G.players[playerID].hand.map((card)=>{
-      return this.renderGameComponent(card)
-    })
+    let hand
+    switch (G.phase) {
+      case 'PLAY_PHASE':
+        hand = G.players[playerID].hand.map((card) => {
+          return this.renderGameComponent(card, {onClick: (event) => this.handleClick(event, card)})
+        })
+        break
+      default:
+        hand = G.players[playerID].hand.map((card) => {
+          return this.renderGameComponent(card)
+        })
+    }
     return <div className={'card-row ' + profile.cardSize}>
       <div className="separator"></div>
       <h5>Cards in hand</h5>
@@ -747,6 +761,14 @@ class ResArcanaBoard extends Component {
     </>
   }
 
+  renderCurrentAction = () => {
+    const { profile, selectedComponent } = this.props
+    let availableActions
+    return <div className={'card-row action' + profile.cardSize}>
+      {selectedComponent && this.renderGameComponent(selectedComponent)}
+      {availableActions}
+    </div>
+  }
   /**
    * Render the board during Action Phase.
    * This board is player specific and will not be available for spectators.
@@ -754,7 +776,7 @@ class ResArcanaBoard extends Component {
    * When a component is selected the board show the selected component and the actions available for this component.
    */
   renderActionDialog = () => {
-    const { G, ctx, playerID, selectedComponent } = this.props
+    const { G, ctx, playerID, profile, selectedComponent } = this.props
     if (!Number.isInteger(parseInt(playerID))) return null
 
     const playersName = this.getPlayersName()
@@ -763,16 +785,18 @@ class ResArcanaBoard extends Component {
     let waiting = false
     let waitingFor = ' - ' + playersName[parseInt(ctx.currentPlayer)] + '\'s turn.'
     let hand = this.renderPlayerHand()
-    let showButtons = false
+    let currentAction = this.renderCurrentAction()
+    let showButtons = true
     let directive = null
 
     const confirmButton = <Button variant="primary" size="sm" onClick={() => this.pickArtefact(selectedComponent.id)} disabled={!selectedComponent}>Confirm</Button>
-    const cancelButton = <Button variant={!selectedComponent ? 'primary' : 'secondary'} size="sm" onClick={() => this.handleClick(undefined)} disabled={!selectedComponent}>Cancel</Button>
+    const cancelButton = <Button variant={!selectedComponent ? 'primary' : 'secondary'} size="sm" onClick={(event) => this.handleClick(event, undefined)} disabled={!selectedComponent}>Cancel</Button>
 
     return <>
       <div className='dialog-panel'>
         <h5><div className="collect-icon"></div>{title}{waitingFor}</h5>
         {waiting ? <h5>{waitingFor}</h5> : <>{directive}</>}
+        {currentAction}
         {showButtons && <div className={waiting ? 'game-button hidden': 'game-button'}>
           {confirmButton} {cancelButton}
         </div>}
@@ -847,7 +871,7 @@ class ResArcanaBoard extends Component {
       <div className={'common-board ' + sizeSetting}>
         {this.renderCommonBoard()}
       </div>
-      <div className="board">
+      <div className="board" ref='board'>
         {board}
       </div>
       <div className="right-panel">

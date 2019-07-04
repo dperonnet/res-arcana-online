@@ -47,7 +47,7 @@ const initState = {
           ...state,
           filter: action.filter
         }
-      case 'SELECT_COMPONENT':
+      case 'SELECT_COMPONENT_TO_EDIT':
         const time = Date.now()
         return {
           ...state,

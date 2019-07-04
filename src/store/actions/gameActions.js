@@ -341,10 +341,10 @@ export const getComponents = () => {
   }
 }
 
-export function selectComponent(card) {
+export function selectComponent(component) {
   return {
       type: 'SELECT_COMPONENT',
-      card
+      component
   };
 }
 

@@ -132,7 +132,6 @@ class Profile extends Component {
             {this.renderLayout()}
             <div className="align-center">
               <div className="card-size-selector">
-                {this.renderCard('x-small')}
                 {this.renderCard('small')}
                 {this.renderCard('normal')}
               </div>
