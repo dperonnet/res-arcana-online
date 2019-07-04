@@ -11,7 +11,7 @@
   width: 100%;
 }
 .debug-ui {
-  z-index: 9999;
+  z-index: 999;
 }
 .board-vertical {
   display: flex;
@@ -110,8 +110,9 @@
   right: 0px;
 }
 .card-zoom-frame {
+  z-index: 20;
   &.focus {
-    z-index: 50;
+    z-index: 40;
   }
 }
 .board-container {
@@ -129,13 +130,13 @@
   padding: 8px;
   background-color: rgba(150,100,50,0.3);
   min-width: 320px;
-  
+
   .card-row {
     margin: auto;
     text-align: center;
     
     .card, .magic-item, .monument, .place-of-power {
-      z-index: 50;
+      z-index: 30;
     }
   }
 }
@@ -305,7 +306,7 @@ width: 75px;
   position: absolute;
   top: 5px;
   left: 5px;
-  z-index: 20;
+  z-index: 12;
   padding: 1px 4px;
   font-size: 12px;
   line-height: 14px;
