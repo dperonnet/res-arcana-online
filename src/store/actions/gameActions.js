@@ -341,9 +341,9 @@ export const getComponents = () => {
   }
 }
 
-export function selectCard(card) {
+export function selectComponent(card) {
   return {
-      type: 'SELECT_CARD',
+      type: 'SELECT_COMPONENT',
       card
   };
 }

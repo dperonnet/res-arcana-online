@@ -283,7 +283,6 @@ const mapStateToProps = (state) => {
     collectActions: state.game.collectActions,
     collectOnComponentActions: state.game.collectOnComponentActions,
     profile: state.firebase.profile,
-    selectedCard: state.game.selectedCard,
     tappedComponents: state.game.tappedComponents,
   }
 }

@@ -27,7 +27,7 @@ class GameComponent extends Component {
   }
 
   render() {
-    const {component, classes, discard, onClick, onDoubleClick, onMouseOut, onMouseOver, profile, selectedCard, tappedComponents } = this.props
+    const {component, classes, discard, onClick, onDoubleClick, onMouseOut, onMouseOver, profile, selectedComponent, tappedComponents } = this.props
     let src = null
     if (component.class) {
       src = require('../../../assets/image/components/' + component.type + '/' + component.class + '.jpg')
@@ -35,7 +35,7 @@ class GameComponent extends Component {
     const cardSize = (profile.cardSize ? profile.cardSize : ' normal ')
     const componentType = COMPONENTS_STYLES[component.type]
     const propsClasses = classes ? classes : ''
-    const active = selectedCard && selectedCard.id === component.id ? ' active ' : ''
+    const active = selectedComponent && selectedComponent.id === component.id ? ' active ' : ''
     const tapped = (tappedComponents && tappedComponents[component.id]) || discard ? ' tapped ' : ''
     const layout = ' vertical ';
     const essences = this.renderEssences()
@@ -63,7 +63,7 @@ class GameComponent extends Component {
 const mapStateToProps = (state) => {
   return {
     profile: state.firebase.profile,
-    selectedCard: state.game.selectedCard,
+    selectedComponent: state.game.selectedComponent,
   }
 }
 
