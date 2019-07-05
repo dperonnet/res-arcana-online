@@ -1,3 +1,5 @@
+@import '../../common/card/card.scss';
+
 .game-board {
   background-color: rgba(34,34,34,.8);
   height: 100%;
@@ -27,10 +29,14 @@
   color: #c1c2c3;
   border-right: 1px solid #F5B041;
   resize: horizontal;
-  max-width: 575px;
+  max-width: 680px;
   min-width: 180px;
   text-align: center;
   flex-shrink: 0;
+  margin-left: -15px;
+}
+.monuments-revealed {
+  display: inline-block;
 }
 
 .board {
@@ -93,10 +99,10 @@
   background: #555; 
 }
 .common-board.x-small, .common-board.small {
-  width: 230px;
+  width: 296px;
 }
 .common-board.normal {
-  width: 340px;
+  width: 360px;
 }
 .common-board.large {
   width: 360px;
@@ -141,16 +147,23 @@
     }
 
     &.action.small {
-      min-height: 140px;
+      min-height: $normal + 52;
     }
     &.action.normal {
-      min-height: 194px;
+      min-height: $large + 52;
     }
     &.action.large {
-      min-height: 232px;
+      min-height: $x-large + 62;
     }
     &.action.x-large {
-      min-height: 282px;
+      min-height: $xx-large + 70;
+    }
+
+    .action-container {
+      flex: 1;
+      align-items: center;
+      display: flex;
+      justify-content: center;
     }
   }
 }

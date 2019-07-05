@@ -8,7 +8,7 @@ import './essence.scss'
 import { compose } from 'redux'
 import { connect } from 'react-redux'
 import { firestoreConnect, isLoaded } from 'react-redux-firebase'
-import { resetCollect, clearZoom, selectComponent, setFocusZoom, zoomCard, setCollectAction } from '../../../../store/actions/gameActions'
+import { resetCollect, clearZoom, selectAction, selectComponent, setFocusZoom, zoomCard, setCollectAction } from '../../../../store/actions/gameActions'
 import { toggleChat } from '../../../../store/actions/chatActions'
 import CardZoom from '../../common/card/CardZoom.js'
 import Chat from '../../common/chat/Chat'
@@ -230,7 +230,7 @@ class ResArcanaBoard extends Component {
   renderGameComponent = (component, args) => {
     return <GameComponent
       component={component} 
-      onMouseOver={() => this.handleMouseOver(component)} 
+      onMouseOver={() => this.handleMouseOver(component)}
       onMouseOut={() => this.handleMouseOut()}
       key={component.id}
       onClick={args && args.onClick ? args.onClick : (event) => event.stopPropagation()}
@@ -278,16 +278,16 @@ class ResArcanaBoard extends Component {
         </div>
       </div>
       <div className="components">
-        <h5>Magic Items</h5>
-        <div className="magic-item-container">
-          {magicItems}
-        </div>
-      </div>
-      <div className="components">
         <h5>Monuments</h5>
         <div className="monument-container">
           {monumentsStack}
-          <div className="monument">{monuments}</div>
+          <div className="monuments-revealed">{monuments}</div>
+        </div>
+      </div>
+      <div className="components">
+        <h5>Magic Items</h5>
+        <div className="magic-item-container">
+          {magicItems}
         </div>
       </div>
     </>
@@ -362,24 +362,28 @@ class ResArcanaBoard extends Component {
   /**
    * Render the cards in the hand of the player.
    */
-  renderPlayerHand = () => {
+  renderPlayerHand = (separator = true) => {
     const { G, playerID, profile } = this.props
     let hand
+    let fixedHeight
     switch (G.phase) {
       case 'PLAY_PHASE':
         hand = G.players[playerID].hand.map((card) => {
           return this.renderGameComponent(card, {onClick: (event) => this.handleClick(event, card)})
         })
+        fixedHeight = !separator ? ' action' : ''
         break
       default:
         hand = G.players[playerID].hand.map((card) => {
           return this.renderGameComponent(card)
         })
     }
-    return <div className={'card-row ' + profile.cardSize}>
-      <div className="separator"></div>
+    return <div className={'card-row flex-col ' + profile.cardSize + fixedHeight}>
+      {separator && <div className="separator"></div>}
       <h5>Cards in hand</h5>
-      {hand}
+      <div className="action-container">
+        {hand}
+      </div>
     </div>;
   }
 
@@ -761,14 +765,125 @@ class ResArcanaBoard extends Component {
     </>
   }
 
-  renderCurrentAction = () => {
-    const { profile, selectedComponent } = this.props
-    let availableActions
-    return <div className={'card-row action' + profile.cardSize}>
-      {selectedComponent && this.renderGameComponent(selectedComponent)}
-      {availableActions}
-    </div>
+  renderInPlayActions = () => {
+    const { selectedComponent } = this.props
+    return <>
+      {selectedComponent &&<h5>Choose an action for {selectedComponent.name}</h5>}
+      <div className="action-container">
+        {this.renderGameComponent(selectedComponent)}
+      </div>
+    </>
   }
+  
+  renderInHandActions = () => {
+    const { selectedComponent } = this.props
+    return <>
+      {selectedComponent &&<h5>Choose an action for {selectedComponent.name}</h5>}
+      <div className="action-container">
+        {this.renderGameComponent(selectedComponent)}
+      </div>
+    </>
+  }
+  
+  renderPurchaseAction = () => {
+    const { selectedComponent } = this.props
+    return <>
+      {selectedComponent &&<h5>Claim {selectedComponent.name} ?</h5>}
+      <div className="action-container">
+        {this.renderGameComponent(selectedComponent)}
+      </div>
+    </>
+  }
+
+  renderPassAction = () => {
+    const { G, selectedComponent } = this.props
+    let directive = selectedComponent ? <h5>Swap your magic item for {selectedComponent.name} ?</h5>: <h5>Select a magic item to swap for</h5>
+    let magicItems = G.publicData.magicItems.map((magicItem) => {
+      return this.renderGameComponent(magicItem, {onClick: (event) => this.handleClick(event, magicItem), onDoubleClick: () => this.pickMagicItem(magicItem.id)})
+    })
+    return <>
+      {directive}
+      <div className="action-container">
+        {magicItems}
+      </div>
+    </>
+  }
+  
+  getComponentLocation = () => {
+    const { G, ctx, playerID, selectedComponent } = this.props
+
+    switch (selectedComponent.type) {
+      case 'artefact':
+        if (G.players[playerID].hand.filter((component) => {return component.id === selectedComponent.id}).length > 0) {
+          return { location: 'HAND', playerId: playerID }
+        } else {
+          for (let id=0; id < ctx.numPlayers; id++) {
+            if (G.publicData.players[id].discard.filter((component) => {return component.id === selectedComponent.id}).length > 0) {
+              return { location: 'DISCARD', playerId: id }
+            } else if (G.publicData.players[id].inPlay.filter((component) => {return component.id === selectedComponent.id}).length > 0) {
+              return { location: 'PLAY', playerId: id }
+            }
+          }
+          return { location: 'COMMON_BOARD' }
+        }
+      case 'mage':
+      case 'placeOfPower':
+      case 'monument':
+      case 'magicItem':
+        for (let id=0; id < ctx.numPlayers; id++) {
+          if (G.publicData.players[playerID].inPlay.filter((component) => {return component.id === selectedComponent.id}).length > 0) {
+            return { location: 'PLAY', playerId: id }
+          }
+        }
+        return { location: 'COMMON_BOARD' }
+      default:
+        return { location: 'COMMON_BOARD' }
+    }
+  }
+
+  renderCurrentAction = () => {
+    const { profile, selectAction, selectedAction, selectedComponent } = this.props
+
+    let availableActions
+    if (selectedAction === 'PASS') {
+      availableActions = this.renderPassAction()
+    } else if (selectedComponent) {
+      let location = this.getComponentLocation().location
+      switch (location) {
+        case 'HAND':
+          availableActions = this.renderInHandActions()
+            break
+        case 'PLAY':
+          availableActions = this.renderInPlayActions()
+          break
+        case 'COMMON_BOARD':
+          if (selectedComponent.type === 'magicItem') {
+            availableActions = this.renderPassAction()
+          } else {
+            availableActions = this.renderPurchaseAction()
+          }
+          break
+        default:
+      }
+    }
+
+    const handleClick = (event) => {
+      selectAction(undefined)
+      return this.handleClick(event, undefined)
+    }
+    const confirmButton = <Button variant="primary" size="sm" onClick={null} disabled={true}>Confirm</Button>
+    const resetButton = <Button variant="secondary" size="sm" onClick={handleClick}>Cancel</Button>
+
+    return <>
+      <div className={'card-row action ' + profile.cardSize + ' flex-col'}>
+        {availableActions}
+      </div>
+      <div className="game-button">
+        {confirmButton} {resetButton}
+      </div>
+    </>
+  }
+
   /**
    * Render the board during Action Phase.
    * This board is player specific and will not be available for spectators.
@@ -776,7 +891,7 @@ class ResArcanaBoard extends Component {
    * When a component is selected the board show the selected component and the actions available for this component.
    */
   renderActionDialog = () => {
-    const { G, ctx, playerID, profile, selectedComponent } = this.props
+    const { ctx, playerID, selectedComponent, selectAction, selectedAction } = this.props
     if (!Number.isInteger(parseInt(playerID))) return null
 
     const playersName = this.getPlayersName()
@@ -784,23 +899,20 @@ class ResArcanaBoard extends Component {
     let title = 'Play Phase'
     let waiting = false
     let waitingFor = ' - ' + playersName[parseInt(ctx.currentPlayer)] + '\'s turn.'
-    let hand = this.renderPlayerHand()
-    let currentAction = this.renderCurrentAction()
-    let showButtons = true
+    let hand = this.renderPlayerHand(false)
+    let currentAction = (selectedComponent || selectedAction) && this.renderCurrentAction()
     let directive = null
 
-    const confirmButton = <Button variant="primary" size="sm" onClick={() => this.pickArtefact(selectedComponent.id)} disabled={!selectedComponent}>Confirm</Button>
-    const cancelButton = <Button variant={!selectedComponent ? 'primary' : 'secondary'} size="sm" onClick={(event) => this.handleClick(event, undefined)} disabled={!selectedComponent}>Cancel</Button>
+    const passButton = <Button variant="secondary" size="sm" onClick={() => selectAction('PASS')}>Pass</Button>
 
     return <>
       <div className='dialog-panel'>
         <h5><div className="collect-icon"></div>{title}{waitingFor}</h5>
         {waiting ? <h5>{waitingFor}</h5> : <>{directive}</>}
-        {currentAction}
-        {showButtons && <div className={waiting ? 'game-button hidden': 'game-button'}>
-          {confirmButton} {cancelButton}
+        {(selectedComponent || selectedAction) ? currentAction : hand}
+        {!(selectedComponent || selectedAction) && <div className={waiting ? 'game-button hidden': 'game-button'}>
+          {passButton}
         </div>}
-        {hand}
       </div>
     </>
   }
@@ -842,7 +954,6 @@ class ResArcanaBoard extends Component {
    */
   render() {
     const { G, chatDisplay, game, cardToZoom, profile } = this.props
-    //console.log('G',G, ctx)
     
     if (!isLoaded(game)) {
       return <div className="loading-panel align-center"><img className="loader" alt="Loading..."/>Loading...</div>
@@ -895,6 +1006,7 @@ const mapStateToProps = (state) => {
     game: state.firestore.ordered.game && state.firestore.ordered.game[0],
     profile: state.firebase.profile,
     selectedComponent: state.game.selectedComponent,
+    selectedAction: state.game.selectedAction
   }
 }
 
@@ -904,6 +1016,7 @@ const mapDispatchToProps = (dispatch) => {
     resetCollect: () => dispatch(resetCollect()),
     setCollectAction: (action) => dispatch(setCollectAction(action)),
     setFocusZoom: (flag) => dispatch(setFocusZoom(flag)),
+    selectAction: (action) => dispatch(selectAction(action)),
     selectComponent: (card) => dispatch(selectComponent(card)),
     toggleChat: () => dispatch(toggleChat()),
     zoomCard: (card) => dispatch(zoomCard(card)),

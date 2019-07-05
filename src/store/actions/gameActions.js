@@ -408,3 +408,10 @@ export function setFocusZoom(flag) {
     flag
   }
 }
+
+export function selectAction(action) {
+  return {
+    type: 'SET_ACTION',
+    action
+  }
+}

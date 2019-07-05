@@ -33,146 +33,81 @@
   width: 228px;
 }
 
+$card-base: 1;
+$magic-item-base: 0.764;
+$place-of-power-base: 1.258;
+
+$card-ratio: 0.708;
+$magic-item-ratio: 0.706;
+$place-of-power-ratio: 0.714;
+
+$x-small: 91px;
+$small: 121px;
+$normal: 151px;
+$large: 181px;
+$x-large: 211px;
+$xx-large: 241px;
+
+@mixin aspect-ratio($height, $ratio) {
+  height: $height;
+  width: ($height * $ratio);
+
+  &.tapped {
+    width: $height;
+    height: $height * $ratio;
+    img {
+      top: $height * $ratio - $height;
+      left: $height - $height * $ratio;
+    }
+  }
+}
+
+@mixin sizing($ratio, $base) {
+  &.x-small{
+    @include aspect-ratio($x-small * $base, $ratio);
+  }
+  &.small {
+    @include aspect-ratio($small * $base, $ratio);
+  }
+  &.normal {
+    @include aspect-ratio($normal * $base, $ratio);
+  }
+  &.large {
+    @include aspect-ratio($large * $base, $ratio);
+  }
+  &.x-large {
+    @include aspect-ratio($x-large * $base, $ratio);
+  }
+  &.xx-large {
+    @include aspect-ratio($xx-large * $base, $ratio);
+  }
+}
+
+.card {
+  @include sizing($card-ratio, $card-base);
+}
+.magic-item {
+  @include sizing($magic-item-ratio, $magic-item-base);
+}
+.place-of-power {
+  @include sizing($place-of-power-ratio, $place-of-power-base);
+}
+
 /* Card row */
 .card-row {
   margin-bottom: 10px;
   
   &.small {
-    min-height: 103px;
+    min-height: $normal;
   }
   &.normal {
-    min-height: 140px;
+    min-height: $large;
   }
   &.large {
-    min-height: 194px;
+    min-height: $x-large;
   }
   &.x-large {
-    min-height: 232px;
-  }
-}
-
-%x-small {
-  height: 54.6px;
-  width: 39px;
-  &.tapped {
-    height: 39px;
-    width: 54.6px;
-    img {
-      top: -8px;
-      left: 8px;
-    }
-  }
-}
-%small {
-  height: 91px;
-  width: 65px;
-  &.tapped {
-    height: 65px;
-    width: 91px;
-    img {
-      top: -13px;
-      left: 13px;
-    }
-  }
-}
-%normal {
-  height: 127.4px;
-  width: 91px;
-  &.tapped {
-    height: 91px;
-    width: 127.4px;
-    img {
-      top: -18px;
-      left: 18px;
-    }
-  }
-}
-%large {
-  height: 182px;
-  width: 130px;
-  &.tapped {
-    height: 130px;
-    width: 182px;
-    img {
-      top: -26px;
-      left: 26px;
-    }
-  }
-}
-%x-large {
-  height: 220px;
-  width: 157px;
-  &.tapped {
-    height: 157px;
-    width: 220px;
-    img {
-      top: -32px;
-      left: 32px;
-    }
-  }
-}
-
-%xx-large {
-  height: 270px;
-  width: 192px;
-  &.tapped {
-    height: 192px;
-    width: 270px;
-    img {
-      top: -46px;
-      left: 46px;
-    }
-  }
-}
-
-/* Magic Item Size */
-.magic-item {
-  &.x-small, &.small {
-    @extend %x-small;
-  }
-  &.normal {
-    @extend %small;
-  }
-  &.large, &.x-large {
-    @extend %normal;
-  }
-}
-
-/* Card size */
-.card {
-  &.x-small {
-    @extend %x-small;
-  }
-  &.small {
-    @extend %small;
-  }
-  &.normal {
-    @extend %normal;
-  }
-  &.large {
-    @extend %large;
-  }
-  &.x-large {
-    @extend %x-large;
-  }
-}
-
-/* Place of Power Size */
-.place-of-power {
-  &.x-small {
-    @extend %small;
-  }
-  &.small {
-    @extend %normal;
-  }
-  &.normal {
-    @extend %large;
-  }
-  &.large {
-    @extend %x-large;
-  }
-  &.x-large {
-    @extend %xx-large;
+    min-height: $xx-large;
   }
 }
 
