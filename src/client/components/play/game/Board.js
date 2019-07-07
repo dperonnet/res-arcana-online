@@ -579,7 +579,7 @@ class ResArcanaBoard extends Component {
         {showCards && <div className={'card-row ' + profile.cardSize}>
           {draftCards}
         </div>}
-        {waiting ? <h5>{waitingFor}</h5> : <>{directive}</>}
+        {waiting ? <div className="info">{waitingFor}</div> : <>{directive}</>}
         {showButtons && <div className={waiting ? 'game-button hidden': 'game-button'}>
           {confirmButton} {cancelButton}
         </div>}
@@ -632,7 +632,7 @@ class ResArcanaBoard extends Component {
         <div className={'card-row ' + profile.cardSize}>
           {magicItems}
         </div>
-        {waiting ? <h5>{waitingFor}</h5> : <>{directive}</>}
+        {waiting ? <div className="info">{waitingFor}</div> : <>{directive}</>}
         {showButtons && <div className={waiting ? 'game-button hidden': 'game-button'}>
           {confirmButton} {cancelButton}
         </div>}
@@ -780,7 +780,16 @@ class ResArcanaBoard extends Component {
     return <>
       {selectedComponent &&<h5>Choose an action for {selectedComponent.name}</h5>}
       <div className="action-container">
-        {this.renderGameComponent(selectedComponent)}
+        <div className="action-row">
+          <div className="action-component">
+            {this.renderGameComponent(selectedComponent)}
+          </div>
+          <div className="action-list">
+            <div className="option" size="sm" onClick={null}><div className="option-label">Place Artefact</div></div>
+            <div className="option" size="sm" onClick={null}><div className="option-label">Discard for </div><div className="essence-on-option essence any-but-gold small">2</div></div>
+            <div className="option" size="sm" onClick={null}><div className="option-label">Discard for </div><div class="essence-on-option essence gold small">1</div></div>
+          </div>
+        </div>
       </div>
     </>
   }
@@ -908,7 +917,7 @@ class ResArcanaBoard extends Component {
     return <>
       <div className='dialog-panel'>
         <h5><div className="collect-icon"></div>{title}{waitingFor}</h5>
-        {waiting ? <h5>{waitingFor}</h5> : <>{directive}</>}
+        {waiting ? <div className="info">{waitingFor}</div> : <>{directive}</>}
         {(selectedComponent || selectedAction) ? currentAction : hand}
         {!(selectedComponent || selectedAction) && <div className={waiting ? 'game-button hidden': 'game-button'}>
           {passButton}

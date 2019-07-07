@@ -164,6 +164,38 @@
       align-items: center;
       display: flex;
       justify-content: center;
+
+      .card.active, .place-of-power.active {
+        box-shadow: none;
+      }
+
+      .action-row {
+        display: flex;
+      }
+
+      .action-component {
+        margin: auto;
+      }
+
+      .action-list {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: 5px 15px;
+
+        .option {
+          text-align: left;
+          min-height: 35px;
+          background-color: rgba(150,100,50,0.5);
+          padding: 5px 10px;
+          border-radius: 4px;
+          margin-bottom: 8px;
+        }
+        .option-label {
+          display: inline-block;
+          vertical-align: -webkit-baseline-middle;
+        }
+      }
     }
   }
 }

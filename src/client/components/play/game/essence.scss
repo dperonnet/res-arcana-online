@@ -1,3 +1,53 @@
+.essence-on-option {
+  color: white;
+  position: relative;
+  top: 1px;
+  left: 0;
+  z-index: 32;
+  background-size: 196px;
+  line-height:0;
+  text-align: left;
+  margin: auto;
+  padding-left: 12px;
+  
+  &.essence {
+    background-size: 175px;
+    height: 30px;
+    width: 32px;
+    padding-top: 17px;
+    margin-left: 2px;
+    
+    &.any-but-gold {
+      background-image: url("../../../assets/image/any-but-gold.png");
+      background-size: 55px;
+      width: 55px;
+      padding-top: 15px;
+      text-align: left;
+    }
+
+    &.elan {
+      background-position: 1px 0;
+    }
+    &.life {
+      background-position: -35px 0;
+    }
+    &.calm {
+      background-position: -73px 0;
+    }
+    &.death {
+      background-position: -110px 0;
+    }
+    &.gold {
+      background-position: -144px 0;
+    }
+  }
+}
+
+.essence.any-but-gold {
+  background-image: url("../../../assets/image/any-but-gold.png");
+  background-size: 220px;
+}
+
 .essence-on-component {
   color: white;
   position: relative;
