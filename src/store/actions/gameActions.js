@@ -415,3 +415,16 @@ export function selectAction(action) {
     action
   }
 }
+
+export function resetEssencePickerSelection() {
+  return {
+    type: 'RESET_ESSENCE_PICKER'
+  }
+}
+
+export function addToEssencePickerSelection(essenceType) {
+  return {
+    type: 'ADD_ESSENCE_TO_SELECTION',
+    essenceType
+  }
+}

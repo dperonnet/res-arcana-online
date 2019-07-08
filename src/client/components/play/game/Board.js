@@ -14,6 +14,7 @@ import CardZoom from '../../common/card/CardZoom.js'
 import Chat from '../../common/chat/Chat'
 import GameComponent from './GameComponent'
 import CollectComponent from './CollectComponent'
+import EssencePicker from './EssencePicker'
 
 
 const CARD_BACK_ARTEFACT = {
@@ -76,6 +77,43 @@ class ResArcanaBoard extends Component {
   }
 
   /**
+   * Get the location of the selected component on the board.
+   * Only artefacts can be in play, in hand or in the discard pile.
+   * Others components are either in play or available in common board.
+   */
+  getComponentLocation = () => {
+    const { G, ctx, playerID, selectedComponent } = this.props
+
+    switch (selectedComponent.type) {
+      case 'artefact':
+        if (G.players[playerID].hand.filter((component) => {return component.id === selectedComponent.id}).length > 0) {
+          return { location: 'HAND', playerId: playerID }
+        } else {
+          for (let id=0; id < ctx.numPlayers; id++) {
+            if (G.publicData.players[id].discard.filter((component) => {return component.id === selectedComponent.id}).length > 0) {
+              return { location: 'DISCARD', playerId: id }
+            } else if (G.publicData.players[id].inPlay.filter((component) => {return component.id === selectedComponent.id}).length > 0) {
+              return { location: 'PLAY', playerId: id }
+            }
+          }
+          return { location: 'COMMON_BOARD' }
+        }
+      case 'mage':
+      case 'placeOfPower':
+      case 'monument':
+      case 'magicItem':
+        for (let id=0; id < ctx.numPlayers; id++) {
+          if (G.publicData.players[playerID].inPlay.filter((component) => {return component.id === selectedComponent.id}).length > 0) {
+            return { location: 'PLAY', playerId: id }
+          }
+        }
+        return { location: 'COMMON_BOARD' }
+      default:
+        return { location: 'COMMON_BOARD' }
+    }
+  }
+
+  /**
    * Select the clicked component.
    */
   handleClick = (e, component) => {
@@ -106,9 +144,11 @@ class ResArcanaBoard extends Component {
    * Define the component to zoom on mouse over.
    */
   handleMouseOver = (component) => {
+    const { profile } = this.props
     clearInterval(interval)
-    if (component.type !== 'back')
-    this.props.zoomCard(component)
+    if (component.type !== 'back'){
+      interval = setInterval(() => this.props.zoomCard(component), profile.zoomFadeTime ? profile.zoomFadeTime : 600)
+    }
   }
 
   /**
@@ -116,8 +156,8 @@ class ResArcanaBoard extends Component {
    */
   handleMouseOut = () => {
     const { profile } = this.props
+    clearInterval(interval)
     interval = setInterval(() => this.props.clearZoom(), profile.zoomFadeTime ? profile.zoomFadeTime : 3000)
-    return () => clearInterval(interval)
   }
 
   /**
@@ -179,6 +219,18 @@ class ResArcanaBoard extends Component {
     const { playerID, collectActions, collectOnComponentActions } = this.props
     this.props.moves.collectEssences(playerID, collectActions, collectOnComponentActions)
     this.props.events.endTurn()
+  }
+
+  /**
+   * Trigger the discard artefact move.
+   */
+  discardArtefact = (cardId, essenceList) => {
+    const { isActive, playerID } = this.props
+    if (isActive) {
+      this.props.moves.discardArtefact(playerID, cardId, essenceList)
+    }
+    this.props.selectComponent(undefined)
+    this.handleBoardClick()
   }
 
   /**
@@ -343,14 +395,15 @@ class ResArcanaBoard extends Component {
   renderPlayerDrawPileAndDiscard = (playerId) => {
     const { G } = this.props
     
-    const drawPile = copy(CARD_BACK_ARTEFACT)
-    drawPile.playerId = playerId + '_back_artefact'
     const countDeck = G.publicData.players[playerId].deckSize
     const countDiscard = G.publicData.players[playerId].discard.length
+    const drawPile = copy(CARD_BACK_ARTEFACT)
+    drawPile.playerId = playerId + '_back_artefact'
+    const discardPile = countDiscard > 0 ? G.publicData.players[playerId].discard[countDiscard - 1] : drawPile
     return <div className="draw-pile">
       <div className="card-container discard">
         <span className="component-legend">Discard ({countDiscard})</span>
-        {this.renderGameComponent({...drawPile, class: countDiscard > 0 ? drawPile.class : null}, {discard: true})}
+        {this.renderGameComponent({...discardPile, class: countDiscard > 0 ? discardPile.class : null}, {discard: true})}
       </div>
       <div className="card-container">
         <span className="component-legend">Draw pile ({countDeck})</span>
@@ -382,7 +435,9 @@ class ResArcanaBoard extends Component {
       {separator && <div className="separator"></div>}
       <h5>Cards in hand</h5>
       <div className="action-container">
-        {hand}
+        <div>
+          {hand}
+        </div>
       </div>
     </div>;
   }
@@ -776,25 +831,50 @@ class ResArcanaBoard extends Component {
   }
   
   renderInHandActions = () => {
-    const { selectedComponent } = this.props
+    const { selectAction, selectedAction, selectedComponent } = this.props
+    let directive = selectedComponent &&<h5>Choose an action for {selectedComponent.name}</h5>
+    let actionPanel = null
+    
+    if (selectedAction) {
+      switch (selectedAction) {
+        case 'DISCARD_FOR_2E':
+          directive = <h5>Select <div className="essence-on-option essence any-but-gold small">2</div></h5>
+          actionPanel = <EssencePicker essencePickerType={'anyButGold'} essenceNumber={2}/>
+          break
+        case 'PLACE_ARTEFACT':
+          break
+        default:
+      }
+    }
+
     return <>
-      {selectedComponent &&<h5>Choose an action for {selectedComponent.name}</h5>}
+      {directive}
       <div className="action-container">
         <div className="action-row">
           <div className="action-component">
             {this.renderGameComponent(selectedComponent)}
           </div>
           <div className="action-list">
-            <div className="option" size="sm" onClick={null}><div className="option-label">Place Artefact</div></div>
-            <div className="option" size="sm" onClick={null}><div className="option-label">Discard for </div><div className="essence-on-option essence any-but-gold small">2</div></div>
-            <div className="option" size="sm" onClick={null}><div className="option-label">Discard for </div><div class="essence-on-option essence gold small">1</div></div>
+            {actionPanel ? actionPanel : <>
+              <div className="option" size="sm" onClick={null}>
+                <div className="option-label">Place Artefact</div>
+              </div>
+              <div className="option" size="sm" onClick={() => selectAction('DISCARD_FOR_2E')}>
+                <div className="option-label">Discard for </div>
+                <div className="essence-on-option essence any-but-gold small">2</div>
+              </div>
+              <div className="option" size="sm" onClick={() => this.discardArtefact(selectedComponent.id, { gold: 1})}>
+                <div className="option-label">Discard for </div>
+                <div className="essence-on-option essence gold small">1</div>
+              </div>
+            </>}
           </div>
         </div>
       </div>
     </>
   }
   
-  renderPurchaseAction = () => {
+  renderClaimAction = () => {
     const { selectedComponent } = this.props
     return <>
       {selectedComponent &&<h5>Claim {selectedComponent.name} ?</h5>}
@@ -806,7 +886,7 @@ class ResArcanaBoard extends Component {
 
   renderPassAction = () => {
     const { G, selectedComponent } = this.props
-    let directive = selectedComponent ? <h5>Swap your magic item for {selectedComponent.name} ?</h5>: <h5>Select a magic item to swap for</h5>
+    let directive = selectedComponent ? <h5>Pass and Swap your magic item for {selectedComponent.name} ?</h5>: <h5>Select a magic item to swap for</h5>
     let magicItems = G.publicData.magicItems.map((magicItem) => {
       return this.renderGameComponent(magicItem, {onClick: (event) => this.handleClick(event, magicItem), onDoubleClick: () => this.pickMagicItem(magicItem.id)})
     })
@@ -818,38 +898,6 @@ class ResArcanaBoard extends Component {
     </>
   }
   
-  getComponentLocation = () => {
-    const { G, ctx, playerID, selectedComponent } = this.props
-
-    switch (selectedComponent.type) {
-      case 'artefact':
-        if (G.players[playerID].hand.filter((component) => {return component.id === selectedComponent.id}).length > 0) {
-          return { location: 'HAND', playerId: playerID }
-        } else {
-          for (let id=0; id < ctx.numPlayers; id++) {
-            if (G.publicData.players[id].discard.filter((component) => {return component.id === selectedComponent.id}).length > 0) {
-              return { location: 'DISCARD', playerId: id }
-            } else if (G.publicData.players[id].inPlay.filter((component) => {return component.id === selectedComponent.id}).length > 0) {
-              return { location: 'PLAY', playerId: id }
-            }
-          }
-          return { location: 'COMMON_BOARD' }
-        }
-      case 'mage':
-      case 'placeOfPower':
-      case 'monument':
-      case 'magicItem':
-        for (let id=0; id < ctx.numPlayers; id++) {
-          if (G.publicData.players[playerID].inPlay.filter((component) => {return component.id === selectedComponent.id}).length > 0) {
-            return { location: 'PLAY', playerId: id }
-          }
-        }
-        return { location: 'COMMON_BOARD' }
-      default:
-        return { location: 'COMMON_BOARD' }
-    }
-  }
-
   renderCurrentAction = () => {
     const { profile, selectAction, selectedAction, selectedComponent } = this.props
 
@@ -869,7 +917,7 @@ class ResArcanaBoard extends Component {
           if (selectedComponent.type === 'magicItem') {
             availableActions = this.renderPassAction()
           } else {
-            availableActions = this.renderPurchaseAction()
+            availableActions = this.renderClaimAction()
           }
           break
         default:
@@ -884,7 +932,7 @@ class ResArcanaBoard extends Component {
     const resetButton = <Button variant="secondary" size="sm" onClick={handleClick}>Cancel</Button>
 
     return <>
-      <div className={'card-row action ' + profile.cardSize + ' flex-col'}>
+      <div className={'card-row flex-col ' + profile.cardSize + ' action'}>
         {availableActions}
       </div>
       <div className="game-button">

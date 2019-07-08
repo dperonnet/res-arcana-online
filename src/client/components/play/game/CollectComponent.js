@@ -8,6 +8,9 @@ import GameComponent from './GameComponent'
 
 class CollectComponent extends Component {
   
+  /**
+   * Build the collect action
+   */
   buildCollectAction = (component, essenceList = {}) => {
     return {
       id: component.id,
@@ -19,6 +22,9 @@ class CollectComponent extends Component {
     }
   }
   
+  /**
+   * Set the selected collect action for the component.
+   */
   handleSelectOption = (type) => {
     const { component } = this.props
     let essenceList = {}
@@ -27,6 +33,9 @@ class CollectComponent extends Component {
     this.props.setCollectAction(action)
   }
 
+  /**
+   * Add one essence of the selected type to the collect action.
+   */
   handleAddTypeToOption = (type) => {
     const { component, collectActions } = this.props
     const collectAction = collectActions[component.id]
@@ -40,6 +49,10 @@ class CollectComponent extends Component {
     this.props.setCollectAction(action)
   }
 
+  /**
+   * Set the collect essence on component action for the component.
+   * Or reset the action if it already exist.
+   */
   handleCollectEssenceOnComponent = () => {
     const { component, collectOnComponentActions, essencesOnComponent, setCollectOnComponentAction, resetCollectOnComponentAction } = this.props
     if (essencesOnComponent || collectOnComponentActions[component.id]) {
@@ -54,6 +67,14 @@ class CollectComponent extends Component {
     }
   }
 
+  /**
+   * Render the collect ability of a component: show all essences and their corresponding number to collect.
+   * 
+    * @param {*} essenceList list of the essence to collect.
+    * @param {*} handleOnClick on click event to bind.
+    * @param {*} onComponent flag used to render the "on this component" icon.
+    * @param {*} cost flag used to render the cost icon on the component.
+    */
   renderCollectAbility = (essenceList, handleOnClick, onComponent, cost) => {
     const { status } = this.props
     const ready = status === 'READY'
@@ -76,6 +97,9 @@ class CollectComponent extends Component {
     </>
   }
 
+  /**
+   * Render the collect on component essence list.
+   */
   renderCollectOnComponent = (collectOnComponentActionsRef) => {
     const { component, essencesOnComponent } = this.props
     if (essencesOnComponent || collectOnComponentActionsRef[component.id]) {
@@ -95,6 +119,9 @@ class CollectComponent extends Component {
     }
   }
 
+  /**
+   * Render the essence options to select when the player has a collect choice to make.
+   */
   renderEssencePicker = (essenceList) => {
     const { component, collectActions } = this.props
     let typeIsAny = Object.keys(essenceList).filter((type)=>{
@@ -142,6 +169,10 @@ class CollectComponent extends Component {
     }
   }
 
+  /**
+   * Render the specific collect ability for the "Forge Maudite" component.
+   * Set a collect action to either "tap" the component or pay 1 death essence.
+   */
   renderForgeMauditePicker = () => {
     const { component, setCollectAction, status } = this.props
     const ready = status === 'READY'
@@ -164,6 +195,9 @@ class CollectComponent extends Component {
     </div>
   }
 
+  /**
+   * Render the tap component choice.
+   */
   renderTapComponent = (handleOnClick) => {
     const { status } = this.props
     const ready = status === 'READY'
@@ -172,6 +206,9 @@ class CollectComponent extends Component {
     </div>
   }
 
+  /**
+   * Main render function for the collect phase.
+   */
   render() {
     const { component, collectActions, collectOnComponentActions, essencesOnComponent, onMouseOut, onMouseOver, resetCollectAction, status, ui } = this.props
     // Once the collect phase is done for a player, the ui.collectAction keep tracks of player's actions until all players are

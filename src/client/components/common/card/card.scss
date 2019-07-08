@@ -56,8 +56,8 @@ $xx-large: 241px;
     width: $height;
     height: $height * $ratio;
     img {
-      top: $height * $ratio - $height;
-      left: $height - $height * $ratio;
+      top: ($height * $ratio - $height) /2;
+      left: ($height - $height * $ratio) /2;
     }
   }
 }

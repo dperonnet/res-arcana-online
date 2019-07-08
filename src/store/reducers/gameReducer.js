@@ -6,6 +6,7 @@ const initState = {
   tappedComponents: [],
   collectActions: {},
   collectOnComponentActions: {},
+  essencePickerSelection: {},
   focusZoom: true
 }
 
@@ -13,6 +14,7 @@ const gameReducer = (state = initState, action) => {
   const debug = false
   let collectActions
   let collectOnComponentActions
+  let essencePickerSelection
   switch (action.type) {
     case 'CREATE_GAME':
       debug && console.log('create game', action.doc.id);
@@ -100,6 +102,16 @@ const gameReducer = (state = initState, action) => {
       return Object.assign({}, state, {
         selectedAction: action.action
       })
+    case 'RESET_ESSENCE_PICKER':
+      return Object.assign({}, state, {
+        essencePickerSelection: {}
+      });
+    case 'ADD_ESSENCE_TO_SELECTION':
+      essencePickerSelection = JSON.parse(JSON.stringify(state.essencePickerSelection))
+      essencePickerSelection[action.essenceType] = essencePickerSelection[action.essenceType] ? essencePickerSelection[action.essenceType] + 1 : 1
+      return Object.assign({}, state, {
+        essencePickerSelection
+      });
     default:
       return state;
   }

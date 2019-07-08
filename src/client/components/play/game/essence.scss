@@ -43,6 +43,10 @@
   }
 }
 
+h5 .essence-on-option {
+  margin-top: -6px;
+}
+
 .essence.any-but-gold {
   background-image: url("../../../assets/image/any-but-gold.png");
   background-size: 220px;
@@ -167,6 +171,7 @@
       top: 0px;
       height: 50px;
       width: 100%;
+      background: black;
     }
   }
 }
@@ -246,6 +251,7 @@
   vertical-align: top;
   padding-left: 5px;
   padding-right: 5px;
+  text-align: left;
   
   .active {
     box-shadow: 0 0 2pt 2pt #F22C2C;
