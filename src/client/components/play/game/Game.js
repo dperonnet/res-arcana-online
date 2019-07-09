@@ -358,15 +358,26 @@ const initPickMagicItemPhase = (G, ctx) => {
  * Role: Move
  * Pick a magic item from the the magic item pool.
  * 
- * @param {*} playerID player selecting the magic item.
  * @param {*} magicItemId id of the selected magic item.
  */
-const pickMagicItem = (G, ctx, playerID, magicItemId) => {
+const pickMagicItem = (G, ctx, magicItemId) => {
+  const playerID = ctx.currentPlayer
   console.log('[pickMagicItem] The player', playerID, 'picked magic item', magicItemId)
   let selectedItemIndex = 0
+  let releasedItemIndex
   if (G.publicData.players[playerID].magicItem){
+    G.publicData.players[playerID].inPlay.forEach((component, index) => {
+      const isReleasedItem = component.type === 'magicItem'
+      if (isReleasedItem) {
+        releasedItemIndex = index
+      }
+    })
     G.publicData.magicItems.push(G.publicData.players[playerID].magicItem)
     G.publicData.players[playerID].magicItem = null
+    G.publicData.players[playerID].inPlay.splice(releasedItemIndex, 1)
+    G.publicData.players[playerID].inPlay = G.publicData.players[playerID].inPlay.filter((component) => {
+      return component.id !== magicItemId
+    })
   }
   const selectedItem = copy(G.publicData.magicItems.filter((magicItem, index) => {
     const isSelectedItem = magicItem.id === magicItemId
@@ -378,7 +389,7 @@ const pickMagicItem = (G, ctx, playerID, magicItemId) => {
   G.publicData.players[playerID].magicItem = selectedItem
   G.publicData.players[playerID].inPlay.push(selectedItem);
   G.publicData.magicItems.splice(selectedItemIndex, 1)
-  G.publicData.players[ctx.currentPlayer].status = 'READY'
+  G.publicData.players[playerID].status = 'READY'
   return G
 }
 
@@ -485,11 +496,11 @@ const initCollectPhase = (G, ctx) => {
  * Role: Move
  * This function execute all collect moves made by a player.
  * 
- * @param {*} playerID player collecting.
  * @param {*} collectActions contains all the collect ability choices made by the player.
  * @param {*} collectOnComponentActions contains all the collect on component choices made by the player.
 */
-const collectEssences = (G, ctx, playerID, collectActions, collectOnComponentActions) => {
+const collectEssences = (G, ctx, collectActions, collectOnComponentActions) => {
+  const playerID = ctx.currentPlayer
   console.log('[collectEssences] Call to collectEssences()',collectActions, collectOnComponentActions)
   collectActions && Object.values(collectActions).forEach((action) => {
     if (action.type === 'GAIN') {
@@ -521,7 +532,7 @@ const collectEssences = (G, ctx, playerID, collectActions, collectOnComponentAct
   })
   let automate = G.publicData.players[playerID].inPlay.filter((component) => {
     return component.id === 'automate'
-  })
+  }).inPlay
   if (automate && automate[0]) {
     console.log('automate in play')
     if (!Object.keys(collectOnComponentActions).includes('automate')) {
@@ -576,11 +587,11 @@ const initActionPhase = (G, ctx) => {
  * Role: Move
  * Discard a card to gain essences.
  * 
- * @param {*} playerID player discarding a card.
  * @param {*} cardId id of the discarded card.
  * @param {*} essenceList essences to add in player's pool.
  */
-const discardArtefact = (G, ctx, playerID, cardId, essenceList) => {
+const discardArtefact = (G, ctx, cardId, essenceList) => {
+  const playerID = ctx.currentPlayer
   const selectedCard = copy(G.players[playerID].hand.filter((card) => {
     return card.id === cardId
   })[0])
@@ -592,6 +603,7 @@ const discardArtefact = (G, ctx, playerID, cardId, essenceList) => {
     console.log('add',essence[0],essence[1])
     G.publicData.players[playerID].essencesPool[essence[0]] = G.publicData.players[playerID].essencesPool[essence[0]] + essence[1]
   })
+  G.publicData.players[playerID].deckSize = G.players[playerID].deck.length
   G.publicData.players[playerID].handSize = G.players[playerID].hand.length
   return G
 }
@@ -602,26 +614,31 @@ const discardArtefact = (G, ctx, playerID, cardId, essenceList) => {
  * Then the player swap his magic item for a new one.
  * Finaly the player draw a card if possible.
  * 
- * @param {*} playerID  player passing.
  * @param {*} magicItemId magic item id to swap for.
  */
-const pass = (G, ctx, playerID, magicItemId) => {
+const pass = (G, ctx, magicItemId) => {
+  const playerID = ctx.currentPlayer
   Pass(G, ctx)
-  pickMagicItem(G, ctx, playerID, magicItemId)
-  if (G.passOrder === playerID) {
+  pickMagicItem(G, ctx, magicItemId)
+  if (G.passOrder && G.passOrder[0] === playerID) {
     G.publicData.firstPlayer = playerID
   }
-  drawCard(G, ctx, playerID)
+  drawCard(G, ctx)
   return G
 }
 
-const drawCard = (G, ctx, playerID) => {
-  if (G.players[playerID].deck.length > 0 && G.publicData.players[playerID].discard.length > 0) {
+const drawCard = (G, ctx) => {
+  const playerID = ctx.currentPlayer
+  if (G.players[playerID].deck.length === 0 && G.publicData.players[playerID].discard.length > 0) {
     G.players[playerID].deck = ctx.random.Shuffle(G.publicData.players[playerID].discard)
     G.publicData.players[playerID].discard = []
   }
-  G.players[playerID].hand.push(G.players[playerID].deck[0])
-  G.players[playerID].deck.splice(0, 1)
+  if (G.players[playerID].deck.length > 0) {
+    G.players[playerID].hand.push(G.players[playerID].deck[0])
+    G.players[playerID].deck.splice(0, 1)
+  }
+  G.publicData.players[playerID].deckSize = G.players[playerID].deck.length
+  G.publicData.players[playerID].handSize = G.players[playerID].hand.length
 }
 
 /**

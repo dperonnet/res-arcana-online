@@ -205,9 +205,9 @@ class ResArcanaBoard extends Component {
    * Trigger the pick magic item move.
    */
   pickMagicItem = (cardId) => {
-    const { isActive, playerID } = this.props
+    const { isActive } = this.props
     if (isActive) {
-      this.props.moves.pickMagicItem(playerID, cardId)
+      this.props.moves.pickMagicItem(cardId)
     }
     this.props.selectComponent(undefined)
     this.handleBoardClick()
@@ -217,8 +217,8 @@ class ResArcanaBoard extends Component {
    * Trigger the collect essence move.
    */
   collectEssences = () => {
-    const { playerID, collectActions, collectOnComponentActions } = this.props
-    this.props.moves.collectEssences(playerID, collectActions, collectOnComponentActions)
+    const { collectActions, collectOnComponentActions } = this.props
+    this.props.moves.collectEssences(collectActions, collectOnComponentActions)
     this.props.events.endTurn()
   }
 
@@ -226,13 +226,20 @@ class ResArcanaBoard extends Component {
    * Trigger the discard artefact move.
    */
   discardArtefact = (cardId, essenceList) => {
-    const { isActive, playerID, selectAction } = this.props
+    const { isActive, selectAction } = this.props
     if (isActive) {
-      this.props.moves.discardArtefact(playerID, cardId, essenceList)
+      this.props.moves.discardArtefact(cardId, essenceList)
     }
     this.props.selectComponent(undefined)
     this.handleBoardClick()
     selectAction(undefined)
+  }
+
+  pass = (magicItemId) => {
+    const { isActive } = this.props
+    if (isActive) {
+      this.props.moves.pass(magicItemId)
+    }
   }
 
   /**
@@ -627,8 +634,9 @@ class ResArcanaBoard extends Component {
       default:
     }
 
-    const confirmButton = <Button variant="primary" size="sm" onClick={handleConfirm} disabled={!selectedComponent}>Confirm</Button>
-    const cancelButton = !lastDraftCard && <Button variant={!selectedComponent ? 'primary' : 'secondary'} size="sm" onClick={(event) => this.handleClick(event)} disabled={!selectedComponent}>Cancel</Button>
+    const confirmButton = <div className={'option' + (selectedComponent ? ' valid' : '')}
+      onClick={selectedComponent && handleConfirm}>Confirm</div>
+    const cancelButton = !lastDraftCard && <div className="option" onClick={selectedComponent && ((event) => this.handleClick(event))}>Cancel</div>
     
     return <>
       <div className='dialog-panel'>
@@ -637,7 +645,7 @@ class ResArcanaBoard extends Component {
           {draftCards}
         </div>}
         {waiting ? <div className="info">{waitingFor}</div> : <>{directive}</>}
-        {showButtons && <div className={waiting ? 'game-button hidden': 'game-button'}>
+        {showButtons && <div className={waiting ? 'button-list hidden': 'button-list'}>
           {confirmButton} {cancelButton}
         </div>}
         {hand}
@@ -680,8 +688,8 @@ class ResArcanaBoard extends Component {
         title = `Get Ready for the battle`
     }
 
-    const confirmButton = <Button variant="primary" size="sm" onClick={handleConfirm} disabled={!selectedComponent}>Confirm</Button>
-    const cancelButton = <Button variant={!selectedComponent ? 'primary' : 'secondary'} size="sm" onClick={(event) => this.handleClick(event)} disabled={!selectedComponent}>Cancel</Button>
+    const confirmButton = <div className={'option' + (selectedComponent ? ' valid' : '')} onClick={selectedComponent && handleConfirm}>Confirm</div>
+    const cancelButton = <div className="option" onClick={selectedComponent && ((event) => this.handleClick(event))}>Cancel</div>
     
     return <>
       <div className='dialog-panel'>
@@ -690,7 +698,7 @@ class ResArcanaBoard extends Component {
           {magicItems}
         </div>
         {waiting ? <div className="info">{waitingFor}</div> : <>{directive}</>}
-        {showButtons && <div className={waiting ? 'game-button hidden': 'game-button'}>
+        {showButtons && <div className={waiting ? 'button-list hidden': 'button-list'}>
           {confirmButton} {cancelButton}
         </div>}
         {hand}
@@ -804,8 +812,9 @@ class ResArcanaBoard extends Component {
       default:
     }
 
-    const confirmButton = <Button variant="primary" size="sm" onClick={handleConfirm} disabled={!(collectValid && costValid)}>Confirm</Button>
-    const resetButton = <Button variant="secondary" size="sm" onClick={() => this.handleResetCollect()}>Reset</Button>
+    const confirmButton = <div className={'option' + ((collectValid && costValid) ? ' valid' : '')} 
+      onClick={collectValid && costValid && handleConfirm}>Confirm</div>
+    const resetButton = <div className="option" onClick={() => this.handleResetCollect()}>Reset</div>
 
     return <>
       <div className='dialog-panel'>
@@ -814,7 +823,7 @@ class ResArcanaBoard extends Component {
           {collectComponents}
         </div>
         {directive}
-        {showButtons && <div className={waiting ? 'game-button hidden': 'game-button'}>
+        {showButtons && <div className={waiting ? 'button-list hidden': 'button-list'}>
           {confirmButton} {resetButton}
         </div>}
         {hand}
@@ -926,7 +935,7 @@ class ResArcanaBoard extends Component {
     const { G, selectedComponent } = this.props
     let directive = selectedComponent ? <h5 className="directive">Pass and Swap your magic item for {selectedComponent.name} ?</h5>: <h5 className="directive">Select a magic item to swap for</h5>
     let magicItems = G.publicData.magicItems.map((magicItem) => {
-      return this.renderGameComponent(magicItem, {onClick: (event) => this.handleClick(event, magicItem), onDoubleClick: () => this.pickMagicItem(magicItem.id)})
+      return this.renderGameComponent(magicItem, {onClick: (event) => this.handleClick(event, magicItem), onDoubleClick: () => this.pass(magicItem.id)})
     })
     return <>
       {directive}
@@ -944,6 +953,7 @@ class ResArcanaBoard extends Component {
     
     if (selectedAction === 'PASS') {
       availableActions = this.renderPassAction()
+      handleConfirm = selectedComponent && (() => this.pass(selectedComponent.id))
     } else if (selectedComponent) {
       let location = this.getComponentLocation().location
       switch (location) {
@@ -981,14 +991,14 @@ class ResArcanaBoard extends Component {
       selectAction(undefined)
       return this.handleClick(event, undefined)
     }
-    const confirmButton = <Button variant="primary" size="sm" onClick={handleConfirm} disabled={!handleConfirm}>Confirm</Button>
-    const cancelButton = <Button variant="secondary" size="sm" onClick={handleCancel}>Cancel</Button>
+    const confirmButton = <div className={'option' + (handleConfirm  ? ' valid' : '')} onClick={handleConfirm} disabled={!handleConfirm}>Confirm</div>
+    const cancelButton = <div className="option" onClick={handleCancel}>Cancel</div>
 
     return <>
       <div className={'card-row flex-col ' + profile.cardSize + ' action'}>
         {availableActions}
       </div>
-      <div className="game-button">
+      <div className="button-list">
         {confirmButton} {cancelButton}
       </div>
     </>
@@ -1014,7 +1024,7 @@ class ResArcanaBoard extends Component {
     let directive = null
 
     const passButton = <div className="option" onClick={() => selectAction('PASS')}>
-      <div className="inline-text">Pass</div>
+      Pass
     </div>
 
     return <>
@@ -1022,7 +1032,7 @@ class ResArcanaBoard extends Component {
         <h5><div className="collect-icon"></div>{title}{waitingFor}</h5>
         {waiting ? <div className="info">{waitingFor}</div> : <>{directive}</>}
         {(selectedComponent || selectedAction) ? currentAction : hand}
-        {!(selectedComponent || selectedAction) && <div className={waiting ? 'action-list row-list hidden': 'action-list row-list'}>
+        {!(selectedComponent || selectedAction) && <div className={waiting ? 'button-list hidden': 'button-list'}>
           {passButton}
         </div>}
       </div>
