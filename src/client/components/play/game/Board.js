@@ -1,14 +1,15 @@
 import React, { Component } from 'react'
 import { Button } from 'react-bootstrap'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTimes } from '@fortawesome/free-solid-svg-icons';
+import { faPlus, faTimes } from '@fortawesome/free-solid-svg-icons';
 import PropTypes from 'prop-types'
 import './board.scss'
 import './essence.scss'
 import { compose } from 'redux'
 import { connect } from 'react-redux'
 import { firestoreConnect, isLoaded } from 'react-redux-firebase'
-import { resetCollect, clearZoom, selectAction, selectComponent, setFocusZoom, zoomCard, setCollectAction } from '../../../../store/actions/gameActions'
+import { addToEssencePickerSelection, clearZoom, resetCollect, resetEssencePickerSelection, selectAction, 
+  selectComponent, setFocusZoom, zoomCard, setCollectAction } from '../../../../store/actions/gameActions'
 import { toggleChat } from '../../../../store/actions/chatActions'
 import CardZoom from '../../common/card/CardZoom.js'
 import Chat from '../../common/chat/Chat'
@@ -138,7 +139,7 @@ class ResArcanaBoard extends Component {
     event.stopPropagation()
     const { focusZoom } = this.props
     this.props.setFocusZoom(!focusZoom)
-  }  
+  }
 
   /**
    * Define the component to zoom on mouse over.
@@ -146,7 +147,7 @@ class ResArcanaBoard extends Component {
   handleMouseOver = (component) => {
     const { profile } = this.props
     clearInterval(interval)
-    if (component.type !== 'back'){
+    if (component.type !== 'back') {
       interval = setInterval(() => this.props.zoomCard(component), profile.zoomFadeTime ? profile.zoomFadeTime : 600)
     }
   }
@@ -225,12 +226,13 @@ class ResArcanaBoard extends Component {
    * Trigger the discard artefact move.
    */
   discardArtefact = (cardId, essenceList) => {
-    const { isActive, playerID } = this.props
+    const { isActive, playerID, selectAction } = this.props
     if (isActive) {
       this.props.moves.discardArtefact(playerID, cardId, essenceList)
     }
     this.props.selectComponent(undefined)
     this.handleBoardClick()
+    selectAction(undefined)
   }
 
   /**
@@ -433,7 +435,7 @@ class ResArcanaBoard extends Component {
     }
     return <div className={'card-row flex-col ' + profile.cardSize + fixedHeight}>
       {separator && <div className="separator"></div>}
-      <h5>Cards in hand</h5>
+      <h5 className="directive">Cards in hand</h5>
       <div className="action-container">
         <div>
           {hand}
@@ -823,7 +825,7 @@ class ResArcanaBoard extends Component {
   renderInPlayActions = () => {
     const { selectedComponent } = this.props
     return <>
-      {selectedComponent &&<h5>Choose an action for {selectedComponent.name}</h5>}
+      {selectedComponent &&<h5 className="directive">Choose an action for {selectedComponent.name}</h5>}
       <div className="action-container">
         {this.renderGameComponent(selectedComponent)}
       </div>
@@ -831,44 +833,80 @@ class ResArcanaBoard extends Component {
   }
   
   renderInHandActions = () => {
-    const { selectAction, selectedAction, selectedComponent } = this.props
-    let directive = selectedComponent &&<h5>Choose an action for {selectedComponent.name}</h5>
+    const { addToEssencePickerSelection, essencePickerSelection, resetEssencePickerSelection, selectAction, selectedAction, selectedComponent } = this.props
+    let directive = selectedComponent &&<h5 className="directive">Choose an action for {selectedComponent.name}</h5>
     let actionPanel = null
-    
+    let essenceList = Object.entries(essencePickerSelection).map((essence, index) => {
+      let isLast =  index === Object.entries(essencePickerSelection).length -1
+      return <div key={essence[0]} className={'collect-option '}>
+        <div className={'type essence ' + essence[0]}>{essence[1] || 0}</div>
+        {!isLast && <div className="option-and">
+          <FontAwesomeIcon icon={faPlus} size="sm" />
+        </div>}
+      </div>
+    })
+
     if (selectedAction) {
       switch (selectedAction) {
         case 'DISCARD_FOR_2E':
-          directive = <h5>Select <div className="essence-on-option essence any-but-gold small">2</div></h5>
+          let count = 0
+          Object.values(essencePickerSelection).forEach((value) => count = count + value)
+          let isValid = count === 2
+          directive =  isValid ?
+            <h5 className="directive">
+              <div className="inline-text">Discard {selectedComponent.name} for </div>
+              <div className='inline-text collect-options'>{essenceList}</div>
+              <div className="inline-text">?</div>
+            </h5>
+            :
+            <h5 className="directive">
+              <div className="inline-text">Select </div>
+              <div className="inline-text collect-options">
+                <div className="collect-option">
+                  <div className="inline-essence essence any-but-gold small">2</div>
+                </div>
+              </div>
+            </h5>
           actionPanel = <EssencePicker essencePickerType={'anyButGold'} essenceNumber={2}/>
+          break
+        case 'DISCARD_FOR_1G':
+          directive =
+            <h5 className="directive">
+              <div className="inline-text">Discard {selectedComponent.name} for </div>
+              <div className='inline-text collect-options'>{essenceList}</div>
+              <div className="inline-text">?</div>
+            </h5>
           break
         case 'PLACE_ARTEFACT':
           break
         default:
       }
+    } else {
+      actionPanel = <>
+        <div className="option" size="sm" onClick={null}>
+          <div className="inline-text">Place Artefact</div>
+        </div>
+        <div className="option" size="sm" onClick={() => selectAction('DISCARD_FOR_2E')}>
+          <div className="inline-text">Discard for </div>
+          <div className="inline-essence essence any-but-gold small">2</div>
+        </div>
+        <div className="option" size="sm" onClick={() => {resetEssencePickerSelection(); addToEssencePickerSelection('gold'); selectAction('DISCARD_FOR_1G')}}>
+          <div className="inline-text">Discard for </div>
+          <div className="inline-essence essence gold small">1</div>
+        </div>
+      </>
     }
 
     return <>
       {directive}
       <div className="action-container">
-        <div className="action-row">
+        <div className={'action-row ' + (actionPanel && ' double')}>
           <div className="action-component">
             {this.renderGameComponent(selectedComponent)}
           </div>
-          <div className="action-list">
-            {actionPanel ? actionPanel : <>
-              <div className="option" size="sm" onClick={null}>
-                <div className="option-label">Place Artefact</div>
-              </div>
-              <div className="option" size="sm" onClick={() => selectAction('DISCARD_FOR_2E')}>
-                <div className="option-label">Discard for </div>
-                <div className="essence-on-option essence any-but-gold small">2</div>
-              </div>
-              <div className="option" size="sm" onClick={() => this.discardArtefact(selectedComponent.id, { gold: 1})}>
-                <div className="option-label">Discard for </div>
-                <div className="essence-on-option essence gold small">1</div>
-              </div>
-            </>}
-          </div>
+          {actionPanel && <div className="action-list">
+            {actionPanel}
+          </div>}
         </div>
       </div>
     </>
@@ -877,7 +915,7 @@ class ResArcanaBoard extends Component {
   renderClaimAction = () => {
     const { selectedComponent } = this.props
     return <>
-      {selectedComponent &&<h5>Claim {selectedComponent.name} ?</h5>}
+      {selectedComponent &&<h5 className="directive">Claim {selectedComponent.name} ?</h5>}
       <div className="action-container">
         {this.renderGameComponent(selectedComponent)}
       </div>
@@ -886,7 +924,7 @@ class ResArcanaBoard extends Component {
 
   renderPassAction = () => {
     const { G, selectedComponent } = this.props
-    let directive = selectedComponent ? <h5>Pass and Swap your magic item for {selectedComponent.name} ?</h5>: <h5>Select a magic item to swap for</h5>
+    let directive = selectedComponent ? <h5 className="directive">Pass and Swap your magic item for {selectedComponent.name} ?</h5>: <h5 className="directive">Select a magic item to swap for</h5>
     let magicItems = G.publicData.magicItems.map((magicItem) => {
       return this.renderGameComponent(magicItem, {onClick: (event) => this.handleClick(event, magicItem), onDoubleClick: () => this.pickMagicItem(magicItem.id)})
     })
@@ -899,9 +937,11 @@ class ResArcanaBoard extends Component {
   }
   
   renderCurrentAction = () => {
-    const { profile, selectAction, selectedAction, selectedComponent } = this.props
+    const { essencePickerSelection, profile, selectAction, selectedAction, selectedComponent } = this.props
 
+    let handleConfirm
     let availableActions
+    
     if (selectedAction === 'PASS') {
       availableActions = this.renderPassAction()
     } else if (selectedComponent) {
@@ -909,7 +949,21 @@ class ResArcanaBoard extends Component {
       switch (location) {
         case 'HAND':
           availableActions = this.renderInHandActions()
-            break
+          if (selectedAction) {
+            switch (selectedAction) {
+              case 'DISCARD_FOR_2E':
+                  handleConfirm = Object.values(essencePickerSelection).reduce((a,b) => {return a + b}, 0) === 2 ? 
+                    () => this.discardArtefact(selectedComponent.id, essencePickerSelection) : null
+                break
+              case 'DISCARD_FOR_1G':
+                  handleConfirm = () => this.discardArtefact(selectedComponent.id, essencePickerSelection)
+                break
+              case 'PLACE_ARTEFACT':
+                break
+              default:
+            }
+          }
+          break
         case 'PLAY':
           availableActions = this.renderInPlayActions()
           break
@@ -923,20 +977,19 @@ class ResArcanaBoard extends Component {
         default:
       }
     }
-
-    const handleClick = (event) => {
+    const handleCancel = (event) => {
       selectAction(undefined)
       return this.handleClick(event, undefined)
     }
-    const confirmButton = <Button variant="primary" size="sm" onClick={null} disabled={true}>Confirm</Button>
-    const resetButton = <Button variant="secondary" size="sm" onClick={handleClick}>Cancel</Button>
+    const confirmButton = <Button variant="primary" size="sm" onClick={handleConfirm} disabled={!handleConfirm}>Confirm</Button>
+    const cancelButton = <Button variant="secondary" size="sm" onClick={handleCancel}>Cancel</Button>
 
     return <>
       <div className={'card-row flex-col ' + profile.cardSize + ' action'}>
         {availableActions}
       </div>
       <div className="game-button">
-        {confirmButton} {resetButton}
+        {confirmButton} {cancelButton}
       </div>
     </>
   }
@@ -960,14 +1013,16 @@ class ResArcanaBoard extends Component {
     let currentAction = (selectedComponent || selectedAction) && this.renderCurrentAction()
     let directive = null
 
-    const passButton = <Button variant="secondary" size="sm" onClick={() => selectAction('PASS')}>Pass</Button>
+    const passButton = <div className="option" onClick={() => selectAction('PASS')}>
+      <div className="inline-text">Pass</div>
+    </div>
 
     return <>
       <div className='dialog-panel'>
         <h5><div className="collect-icon"></div>{title}{waitingFor}</h5>
         {waiting ? <div className="info">{waitingFor}</div> : <>{directive}</>}
         {(selectedComponent || selectedAction) ? currentAction : hand}
-        {!(selectedComponent || selectedAction) && <div className={waiting ? 'game-button hidden': 'game-button'}>
+        {!(selectedComponent || selectedAction) && <div className={waiting ? 'action-list row-list hidden': 'action-list row-list'}>
           {passButton}
         </div>}
       </div>
@@ -1059,6 +1114,7 @@ const mapStateToProps = (state) => {
     collectActions: state.game.collectActions,
     collectOnComponentActions: state.game.collectOnComponentActions,
     currentGame: state.firestore.data.currentGame,
+    essencePickerSelection: state.game.essencePickerSelection,
     focusZoom: state.game.focusZoom,
     game: state.firestore.ordered.game && state.firestore.ordered.game[0],
     profile: state.firebase.profile,
@@ -1069,8 +1125,10 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
+    addToEssencePickerSelection: (essenceType) => dispatch(addToEssencePickerSelection(essenceType)),
     clearZoom: () => dispatch(clearZoom()),
     resetCollect: () => dispatch(resetCollect()),
+    resetEssencePickerSelection: () => dispatch(resetEssencePickerSelection()),
     setCollectAction: (action) => dispatch(setCollectAction(action)),
     setFocusZoom: (flag) => dispatch(setFocusZoom(flag)),
     selectAction: (action) => dispatch(selectAction(action)),

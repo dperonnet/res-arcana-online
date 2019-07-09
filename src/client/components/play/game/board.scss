@@ -169,38 +169,55 @@
         box-shadow: none;
       }
       .action-row {
-          display: inline-grid;
+        display: inline-grid;
+        grid-template-columns: 1fr;
+
+        &.double {
           grid-template-columns: 1fr 1fr;
+        }
       }
       .action-component {
         text-align: right;
       }
+    }
+  }
 
-      .action-list {
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        padding: 5px 15px;
+  .action-list {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 5px 15px;
 
-        .option {
-          text-align: left;
-          min-height: 35px;
-          background-color: rgba(150,100,50,0.3);
-          padding: 5px 10px;
-          border-radius: 4px;
-          margin-bottom: 8px;
-          border: 1px solid rgba(245,176,65,0.7);
+    &.row-list {
+      flex-direction: row;
+      .option {
+        min-width: 120px;
+        text-align: center;
+      }
+    }
 
-          &:hover {
-            background-color: rgba(150,100,50,0.6);
-            border: 1px solid rgba(245,176,65,1);
-            cursor: pointer;
-          }
-        }
-        .option-label {
-          display: inline-block;
-          vertical-align: -webkit-baseline-middle;
-        }
+    .option {
+      text-align: left;
+      min-height: 35px;
+      background-color: rgba(150,100,50,0.3);
+      padding: 5px 10px;
+      border-radius: 4px;
+      margin-bottom: 8px;
+      border: 1px solid rgba(245,176,65,0.7);
+
+      &:hover {
+        background-color: rgba(150,100,50,0.6);
+        border: 1px solid rgba(245,176,65,1);
+        cursor: pointer;
+      }
+
+      .inline-text {
+        vertical-align: -webkit-baseline-middle;
+      }
+
+      &.pass {
+        width: 120px;
+        text-align: center;
       }
     }
   }
@@ -402,4 +419,25 @@ width: 75px;
 
 .in-play div {
   vertical-align: middle;
+}
+
+.directive {
+  margin-bottom: -10px;
+  margin-top: 10px;
+  height: 38px;
+  vertical-align: -webkit-baseline-middle;
+
+  .essence {
+    line-height: 1.5;
+    height: 31px;
+  }
+}
+
+.inline-text {
+  display: inline-block;
+  vertical-align: top;
+
+  .essence {
+    margin-top: -5px;
+  }
 }

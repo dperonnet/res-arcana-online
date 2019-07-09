@@ -1,27 +1,25 @@
-.essence-on-option {
-  color: white;
-  position: relative;
-  top: 1px;
-  left: 0;
+.inline-essence {
+  display: inline-block;
   z-index: 32;
-  background-size: 196px;
-  line-height:0;
   text-align: left;
   margin: auto;
-  padding-left: 12px;
-  
+
+  div{
+    display: inline-block;
+  }
+
   &.essence {
     background-size: 175px;
     height: 30px;
     width: 32px;
-    padding-top: 17px;
     margin-left: 2px;
+    padding-left: 12px;
+    vertical-align: bottom;
     
     &.any-but-gold {
       background-image: url("../../../assets/image/any-but-gold.png");
       background-size: 55px;
       width: 55px;
-      padding-top: 15px;
       text-align: left;
     }
 
@@ -41,10 +39,6 @@
       background-position: -144px 0;
     }
   }
-}
-
-h5 .essence-on-option {
-  margin-top: -6px;
 }
 
 .essence.any-but-gold {
@@ -186,6 +180,12 @@ h5 .essence-on-option {
       outline: none !important;
       box-shadow: none !important;
     }
+
+    
+  }
+  
+  .fade-option {
+    opacity: 0.2;
   }
 
   &.collect-info {
@@ -212,6 +212,7 @@ h5 .essence-on-option {
   .option-and, .option-or, .option-reset {
     display: inline-block;
     padding-top: 5px;
+    font-size: 1rem;
   }
 
   .btn, .type {
@@ -251,7 +252,6 @@ h5 .essence-on-option {
   vertical-align: top;
   padding-left: 5px;
   padding-right: 5px;
-  text-align: left;
   
   .active {
     box-shadow: 0 0 2pt 2pt #F22C2C;

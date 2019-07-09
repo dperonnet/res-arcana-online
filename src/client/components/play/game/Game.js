@@ -539,6 +539,11 @@ const collectEssences = (G, ctx, playerID, collectActions, collectOnComponentAct
   return G
 }
 
+/**
+ * Role: endPhaseIf
+ * This function check if all players have collect their essences
+ * and define the next phase.
+ */
 const allCollectsReady = (G, ctx) => {
   console.log('[allCollectsReady] Call to allCollectsReady()')
   let playersReady = true
@@ -552,14 +557,12 @@ const allCollectsReady = (G, ctx) => {
   console.log('[allCollectsReady] One player at least is not ready, return "collectPhase"')
 }
 
+/**
+ * Role: turnOrder
+ * Define the turn order for the collect phase.
+ */
 const getCollectTurnOrder = (G, ctx) => {
-  let firstPlayer = G.publicData.firstPlayer
-  let order = []
-  for (let i = 0; i < ctx.numPlayers; i++ ) {
-    let nextPlayerId = (parseInt(firstPlayer) + i) % ctx.numPlayers
-    order.push((nextPlayerId).toString())
-  }
-  return order
+  return getTurnOrder(G, ctx)
 }
 
 // ########## ACTION PHASE ##########
@@ -569,21 +572,6 @@ const initActionPhase = (G, ctx) => {
   return G
 }
 
-const placeArtefact = (G, ctx, artefactId) => {
-  let artefactIndex = G.artefacts.findIndex(
-    artefact => artefact.id === artefactId
-  )
-  let artefact = copy(G.artefacts[artefactIndex])
-  G.artefacts.splice(artefactIndex, 1)
-  if (!G.artefactsInPlay) G.artefactsInPlay= {}
-  G.artefactsInPlay[ctx.currentPlayer].push(artefact)
-}
-const claimMonument = (G, ctx) => {
-  return G
-}
-const claimPlaceOfPower = (G, ctx) => {
-  return G
-}
 /**
  * Role: Move
  * Discard a card to gain essences.
@@ -604,12 +592,70 @@ const discardArtefact = (G, ctx, playerID, cardId, essenceList) => {
     console.log('add',essence[0],essence[1])
     G.publicData.players[playerID].essencesPool[essence[0]] = G.publicData.players[playerID].essencesPool[essence[0]] + essence[1]
   })
+  G.publicData.players[playerID].handSize = G.players[playerID].hand.length
   return G
 }
 
+/**
+ * Role: Move
+ * The first player to pass in a round take the first player token.
+ * Then the player swap his magic item for a new one.
+ * Finaly the player draw a card if possible.
+ * 
+ * @param {*} playerID  player passing.
+ * @param {*} magicItemId magic item id to swap for.
+ */
+const pass = (G, ctx, playerID, magicItemId) => {
+  Pass(G, ctx)
+  pickMagicItem(G, ctx, playerID, magicItemId)
+  if (G.passOrder === playerID) {
+    G.publicData.firstPlayer = playerID
+  }
+  drawCard(G, ctx, playerID)
+  return G
+}
+
+const drawCard = (G, ctx, playerID) => {
+  if (G.players[playerID].deck.length > 0 && G.publicData.players[playerID].discard.length > 0) {
+    G.players[playerID].deck = ctx.random.Shuffle(G.publicData.players[playerID].discard)
+    G.publicData.players[playerID].discard = []
+  }
+  G.players[playerID].hand.push(G.players[playerID].deck[0])
+  G.players[playerID].deck.splice(0, 1)
+}
+
+/**
+ * Role: Move
+ * Activate the power of a component.
+ */
 const activatePower = (G, ctx) => {
   return G
 }
+
+/**
+ * Role: Move
+ * Place an artefact in play.
+ */
+const placeArtefact = (G, ctx, artefactId) => {
+  return G
+}
+
+/**
+ * Role: Move
+ * Claim a monument.
+ */
+const claimMonument = (G, ctx) => {
+  return G
+}
+
+/**
+ * Role: Move
+ * Claim a place of power.
+ */
+const claimPlaceOfPower = (G, ctx) => {
+  return G
+}
+
 const getTurnOrder = (G, ctx) => {
   let firstPlayer = G.publicData.firstPlayer
   let order = []
@@ -620,8 +666,30 @@ const getTurnOrder = (G, ctx) => {
   return order
 }
 
-const allPlayersPassed = (G, ctx) => {
+// ########## VICTORY CHECK PHASE ##########
+const initVictoryCheckPhase = (G, ctx) => {
+  return G
+}
 
+const getCheckVictoryTurnOrder = (G, ctx) => {
+  let firstPlayer = G.publicData.firstPlayer
+  let order = []
+  for (let i=0; i < ctx.numPlayers; i++) {
+    let componentWithReactPower = G.publicData.players[i].inPlay.filter((component) => {return component.hasVictoryCheckReactPower})
+    if (componentWithReactPower.length > 0) {
+      let nextPlayerId = (parseInt(firstPlayer) + i) % ctx.numPlayers
+      order.push((nextPlayerId).toString())
+    }
+  }
+  return order
+}
+
+const allPlayersPassed = (G, ctx) => {
+  if (G.allPassed) {
+    console.log('[allPlayersPassed] All players passed, return "checkVictoryPhase"')
+    return {next: 'checkVictoryPhase' }
+  }
+  console.log('[allPlayersPassed] One player at least is sill playing, return "actionPhase"')
 }
 
 function copy(value) {
@@ -670,7 +738,7 @@ export const ResArcanaGame = Game({
     claimPlaceOfPower: claimPlaceOfPower,
     discardArtefact: discardArtefact,
     activatePower: activatePower,
-    pass: Pass,
+    pass: pass,
   },
 
   flow: {
@@ -718,7 +786,38 @@ export const ResArcanaGame = Game({
           next: (G, ctx) => (ctx.playOrderPos + 1) % ctx.numPlayers,
         },
         endPhaseIf: (G, ctx) => allPlayersPassed(G, ctx)
+      },
+      victoryCheckPhase: {
+        onPhaseBegin: (G, ctx) => initVictoryCheckPhase(G, ctx),
+        turnOrder: {
+          playOrder: (G, ctx) => getCheckVictoryTurnOrder(G, ctx),
+          first: (G, ctx) => 0,
+          next: (G, ctx) => (ctx.playOrderPos + 1) % ctx.numPlayers,
+        },
       }
+    },
+
+    endGameIf: (G, ctx) => {
+      let winner = undefined
+      let scores = []
+      for (let i=0; i < ctx.numPlayers; i++) {
+        scores[i]= 0
+        G.publicData.players[i].inPlay.forEach((component) => {
+          scores[i] = scores[i] + component.victoryPoint ? component.victoryPoint : 0
+        })
+      }
+      for (let i=0; i < ctx.numPlayers; i++) {
+        if (Math.max(...scores) >= 10) {
+          winner = [];
+          var max = Math.max(...scores);
+          var idx = scores.indexOf(max);
+          while (idx != -1) {
+            winner.push(idx);
+            idx = scores.indexOf(max, idx + 1);
+          }
+        }
+      }
+      return winner
     },
   },
   enhancer: applyMiddleware(logger),

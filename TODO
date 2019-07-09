@@ -10,7 +10,8 @@ Game
 -show discard content
 -monument count
 -turn count
-
+-confirm when collecting on place of power
+-state reset on new games
 
 Chat
 -in game action notification
