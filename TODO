@@ -1,6 +1,8 @@
 UI options:
 -Layout Vertical
 -Profile fadeOut time
+-Store images in localstorage
+
 Cards
 -alt cards
 
@@ -12,6 +14,7 @@ Game
 -turn count
 -confirm when collecting on place of power
 -state reset on new games
+-toggle show cards in hand
 
 Chat
 -in game action notification

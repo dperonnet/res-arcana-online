@@ -96,6 +96,7 @@ $xx-large: 241px;
 /* Card row */
 .card-row {
   margin-bottom: 10px;
+  margin-top: 10px;
   
   &.small {
     min-height: $normal;
@@ -132,7 +133,7 @@ $xx-large: 241px;
 }
 
 div.magic-item, div.card, div.place-of-power {
-  margin: 5px 0 0 5px;
+  margin: 0 0 0 5px;
 }
 
 .card-name {

@@ -442,12 +442,12 @@ class ResArcanaBoard extends Component {
     }
     return <div className={'card-row flex-col ' + profile.cardSize + fixedHeight}>
       {separator && <div className="separator"></div>}
-      <h5 className="directive">Cards in hand</h5>
       <div className="action-container">
         <div>
           {hand}
         </div>
       </div>
+      <h5 className="directive">Cards in hand ({G.publicData.players[playerID].handSize})</h5>
     </div>;
   }
 
@@ -585,9 +585,9 @@ class ResArcanaBoard extends Component {
         })
       
         directive = selectedComponent ?
-          <div className="info">Keep {selectedComponent.name} {!lastDraftCard && 'and pass the rest to '  + nextPlayer + ' ?'}</div>
+          <h5 className="directive">Keep {selectedComponent.name} {!lastDraftCard && 'and pass the rest to '  + nextPlayer + ' ?'}</h5>
         :
-          <div className="info">Select an artefact to add into your deck.</div>
+          <h5 className="directive">Select an artefact to add into your deck.</h5>
         
         G.publicData.waitingFor.forEach((id, index) => {
           let isLastPlayer = index === G.publicData.waitingFor.length - 1
@@ -605,9 +605,9 @@ class ResArcanaBoard extends Component {
           return this.renderGameComponent(card, {onClick: (event) => this.handleClick(event, card), onDoubleClick: () => this.pickMage(card.id)})
         })
         directive = selectedComponent ?
-          <div className="info">Keep {selectedComponent.name} ?</div>
+          <h5 className="directive">Keep {selectedComponent.name} ?</h5>
         :
-          <div className="info">Select your mage.</div>
+          <h5 className="directive">Select your mage.</h5>
         handleConfirm = () => this.pickMage(selectedComponent.id)
         
         hand = this.renderPlayerHand()
@@ -634,7 +634,7 @@ class ResArcanaBoard extends Component {
       default:
     }
 
-    const confirmButton = <div className={'option' + (selectedComponent ? ' valid' : '')}
+    const confirmButton = <div className={'option' + (selectedComponent ? ' valid' : ' disabled')}
       onClick={selectedComponent && handleConfirm}>Confirm</div>
     const cancelButton = !lastDraftCard && <div className="option" onClick={selectedComponent && ((event) => this.handleClick(event))}>Cancel</div>
     
@@ -644,7 +644,7 @@ class ResArcanaBoard extends Component {
         {showCards && <div className={'card-row ' + profile.cardSize}>
           {draftCards}
         </div>}
-        {waiting ? <div className="info">{waitingFor}</div> : <>{directive}</>}
+        {waiting ? <h5 className="directive">{waitingFor}</h5> : <>{directive}</>}
         {showButtons && <div className={waiting ? 'button-list hidden': 'button-list'}>
           {confirmButton} {cancelButton}
         </div>}
@@ -667,7 +667,6 @@ class ResArcanaBoard extends Component {
     let waiting = playerID !== ctx.currentPlayer
     let waitingFor = 'Waiting for ' + playersName[parseInt(ctx.currentPlayer)] + ' to pick a Magic Item.'
     let hand = this.renderPlayerHand()
-    let showButtons = !waiting
     let magicItems = G.publicData.magicItems.map((magicItem) => {
       return waiting ?
         this.renderGameComponent(magicItem)
@@ -676,19 +675,21 @@ class ResArcanaBoard extends Component {
     })
   
     let directive = null
-    let handleConfirm = null;
+    let handleConfirm = null
+    let showButtons = true
 
     switch (G.publicData.players[playerID].status) {
       case 'SELECTING_MAGIC_ITEM':
-        directive = <div className="info">Select a Magic Item.</div>
+        directive = <h5 className="directive">Select a Magic Item.</h5>
         handleConfirm = () => this.pickMagicItem(selectedComponent.id)
         break
       case 'READY':
       default:
         title = `Get Ready for the battle`
+        showButtons = false
     }
 
-    const confirmButton = <div className={'option' + (selectedComponent ? ' valid' : '')} onClick={selectedComponent && handleConfirm}>Confirm</div>
+    const confirmButton = <div className={'option' + (selectedComponent ? ' valid' : ' disabled')} onClick={selectedComponent && handleConfirm}>Confirm</div>
     const cancelButton = <div className="option" onClick={selectedComponent && ((event) => this.handleClick(event))}>Cancel</div>
     
     return <>
@@ -697,10 +698,10 @@ class ResArcanaBoard extends Component {
         <div className={'card-row ' + profile.cardSize}>
           {magicItems}
         </div>
-        {waiting ? <div className="info">{waitingFor}</div> : <>{directive}</>}
-        {showButtons && <div className={waiting ? 'button-list hidden': 'button-list'}>
+        {waiting ? <h5 className="directive">{waitingFor}</h5> : <>{directive}</>}
+        <div className={!showButtons ? 'button-list hidden': 'button-list'}>
           {confirmButton} {cancelButton}
-        </div>}
+        </div>
         {hand}
       </div>
     </>
@@ -724,7 +725,7 @@ class ResArcanaBoard extends Component {
     let waiting = playerID !== ctx.currentPlayer
     let waitingFor = ' - ' + playersName[parseInt(ctx.currentPlayer)] + '\'s turn.'
     let hand = this.renderPlayerHand()
-    let showButtons = !waiting
+    let showButtons = true
     let directive = null
     let handleConfirm = null
     let collectValid = true
@@ -793,26 +794,27 @@ class ResArcanaBoard extends Component {
 
     switch (G.publicData.players[playerID].status) {
       case 'COLLECT_ACTION_AVAILABLE':
-        directive = <div className="info">You may collect essence.</div>
+        directive = <h5 className="directive">You may collect essence.</h5>
         handleConfirm = () => this.collectEssences()
         break
       case 'COLLECT_ACTION_REQUIRED':
         directive = collectValid && costValid ?
-            <div className="info">Confirm your collect option(s).</div>
+            <h5 className="directive">Confirm your collect option(s).</h5>
           : costValid ?
-            <div className="info">You have to select collect option(s).</div>
+            <h5 className="directive">You have to select collect option(s).</h5>
           :
-            <div className="info">You need {Object.entries(missingEssences).map((essence) => {
+            <h5 className="directive">You need {Object.entries(missingEssences).map((essence) => {
               return <div key={essence[0]}className="collect-options collect-info">
               <div className={'type essence '+essence[0]}>{essence[1]}</div>
-            </div>})} more essence(s) for your collect to be valid.</div>
+            </div>})} more essence(s) for your collect to be valid.</h5>
         handleConfirm = () => this.collectEssences()
         break
       case 'READY':
       default:
+          showButtons = false
     }
 
-    const confirmButton = <div className={'option' + ((collectValid && costValid) ? ' valid' : '')} 
+    const confirmButton = <div className={'option' + ((collectValid && costValid) ? ' valid' : ' disabled')} 
       onClick={collectValid && costValid && handleConfirm}>Confirm</div>
     const resetButton = <div className="option" onClick={() => this.handleResetCollect()}>Reset</div>
 
@@ -834,10 +836,10 @@ class ResArcanaBoard extends Component {
   renderInPlayActions = () => {
     const { selectedComponent } = this.props
     return <>
-      {selectedComponent &&<h5 className="directive">Choose an action for {selectedComponent.name}</h5>}
       <div className="action-container">
         {this.renderGameComponent(selectedComponent)}
       </div>
+      {selectedComponent &&<h5 className="directive">Choose an action for {selectedComponent.name}</h5>}
     </>
   }
   
@@ -854,6 +856,7 @@ class ResArcanaBoard extends Component {
         </div>}
       </div>
     })
+    let splitContainer = true
 
     if (selectedAction) {
       switch (selectedAction) {
@@ -885,6 +888,7 @@ class ResArcanaBoard extends Component {
               <div className='inline-text collect-options'>{essenceList}</div>
               <div className="inline-text">?</div>
             </h5>
+          splitContainer = false
           break
         case 'PLACE_ARTEFACT':
           break
@@ -907,27 +911,25 @@ class ResArcanaBoard extends Component {
     }
 
     return <>
-      {directive}
-      <div className="action-container">
-        <div className={'action-row ' + (actionPanel && ' double')}>
-          <div className="action-component">
-            {this.renderGameComponent(selectedComponent)}
-          </div>
-          {actionPanel && <div className="action-list">
-            {actionPanel}
-          </div>}
+      <div className={'action-container' + (splitContainer ? ' split' : '')}>
+        <div className="action-component">
+          {this.renderGameComponent(selectedComponent)}
         </div>
+        {actionPanel && <div className="action-list">
+          {actionPanel}
+        </div>}
       </div>
+      {directive}
     </>
   }
   
   renderClaimAction = () => {
     const { selectedComponent } = this.props
     return <>
-      {selectedComponent &&<h5 className="directive">Claim {selectedComponent.name} ?</h5>}
       <div className="action-container">
         {this.renderGameComponent(selectedComponent)}
       </div>
+      {selectedComponent &&<h5 className="directive">Claim {selectedComponent.name} ?</h5>}
     </>
   }
 
@@ -938,10 +940,10 @@ class ResArcanaBoard extends Component {
       return this.renderGameComponent(magicItem, {onClick: (event) => this.handleClick(event, magicItem), onDoubleClick: () => this.pass(magicItem.id)})
     })
     return <>
-      {directive}
       <div className="action-container">
         {magicItems}
       </div>
+      {directive}
     </>
   }
   
@@ -991,7 +993,7 @@ class ResArcanaBoard extends Component {
       selectAction(undefined)
       return this.handleClick(event, undefined)
     }
-    const confirmButton = <div className={'option' + (handleConfirm  ? ' valid' : '')} onClick={handleConfirm} disabled={!handleConfirm}>Confirm</div>
+    const confirmButton = <div className={'option' + (handleConfirm  ? ' valid' : ' disabled')} onClick={handleConfirm} disabled={!handleConfirm}>Confirm</div>
     const cancelButton = <div className="option" onClick={handleCancel}>Cancel</div>
 
     return <>
@@ -1030,9 +1032,9 @@ class ResArcanaBoard extends Component {
     return <>
       <div className='dialog-panel'>
         <h5><div className="collect-icon"></div>{title}{waitingFor}</h5>
-        {waiting ? <div className="info">{waitingFor}</div> : <>{directive}</>}
+        {waiting ? <h5 className="directive">{waitingFor}</h5> : <>{directive}</>}
         {(selectedComponent || selectedAction) ? currentAction : hand}
-        {!(selectedComponent || selectedAction) && <div className={waiting ? 'button-list hidden': 'button-list'}>
+        {!(selectedComponent || selectedAction) && <div className="button-list">
           {passButton}
         </div>}
       </div>

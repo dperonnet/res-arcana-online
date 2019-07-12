@@ -66,3 +66,7 @@ body {
   outline: none !important;
   box-shadow: none !important;
 }
+
+.small {
+  font-size: 1rem;
+}

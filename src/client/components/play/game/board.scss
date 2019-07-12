@@ -35,6 +35,7 @@
   flex-shrink: 0;
   margin-left: -15px;
 }
+
 .monuments-revealed {
   display: inline-block;
 }
@@ -177,7 +178,15 @@
         }
       }
       .action-component {
-        text-align: right;
+        display: inline-block;
+        align-self: center;
+        flex: 1;
+      }
+
+      &.split {
+        .action-component {
+          text-align: right;
+        }
       }
     }
   }
@@ -189,15 +198,22 @@
       width: 120px;
       text-align: center;
       margin: 0 5px;
+      user-select: none;
     }
   }
 
   .action-list {
+    display: inline-block;
     flex-direction: column;
-    padding: 5px 15px;
+    padding: 0 15px;
+    flex: 1;
     
     .option {
       text-align: left;
+    }
+
+    .essence-picker {
+      width: fit-content;
     }
   }
 
@@ -206,20 +222,21 @@
     justify-content: center;
 
     .option {
+      width: 180px;
       min-height: 35px;
       background-color: rgb(75, 56, 27);
       padding: 5px 10px;
       border-radius: 4px;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
       border: 1px solid rgba(245,176,65,0.7);
       cursor: pointer;
       
-      &:hover, &.valid:hover {
+      &:hover:not(.disabled), &.valid:hover {
         background-color: rgb(201, 144, 53);
         border: 1px solid rgb(201, 144, 53);
       }
 
-      &.disable {
+      &.disabled {
         cursor: not-allowed;
       }
 
@@ -237,6 +254,7 @@
 
 .info {
   text-align: center;
+  margin: 8px auto;
 }
 
 .ruban {
@@ -297,6 +315,7 @@
   position: relative;
   top: -2px;
   left: 2px;
+  user-select: none;
 }
 
 .player-pool {
@@ -434,9 +453,11 @@ width: 75px;
 }
 
 .directive {
-  margin-bottom: -10px;
-  margin-top: 10px;
+  margin-bottom: 8px;
+  margin-top: 8px;
   height: 38px;
+  font-size: 1.15rem;
+  line-height: 1.4;
   vertical-align: -webkit-baseline-middle;
 
   .essence {

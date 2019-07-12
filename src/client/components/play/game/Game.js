@@ -828,7 +828,7 @@ export const ResArcanaGame = Game({
           winner = [];
           var max = Math.max(...scores);
           var idx = scores.indexOf(max);
-          while (idx != -1) {
+          while (idx !== -1) {
             winner.push(idx);
             idx = scores.indexOf(max, idx + 1);
           }
