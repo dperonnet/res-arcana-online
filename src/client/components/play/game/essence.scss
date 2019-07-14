@@ -12,31 +12,32 @@
     background-size: 175px;
     height: 30px;
     width: 32px;
-    margin-left: 2px;
-    padding-left: 12px;
+    padding-top: 4px;
     vertical-align: bottom;
+    text-align: center;
     
     &.any-but-gold {
       background-image: url("../../../assets/image/any-but-gold.png");
       background-size: 55px;
       width: 55px;
       text-align: left;
+      padding-left: 12px;
     }
-
+    
     &.elan {
-      background-position: 1px 0;
+      background-position: 3px 0;
     }
     &.life {
-      background-position: -35px 0;
+      background-position: -34px 0;
     }
     &.calm {
-      background-position: -73px 0;
+      background-position: -71px 0;
     }
     &.death {
-      background-position: -110px 0;
+      background-position: -109px 0;
     }
     &.gold {
-      background-position: -145px 0;
+      background-position: -146px 0;
     }
   }
 }

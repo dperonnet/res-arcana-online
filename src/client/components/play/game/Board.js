@@ -891,12 +891,21 @@ class ResArcanaBoard extends Component {
           splitContainer = false
           break
         case 'PLACE_ARTEFACT':
+            actionPanel = 
+            <div className="cost-frame-v">
+              <div className="cost-frame-content">
+                <div className="inline-essence essence elan small">1</div>
+                <div className="inline-essence essence life small">1</div>
+                <div className="inline-essence essence calm small">1</div>
+                <div className="inline-essence essence death small">1</div>
+              </div>
+            </div>
           break
         default:
       }
     } else {
       actionPanel = <>
-        <div className="option" size="sm" onClick={null}>
+        <div className="option" size="sm" onClick={() => selectAction('PLACE_ARTEFACT')}>
           <div className="inline-text">Place Artefact</div>
         </div>
         <div className="option" size="sm" onClick={() => selectAction('DISCARD_FOR_2E')}>
@@ -1103,9 +1112,9 @@ class ResArcanaBoard extends Component {
     const sizeSetting = profile && profile.cardSize ? profile.cardSize : 'normal'
     const layoutSetting = profile && profile.layout ? profile.layout : 'vertical'
     return <div className={'board-'+layoutSetting} onClick={() => this.handleBoardClick()}>
-      <div className={'common-board ' + sizeSetting}>
+      {false && <div className={'common-board ' + sizeSetting}>
         {this.renderCommonBoard()}
-      </div>
+      </div>}
       <div className="board" ref='board'>
         {board}
       </div>

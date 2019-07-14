@@ -83,7 +83,7 @@ const getInitialState = (ctx, setupData) => {
   // Define the first player
   G.publicData.firstPlayer = (ctx.random.Die(ctx.numPlayers) -1).toString()
   
-  const skip = false
+  const skip = true
   
   if (skip) {
     console.log('[setupGameComponents] skipDraftPhase')
@@ -102,22 +102,20 @@ const getInitialState = (ctx, setupData) => {
       G.publicData.players[i].inPlay.push(G.players[i].deck[0])
       G.publicData.players[i].inPlay.push(G.players[i].deck[1])
       G.publicData.players[i].inPlay.push(G.players[i].deck[2])
-      G.publicData.players[i].inPlay.push(G.players[i].deck[3])
-      G.publicData.players[i].inPlay.push(G.players[i].deck[4])
       G.publicData.players[i].inPlay.push(G.publicData.placesOfPowerInGame[i])
       G.publicData.players[i].inPlay.push(G.publicData.magicItems[ctx.random.Die(Object.keys(G.publicData.magicItems).length)-1])
       
       const essencesTypes = ['elan', 'life', 'calm', 'death', 'gold']
       const essencesTypeNumber = 5
       for (let j = 0; j < essencesTypeNumber; j++){
-        for (let k = 0; k < ctx.random.Die(5); k++){
+        for (let k = 0; k < ctx.random.Die(3); k++){
           addEssenceOnComponent(G, i, G.players[i].deck[j].id, essencesTypes[ctx.random.Die(5)-1], ctx.random.Die(5))
         }
       }
     }
   }
   G.skipDraftPhase = skip
-  G.startingPhase = skip ? { next: 'collectPhase' } : { next: 'draftPhase' }
+  G.startingPhase = skip ? { next: 'actionPhase' } : { next: 'draftPhase' }
 
   return G
 }
@@ -761,7 +759,7 @@ export const ResArcanaGame = Game({
   flow: {
     onMove: (G, ctx) => G,
     movesPerTurn: 1,
-    startingPhase: 'draftPhase',
+    startingPhase: 'actionPhase',
 
     phases: {
       setupPhase: {
