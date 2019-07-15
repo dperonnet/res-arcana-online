@@ -847,6 +847,7 @@ class ResArcanaBoard extends Component {
     const { addToEssencePickerSelection, essencePickerSelection, resetEssencePickerSelection, selectAction, selectedAction, selectedComponent } = this.props
     let directive = selectedComponent &&<h5 className="directive">Choose an action for {selectedComponent.name}</h5>
     let actionPanel = null
+    let costFrame = null
     let essenceList = Object.entries(essencePickerSelection).map((essence, index) => {
       let isLast =  index === Object.entries(essencePickerSelection).length -1
       return <div key={essence[0]} className={'collect-option '}>
@@ -891,7 +892,7 @@ class ResArcanaBoard extends Component {
           splitContainer = false
           break
         case 'PLACE_ARTEFACT':
-            actionPanel = 
+          costFrame = 
             <div className="cost-frame-v">
               <div className="cost-frame-content">
                 <div className="inline-essence essence elan small">1</div>
@@ -900,6 +901,7 @@ class ResArcanaBoard extends Component {
                 <div className="inline-essence essence death small">1</div>
               </div>
             </div>
+          actionPanel = costFrame
           break
         default:
       }
@@ -922,6 +924,7 @@ class ResArcanaBoard extends Component {
     return <>
       <div className={'action-container' + (splitContainer ? ' split' : '')}>
         <div className="action-component">
+          {costFrame}
           {this.renderGameComponent(selectedComponent)}
         </div>
         {actionPanel && <div className="action-list">

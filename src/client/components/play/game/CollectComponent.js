@@ -85,9 +85,6 @@ class CollectComponent extends Component {
           :
             <div className={'type essence ' + essence[0]}>{essence[1]}</div>
         }
-        {!isLast && <div className="option-and">
-          <FontAwesomeIcon icon={faPlus} size="sm" />
-        </div>}
       </div>
     })
     return <div onClick={!ready ? handleOnClick : null}>
@@ -108,9 +105,6 @@ class CollectComponent extends Component {
           let isLast =  index === Object.entries(essences).length -1
           return <div key={essence[0]} className="collect-option">
           <div className={'type essence ' + essence[0]}>{essence[1]}</div>
-          {!isLast && <div className="option-and">
-            <FontAwesomeIcon icon={faPlus} size="sm" />
-          </div>}
         </div>
         })
     } else {

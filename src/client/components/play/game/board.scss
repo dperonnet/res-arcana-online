@@ -187,6 +187,8 @@
       &.split {
         .action-component {
           text-align: right;
+          display: flex;
+          flex-direction: row-reverse;
         }
       }
     }
@@ -476,6 +478,25 @@
     z-index: -1;
   }
 }
+.large, .x-large {
+  .cost-frame-v {
+    background-size: 42px 1px;
+    width: 44px;
+    
+    .essence {
+      height: 43px;
+    }
+    
+    &:before {
+      background-size: 46px 8px;
+      width: 46px;
+    }
+    &:after {
+      background-size: 42px 15px;
+      width: 44px;
+    }
+  }
+}
 
 .cost-frame-v {
   display: inline-block;
@@ -520,7 +541,7 @@
     width: 38px;
     left: 0;
     bottom: -14px;
-    z-index: -1;
+    z-index: 10;
   }
 }
 
