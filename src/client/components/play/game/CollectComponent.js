@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { Button } from 'react-bootstrap'
 import { resetCollectAction, resetCollectOnComponentAction, setCollectAction, setCollectOnComponentAction, tapComponent } from '../../../../store/actions/gameActions'
 import { connect } from 'react-redux';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -80,7 +79,7 @@ class CollectComponent extends Component {
     const ready = status === 'READY'
     let essences = Object.entries(essenceList).map((essence, index) => {
       let isLast =  index === Object.entries(essenceList).length -1
-      return <div key={essence[0]} className="collect-option" onClick={!ready ? handleOnClick : null}>
+      return <div key={essence[0]} className="collect-option">
         {cost ?
             <div className={'type essence ' + essence[0] + ' cost-container'}><div className="cost"></div>{essence[1]}</div>
           :
@@ -91,10 +90,10 @@ class CollectComponent extends Component {
         </div>}
       </div>
     })
-    return <>
+    return <div onClick={!ready ? handleOnClick : null}>
       {essences}
       {onComponent && <div className="on-component-icon"></div>}
-    </>
+    </div>
   }
 
   /**
@@ -145,12 +144,12 @@ class CollectComponent extends Component {
       return essenceList.map((type, index) => {
         let isLast = index === (Object.entries(essenceList).length -1)
         return <div key={type} className="collect-option">
-          <Button variant="secondary" className={'essence ' + type} 
+          <div className={'essence pointer-cursor ' + type} 
             onClick={() => this.handleAddTypeToOption(type)}>
             {(selection && selection[type]) || 0}
-          </Button>
+          </div>
           {!isLast && <div className="option-or">
-            <FontAwesomeIcon icon={faPlus} size="sm" rotation={90} />
+            <FontAwesomeIcon icon={faPlus} size="sm" />
           </div>}
         </div>
       })
@@ -160,7 +159,7 @@ class CollectComponent extends Component {
       return Object.entries(essenceList).map((essence, index) => {
         let isLast =  index === Object.entries(essenceList).length -1
         return <div key={essence[0]} className="collect-option">
-          <Button variant="secondary" className={'essence ' + essence[0]} onClick={() => this.handleSelectOption(essence[0])}>{essence[1]}</Button>
+          <div className={'essence pointer-cursor ' + essence[0]} onClick={() => this.handleSelectOption(essence[0])}>{essence[1]}</div>
           {!isLast && <div className="option-or">
             <FontAwesomeIcon icon={faSlash} size="sm" rotation={90} />
           </div>}
@@ -187,7 +186,7 @@ class CollectComponent extends Component {
       setCollectAction(action)
     }
     return <div className="collect-option">
-      <Button variant="secondary" className="type essence death cost-container" onClick={!ready ? () => handleCost() : null}><div className="cost"></div>1</Button>
+      <div className="type essence death cost-container pointer-cursor" onClick={!ready ? () => handleCost() : null}><div className="cost"></div>1</div>
       <div className="option-or">
         <FontAwesomeIcon icon={faSlash} size="sm" rotation={90} />
       </div>
@@ -201,8 +200,10 @@ class CollectComponent extends Component {
   renderTapComponent = (handleOnClick) => {
     const { status } = this.props
     const ready = status === 'READY'
-    return <div className="collect-option" onClick={!ready ? handleOnClick : null}>
-      <div className="tap-component-icon"></div>
+    return <div onClick={!ready ? handleOnClick : null}>
+      <div className="collect-option">
+        <div className="tap-component-icon"></div>
+      </div>
     </div>
   }
 
@@ -285,10 +286,10 @@ class CollectComponent extends Component {
     const requireAction = ((component.hasStandardCollectAbility && component.standardCollectAbility.multipleCollectOptions)
       || componentsWithSpecificAction.includes(component.id))
     const valid = (collectActionsRef[component.id] && collectActionsRef[component.id].valid) || validSpecific
-    const active = requireAction && !valid ? ' active ' : ''
+    const invalid = requireAction && !valid ? ' invalid ' : ''
     const cursorGameComponent = !ready && essencesOnComponent && Object.keys(essencesOnComponent).length > 0 ? ' pointer-cursor ' : ''
-    const classes = active + cursorGameComponent
-    const cursorCollectAbility = !ready && collectActionsRef[component.id] ? ' delete-cursor' : ' '
+    const classes = invalid + cursorGameComponent
+    const cursorCollectAbility = !ready && collectActionsRef[component.id] && valid ? ' delete-cursor' : ' '
     const cursorOnComponent = !ready && collectOnComponentActionsRef[component.id] ? ' delete-cursor' : ' '
 
     const handleOnClick = (event) => {
@@ -297,7 +298,7 @@ class CollectComponent extends Component {
     }
 
     return <div className="essence-picker">
-      <div className={'collect-options '+ cursorCollectAbility}>
+      <div className={'collect-options'+ cursorCollectAbility}>
         {collectAbilities}
       </div>
       <GameComponent 
@@ -308,7 +309,7 @@ class CollectComponent extends Component {
         onMouseOut={() => onMouseOut()}
         onMouseOver={() => onMouseOver(component)}
       />
-      <div className={'collect-options '+ cursorOnComponent} onClick={!ready ? handleClickEssenceOnComponent : null}>
+      <div className={'collect-options' + cursorOnComponent} onClick={!ready ? handleClickEssenceOnComponent : null}>
         {collectOnComponent}
       </div>
     </div>

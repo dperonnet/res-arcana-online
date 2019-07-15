@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { Button } from 'react-bootstrap'
 import { addToEssencePickerSelection, resetEssencePickerSelection } from '../../../../store/actions/gameActions'
 import { connect } from 'react-redux';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -40,10 +39,10 @@ class EssencePicker extends Component {
       picker =  essenceList.map((type, index) => {
         let isLast = index === (Object.entries(essenceList).length -1)
         return <div key={type} className="collect-option">
-          <Button variant="secondary" className={'essence ' + type}
+          <div className={'essence clickable' + type}
             onClick={() => this.handleAddEssence(type)}>
             {essencePickerSelection[type] || 0}
-          </Button>
+          </div>
           {!isLast && <div className="option-or">
             <FontAwesomeIcon icon={faPlus} size="sm" rotation={90} />
           </div>}

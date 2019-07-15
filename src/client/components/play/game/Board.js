@@ -908,11 +908,11 @@ class ResArcanaBoard extends Component {
         <div className="option" size="sm" onClick={() => selectAction('PLACE_ARTEFACT')}>
           <div className="inline-text">Place Artefact</div>
         </div>
-        <div className="option" size="sm" onClick={() => selectAction('DISCARD_FOR_2E')}>
+        <div className="option small" size="sm" onClick={() => selectAction('DISCARD_FOR_2E')}>
           <div className="inline-text">Discard for </div>
           <div className="inline-essence essence any-but-gold small">2</div>
         </div>
-        <div className="option" size="sm" onClick={() => {resetEssencePickerSelection(); addToEssencePickerSelection('gold'); selectAction('DISCARD_FOR_1G')}}>
+        <div className="option small" size="sm" onClick={() => {resetEssencePickerSelection(); addToEssencePickerSelection('gold'); selectAction('DISCARD_FOR_1G')}}>
           <div className="inline-text">Discard for </div>
           <div className="inline-essence essence gold small">1</div>
         </div>

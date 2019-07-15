@@ -245,7 +245,7 @@ class EssencePanel extends Component {
     const components = essenceList.map((type, index) => (
     <div className="essence-list" key={index} >
         <InputGroup.Prepend>
-          <InputGroup.Text className={"help-card-min "+type} id={type+'Essence'}>{essenceListFromProps[type] || 0}</InputGroup.Text>
+          <InputGroup.Text className={"essence "+type} id={type+'Essence'}>{essenceListFromProps[type] || 0}</InputGroup.Text>
         </InputGroup.Prepend>
         <InputGroup.Append>
           <div className="vertical-buttons">

@@ -1,29 +1,73 @@
-.inline-essence {
-  display: inline-block;
-  z-index: 32;
-  text-align: left;
-  margin: auto;
 
-  div{
-    display: inline-block;
+.essence {
+  display: inline-block;
+  color: ghostwhite;
+  font-weight: bold;
+  font-size: large;
+  line-height:0;
+  text-align: center;
+  background-image: url("../../../assets/image/essences.png");
+  background-repeat: no-repeat;
+  background-size: 540px 38px;
+  height: 50px;
+  width: 40px;
+  margin: 0 2px;
+  padding-top: 26px;
+  vertical-align: top;
+  
+  &.elan {
+    background-position: 4px 5px;
   }
 
-  &.essence {
-    background-size: 175px;
-    height: 30px;
-    width: 32px;
-    padding-top: 4px;
-    vertical-align: bottom;
+  &.life {
+    background-position: -43px 5px;
+  }
+
+  &.calm {
+    background-position: -90px 5px;
+  }
+
+  &.death {
+    background-position: -137px 5px;
+  }
+
+  &.gold {
+    background-position: -184px 5px;
+  }
+
+  &.any {
+    background-position: -229px 5px;
+  }
+
+  &.any-but-gold {
+    background-position: -229px 0;
+    font-size: large;
+    padding-left: 15px;
+    padding-top: 22px;
+    text-align: left;
+    width: 84px;
+  }
+
+  &.any-but-death-gold {
+    background-position: -317px 0;
+    font-size: large;
+    padding-left: 15px;
+    padding-top: 22px;
+    text-align: left;
+    width: 107px;
+  }
+}
+
+.small, .normal {
+  .essence {
+    @extend .essence;
+    background-size: 425px 30px;
+    height: 35px;
+    width: 30px;
+    padding-top: 16px;
+    vertical-align: top;
     text-align: center;
-    
-    &.any-but-gold {
-      background-image: url("../../../assets/image/any-but-gold.png");
-      background-size: 55px;
-      width: 55px;
-      text-align: left;
-      padding-left: 12px;
-    }
-    
+
     &.elan {
       background-position: 3px 0;
     }
@@ -39,150 +83,50 @@
     &.gold {
       background-position: -146px 0;
     }
+    &.any-but-gold {
+      width: 70px;
+      text-align: left;
+      padding-left: 12px;
+      background-position: -179px 0;
+    }
   }
-}
-
-.essence.any-but-gold {
-  background-image: url("../../../assets/image/any-but-gold.png");
-  background-size: 220px;
 }
 
 .essence-on-component {
-  color: white;
   position: relative;
-  top: 1px;
-  left: 0;
   z-index: 32;
-  background-size: 196px;
-  line-height:0; 
-  font-size:0;
   text-align: center;
-  margin: auto;
-  
-  .essence {
-    vertical-align: top;
-    margin-left: 0;
+  vertical-align: middle;
+  height: 100%;
+
+  &:before {
+    content: "";
+    display: inline-block;
+    vertical-align: middle;
+    height: 100%;
   }
-}
 
-.x-small {
-  .essence-on-component .essence {
-    background-size: 100px;
-    height: 18px;
-    width: 18px;
-    font-size: 10px;
-    padding-top: 10px;
-    margin-left: 0;
-
-    &.elan {
-      background-position: 1px 0;
-    }
-    &.life {
-      background-position: -20px 0;
-    }
-    &.calm {
-      background-position: -41px 0;
-    }
-    &.death {
-      background-position: -62px 0;
-    }
-    &.gold {
-      background-position: -84px 0;
-    }
-  }
-}
-
-.small {
-  .essence-on-component .essence {
-    background-size: 175px;
-    height: 30px;
-    width: 30px;
-    padding-top: 17px;
-    margin-left: -2px;
-    
-    &.elan {
-      background-position: 1px 0;
-    }
-    &.life {
-      background-position: -35px 0;
-    }
-    &.calm {
-      background-position: -73px 0;
-    }
-    &.death {
-      background-position: -110px 0;
-    }
-    &.gold {
-      background-position: -147px 0;
-    }
-
-  }
-}
-
-.normal {
-  .essence-on-component .essence {
-    height: 42px;
-    padding-top: 26px;
-    
-    &.elan {
-      background-position: 4px 4px;
-    }
-    &.life {
-      background-position: -43px 4px;
-    }
-    &.calm {
-      background-position: -90px 4px;
-    }
-    &.death {
-      background-position: -137px 4px;
-    }
-    &.gold {
-      background-position: -184px 4px;
-    }
-  }
-}
-
-.large, .x-large {
-  .essence-on-component {
-    width: 125px;
-
-    .essence {
-      padding-top: 26px;
-    }
+  .essence-wrapper {
+    display: inline-block;
+    vertical-align: middle;
   }
 }
 
 .large .essence-on-component {
-  top: 50px;
+  width: 125px;
 }
-
 .x-large .essence-on-component {
-  top: 75px;
-}
-
-.card-zoom-frame {
-  &.x-small, &.small, &.normal, &.large, &.x-large {
-    .essence-on-component {
-      top: 0px;
-      height: 50px;
-      width: 100%;
-      background: black;
-    }
-  }
+  width: 150px;
 }
 
 .collect-options {
-  min-height: 35px;
+  min-height: 37px;
+  padding-left: 5px;
+
   .collect-option {
     display: inline-block;
     vertical-align: bottom;
-
-    .btn {
-      outline: none !important;
-      box-shadow: none !important;
-    }
-
-    
+    line-height:0;
   }
   
   .fade-option {
@@ -212,103 +156,23 @@
 
   .option-and, .option-or, .option-reset {
     display: inline-block;
-    padding-top: 5px;
-    font-size: 1rem;
+    padding-top: 10px;
+    padding-left: 2px;
   }
+}
 
-  .btn, .type {
-    background-color: unset;
-    border: none;
+.large, .x-large {
+  .collect-options {
+    min-height: 50px;
     
-    background-size: 175px;
-    height: 35px;
-    width: 35px;
-    padding-top: 5px;
-    margin-left: 0;
-    
-    &:hover {
-      background-color: unset;
-    }
-
-    &.elan {
-      background-position: 5px 1px;
-    }
-    &.life {
-      background-position: -32px 1px;
-    }
-    &.calm {
-      background-position: -70px 1px;
-    }
-    &.death {
-      background-position: -107px 1px;
-    }
-    &.gold {
-      background-position: -145px 1px;
+    .option-and, .option-or, .option-reset {
+      display: inline-block;
+      padding-top: 18px;
+      padding-left: 2px;
     }
   }
 }
 
-.essence-picker {
-  display: inline-block;
-  vertical-align: top;
-  padding-left: 5px;
-  padding-right: 5px;
-  
-  .active {
-    box-shadow: 0 0 2pt 2pt #F22C2C;
-  }
-}
-
-.collect-icon {
-  display: inline-block;
-  color: ghostwhite;
-  font-weight: bold;
-  font-size: large;
-  text-align: center;
-  background-image: url("../../../assets/image/collect_icon.png");
-  background-repeat: no-repeat;
-  background-size: 24px;
-  height: 24px;
-  width: 24px;
-  margin-right: 4px;
-  padding-top: 0px;
-  vertical-align: top;
-  background-position: 0 0px;
-}
-
-.on-component-icon {
-  display: inline-block;
-  color: ghostwhite;
-  font-weight: bold;
-  font-size: large;
-  text-align: center;
-  background-image: url("../../../assets/image/on_component.png");
-  background-repeat: no-repeat;
-  background-size: 24px;
-  height: 30px;
-  width: 24px;
-  margin-right: 4px;
-  padding-top: 2px;
-  vertical-align: top;
-  background-position: 0 5px;
-}
-
-.tap-component-icon {
-  display: inline-block;
-  color: ghostwhite;
-  font-weight: bold;
-  font-size: large;
-  text-align: center;
-  background-image: url("../../../assets/image/tap_component.png");
-  background-repeat: no-repeat;
-  background-size: 24px;
-  height: 30px;
-  width: 24px;
-  margin-right: 4px;
-  padding-top: 2px;
-  vertical-align: top;
-  background-position: 0 5px;
-}
 .cost-container {
   position: relative;
 }
@@ -326,10 +190,13 @@
   background-repeat: no-repeat;
 }
 
-.delete-cursor {
-  cursor: url("../../../assets/image/delete-cursor.png") 0 0, auto;
-}
-
-.pointer-cursor {
-  cursor: pointer;
+.card-zoom-frame {
+  &.x-small, &.small, &.normal, &.large, &.x-large {
+    .essence-on-component {
+      top: 0px;
+      height: 50px;
+      width: 100%;
+      background: black;
+    }
+  }
 }

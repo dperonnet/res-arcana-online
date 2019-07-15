@@ -21,6 +21,7 @@
   height: 100%;
   width: 100%;
 }
+
 .common-board {
   display: inline-block;
   position: relative;
@@ -223,7 +224,7 @@
     justify-content: center;
 
     .option {
-      width: 180px;
+      width: 190px;
       min-height: 35px;
       background-color: rgb(75, 56, 27);
       padding: 5px 10px;
@@ -245,11 +246,29 @@
         background-color: rgb(133, 96, 36);
         border: 1px solid rgb(201, 144, 53);
       }
-
-      .inline-text {
-        vertical-align: text-bottom;
-      }
     }
+  }
+}
+
+
+.inline-text {
+  display: inline-block;
+  vertical-align: top;
+  
+  .collect-option {
+    margin-top: -5px;
+  }
+}
+
+.large, .x-large {
+  .inline-text .collect-option {
+    margin-top: -11px;
+  }
+}
+
+.option {
+  .inline-text {
+    vertical-align: -webkit-baseline-middle;
   }
 }
 
@@ -323,58 +342,6 @@
   margin-left: 20px;
 }
 
-.essence {
-  display: inline-block;
-  color: ghostwhite;
-  font-weight: bold;
-  font-size: large;
-  text-align: center;
-  background-image: url("../../../assets/image/essences.png");
-  background-repeat: no-repeat;
-  background-size: 220px;
-  height: 50px;
-  width: 40px;
-  margin-left: 8px;
-  padding-top: 2px;
-  vertical-align: top;
-}
-
-.essence.elan {
-  background-position: 4px 5px;
-}
-
-.essence.life {
-  background-position: -43px 5px;
-}
-
-.essence.calm {
-  background-position: -90px 5px;
-}
-
-.essence.death {
-  background-position: -137px 5px;
-}
-
-.essence.gold {
-  background-position: -184px 5px;
-}
-
-.any {
-background-position: -23px -81px;
-}
-
-.anyButGold {
-text-align: left;
-background-position: -74px -81px;
-width: 61px;
-}
-
-.anyButDeathGold {
-  text-align: left;
-background-position: -151px -81px;
-width: 75px;
-}
-
 .cards-in-hand {
   display: inline-block;
   color: ghostwhite;
@@ -415,6 +382,7 @@ width: 75px;
 .x-small .component-legend, .small .component-legend {
   display: none;
 }
+
 .component-legend {
   color: white;
   position: absolute;
@@ -460,20 +428,6 @@ width: 75px;
   font-size: 1.15rem;
   line-height: 1.4;
   vertical-align: -webkit-baseline-middle;
-
-  .essence {
-    line-height: 1.5;
-    height: 31px;
-  }
-}
-
-.inline-text {
-  display: inline-block;
-  vertical-align: top;
-
-  .essence {
-    margin-top: -5px;
-  }
 }
 
 .cost-frame-h {
@@ -523,7 +477,6 @@ width: 75px;
   }
 }
 
-
 .cost-frame-v {
   display: inline-block;
   background-image: url("../../../assets/image/cost-frame-content-v.png");
@@ -570,13 +523,71 @@ width: 75px;
     z-index: -1;
   }
 }
-.inline-essence.essence {
+
+.game-icon {
+  display: inline-block;
+  color: ghostwhite;
+  font-weight: bold;
+  font-size: large;
   text-align: center;
-  background-size: 175px;
+  background-repeat: no-repeat;
+  background-size: 24px;
+  height: 24px;
+  width: 24px;
+  margin-right: 4px;
+  padding-top: 0px;
+  vertical-align: top;
+}
+
+.collect-icon {
+  @extend .game-icon;
+  background-image: url("../../../assets/image/collect_icon.png");
+  background-position: 0 0px;
+}
+
+.on-component-icon {
+  @extend .game-icon;
+  background-image: url("../../../assets/image/on_component.png");
+  background-position: 0 5px;
   height: 30px;
-  width: 32px;
-  margin-left: 0px;
-  vertical-align: bottom;
-  text-align: center;
-  padding: 0;
+}  
+.tap-component-icon {
+  @extend .game-icon;
+  background-image: url("../../../assets/image/tap_component.png");
+  background-position: 0 5px;
+  height: 30px;
+}
+
+.large {
+  .on-component-icon {
+    @extend .game-icon;
+    background-image: url("../../../assets/image/on_component.png");
+    background-position: 0 5px;
+    background-size: 34px;
+    height: 50px;
+    width: 30px;
+  }  
+  .tap-component-icon {
+    @extend .game-icon;
+    background-image: url("../../../assets/image/tap_component.png");
+    background-position: 0 8px;
+    background-size: 35px;
+    height: 50px;
+    width: 40px;
+  }
+}
+
+.delete-cursor {
+  cursor: url("../../../assets/image/delete-cursor.png") 0 0, auto;
+}
+
+.pointer-cursor {
+  cursor: pointer;
+}
+
+
+// CollectComponent
+.essence-picker {
+  display: inline-block;
+  vertical-align: top;
 }

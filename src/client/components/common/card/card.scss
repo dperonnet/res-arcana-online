@@ -120,6 +120,10 @@ $xx-large: 241px;
   transform: rotate(90deg);
 }
 
+div.magic-item, div.card, div.place-of-power {
+  margin: 0 0 0 5px;
+}
+
 .magic-item, .card, .place-of-power {
   position: relative;
   display: inline-block;
@@ -130,10 +134,6 @@ $xx-large: 241px;
   overflow: hidden;
   z-index: 10;
   user-select: none;
-}
-
-div.magic-item, div.card, div.place-of-power {
-  margin: 0 0 0 5px;
 }
 
 .card-name {
@@ -160,24 +160,14 @@ img {
   pointer-events: none;
 }
 
-.card.active, .magic-item.active, .place-of-power.active {
-  box-shadow: 0 0 2pt 2pt #F5B041;
+.active {
+  &.card, &.magic-item, &.place-of-power{
+    box-shadow: 0 0 2pt 2pt #F5B041;
+  }
 }
 
-.counters {
-  flex-direction: column;
-  color: #fff;
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  justify-content: center;
-  display: flex;
-  align-content: center;
-  align-items: center;
-  flex-wrap: wrap;
-  z-index: 12;
+.card.invalid, .magic-item.invalid, .place-of-power.invalid {
+  box-shadow: 0 0 2pt 2pt #F22C2C;
 }
 
 .ignore-mouse-events {

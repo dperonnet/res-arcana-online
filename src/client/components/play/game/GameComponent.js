@@ -22,7 +22,9 @@ class GameComponent extends Component {
       })
     }
     return <div className="essence-on-component">
-      {essences}
+      <div className="essence-wrapper">
+        {essences}
+      </div>
     </div>
   }
 
