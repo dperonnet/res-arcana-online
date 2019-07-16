@@ -18,27 +18,21 @@
   &.elan {
     background-position: 4px 5px;
   }
-
   &.life {
     background-position: -43px 5px;
   }
-
   &.calm {
     background-position: -90px 5px;
   }
-
   &.death {
     background-position: -138px 5px;
   }
-
   &.gold {
     background-position: -185px 5px;
   }
-
   &.any {
-    background-position: -229px 5px;
+    background-position: -210px 5px;
   }
-
   &.any-but-gold {
     background-position: -229px 0;
     font-size: large;
@@ -47,7 +41,6 @@
     text-align: left;
     width: 84px;
   }
-
   &.any-but-death-gold {
     background-position: -317px 0;
     font-size: large;
@@ -82,12 +75,24 @@
     }
     &.gold {
       background-position: -146px 0;
+    }    
+    &.any {
+      background-position: -180px 0;
+      width: 32px;
     }
     &.any-but-gold {
-      width: 70px;
+      background-position: -180px 0;
+      font-size: large;
+      padding-left: 11px;
       text-align: left;
-      padding-left: 12px;
-      background-position: -179px 0;
+      width: 65px;
+    }
+    &.any-but-death-gold {
+      background-position: -249px 0;
+      font-size: large;
+      padding-left: 11px;
+      text-align: left;
+      width: 86px;
     }
   }
 }

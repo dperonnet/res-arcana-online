@@ -16,9 +16,9 @@ class GameComponent extends Component {
   renderEssences = () => {
     const {essencesOnComponent} = this.props
     let essences
-    if(essencesOnComponent) {
-      essences = Object.entries(essencesOnComponent).map((essence) => {
-         return essence[1] > 0 && <div key={essence[0]} className={'essence ' + essence[0]}>{essence[1]}</div>
+    if (essencesOnComponent) {
+      essences = essencesOnComponent.map((essence) => {
+         return essence.quantity > 0 && <div key={essence.type} className={'essence ' + essence.type}>{essence.quantity}</div>
       })
     }
     return <div className="essence-on-component">

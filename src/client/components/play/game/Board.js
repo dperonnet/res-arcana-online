@@ -254,7 +254,7 @@ class ResArcanaBoard extends Component {
     })[0]
     const focus = focusZoom ? ' focus ': ''
     const essencesOnComponent = playerOwningCard ? playerOwningCard.essencesOnComponent[component.id] : null
-    return <div className={'card-zoom-frame normal' + focus} 
+    return <div className={'card-zoom-frame large' + focus} 
       onClick={(event) => this.handleMouseClickZoom(event)} 
       onMouseOver={() => this.handleMouseOver(component)} 
       onMouseOut={() => this.handleMouseOut()}>
@@ -815,7 +815,7 @@ class ResArcanaBoard extends Component {
     }
 
     const confirmButton = <div className={'option' + ((collectValid && costValid) ? ' valid' : ' disabled')} 
-      onClick={collectValid && costValid && handleConfirm}>Confirm</div>
+      onClick={collectValid && costValid ? handleConfirm : null}>Confirm</div>
     const resetButton = <div className="option" onClick={() => this.handleResetCollect()}>Reset</div>
 
     return <>
@@ -892,7 +892,7 @@ class ResArcanaBoard extends Component {
           splitContainer = false
           break
         case 'PLACE_ARTEFACT':
-          costFrame = 
+          actionPanel = 
             <div className="cost-frame-v">
               <div className="cost-frame-content">
                 <div className="inline-essence essence elan small">1</div>
@@ -901,7 +901,6 @@ class ResArcanaBoard extends Component {
                 <div className="inline-essence essence death small">1</div>
               </div>
             </div>
-          actionPanel = costFrame
           break
         default:
       }

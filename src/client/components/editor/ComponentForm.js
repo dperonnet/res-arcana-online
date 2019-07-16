@@ -48,8 +48,10 @@ class ComponentForm extends Component {
         ...component,
         [name]: valueToUpdate
       }
-    }
-    else {
+    } else if (name === 'multipleCollectOptions') {
+      newComponent = component
+      newComponent.standardCollectAbility.multipleCollectOptions = valueToUpdate
+    } else {
       newComponent = {
         ...component,
         [name]: valueToUpdate
@@ -61,22 +63,22 @@ class ComponentForm extends Component {
 
   handleFormChangeByName = (name, valueToUpdate) => {
     const { component } = this.state
-    let newComponent = {
-      ...component,
-      [name]: valueToUpdate
+    let newComponent
+    if (name === 'standardCollectAbility') {
+      newComponent = component
+      newComponent.standardCollectAbility.essenceList= valueToUpdate
+    } else {
+      newComponent = {
+        ...component,
+        [name]: valueToUpdate
+      }
     }
     this.setState({component: newComponent})
     this.props.showComponentJSON(newComponent)
   }
 
   clearCollectOptions = () => {
-    let data = {...this.state.component.standardCollectAbility}
-    for (var property in data.essenceList) {
-      if (data.essenceList.hasOwnProperty(property)) {
-          data.essenceList[property] = 0
-      }
-    }
-    this.handleFormChangeByName('standardCollectAbility', data)
+    this.handleFormChangeByName('standardCollectAbility', [])
   }
 
   render() {
@@ -136,12 +138,24 @@ class ComponentForm extends Component {
                     onClick={(e) => this.clearCollectOptions()}><span>Reset</span></Button>
               </InputGroup>
 
-              { component.hasStandardCollectAbility ?
-                <EssencePanel className="mb-3"
-                  hasStandardCollectAbility={component.hasStandardCollectAbility}
-                  standardCollectAbility={component.standardCollectAbility}
-                  onChangeByName={this.handleFormChangeByName}
-                /> : null
+              { component.hasStandardCollectAbility && 
+                <>
+                  <div className="mb-3">
+                    <EssencePanel
+                      essenceList={component.standardCollectAbility.essenceList}
+                      onChangeByName={(data) => this.handleFormChangeByName('standardCollectAbility', data)}
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <InputGroup className="mb-3">
+                      <Form.Check inline type="checkbox" name="multipleCollectOptions"
+                        id="multipleCollectOptions" label="Player's choice"
+                        value={component.standardCollectAbility.multipleCollectOptions}
+                        checked={component.standardCollectAbility.multipleCollectOptions}
+                        onChange={this.handleFormChange}/>
+                    </InputGroup>
+                  </div>
+                </>
               }
 
               <InputGroup className="mb-3">
@@ -214,69 +228,60 @@ export default connect(mapStateToProps, mapDispatchToProps)(ComponentForm)
 
 class EssencePanel extends Component {
 
-  handleFormChange = (changeEvent) => {
-    const { checked, name, value, type } = changeEvent.target
-    const valueToUpdate = type === 'checkbox' ? checked: value
-    let data = {...this.props.standardCollectAbility}
-    data[name] = valueToUpdate
-    this.props.onChangeByName('standardCollectAbility', data)
-  }
-
   decrement = (type) => {
-    let data = {...this.props.standardCollectAbility}
-    if(this.props.standardCollectAbility.essenceList[type] > 1) {
-      data.essenceList[type] =  --this.props.standardCollectAbility.essenceList[type]
-    } else {
-      delete data.essenceList[type]
+    const { essenceList } = this.props
+    let data = essenceList.length > 0 ? JSON.parse(JSON.stringify(essenceList)) : []
+    let typeIndex = data.findIndex((item) => {
+      return item.type === type
+    })    
+    if(typeIndex !== -1) {
+      if(data[typeIndex].quantity > 1) {
+        --data[typeIndex].quantity
+      } else {
+        data.splice(typeIndex, 1)
+      }
     }
-    this.props.onChangeByName('standardCollectAbility', data)
+    this.props.onChangeByName(data)
   }
 
   increment = (type) => {
-    let data = {...this.props.standardCollectAbility}
-    data.essenceList[type] = this.props.standardCollectAbility.essenceList[type] >= 0 ? ++this.props.standardCollectAbility.essenceList[type] : 1
-    this.props.onChangeByName('standardCollectAbility', data)
+    const { essenceList } = this.props
+    let data = JSON.parse(JSON.stringify(essenceList))
+    let typeIndex = Array.isArray(data) && data.findIndex((item) => {
+      return item.type === type
+    })
+    if (typeIndex && typeIndex === -1) {
+      let item = { type, quantity: 1}
+      data.push(item)
+    } else {
+      data[typeIndex].quantity++
+    }
+    this.props.onChangeByName(data)
   }
 
   render() {
-    const { hasStandardCollectAbility, standardCollectAbility } = this.props
-    const essenceListFromProps = standardCollectAbility.essenceList
-    const essenceList = [ 'elan', 'life', 'calm', 'death', 'gold', 'any', 'anyButGold', 'anyButDeathGold']
-    const components = essenceList.map((type, index) => (
-    <div className="essence-list" key={index} >
-        <InputGroup.Prepend>
-          <InputGroup.Text className={"essence "+type} id={type+'Essence'}>{essenceListFromProps[type] || 0}</InputGroup.Text>
-        </InputGroup.Prepend>
-        <InputGroup.Append>
-          <div className="vertical-buttons">
-            <Button variant="secondary" id={'lower'+type+'CollectOptions'}
-              onClick={() => this.increment(type)}><span>+</span></Button>
-            <Button variant="secondary" id={'raise'+type+'Essence'}
-              onClick={() => this.decrement(type)}><span>-</span></Button>
-          </div>
-        </InputGroup.Append>
-      </div>
-    ))
-    return (
-      <div>
-        { hasStandardCollectAbility === true ?
-          <div>
-            <div className="mb-3">
-              {components}
+    const { essenceList } = this.props
+    const essenceTypes = [ 'elan', 'life', 'calm', 'death', 'gold', 'any', 'any-but-gold', 'any-but-death-gold']
+    const components = essenceTypes.map((type, index) => {
+      let essence = Array.isArray(essenceList) ? essenceList.find((item) => item.type === type) : null
+      return (
+        <div className="essence-list small" key={index} >
+          <InputGroup.Prepend>
+            <InputGroup.Text className={"essence "+type} id={type+'Essence'}>{essence && essence.quantity || 0}</InputGroup.Text>
+          </InputGroup.Prepend>
+          <InputGroup.Append>
+            <div className="vertical-buttons">
+              <Button variant="secondary" id={'lower'+type+'CollectOptions'}
+                onClick={() => this.increment(type)}><span>+</span></Button>
+              <Button variant="secondary" id={'raise'+type+'Essence'}
+                onClick={() => this.decrement(type)}><span>-</span></Button>
             </div>
-            <div className="mb-3">
-              <InputGroup className="mb-3">
-                <Form.Check inline type="checkbox" name="multipleCollectOptions"
-                  id="multipleCollectOptions" label="Player's choice"
-                  value={standardCollectAbility.multipleCollectOptions}
-                  checked={standardCollectAbility.multipleCollectOptions}
-                  onChange={(e) => this.handleFormChange(e)}/>
-              </InputGroup>
-            </div>
-          </div>
-          : <div></div>
-        }
-      </div> 
-    )
+          </InputGroup.Append>
+        </div>
+      )
+    })
+    return <div className="mb-3">
+      {components}
+    </div>
   }
 }

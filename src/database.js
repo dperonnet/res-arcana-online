@@ -78,10 +78,16 @@ export const GameComponents = [
       "isDragon":false,
       "name":"Autel Corrompu",
       "standardCollectAbility":{
-         "essenceList":{
-            "death":1,
-            "life":1
-         },
+         "essenceList":[
+            {
+               "quantity":1,
+               "type":"life"
+            },
+            {
+               "quantity":1,
+               "type":"death"
+            }
+         ],
          "multipleCollectOptions":false
       },
       "type":"artefact"
@@ -137,10 +143,16 @@ export const GameComponents = [
       "isDragon":false,
       "name":"Calice de Vie",
       "standardCollectAbility":{
-         "essenceList":{
-            "calm":1,
-            "life":1
-         },
+         "essenceList":[
+            {
+               "quantity":1,
+               "type":"calm"
+            },
+            {
+               "quantity":1,
+               "type":"life"
+            }
+         ],
          "multipleCollectOptions":false
       },
       "type":"artefact"
@@ -155,9 +167,12 @@ export const GameComponents = [
       "isDragon":false,
       "name":"Catacombes de la Mort",
       "standardCollectAbility":{
-         "essenceList":{
-            "death":1
-         },
+         "essenceList":[
+            {
+               "quantity":1,
+               "type":"death"
+            }
+         ],
          "multipleCollectOptions":false
       },
       "type":"placeOfPower"
@@ -170,13 +185,16 @@ export const GameComponents = [
       "isCreature":false,
       "isDragon":false,
       "name":"Coffre Fort",
-      "type":"artefact",
       "standardCollectAbility":{
-         "essenceList":{
-            "anyButGold":2
-         },
+         "essenceList":[
+            {
+               "quantity":2,
+               "type":"any-but-gold"
+            }
+         ],
          "multipleCollectOptions":true
-      }
+      },
+      "type":"artefact"
    },
    {
       "id":"colosse",
@@ -207,9 +225,12 @@ export const GameComponents = [
       "isDragon":false,
       "name":"Coupe de Feu",
       "standardCollectAbility":{
-         "essenceList":{
-            "elan":2
-         },
+         "essenceList":[
+            {
+               "quantity":2,
+               "type":"elan"
+            }
+         ],
          "multipleCollectOptions":false
       },
       "type":"artefact"
@@ -323,9 +344,12 @@ export const GameComponents = [
       "isDragon":false,
       "name":"Druidesse",
       "standardCollectAbility":{
-         "essenceList":{
-            "life":1
-         },
+         "essenceList":[
+            {
+               "quantity":1,
+               "type":"life"
+            }
+         ],
          "multipleCollectOptions":false
       },
       "type":"mage"
@@ -339,9 +363,12 @@ export const GameComponents = [
       "isDragon":false,
       "name":"Duelliste",
       "standardCollectAbility":{
-         "essenceList":{
-            "elan":1
-         },
+         "essenceList":[
+            {
+               "quantity":1,
+               "type":"elan"
+            }
+         ],
          "multipleCollectOptions":false
       },
       "type":"mage"
@@ -365,10 +392,16 @@ export const GameComponents = [
       "isDragon":false,
       "name":"Épée Vive",
       "standardCollectAbility":{
-         "essenceList":{
-            "death":1,
-            "elan":1
-         },
+         "essenceList":[
+            {
+               "quantity":1,
+               "type":"death"
+            },
+            {
+               "quantity":1,
+               "type":"elan"
+            }
+         ],
          "multipleCollectOptions":false
       },
       "type":"artefact"
@@ -392,9 +425,12 @@ export const GameComponents = [
       "isDragon":false,
       "name":"Étang de Sérénité",
       "standardCollectAbility":{
-         "essenceList":{
-            "calm":2
-         },
+         "essenceList":[
+            {
+               "quantity":2,
+               "type":"calm"
+            }
+         ],
          "multipleCollectOptions":false
       },
       "type":"artefact"
@@ -408,9 +444,12 @@ export const GameComponents = [
       "isDragon":false,
       "name":"Faucon",
       "standardCollectAbility":{
-         "essenceList":{
-            "calm":1
-         },
+         "essenceList":[
+            {
+               "quantity":1,
+               "type":"calm"
+            }
+         ],
          "multipleCollectOptions":false
       },
       "type":"artefact"
@@ -424,9 +463,12 @@ export const GameComponents = [
       "isDragon":false,
       "name":"Fontaine de Jouvence",
       "standardCollectAbility":{
-         "essenceList":{
-            "life":1
-         },
+         "essenceList":[
+            {
+               "quantity":1,
+               "type":"life"
+            }
+         ],
          "multipleCollectOptions":false
       },
       "type":"artefact"
@@ -471,10 +513,16 @@ export const GameComponents = [
       "isDragon":false,
       "name":"Guérisseur",
       "standardCollectAbility":{
-         "essenceList":{
-            "calm":1,
-            "life":1
-         },
+         "essenceList":[
+            {
+               "quantity":1,
+               "type":"calm"
+            },
+            {
+               "quantity":1,
+               "type":"life"
+            }
+         ],
          "multipleCollectOptions":true
       },
       "type":"mage"
@@ -498,9 +546,12 @@ export const GameComponents = [
       "isDragon":false,
       "name":"Jardins Suspendus",
       "standardCollectAbility":{
-         "essenceList":{
-            "anyButGold":3
-         },
+         "essenceList":[
+            {
+               "quantity":3,
+               "type":"any-but-gold"
+            }
+         ],
          "multipleCollectOptions":true
       },
       "type":"monument"
@@ -556,9 +607,12 @@ export const GameComponents = [
       "isDragon":false,
       "name":"Mine des Nains",
       "standardCollectAbility":{
-         "essenceList":{
-            "gold":1
-         },
+         "essenceList":[
+            {
+               "quantity":1,
+               "type":"gold"
+            }
+         ],
          "multipleCollectOptions":false
       },
       "type":"placeOfPower"
@@ -582,9 +636,12 @@ export const GameComponents = [
       "isDragon":false,
       "name":"Monture Céleste",
       "standardCollectAbility":{
-         "essenceList":{
-            "anyButDeathGold":2
-         },
+         "essenceList":[
+            {
+               "quantity":2,
+               "type":"any-but-death-gold"
+            }
+         ],
          "multipleCollectOptions":true
       },
       "type":"artefact"
@@ -598,10 +655,16 @@ export const GameComponents = [
       "isDragon":false,
       "name":"Mort Vie",
       "standardCollectAbility":{
-         "essenceList":{
-            "death":1,
-            "life":1
-         },
+         "essenceList":[
+            {
+               "quantity":1,
+               "type":"death"
+            },
+            {
+               "quantity":1,
+               "type":"life"
+            }
+         ],
          "multipleCollectOptions":true
       },
       "type":"magicItem"
@@ -615,9 +678,12 @@ export const GameComponents = [
       "isDragon":false,
       "name":"Nécromancienne",
       "standardCollectAbility":{
-         "essenceList":{
-            "death":1
-         },
+         "essenceList":[
+            {
+               "quantity":1,
+               "type":"death"
+            }
+         ],
          "multipleCollectOptions":false
       },
       "type":"mage"
@@ -701,9 +767,12 @@ export const GameComponents = [
       "isDragon":false,
       "name":"Puits Calcifère",
       "standardCollectAbility":{
-         "essenceList":{
-            "elan":1
-         },
+         "essenceList":[
+            {
+               "quantity":1,
+               "type":"elan"
+            }
+         ],
          "multipleCollectOptions":false
       },
       "type":"artefact"
@@ -749,9 +818,12 @@ export const GameComponents = [
       "isDragon":false,
       "name":"Récif des Naufrageurs",
       "standardCollectAbility":{
-         "essenceList":{
-            "gold":1
-         },
+         "essenceList":[
+            {
+               "quantity":1,
+               "type":"gold"
+            }
+         ],
          "multipleCollectOptions":false
       },
       "type":"placeOfPower"
@@ -786,10 +858,16 @@ export const GameComponents = [
       "isDragon":false,
       "name":"Sérénité Vigueur",
       "standardCollectAbility":{
-         "essenceList":{
-            "calm":1,
-            "elan":1
-         },
+         "essenceList":[
+            {
+               "quantity":1,
+               "type":"calm"
+            },
+            {
+               "quantity":1,
+               "type":"elan"
+            }
+         ],
          "multipleCollectOptions":true
       },
       "type":"magicItem"
@@ -813,9 +891,12 @@ export const GameComponents = [
       "isDragon":false,
       "name":"Sirène",
       "standardCollectAbility":{
-         "essenceList":{
-            "calm":1
-         },
+         "essenceList":[
+            {
+               "quantity":1,
+               "type":"calm"
+            }
+         ],
          "multipleCollectOptions":false
       },
       "type":"artefact"
@@ -829,10 +910,16 @@ export const GameComponents = [
       "isDragon":false,
       "name":"Sorcière",
       "standardCollectAbility":{
-         "essenceList":{
-            "death":1,
-            "life":1
-         },
+         "essenceList":[
+            {
+               "quantity":1,
+               "type":"life"
+            },
+            {
+               "quantity":1,
+               "type":"death"
+            }
+         ],
          "multipleCollectOptions":true
       },
       "type":"mage"
@@ -846,11 +933,20 @@ export const GameComponents = [
       "isDragon":false,
       "name":"Source Élémentaire",
       "standardCollectAbility":{
-         "essenceList":{
-            "calm":1,
-            "elan":1,
-            "life":1
-         },
+         "essenceList":[
+            {
+               "quantity":1,
+               "type":"calm"
+            },
+            {
+               "quantity":1,
+               "type":"life"
+            },
+            {
+               "quantity":1,
+               "type":"elan"
+            }
+         ],
          "multipleCollectOptions":false
       },
       "type":"artefact"
@@ -884,9 +980,12 @@ export const GameComponents = [
       "isDragon":false,
       "name":"Temple",
       "standardCollectAbility":{
-         "essenceList":{
-            "life":1
-         },
+         "essenceList":[
+            {
+               "quantity":1,
+               "type":"life"
+            }
+         ],
          "multipleCollectOptions":false
       },
       "type":"monument"
@@ -901,9 +1000,12 @@ export const GameComponents = [
       "isDragon":false,
       "name":"Tour de l'Alchimiste",
       "standardCollectAbility":{
-         "essenceList":{
-            "anyButGold":3
-         },
+         "essenceList":[
+            {
+               "quantity":3,
+               "type":"any-but-gold"
+            }
+         ],
          "multipleCollectOptions":true
       },
       "type":"placeOfPower"
@@ -937,9 +1039,12 @@ export const GameComponents = [
       "isDragon":false,
       "name":"Tréant",
       "standardCollectAbility":{
-         "essenceList":{
-            "life":2
-         },
+         "essenceList":[
+            {
+               "quantity":2,
+               "type":"life"
+            }
+         ],
          "multipleCollectOptions":false
       },
       "type":"artefact"
@@ -953,9 +1058,12 @@ export const GameComponents = [
       "isDragon":false,
       "name":"Voyante",
       "standardCollectAbility":{
-         "essenceList":{
-            "calm":1
-         },
+         "essenceList":[
+            {
+               "quantity":1,
+               "type":"calm"
+            }
+         ],
          "multipleCollectOptions":false
       },
       "type":"mage"

@@ -12,7 +12,7 @@ export const COMPONENTS_TYPE = [
 
 export const DEFAULT_STANDARD_COLLECT_ABILITY = {
   multipleCollectOptions: false,
-  essenceList: {}
+  essenceList: []
 };
 
 export const DEFAULT_COMPONENT = {

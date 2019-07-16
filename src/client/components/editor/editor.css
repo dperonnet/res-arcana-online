@@ -132,15 +132,10 @@ h5 {
 }
 
 .editor .essence {
-  background-size: 425px 30px;
-  display: block;
-  width: 32px;
   height: 32px;
+  width: 32px;
   padding-top: 1px;
   padding-left: 10px;
-  font-weight: bold;
-  font-size: larger;
-  color: ghostwhite;
 }
 
 .anyButGold {

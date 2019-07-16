@@ -263,15 +263,16 @@ const pickArtefact = (G, ctx, playerID, cardId) => {
  * @param {*} essenceNumber number of essence to place on component.
  */
 const addEssenceOnComponent = (G, playerID, componentId, essenceType, essenceNumber) => {
-  let component = G.publicData.players[playerID].essencesOnComponent[componentId]
-  if (!component) {
-    G.publicData.players[playerID].essencesOnComponent[componentId] = {}
-    component = G.publicData.players[playerID].essencesOnComponent[componentId]
+  let componentPool = G.publicData.players[playerID].essencesOnComponent[componentId]
+  if (!componentPool) {
+    G.publicData.players[playerID].essencesOnComponent[componentId] = []
+    componentPool = G.publicData.players[playerID].essencesOnComponent[componentId]
   }
-  if (component[essenceType]) {
-    component[essenceType] += essenceNumber
+  let index = componentPool.findIndex((essence) => essence.type === essenceType)
+  if (index > -1) {
+    componentPool[index].quantity += essenceNumber
   } else {
-    component[essenceType] = essenceNumber
+    componentPool.push({type: essenceType, quantity: essenceNumber})
   }
 }
 
@@ -476,7 +477,7 @@ const initCollectPhase = (G, ctx) => {
               break
             case 'coffreFort':
               essences = G.publicData.players[i].essencesOnComponent[component.id]
-              if (essences && essences['gold'] > 0) {
+              if (essences && essences.findIndex((essence) => essence.type === 'gold') > -1) {
                 G.publicData.players[i].status = 'COLLECT_ACTION_REQUIRED'
                 G.publicData.players[i].requiredAction.push('coffreFort')
               }
@@ -503,34 +504,39 @@ const initCollectPhase = (G, ctx) => {
 const collectEssences = (G, ctx, collectActions, collectOnComponentActions) => {
   const playerID = ctx.currentPlayer
   console.log('[collectEssences] Call to collectEssences()',collectActions, collectOnComponentActions)
+
+  // Collect actions requiring player's decision
   collectActions && Object.values(collectActions).forEach((action) => {
     if (action.type === 'GAIN') {
-      Object.entries(action.essences).forEach((essence) => {
-        console.log('add',essence[0],essence[1])
-        G.publicData.players[playerID].essencesPool[essence[0]] = G.publicData.players[playerID].essencesPool[essence[0]] + essence[1]
+      action.essences.forEach((essence) => {
+        console.log('add',essence.type,essence.quantity)
+        G.publicData.players[playerID].essencesPool[essence.type] = G.publicData.players[playerID].essencesPool[essence.type] + essence.quantity
       })
     } else if (action.type === 'COST') {
-      Object.entries(action.essences).forEach((essence) => {
-        console.log('remove',essence[0],essence[1])
-        G.publicData.players[playerID].essencesPool[essence[0]] = G.publicData.players[playerID].essencesPool[essence[0]]- essence[1]
+      action.essences.forEach((essence) => {
+        console.log('remove',essence.type,essence.quantity)
+        G.publicData.players[playerID].essencesPool[essence.type] = G.publicData.players[playerID].essencesPool[essence.type]- essence.quantity
       })
     } else if (action.type === 'TAP') {
       G.publicData.tappedComponents[action.id] = true
     }
   })
+  // Collect of essences on components
   collectOnComponentActions && Object.entries(collectOnComponentActions).forEach((action) => {
-    Object.entries(action[1].essences).forEach((essence) => {
-      console.log('add',essence[0],essence[1])
-      G.publicData.players[playerID].essencesPool[essence[0]] = G.publicData.players[playerID].essencesPool[essence[0]] + essence[1]
+    action[1].essences.forEach((essence) => {
+      console.log('add',essence.type,essence.quantity)
+      G.publicData.players[playerID].essencesPool[essence.type] = G.publicData.players[playerID].essencesPool[essence.type] + essence.quantity
     })
     removeAllFromComponent(G, playerID, action[0])
   })
+  // Collect actions by default
   G.publicData.players[playerID].collectActions && Object.values(G.publicData.players[playerID].collectActions).forEach((action) => {
-    Object.entries(action.essences).forEach((essence) => {
-      console.log('add',essence[0],essence[1])
-      G.publicData.players[playerID].essencesPool[essence[0]] = G.publicData.players[playerID].essencesPool[essence[0]] + essence[1]
+    action.essences.forEach((essence) => {
+      console.log('add',essence.type,essence.quantity)
+      G.publicData.players[playerID].essencesPool[essence.type] = G.publicData.players[playerID].essencesPool[essence.type] + essence.quantity
     })
   })
+  // Specific collect action for automate
   let automate = G.publicData.players[playerID].inPlay.filter((component) => {
     return component.id === 'automate'
   }).inPlay
@@ -538,8 +544,8 @@ const collectEssences = (G, ctx, collectActions, collectOnComponentActions) => {
     console.log('automate in play')
     if (!Object.keys(collectOnComponentActions).includes('automate')) {
       if (G.publicData.players[playerID].essencesOnComponent['automate']) {
-        Object.keys(G.publicData.players[playerID].essencesOnComponent['automate']).forEach((essence) => {
-          addEssenceOnComponent(G, playerID, 'automate', essence, 2)
+        G.publicData.players[playerID].essencesOnComponent['automate'].forEach((essence) => {
+          addEssenceOnComponent(G, playerID, 'automate', essence.type, 2)
         })
       }
     }

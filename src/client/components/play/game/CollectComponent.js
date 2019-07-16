@@ -11,14 +11,20 @@ class CollectComponent extends Component {
    * Build the collect action
    */
   buildCollectAction = (component, essenceList = {}) => {
-    return {
+    let collectAction = {
       id: component.id,
       name: component.name,
-      essences: essenceList,
+      essences: [],
       from: 'COLLECT_ABILITY',
       type: 'GAIN',
       valid: true
     }
+    Object.entries(essenceList).forEach((essence) => {
+      let newEssence = {type: essence[0], quantity: essence[1]}
+      collectAction.essences.push(newEssence)
+    })
+    
+    return collectAction
   }
   
   /**
@@ -27,7 +33,7 @@ class CollectComponent extends Component {
   handleSelectOption = (type) => {
     const { component } = this.props
     let essenceList = {}
-    essenceList[type] = component.standardCollectAbility.essenceList[type]
+    essenceList[type] = component.standardCollectAbility.essenceList.find((essence) => essence.type === type).quantity
     const action = this.buildCollectAction(component, essenceList)
     this.props.setCollectAction(action)
   }
@@ -41,10 +47,17 @@ class CollectComponent extends Component {
     let essenceList = {}
     essenceList[type] = 0
     const action =  collectAction ? collectAction: this.buildCollectAction(component, essenceList)
-    action.essences[type] = action.essences[type] ? action.essences[type] + 1 : 1
+    let essenceIndex = action.essences.findIndex((essence) => {
+      return essence.type === type
+    })
+    if(essenceIndex > -1) {
+      action.essences[essenceIndex].quantity++
+    } else {
+      action.essences.push({type, quantity: 1})
+    }
     let count = 0
-    Object.values(action.essences).forEach((value) => count = count + value)
-    action.valid = Object.values(component.standardCollectAbility.essenceList)[0] === count
+    action.essences.forEach((essence) => count = count + essence.quantity)
+    action.valid = component.standardCollectAbility.essenceList[0].quantity === count
     this.props.setCollectAction(action)
   }
 
@@ -56,7 +69,10 @@ class CollectComponent extends Component {
     const { component, collectOnComponentActions, essencesOnComponent, setCollectOnComponentAction, resetCollectOnComponentAction } = this.props
     if (essencesOnComponent || collectOnComponentActions[component.id]) {
       if (!collectOnComponentActions[component.id]) {
-        let essenceList = essencesOnComponent
+        let essenceList = {}
+        essencesOnComponent.map((essence) => {
+          essenceList[essence.type] = essence.quantity
+        })
         const action = this.buildCollectAction(component, essenceList)
         action.from = 'ON_COMPONENT'
         setCollectOnComponentAction(action)
@@ -77,13 +93,12 @@ class CollectComponent extends Component {
   renderCollectAbility = (essenceList, handleOnClick, onComponent, cost) => {
     const { status } = this.props
     const ready = status === 'READY'
-    let essences = Object.entries(essenceList).map((essence, index) => {
-      let isLast =  index === Object.entries(essenceList).length -1
-      return <div key={essence[0]} className="collect-option">
+    let essences = essenceList && essenceList.map((essence) => {
+      return <div key={essence.type} className="collect-option">
         {cost ?
-            <div className={'type essence ' + essence[0] + ' cost-container'}><div className="cost"></div>{essence[1]}</div>
+            <div className={'type essence ' + essence.type + ' cost-container'}><div className="cost"></div>{essence.quantity}</div>
           :
-            <div className={'type essence ' + essence[0]}>{essence[1]}</div>
+            <div className={'type essence ' + essence.type}>{essence.quantity}</div>
         }
       </div>
     })
@@ -100,13 +115,11 @@ class CollectComponent extends Component {
     const { component, essencesOnComponent } = this.props
     if (essencesOnComponent || collectOnComponentActionsRef[component.id]) {
       const essences = collectOnComponentActionsRef[component.id] ? collectOnComponentActionsRef[component.id].essences : null
-      return essences &&
-        Object.entries(essences).map((essence, index) => {
-          let isLast =  index === Object.entries(essences).length -1
-          return <div key={essence[0]} className="collect-option">
-          <div className={'type essence ' + essence[0]}>{essence[1]}</div>
+      return essences && essences.map((essence) => {
+        return <div key={essence.type} className="collect-option">
+          <div className={'type essence ' + essence.type}>{essence.quantity}</div>
         </div>
-        })
+      })
     } else {
       return null
     }
@@ -117,30 +130,32 @@ class CollectComponent extends Component {
    */
   renderEssencePicker = (essenceList) => {
     const { component, collectActions } = this.props
-    let typeIsAny = Object.keys(essenceList).filter((type)=>{
-      return type.startsWith('any')
+    let typeIsAny = essenceList.filter((item) => {
+      return item.type.startsWith('any')
     })
 
     // When the collect ability is type 'any', display add buttons for all type allowed.
     if (typeIsAny.length > 0) {
       const essenceList = ['elan', 'life', 'calm', 'death', 'gold']
-      switch (typeIsAny[0]) {
-        case 'anyButGold':
+      switch (typeIsAny[0].type) {
+        case 'any-but-gold':
           essenceList.pop()
           break
-        case 'anyButDeathGold':
+        case 'any-but-death-gold':
           essenceList.pop()
           essenceList.pop()
           break
         default:
       }
-      let selection = collectActions && collectActions[component.id] && collectActions[component.id].essences
       return essenceList.map((type, index) => {
-        let isLast = index === (Object.entries(essenceList).length -1)
+        let essenceIndex = collectActions && collectActions[component.id] &&
+          collectActions[component.id].essences.findIndex((essence) => essence.type === type)
+        let selection = essenceIndex > -1 ? collectActions[component.id].essences[essenceIndex] : null
+        let isLast = index === (essenceList.length -1)
         return <div key={type} className="collect-option">
           <div className={'essence pointer-cursor ' + type} 
             onClick={() => this.handleAddTypeToOption(type)}>
-            {(selection && selection[type]) || 0}
+            {(selection && selection.quantity) || 0}
           </div>
           {!isLast && <div className="option-or">
             <FontAwesomeIcon icon={faPlus} size="sm" />
@@ -150,10 +165,10 @@ class CollectComponent extends Component {
 
     } else {
       // else display selection buttons for each possible collect option
-      return Object.entries(essenceList).map((essence, index) => {
-        let isLast =  index === Object.entries(essenceList).length -1
-        return <div key={essence[0]} className="collect-option">
-          <div className={'essence pointer-cursor ' + essence[0]} onClick={() => this.handleSelectOption(essence[0])}>{essence[1]}</div>
+      return essenceList.map((essence, index) => {
+        let isLast =  index === essenceList.length -1
+        return <div key={essence.type} className="collect-option">
+          <div className={'essence pointer-cursor ' + essence.type} onClick={() => this.handleSelectOption(essence.type)}>{essence.quantity}</div>
           {!isLast && <div className="option-or">
             <FontAwesomeIcon icon={faSlash} size="sm" rotation={90} />
           </div>}
@@ -225,10 +240,9 @@ class CollectComponent extends Component {
     if (component.hasSpecificCollectAbility) {
       switch (component.id) {
         case 'automate':
-          if (essencesOnComponent && Object.keys(essencesOnComponent).length > 0) {
-            let essenceList = {}
-            Object.keys(essencesOnComponent).forEach((type) => essenceList[type] = 2)
-
+          if (essencesOnComponent && essencesOnComponent.length > 0) {
+            let essenceList = []
+            essencesOnComponent.forEach((essence) => essenceList.push({type: essence.type, quantity: 2}))
             collectAbilities = collectOnComponentActionsRef[component.id] ? null : this.renderCollectAbility(essenceList, null, true)
             handleClickComponent = collectOnComponentActionsRef[component.id] ? null : (() => this.handleCollectEssenceOnComponent())
             handleClickEssenceOnComponent = (() => this.handleCollectEssenceOnComponent())
@@ -257,8 +271,9 @@ class CollectComponent extends Component {
         case 'forgeMaudite':
           if (actionValid && collectActionsRef[component.id].valid) {
             const handleClick = !ready ? () => resetCollectAction(component.id) : null
+            let essenceList = [{type: 'death', quantity: 1}]
             collectAbilities = collectActionsRef[component.id].type === 'COST' ? 
-                this.renderCollectAbility(collectActionsRef[component.id].essences , handleClick, false, true)
+                this.renderCollectAbility(essenceList, handleClick, false, true)
               :
                 this.renderTapComponent(() => resetCollectAction(component.id))
           } else {
