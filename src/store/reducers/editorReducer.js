@@ -7,8 +7,13 @@ const initState = {
       class: '',
       name: '',
       type: 'artefact',
+      hasActionPower: false,
+      hasCost: false,
+      hasDiscountAbility: false,
+      hasReactPower: false,
       hasStandardCollectAbility: false,
       hasSpecificCollectAbility: false,
+      hasVictoryPoints: false,
       isDragon: false,
       isCreature: false
     },

@@ -5,7 +5,7 @@ import { DEFAULT_COMPONENT } from './EditorConstants';
 import ComponentForm from './ComponentForm';
 import DatabaseContent from './DatabaseContent';
 import CardZoom from '../common/card/CardZoom.js';
-import './editor.css';
+import './editor.scss';
 import { connect } from 'react-redux';
 import { deleteComponent, saveComponent } from '../../../store/actions/editorActions'
 

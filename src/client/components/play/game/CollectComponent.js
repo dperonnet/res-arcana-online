@@ -70,9 +70,9 @@ class CollectComponent extends Component {
     if (essencesOnComponent || collectOnComponentActions[component.id]) {
       if (!collectOnComponentActions[component.id]) {
         let essenceList = {}
-        essencesOnComponent.map((essence) => {
+        essencesOnComponent.forEach((essence) => 
           essenceList[essence.type] = essence.quantity
-        })
+        )
         const action = this.buildCollectAction(component, essenceList)
         action.from = 'ON_COMPONENT'
         setCollectOnComponentAction(action)
@@ -231,9 +231,7 @@ class CollectComponent extends Component {
     let handleClickComponent = collectOnComponentActionsRef[component.id] ? null : (() => this.handleCollectEssenceOnComponent())
     let handleClickEssenceOnComponent = !collectOnComponentActionsRef[component.id] ? null :  (() => this.handleCollectEssenceOnComponent())
 
-    let actionValid = Object.keys(collectActionsRef).includes(component.id)
-    // components with specific collect ability and requiring collect action
-    const specialComponents = ['coffreFort','forgeMaudite']
+    let actionValid = collectActionsRef[component.id] && collectActionsRef[component.id].valid
     let validSpecific = false
 
     const ready = status === 'READY'
@@ -254,7 +252,7 @@ class CollectComponent extends Component {
         case 'coffreFort':
           // if there is gold on component and there is no collect on component action
           if (essencesOnComponent && essencesOnComponent.filter((essence) => essence.type === 'gold').length > 0 && !collectOnComponentActionsRef[component.id]) {
-            if (actionValid && collectActionsRef[component.id].valid) {
+            if (actionValid) {
               collectAbilities = this.renderCollectAbility(collectActionsRef[component.id].essences , () => resetCollectAction(component.id))
             } else {
               collectAbilities = this.renderEssencePicker(component.specificCollectAbility.essenceList)
@@ -275,7 +273,7 @@ class CollectComponent extends Component {
           })
           break
         case 'forgeMaudite':
-          if (actionValid && collectActionsRef[component.id].valid) {
+          if (actionValid) {
             const handleClick = !ready ? () => resetCollectAction(component.id) : null
             let essenceList = [{type: 'death', quantity: 1}]
             collectAbilities = collectActionsRef[component.id].type === 'COST' ? 
@@ -287,20 +285,18 @@ class CollectComponent extends Component {
           }
           break
         default:
+          if (actionValid) {
+            collectAbilities = this.renderCollectAbility(collectActionsRef[component.id].essences , () => resetCollectAction(component.id))
+          } else if (component.specificCollectAbility.multipleCollectOptions) {
+            collectAbilities = this.renderEssencePicker(component.specificCollectAbility.essenceList)
+          }
       }
     } else if (component.hasStandardCollectAbility) {
-      if (actionValid && collectActionsRef[component.id].valid) {
-        collectAbilities = this.renderCollectAbility(collectActionsRef[component.id].essences , () => resetCollectAction(component.id))
-      } else if (component.standardCollectAbility.multipleCollectOptions) {
-        collectAbilities = this.renderEssencePicker(component.standardCollectAbility.essenceList)
-      } else {
-        collectAbilities = this.renderCollectAbility(component.standardCollectAbility.essenceList)
-      }
+      collectAbilities = this.renderCollectAbility(component.standardCollectAbility.essenceList)
     }
 
-    const requireAction = ((component.hasStandardCollectAbility && component.standardCollectAbility.multipleCollectOptions)
-      || specialComponents.includes(component.id))
-    const valid = (collectActionsRef[component.id] && collectActionsRef[component.id].valid) || validSpecific
+    const requireAction = component.hasSpecificCollectAbility
+    const valid = actionValid || validSpecific
     const invalid = requireAction && !valid ? ' invalid ' : ''
     const cursorGameComponent = !ready && essencesOnComponent && Object.keys(essencesOnComponent).length > 0 ? ' pointer-cursor ' : ''
     const classes = invalid + cursorGameComponent

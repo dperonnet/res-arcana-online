@@ -453,32 +453,22 @@ const initCollectPhase = (G, ctx) => {
 
       G.publicData.players[i].inPlay.forEach((component) => {
         if (component.hasStandardCollectAbility) {
-          if(component.standardCollectAbility.multipleCollectOptions) {
-            G.publicData.players[i].status = 'COLLECT_ACTION_REQUIRED'
-          } else {
-            const collectAction = {
-              id: component.id,
-              name: component.name,
-              essences: component.standardCollectAbility.essenceList,
-              from: 'COLLECT_ABILITY',
-              type: 'GAIN'
-            }
-            collectActions.push(collectAction)
+          const collectAction = {
+            id: component.id,
+            name: component.name,
+            essences: component.standardCollectAbility.essenceList,
+            from: 'COLLECT_ABILITY',
+            type: 'GAIN'
           }
+          collectActions.push(collectAction)
         }
 
         if (component.hasSpecificCollectAbility) {
           let essences
           switch (component.id) {
-            case 'automate':
-              essences = G.publicData.players[i].essencesOnComponent[component.id]
-              if (essences && essences.length > 0) {
-                G.publicData.players[i].status = 'COLLECT_ACTION_REQUIRED'
-              }
-              break
             case 'coffreFort':
               essences = G.publicData.players[i].essencesOnComponent[component.id]
-              if (essences && essences.findIndex((essence) => essence.type === 'gold') > -1) {
+              if (essences && essences.filter((essence) => essence.type === 'gold').length > 0) {
                 G.publicData.players[i].status = 'COLLECT_ACTION_REQUIRED'
                 G.publicData.players[i].requiredAction.push('coffreFort')
               }

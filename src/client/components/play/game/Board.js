@@ -1,5 +1,4 @@
 import React, { Component } from 'react'
-import { Button } from 'react-bootstrap'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faTimes } from '@fortawesome/free-solid-svg-icons';
 import PropTypes from 'prop-types'
@@ -720,7 +719,6 @@ class ResArcanaBoard extends Component {
     const essencesOnComponent = G.publicData.players[playerID].essencesOnComponent
     // essencesOnComponentRef is used to maintain the display of the component once his essences have been removed by collect.
     const essencesOnComponentRef = G.players[playerID].uiTemp.essencesOnComponent
-    const componentsWithSpecificAction = ['coffreFort','forgeMaudite']
     let title = 'Collect Phase'
     let waiting = playerID !== ctx.currentPlayer
     let waitingFor = ' - ' + playersName[parseInt(ctx.currentPlayer)] + '\'s turn.'
@@ -774,7 +772,7 @@ class ResArcanaBoard extends Component {
 
     // Check if all the actions required are done.
     components.forEach((component) => {
-      if (component.hasSpecificCollectAbility && componentsWithSpecificAction.includes(component.id)) {
+      if (component.hasSpecificCollectAbility) {
         switch (component.id) {
           case 'coffreFort':
             const hasEssence = essencesOnComponent[component.id]
@@ -783,12 +781,11 @@ class ResArcanaBoard extends Component {
               || (collectOnComponentActions[component.id] && collectOnComponentActions[component.id].valid))
             }
             break
+          case 'automate':
           case 'forgeMaudite':
           default:
-            collectValid = collectValid && (collectActions[component.id] && collectActions[component.id].valid)
+            collectValid = collectValid && collectActions[component.id] && collectActions[component.id].valid
         }
-      } else if (component.hasStandardCollectAbility && component.standardCollectAbility.multipleCollectOptions) {
-        collectValid = collectValid && collectActions[component.id] && collectActions[component.id].valid
       }
     })
 

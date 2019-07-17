@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { Button, ButtonToolbar, Form, InputGroup} from 'react-bootstrap'
-import { COMPONENTS_TYPE, DEFAULT_COMPONENT, DEFAULT_SPECIFIC_COLLECT_ABILITY, DEFAULT_STANDARD_COLLECT_ABILITY } from './EditorConstants'
+import { COMPONENTS_TYPE, DEFAULT_COMPONENT, SPECIFIC_COLLECT_ABILITY, STANDARD_COLLECT_ABILITY } from './EditorConstants'
 import { connect } from 'react-redux'
 import { deleteComponent, saveComponent } from '../../../store/actions/editorActions'
 
@@ -24,7 +24,7 @@ class ComponentForm extends Component {
     const { pristineComponent } = this.props
     const component = Object.keys(pristineComponent).length !== 0 ?
       pristineComponent : DEFAULT_COMPONENT
-    return JSON.parse(JSON.stringify(component))
+    return copy(component)
   }
 
   handleReset = () => {
@@ -37,37 +37,108 @@ class ComponentForm extends Component {
     const { component } = this.state
     const valueToUpdate = type === 'checkbox' ? checked : value
     let newComponent
-    if (name === 'hasStandardCollectAbility') {
-      if (valueToUpdate === true) {
-        const newSCA = JSON.parse(JSON.stringify(DEFAULT_STANDARD_COLLECT_ABILITY))
-        component.standardCollectAbility = newSCA
-      } else {
-        delete component.standardCollectAbility
-      }
-      newComponent = {
-        ...component,
-        [name]: valueToUpdate
-      }
-    } else if (name === 'hasSpecificCollectAbility') {
-      if (valueToUpdate === true) {
-        const newSCA = JSON.parse(JSON.stringify(DEFAULT_SPECIFIC_COLLECT_ABILITY))
-        component.specificCollectAbility = newSCA
-      } else {
-        delete component.specificCollectAbility
-      }
-      newComponent = {
-        ...component,
-        [name]: valueToUpdate
-      }
-    } else if (name === 'multipleCollectOptions') {
+
+    // delete or initialize datas depending on the changed field
+    switch (name) {
+      case 'hasCost':
+        if (valueToUpdate === true) {
+          component.costEssenceList = []
+        } else {
+          delete component.costEssenceList
+        }
+        break
+      case 'hasStandardCollectAbility':
+        if (valueToUpdate === true) {
+          component.standardCollectAbility = copy(STANDARD_COLLECT_ABILITY)
+        } else {
+          delete component.standardCollectAbility
+        }
+        break
+      case 'hasSpecificCollectAbility':
+        if (valueToUpdate === true) {
+          const newSCA = copy(SPECIFIC_COLLECT_ABILITY)
+          component.specificCollectAbility = newSCA
+        } else {
+          delete component.specificCollectAbility
+        }
+        break
+      case 'hasDiscountAbility':
+        if (valueToUpdate === true) {
+          component.discountAbilityList = []
+        } else {
+          delete component.discountAbilityList
+        }
+        break
+      case 'hasActionPower':
+        if (valueToUpdate === true) {
+          component.actionPowerList = []
+        } else {
+          delete component.actionPowerList
+        }
+        break
+      case 'hasReactPower':
+        if (valueToUpdate === true) {
+          component.reactPowerList = []
+        } else {
+          delete component.reactPowerList
+        }
+        break
+      case 'hasVictoryPoints':
+        if (valueToUpdate === true) {
+          component.victoryPoints = 1
+        } else {
+          delete component.victoryPoints
+        }
+        break
+      case 'hasConditionalVictoryPoints':
+        if (valueToUpdate === true) {
+          component.conditionalVictoryPointList = []
+        } else {
+          delete component.conditionalVictoryPointList
+        }
+        break
+      case 'type':
+        if (valueToUpdate === 'mage') {
+          component.hasAlternative = false
+          component.isAlternative = false
+        } else {
+          delete component.hasAlternative
+          delete component.isAlternative
+        }
+        if (valueToUpdate === 'mage' || valueToUpdate === 'magicItem') {
+          delete component.hasCost
+          delete component.costEssenceList
+        } else {
+          component.hasCost = component.hasCost ? component.hasCost : false
+        }
+        if (valueToUpdate !== 'artefact') {
+          delete component.isDragon
+          delete component.isCreature
+        } else {
+          component.isDragon = false
+          component.isCreature = false
+        }
+        if (valueToUpdate === 'placeOfPower') {
+          component.hasConditionalVictoryPoints = false
+          component.excludedComponentId = ""
+        } else {
+          delete component.hasConditionalVictoryPoints
+          delete component.excludedComponentId
+        }
+        break
+      default:
+    }
+
+    if (name === 'multipleCollectOptions') {
       newComponent = component
-      newComponent.standardCollectAbility.multipleCollectOptions = valueToUpdate
+      newComponent.specificCollectAbility.multipleCollectOptions = valueToUpdate
     } else {
       newComponent = {
         ...component,
         [name]: valueToUpdate
       }
     }
+
     this.setState({component: newComponent})
     this.props.showComponentJSON(newComponent)
   }
@@ -89,6 +160,16 @@ class ComponentForm extends Component {
     }
     this.setState({component: newComponent})
     this.props.showComponentJSON(newComponent)
+  }
+
+  decrement = (name) => {
+    let property = this.state.component[name.toString()]
+    this.handleFormChangeByName(name, property - 1)
+  }
+
+  increment = (name) => {
+    let property = this.state.component[name]
+    this.handleFormChangeByName(name, property + 1)
   }
 
   clearCollectOptions = (name) => {
@@ -141,6 +222,32 @@ class ComponentForm extends Component {
                 </InputGroup>
               }
 
+              { component.type !== 'mage' && component.type !== 'magicItem' &&
+                <>
+                  <InputGroup className="mb-3">
+                    <Form.Check inline type="checkbox" name="hasCost"
+                      id="hasCost" label="Has cost"
+                      value={component.hasCost}
+                      checked={component.hasCost}
+                      onChange={this.handleFormChange}/>
+                    
+                      <Button variant="secondary" id={'clearCost'} size="sm" className={component.hasCost ? '' : 'd-none'}
+                        onClick={(e) => this.clearCollectOptions('costEssenceList')}><span>Reset</span></Button>
+                  </InputGroup>
+
+                  { component.hasCost && 
+                    <>
+                      <div className="mb-3">
+                        <EssencePanel
+                          essenceList={component.costEssenceList}
+                          onChangeByName={(data) => this.handleFormChangeByName('costEssenceList', data)}
+                        />
+                      </div>
+                    </>
+                  }
+                </>
+              }
+
               <InputGroup className="mb-3">
                 <Form.Check inline type="checkbox" name="hasStandardCollectAbility"
                   id="hasStandardCollectAbility" label="Has standard collect ability"
@@ -156,18 +263,9 @@ class ComponentForm extends Component {
                 <>
                   <div className="mb-3">
                     <EssencePanel
-                      essenceList={component.standardCollectAbility.essenceList}
+                      essenceList={component.standardCollectAbility && component.standardCollectAbility.essenceList}
                       onChangeByName={(data) => this.handleFormChangeByName('standardCollectAbility', data)}
                     />
-                  </div>
-                  <div className="mb-3">
-                    <InputGroup className="mb-3">
-                      <Form.Check inline type="checkbox" name="multipleCollectOptions"
-                        id="multipleCollectOptions" label="Player's choice"
-                        value={component.standardCollectAbility.multipleCollectOptions}
-                        checked={component.standardCollectAbility.multipleCollectOptions}
-                        onChange={this.handleFormChange}/>
-                    </InputGroup>
                   </div>
                 </>
               }
@@ -187,43 +285,139 @@ class ComponentForm extends Component {
                 <>
                   <div className="mb-3">
                     <EssencePanel
-                      essenceList={component.specificCollectAbility.essenceList}
+                      essenceList={component.specificCollectAbility && component.specificCollectAbility.essenceList}
                       onChangeByName={(data) => this.handleFormChangeByName('specificCollectAbility', data)}
                     />
+                  </div>
+                  <div className="mb-3">
+                    <InputGroup className="mb-3">
+                      <Form.Check inline type="checkbox" name="multipleCollectOptions"
+                        id="multipleCollectOptions" label="Player's choice"
+                        value={component.specificCollectAbility.multipleCollectOptions}
+                        checked={component.specificCollectAbility.multipleCollectOptions}
+                        onChange={this.handleFormChange}/>
+                    </InputGroup>
                   </div>
                 </>
               }
 
               <InputGroup className="mb-3">
-                <Form.Check inline type="checkbox" name="hasAlternative"
-                  id="hasAlternative" label="Has an alternative card"
-                  value={component.hasAlternative}
-                  checked={component.hasAlternative}
+                <Form.Check inline type="checkbox" name="hasDiscountAbility"
+                  id="hasDiscountAbility" label="Has discount ability"
+                  value={component.hasDiscountAbility}
+                  checked={component.hasDiscountAbility}
                   onChange={this.handleFormChange}/>
               </InputGroup>
 
               <InputGroup className="mb-3">
-                <Form.Check inline type="checkbox" name="isAlternative"
-                  id="isAlternative" label="Is an alternative card"
-                  value={component.isAlternative}
-                  checked={component.isAlternative}
+                <Form.Check inline type="checkbox" name="hasActionPower"
+                  id="hasActionPower" label="Has action Power(s)"
+                  value={component.hasActionPower}
+                  checked={component.hasActionPower}
                   onChange={this.handleFormChange}/>
               </InputGroup>
 
-              { component.isAlternative && 
-                <InputGroup size="sm" className="mb-3">
-                  <InputGroup.Prepend>
-                    <InputGroup.Text id="name">Component Id</InputGroup.Text>
-                  </InputGroup.Prepend>
-                  <Form.Control
-                    placeholder="Id"
-                    name="altOfId"
-                    value={component.altOfId}
-                    onChange={this.handleFormChange}
-                  />
-                </InputGroup>
+              <InputGroup className="mb-3">
+                <Form.Check inline type="checkbox" name="hasReactPower"
+                  id="hasReactPower" label="Has react power"
+                  value={component.hasReactPower}
+                  checked={component.hasReactPower}
+                  onChange={this.handleFormChange}/>
+              </InputGroup>
+
+              { component.type !== 'mage' && component.type !== 'magicItem' &&
+                <>
+                  <InputGroup className="mb-3">
+                    <Form.Check inline type="checkbox" name="hasVictoryPoints"
+                      id="hasVictoryPoints" label="Has victory point(s)"
+                      value={component.hasVictoryPoints}
+                      checked={component.hasVictoryPoints}
+                      onChange={this.handleFormChange}/>
+
+                    { component.hasVictoryPoints && 
+                      <>
+                        <InputGroup.Prepend>
+                          <InputGroup.Text className="victory-points" id="victoryPoints">{component.victoryPoints || 0}</InputGroup.Text>
+                        </InputGroup.Prepend>
+                        <InputGroup.Append>
+                          <div className="vertical-buttons">
+                            <Button variant="secondary" id="lowerVictoryPoints"
+                              onClick={() => this.increment("victoryPoints")}><span>+</span></Button>
+                            <Button variant="secondary" id="raiseVictoryPoints"
+                              onClick={() => this.decrement("victoryPoints")}><span>-</span></Button>
+                          </div>
+                        </InputGroup.Append>
+                      </>
+                    }
+                  </InputGroup>
+                </>
               }
 
+              { component.type === 'placeOfPower' &&
+                <>
+                  <InputGroup className="mb-3">
+                    <Form.Check inline type="checkbox" name="hasConditionalVictoryPoints"
+                      id="hasConditionalVictoryPoints" label="Has conditional victory point(s)"
+                      value={component.hasConditionalVictoryPoints}
+                      checked={component.hasConditionalVictoryPoints}
+                      onChange={this.handleFormChange}/>
+                  </InputGroup>
+                </>
+              }
+
+              { component.type === 'artefact' && 
+                <>
+                  <InputGroup className="mb-3">
+                    <Form.Check inline type="checkbox" name="isCreature"
+                      id="isCreature" label="Is a creature"
+                      value={component.isCreature}
+                      checked={component.isCreature}
+                      onChange={this.handleFormChange}/>
+                  </InputGroup>
+
+                  <InputGroup className="mb-3">
+                    <Form.Check inline type="checkbox" name="isDragon"
+                      id="isDragon" label="Is a dragon"
+                      value={component.isDragon}
+                      checked={component.isDragon}
+                      onChange={this.handleFormChange}/>
+                  </InputGroup>
+                </>
+              }
+
+              { component.type === 'mage' && 
+                <>
+                  <InputGroup className="mb-3">
+                    <Form.Check inline type="checkbox" name="hasAlternative"
+                      id="hasAlternative" label="Has an alternative card"
+                      value={component.hasAlternative}
+                      checked={component.hasAlternative}
+                      onChange={this.handleFormChange}/>
+                  </InputGroup>
+
+                  <InputGroup className="mb-3">
+                    <Form.Check inline type="checkbox" name="isAlternative"
+                      id="isAlternative" label="Is an alternative card"
+                      value={component.isAlternative}
+                      checked={component.isAlternative}
+                      onChange={this.handleFormChange}/>
+                  </InputGroup>
+
+                  {component.isAlternative && 
+                      <InputGroup size="sm" className="mb-3">
+                        <InputGroup.Prepend>
+                          <InputGroup.Text id="name">Component Id</InputGroup.Text>
+                        </InputGroup.Prepend>
+                        <Form.Control
+                          placeholder="Id"
+                          name="altOfId"
+                          value={component.altOfId}
+                          onChange={this.handleFormChange}
+                        />
+                      </InputGroup>
+                  }
+                </>
+              }
               <ButtonToolbar>
                 <Button variant="secondary" size="sm" onClick={onSave} disabled={!component.name.trim()}>Save</Button>
                 <Button variant="secondary" size="sm" onClick={this.handleReset}>Reset</Button>
@@ -295,7 +489,7 @@ class EssencePanel extends Component {
       return (
         <div className="essence-list small" key={index} >
           <InputGroup.Prepend>
-            <InputGroup.Text className={"essence "+type} id={type+'Essence'}>{essence && essence.quantity || 0}</InputGroup.Text>
+            <InputGroup.Text className={"essence "+type} id={type+'Essence'}>{(essence && essence.quantity) || 0}</InputGroup.Text>
           </InputGroup.Prepend>
           <InputGroup.Append>
             <div className="vertical-buttons">
@@ -312,4 +506,8 @@ class EssencePanel extends Component {
       {components}
     </div>
   }
+}
+
+function copy(value){
+  return JSON.parse(JSON.stringify(value))
 }
