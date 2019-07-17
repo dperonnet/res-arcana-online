@@ -232,7 +232,8 @@ class CollectComponent extends Component {
     let handleClickEssenceOnComponent = !collectOnComponentActionsRef[component.id] ? null :  (() => this.handleCollectEssenceOnComponent())
 
     let actionValid = Object.keys(collectActionsRef).includes(component.id)
-    const componentsWithSpecificAction = ['coffreFort','forgeMaudite']
+    // components with specific collect ability and requiring collect action
+    const specialComponents = ['coffreFort','forgeMaudite']
     let validSpecific = false
 
     const ready = status === 'READY'
@@ -240,6 +241,7 @@ class CollectComponent extends Component {
     if (component.hasSpecificCollectAbility) {
       switch (component.id) {
         case 'automate':
+          // if there is at least one type of essence on the automate
           if (essencesOnComponent && essencesOnComponent.length > 0) {
             let essenceList = []
             essencesOnComponent.forEach((essence) => essenceList.push({type: essence.type, quantity: 2}))
@@ -247,18 +249,22 @@ class CollectComponent extends Component {
             handleClickComponent = collectOnComponentActionsRef[component.id] ? null : (() => this.handleCollectEssenceOnComponent())
             handleClickEssenceOnComponent = (() => this.handleCollectEssenceOnComponent())
           }
+          // if there is no collect on component action, the "add 2 of each essence type on component" action is done server side.
           break
         case 'coffreFort':
-          if (essencesOnComponent && essencesOnComponent['gold'] > 0 && !collectOnComponentActionsRef[component.id]) {
+          // if there is gold on component and there is no collect on component action
+          if (essencesOnComponent && essencesOnComponent.filter((essence) => essence.type === 'gold').length > 0 && !collectOnComponentActionsRef[component.id]) {
             if (actionValid && collectActionsRef[component.id].valid) {
               collectAbilities = this.renderCollectAbility(collectActionsRef[component.id].essences , () => resetCollectAction(component.id))
             } else {
-              collectAbilities = this.renderEssencePicker(component.standardCollectAbility.essenceList)
+              collectAbilities = this.renderEssencePicker(component.specificCollectAbility.essenceList)
             }
             validSpecific = collectOnComponentActionsRef[component.id]
           } else {
+            // else there is no gold on component and the action is valid
             validSpecific = true
           }
+          // on click to collect the essences on component, reset the collect action
           handleClickComponent = collectOnComponentActionsRef[component.id] ? null : (() => {
             this.handleCollectEssenceOnComponent()
             resetCollectAction(component.id)
@@ -293,7 +299,7 @@ class CollectComponent extends Component {
     }
 
     const requireAction = ((component.hasStandardCollectAbility && component.standardCollectAbility.multipleCollectOptions)
-      || componentsWithSpecificAction.includes(component.id))
+      || specialComponents.includes(component.id))
     const valid = (collectActionsRef[component.id] && collectActionsRef[component.id].valid) || validSpecific
     const invalid = requireAction && !valid ? ' invalid ' : ''
     const cursorGameComponent = !ready && essencesOnComponent && Object.keys(essencesOnComponent).length > 0 ? ' pointer-cursor ' : ''

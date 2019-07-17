@@ -579,7 +579,7 @@
   height: 30px;
 }
 
-.large {
+.large, .x-large {
   .on-component-icon {
     @extend .game-icon;
     background-image: url("../../../assets/image/on_component.png");

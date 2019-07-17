@@ -754,15 +754,15 @@ class ResArcanaBoard extends Component {
 
     // Check if player can pay all collect costs.
     Object.values(collectActions).forEach((action) => {
-      Object.entries(action.essences).forEach((essence) => {
-        if (!sumCollects[essence[0]]) sumCollects[essence[0]] = 0
-        sumCollects[essence[0]] = sumCollects[essence[0]] + (action.type === 'COST' ?  - essence[1] : essence[1])
+      action.essences.forEach((essence) => {
+        if (!sumCollects[essence.type]) sumCollects[essence.type] = 0
+        sumCollects[essence.type] = sumCollects[essence.type] + (action.type === 'COST' ?  - essence.quantity : essence.quantity)
       })
     })
     Object.values(collectOnComponentActions).forEach((action) => {
-      Object.entries(action.essences).forEach((essence) => {
-        if (!sumCollects[essence[0]]) sumCollects[essence[0]] = 0
-        sumCollects[essence[0]] = sumCollects[essence[0]] + (action.type === 'COST' ?  - essence[1] : essence[1])
+      action.essences.forEach((essence) => {
+        if (!sumCollects[essence.type]) sumCollects[essence.type] = 0
+        sumCollects[essence.type] = sumCollects[essence.type] + (action.type === 'COST' ?  - essence.quantity : essence.quantity)
       })
     })
     Object.entries(sumCollects).forEach((essence) => {
@@ -814,7 +814,7 @@ class ResArcanaBoard extends Component {
           showButtons = false
     }
 
-    const confirmButton = <div className={'option' + ((collectValid && costValid) ? ' valid' : ' disabled')} 
+    const confirmButton = <div className={'option' + ((collectValid && costValid) ? ' valid' : ' disabled')}
       onClick={collectValid && costValid ? handleConfirm : null}>Confirm</div>
     const resetButton = <div className="option" onClick={() => this.handleResetCollect()}>Reset</div>
 

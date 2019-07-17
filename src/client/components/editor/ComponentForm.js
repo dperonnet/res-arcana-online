@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { Button, ButtonToolbar, Form, InputGroup} from 'react-bootstrap'
-import { COMPONENTS_TYPE, DEFAULT_COMPONENT, DEFAULT_STANDARD_COLLECT_ABILITY } from './EditorConstants'
+import { COMPONENTS_TYPE, DEFAULT_COMPONENT, DEFAULT_SPECIFIC_COLLECT_ABILITY, DEFAULT_STANDARD_COLLECT_ABILITY } from './EditorConstants'
 import { connect } from 'react-redux'
 import { deleteComponent, saveComponent } from '../../../store/actions/editorActions'
 
@@ -48,6 +48,17 @@ class ComponentForm extends Component {
         ...component,
         [name]: valueToUpdate
       }
+    } else if (name === 'hasSpecificCollectAbility') {
+      if (valueToUpdate === true) {
+        const newSCA = JSON.parse(JSON.stringify(DEFAULT_SPECIFIC_COLLECT_ABILITY))
+        component.specificCollectAbility = newSCA
+      } else {
+        delete component.specificCollectAbility
+      }
+      newComponent = {
+        ...component,
+        [name]: valueToUpdate
+      }
     } else if (name === 'multipleCollectOptions') {
       newComponent = component
       newComponent.standardCollectAbility.multipleCollectOptions = valueToUpdate
@@ -67,6 +78,9 @@ class ComponentForm extends Component {
     if (name === 'standardCollectAbility') {
       newComponent = component
       newComponent.standardCollectAbility.essenceList= valueToUpdate
+    } else if (name === 'specificCollectAbility') {
+      newComponent = component
+      newComponent.specificCollectAbility.essenceList= valueToUpdate
     } else {
       newComponent = {
         ...component,
@@ -77,8 +91,8 @@ class ComponentForm extends Component {
     this.props.showComponentJSON(newComponent)
   }
 
-  clearCollectOptions = () => {
-    this.handleFormChangeByName('standardCollectAbility', [])
+  clearCollectOptions = (name) => {
+    this.handleFormChangeByName(name, [])
   }
 
   render() {
@@ -129,13 +143,13 @@ class ComponentForm extends Component {
 
               <InputGroup className="mb-3">
                 <Form.Check inline type="checkbox" name="hasStandardCollectAbility"
-                  id="hasStandardCollectAbility" label="Add standard collect ability"
+                  id="hasStandardCollectAbility" label="Has standard collect ability"
                   value={component.hasStandardCollectAbility}
                   checked={component.hasStandardCollectAbility}
                   onChange={this.handleFormChange}/>
                 
                   <Button variant="secondary" id={'clearCollectOptions'} size="sm" className={component.hasStandardCollectAbility ? '' : 'd-none'}
-                    onClick={(e) => this.clearCollectOptions()}><span>Reset</span></Button>
+                    onClick={(e) => this.clearCollectOptions('standardCollectAbility')}><span>Reset</span></Button>
               </InputGroup>
 
               { component.hasStandardCollectAbility && 
@@ -160,11 +174,25 @@ class ComponentForm extends Component {
 
               <InputGroup className="mb-3">
                 <Form.Check inline type="checkbox" name="hasSpecificCollectAbility"
-                  id="hasSpecificCollectAbility" label="Add specific collect ability"
+                  id="hasSpecificCollectAbility" label="Has specific collect ability"
                   value={component.hasSpecificCollectAbility}
                   checked={component.hasSpecificCollectAbility}
                   onChange={this.handleFormChange}/>
+
+                  <Button variant="secondary" id={'clearCollectOptions'} size="sm" className={component.hasSpecificCollectAbility ? '' : 'd-none'}
+                    onClick={(e) => this.clearCollectOptions('specificCollectAbility')}><span>Reset</span></Button>
               </InputGroup>
+
+              { component.hasSpecificCollectAbility && 
+                <>
+                  <div className="mb-3">
+                    <EssencePanel
+                      essenceList={component.specificCollectAbility.essenceList}
+                      onChangeByName={(data) => this.handleFormChangeByName('specificCollectAbility', data)}
+                    />
+                  </div>
+                </>
+              }
 
               <InputGroup className="mb-3">
                 <Form.Check inline type="checkbox" name="hasAlternative"

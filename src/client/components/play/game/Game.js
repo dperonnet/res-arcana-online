@@ -246,6 +246,7 @@ const pickArtefact = (G, ctx, playerID, cardId) => {
   if (G.players[playerID].draftCards.length === 0) {
     G.publicData.waitingFor.splice(G.publicData.waitingFor.indexOf(parseInt(playerID)), 1)
   }
+  // TODO remove this part
   const essencesTypes = ['elan', 'life', 'calm', 'death', 'gold']
   const essencesTypeNumber = 5
   for (let i = 0; i < essencesTypeNumber; i++){
@@ -539,7 +540,7 @@ const collectEssences = (G, ctx, collectActions, collectOnComponentActions) => {
   // Specific collect action for automate
   let automate = G.publicData.players[playerID].inPlay.filter((component) => {
     return component.id === 'automate'
-  }).inPlay
+  })
   if (automate && automate[0]) {
     console.log('automate in play')
     if (!Object.keys(collectOnComponentActions).includes('automate')) {

@@ -15,6 +15,10 @@ export const DEFAULT_STANDARD_COLLECT_ABILITY = {
   essenceList: []
 };
 
+export const DEFAULT_SPECIFIC_COLLECT_ABILITY = {
+  essenceList: []
+};
+
 export const DEFAULT_COMPONENT = {
   id: '',
   class: '',

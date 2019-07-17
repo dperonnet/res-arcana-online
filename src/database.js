@@ -100,6 +100,11 @@ export const GameComponents = [
       "isCreature":false,
       "isDragon":false,
       "name":"Automate",
+      "specificCollectAbility":{
+         "essenceList":[
+
+         ]
+      },
       "type":"artefact"
    },
    {
@@ -181,18 +186,17 @@ export const GameComponents = [
       "id":"coffreFort",
       "class":"coffre_fort",
       "hasSpecificCollectAbility":true,
-      "hasStandardCollectAbility":true,
+      "hasStandardCollectAbility":false,
       "isCreature":false,
       "isDragon":false,
       "name":"Coffre Fort",
-      "standardCollectAbility":{
+      "specificCollectAbility":{
          "essenceList":[
             {
                "quantity":2,
                "type":"any-but-gold"
             }
-         ],
-         "multipleCollectOptions":true
+         ]
       },
       "type":"artefact"
    },
@@ -482,7 +486,12 @@ export const GameComponents = [
       "isCreature":false,
       "isDragon":false,
       "name":"Forge Maudite",
-      "type":"placeOfPower"
+      "type":"placeOfPower",
+      "specificCollectAbility":{
+         "essenceList":[
+
+         ]
+      }
    },
    {
       "id":"fouetArdent",
