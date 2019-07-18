@@ -299,7 +299,7 @@ class ComponentForm extends Component {
                   <div className="mb-3">
                     <InputGroup className="mb-3">
                       <Form.Check inline type="checkbox" name="multipleCollectOptions"
-                        id="multipleCollectOptions" label="Player's choice"
+                        id="multipleCollectOptions" label="Player can choose different essences"
                         value={component.specificCollectAbility.multipleCollectOptions}
                         checked={component.specificCollectAbility.multipleCollectOptions}
                         onChange={this.handleFormChange}/>

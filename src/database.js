@@ -1217,11 +1217,11 @@ export const GameComponents = [
       "hasDiscountAbility":false,
       "hasPlacementPower":false,
       "hasReactPower":false,
-      "hasSpecificCollectAbility":false,
-      "hasStandardCollectAbility":true,
+      "hasSpecificCollectAbility":true,
+      "hasStandardCollectAbility":false,
       "hasVictoryPoint":true,
       "name":"Jardins Suspendus",
-      "standardCollectAbility":{
+      "specificCollectAbility":{
          "essenceList":[
             {
                "quantity":3,
@@ -1433,13 +1433,13 @@ export const GameComponents = [
       "hasCost":true,
       "hasDiscountAbility":false,
       "hasReactPower":false,
-      "hasSpecificCollectAbility":false,
-      "hasStandardCollectAbility":true,
+      "hasSpecificCollectAbility":true,
+      "hasStandardCollectAbility":false,
       "hasVictoryPoint":false,
       "isCreature":true,
       "isDragon":false,
       "name":"Monture Céleste",
-      "standardCollectAbility":{
+      "specificCollectAbility":{
          "essenceList":[
             {
                "quantity":2,
@@ -2151,14 +2151,14 @@ export const GameComponents = [
       "hasCost":true,
       "hasDiscountAbility":false,
       "hasReactPower":true,
-      "hasSpecificCollectAbility":false,
-      "hasStandardCollectAbility":true,
+      "hasSpecificCollectAbility":true,
+      "hasStandardCollectAbility":false,
       "hasVictoryPoint":false,
       "name":"Tour de l'Alchimiste",
       "reactPowerList":[
 
       ],
-      "standardCollectAbility":{
+      "specificCollectAbility":{
          "essenceList":[
             {
                "quantity":3,

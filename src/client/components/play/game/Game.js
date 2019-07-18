@@ -109,7 +109,7 @@ const getInitialState = (ctx, setupData) => {
       const essencesTypeNumber = 5
 
       for (let j= 0; j < G.players[i].deck.length; j++) {
-        for (let k = 0; k < ctx.random.Die(essencesTypeNumber); k++) {
+        for (let k = 0; k < essencesTypeNumber; k++) {
           addEssenceOnComponent(G, i, G.players[i].deck[j].id, essencesTypes[k], ctx.random.Die(5))
 
         }

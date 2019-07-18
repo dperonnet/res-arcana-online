@@ -57,7 +57,7 @@ class CollectComponent extends Component {
     }
     let count = 0
     action.essences.forEach((essence) => count = count + essence.quantity)
-    action.valid = component.standardCollectAbility.essenceList[0].quantity === count
+    action.valid = component.specificCollectAbility.essenceList[0].quantity === count
     this.props.setCollectAction(action)
   }
 
@@ -235,7 +235,7 @@ class CollectComponent extends Component {
     let validSpecific = false
 
     const ready = status === 'READY'
-
+    console.log('component',component);
     if (component.hasSpecificCollectAbility) {
       switch (component.id) {
         case 'automate':
@@ -246,6 +246,10 @@ class CollectComponent extends Component {
             collectAbilities = collectOnComponentActionsRef[component.id] ? null : this.renderCollectAbility(essenceList, null, true)
             handleClickComponent = collectOnComponentActionsRef[component.id] ? null : (() => this.handleCollectEssenceOnComponent())
             handleClickEssenceOnComponent = (() => this.handleCollectEssenceOnComponent())
+            actionValid = !(collectOnComponentActionsRef[component.id] && collectOnComponentActionsRef[component.id].valid && actionValid)
+          } else {
+            // else there is no essence on component and the action is valid
+            validSpecific = true
           }
           // if there is no collect on component action, the "add 2 of each essence type on component" action is done server side.
           break

@@ -776,12 +776,14 @@ class ResArcanaBoard extends Component {
         switch (component.id) {
           case 'coffreFort':
             const hasEssence = essencesOnComponent[component.id]
-            if (hasEssence && hasEssence['gold']) {
-              collectValid = collectValid && ((collectActions[component.id] && collectActions[component.id].valid)
+            if (hasEssence && hasEssence.filter((essence) => essence.type === 'gold').length > 0) {
+              collectValid = ((collectActions[component.id] && collectActions[component.id].valid)
               || (collectOnComponentActions[component.id] && collectOnComponentActions[component.id].valid))
             }
             break
           case 'automate':
+            collectValid = true
+            break
           case 'forgeMaudite':
           default:
             collectValid = collectValid && collectActions[component.id] && collectActions[component.id].valid
