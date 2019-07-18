@@ -30,7 +30,7 @@ export const DEFAULT_COMPONENT = {
   hasReactPower: false,
   hasStandardCollectAbility: false,
   hasSpecificCollectAbility: false,
-  hasVictoryPoints: false,
+  hasVictoryPoint: false,
   isDragon: false,
   isCreature: false
 }

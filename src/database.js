@@ -1,49 +1,117 @@
 export const GameComponents = [
    {
       "id":"alchimie",
+      "actionPowerList":[
+
+      ],
       "class":"alchimie",
+      "hasActionPower":true,
+      "hasDiscountAbility":false,
+      "hasReactPower":false,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":false,
-      "isCreature":false,
-      "isDragon":false,
       "name":"Alchimie",
       "type":"magicItem"
    },
    {
       "id":"alchimiste",
+      "actionPowerList":[
+
+      ],
       "class":"alchimiste",
+      "hasActionPower":true,
+      "hasAlternative":true,
+      "hasDiscountAbility":false,
+      "hasReactPower":false,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":false,
-      "isCreature":false,
-      "isDragon":false,
+      "isAlternative":false,
       "name":"Alchimiste",
       "type":"mage"
    },
    {
       "id":"anneauDeMidas",
+      "actionPowerList":[
+
+      ],
       "class":"anneau_de_midas",
+      "costEssenceList":[
+         {
+            "quantity":1,
+            "type":"life"
+         },
+         {
+            "quantity":1,
+            "type":"gold"
+         }
+      ],
+      "hasActionPower":true,
+      "hasCost":true,
+      "hasDiscountAbility":false,
+      "hasReactPower":false,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":false,
+      "hasVictoryPoint":true,
       "isCreature":false,
       "isDragon":false,
       "name":"Anneau de Midas",
-      "type":"artefact"
+      "type":"artefact",
+      "victoryPoint":1
    },
    {
       "id":"arbreDeVie",
+      "actionPowerList":[
+
+      ],
       "class":"arbre_de_vie",
+      "costEssenceList":[
+         {
+            "quantity":2,
+            "type":"any"
+         },
+         {
+            "quantity":1,
+            "type":"life"
+         }
+      ],
+      "hasActionPower":true,
+      "hasCost":true,
+      "hasDiscountAbility":false,
+      "hasReactPower":true,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":false,
+      "hasVictoryPoint":false,
       "isCreature":false,
       "isDragon":false,
       "name":"Arbre de vie",
+      "reactPowerList":[
+
+      ],
       "type":"artefact"
    },
    {
       "id":"arcElfique",
+      "actionPowerList":[
+
+      ],
       "class":"arc_elfique",
+      "costEssenceList":[
+         {
+            "quantity":2,
+            "type":"elan"
+         },
+         {
+            "quantity":1,
+            "type":"life"
+         }
+      ],
+      "hasActionPower":true,
+      "hasCost":true,
+      "hasDiscountAbility":false,
+      "hasReactPower":false,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":false,
+      "hasVictoryPoint":false,
       "isCreature":false,
       "isDragon":false,
       "name":"Arc Elfique",
@@ -52,18 +120,42 @@ export const GameComponents = [
    {
       "id":"artificier",
       "class":"artificier",
+      "discountAbilityList":[
+
+      ],
+      "hasActionPower":false,
+      "hasAlternative":true,
+      "hasDiscountAbility":true,
+      "hasReactPower":false,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":false,
-      "isCreature":false,
-      "isDragon":false,
+      "isAlternative":false,
       "name":"Artificier",
       "type":"mage"
    },
    {
       "id":"athanor",
+      "actionPowerList":[
+
+      ],
       "class":"athanor",
+      "costEssenceList":[
+         {
+            "quantity":1,
+            "type":"gold"
+         },
+         {
+            "quantity":1,
+            "type":"elan"
+         }
+      ],
+      "hasActionPower":true,
+      "hasCost":true,
+      "hasDiscountAbility":false,
+      "hasReactPower":false,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":false,
+      "hasVictoryPoint":false,
       "isCreature":false,
       "isDragon":false,
       "name":"Athanor",
@@ -71,9 +163,27 @@ export const GameComponents = [
    },
    {
       "id":"autelCorrompu",
+      "actionPowerList":[
+
+      ],
       "class":"autel_corrompu",
+      "costEssenceList":[
+         {
+            "quantity":3,
+            "type":"any"
+         },
+         {
+            "quantity":2,
+            "type":"death"
+         }
+      ],
+      "hasActionPower":true,
+      "hasCost":true,
+      "hasDiscountAbility":false,
+      "hasReactPower":false,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":true,
+      "hasVictoryPoint":false,
       "isCreature":false,
       "isDragon":false,
       "name":"Autel Corrompu",
@@ -94,9 +204,35 @@ export const GameComponents = [
    },
    {
       "id":"automate",
+      "actionPowerList":[
+
+      ],
       "class":"automate",
+      "costEssenceList":[
+         {
+            "quantity":1,
+            "type":"elan"
+         },
+         {
+            "quantity":1,
+            "type":"life"
+         },
+         {
+            "quantity":1,
+            "type":"calm"
+         },
+         {
+            "quantity":1,
+            "type":"gold"
+         }
+      ],
+      "hasActionPower":true,
+      "hasCost":true,
+      "hasDiscountAbility":false,
+      "hasReactPower":false,
       "hasSpecificCollectAbility":true,
       "hasStandardCollectAbility":false,
+      "hasVictoryPoint":false,
       "isCreature":false,
       "isDragon":false,
       "name":"Automate",
@@ -109,44 +245,132 @@ export const GameComponents = [
    },
    {
       "id":"bestiaireDuSorcier",
+      "actionPowerList":[
+
+      ],
       "class":"bestiaire_du_sorcier",
+      "conditionalVictoryPointList":[
+
+      ],
+      "costEssenceList":[
+         {
+            "quantity":4,
+            "type":"life"
+         },
+         {
+            "quantity":2,
+            "type":"elan"
+         },
+         {
+            "quantity":2,
+            "type":"calm"
+         },
+         {
+            "quantity":2,
+            "type":"death"
+         }
+      ],
       "excludedComponentId":"repaireDesDragons",
+      "hasActionPower":true,
+      "hasConditionalVictoryPoint":true,
+      "hasCost":true,
+      "hasDiscountAbility":false,
+      "hasReactPower":false,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":false,
-      "isCreature":false,
-      "isDragon":false,
+      "hasVictoryPoint":false,
       "name":"Bestiaire du Sorcier",
       "type":"placeOfPower"
    },
    {
       "id":"bibliotheque",
+      "actionPowerList":[
+
+      ],
       "class":"bibliotheque",
+      "costEssenceList":[
+         {
+            "quantity":4,
+            "type":"gold"
+         }
+      ],
+      "hasActionPower":true,
+      "hasCost":true,
+      "hasDiscountAbility":false,
+      "hasPlacementPower":false,
+      "hasReactPower":false,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":false,
-      "isCreature":false,
-      "isDragon":false,
+      "hasVictoryPoint":true,
       "name":"Bibliothèque",
-      "type":"monument"
+      "type":"monument",
+      "victoryPoint":1
    },
    {
       "id":"bosquetSacre",
+      "actionPowerList":[
+
+      ],
       "class":"bosquet_sacre",
+      "conditionalVictoryPointList":[
+
+      ],
+      "costEssenceList":[
+         {
+            "quantity":8,
+            "type":"life"
+         },
+         {
+            "quantity":4,
+            "type":"calm"
+         }
+      ],
       "excludedComponentId":"tourDeLAlchimiste",
+      "hasActionPower":true,
+      "hasConditionalVictoryPoint":true,
+      "hasCost":true,
+      "hasDiscountAbility":false,
+      "hasReactPower":false,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":false,
-      "isCreature":false,
-      "isDragon":false,
+      "hasVictoryPoint":true,
       "name":"Bosquet Sacré",
-      "type":"placeOfPower"
+      "type":"placeOfPower",
+      "victoryPoint":2
    },
    {
       "id":"caliceDeVie",
+      "actionPowerList":[
+
+      ],
       "class":"calice_de_vie",
+      "costEssenceList":[
+         {
+            "quantity":1,
+            "type":"gold"
+         },
+         {
+            "quantity":1,
+            "type":"life"
+         },
+         {
+            "quantity":1,
+            "type":"calm"
+         }
+      ],
+      "hasActionPower":true,
+      "hasCost":true,
+      "hasDiscountAbility":false,
+      "hasReactPower":true,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":true,
+      "hasVictoryPoint":false,
       "isCreature":false,
       "isDragon":false,
       "name":"Calice de Vie",
+      "reactPowerList":[
+
+      ],
       "standardCollectAbility":{
          "essenceList":[
             {
@@ -164,12 +388,28 @@ export const GameComponents = [
    },
    {
       "id":"catacombesDeLaMort",
+      "actionPowerList":[
+
+      ],
       "class":"catacombes_de_la_mort",
+      "conditionalVictoryPointList":[
+
+      ],
+      "costEssenceList":[
+         {
+            "quantity":9,
+            "type":"death"
+         }
+      ],
       "excludedComponentId":"puitsSacrificiel",
+      "hasActionPower":true,
+      "hasConditionalVictoryPoint":true,
+      "hasCost":true,
+      "hasDiscountAbility":false,
+      "hasReactPower":false,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":true,
-      "isCreature":false,
-      "isDragon":false,
+      "hasVictoryPoint":false,
       "name":"Catacombes de la Mort",
       "standardCollectAbility":{
          "essenceList":[
@@ -184,9 +424,27 @@ export const GameComponents = [
    },
    {
       "id":"coffreFort",
+      "actionPowerList":[
+
+      ],
       "class":"coffre_fort",
+      "costEssenceList":[
+         {
+            "quantity":1,
+            "type":"gold"
+         },
+         {
+            "quantity":1,
+            "type":"any"
+         }
+      ],
+      "hasActionPower":true,
+      "hasCost":true,
+      "hasDiscountAbility":false,
+      "hasReactPower":false,
       "hasSpecificCollectAbility":true,
       "hasStandardCollectAbility":false,
+      "hasVictoryPoint":false,
       "isCreature":false,
       "isDragon":false,
       "name":"Coffre Fort",
@@ -202,19 +460,47 @@ export const GameComponents = [
    },
    {
       "id":"colosse",
+      "actionPowerList":[
+
+      ],
       "class":"colosse",
+      "costEssenceList":[
+         {
+            "quantity":4,
+            "type":"gold"
+         }
+      ],
+      "hasActionPower":true,
+      "hasCost":true,
+      "hasDiscountAbility":false,
+      "hasPlacementPower":false,
+      "hasReactPower":false,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":false,
-      "isCreature":false,
-      "isDragon":false,
+      "hasVictoryPoint":true,
       "name":"Colosse",
-      "type":"monument"
+      "type":"monument",
+      "victoryPoint":2
    },
    {
       "id":"corneDAbondance",
+      "actionPowerList":[
+
+      ],
       "class":"corne_d_abondance",
+      "costEssenceList":[
+         {
+            "quantity":2,
+            "type":"gold"
+         }
+      ],
+      "hasActionPower":true,
+      "hasCost":true,
+      "hasDiscountAbility":false,
+      "hasReactPower":false,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":false,
+      "hasVictoryPoint":false,
       "isCreature":false,
       "isDragon":false,
       "name":"Corne d'Abondance",
@@ -222,9 +508,27 @@ export const GameComponents = [
    },
    {
       "id":"coupeDeFeu",
+      "actionPowerList":[
+
+      ],
       "class":"coupe_de_feu",
+      "costEssenceList":[
+         {
+            "quantity":1,
+            "type":"gold"
+         },
+         {
+            "quantity":1,
+            "type":"elan"
+         }
+      ],
+      "hasActionPower":true,
+      "hasCost":true,
+      "hasDiscountAbility":false,
+      "hasReactPower":false,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":true,
+      "hasVictoryPoint":false,
       "isCreature":false,
       "isDragon":false,
       "name":"Coupe de Feu",
@@ -241,9 +545,23 @@ export const GameComponents = [
    },
    {
       "id":"craneMaudit",
+      "actionPowerList":[
+
+      ],
       "class":"crane_maudit",
+      "costEssenceList":[
+         {
+            "quantity":2,
+            "type":"death"
+         }
+      ],
+      "hasActionPower":true,
+      "hasCost":true,
+      "hasDiscountAbility":false,
+      "hasReactPower":false,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":false,
+      "hasVictoryPoint":false,
       "isCreature":false,
       "isDragon":false,
       "name":"Crâne Maudit",
@@ -251,9 +569,27 @@ export const GameComponents = [
    },
    {
       "id":"crypte",
+      "actionPowerList":[
+
+      ],
       "class":"crypte",
+      "costEssenceList":[
+         {
+            "quantity":3,
+            "type":"any"
+         },
+         {
+            "quantity":2,
+            "type":"death"
+         }
+      ],
+      "hasActionPower":true,
+      "hasCost":true,
+      "hasDiscountAbility":false,
+      "hasReactPower":false,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":false,
+      "hasVictoryPoint":false,
       "isCreature":false,
       "isDragon":false,
       "name":"Crypte",
@@ -261,9 +597,27 @@ export const GameComponents = [
    },
    {
       "id":"dagueSacrificielle",
+      "actionPowerList":[
+
+      ],
       "class":"dague_sacrificielle",
+      "costEssenceList":[
+         {
+            "quantity":1,
+            "type":"death"
+         },
+         {
+            "quantity":1,
+            "type":"gold"
+         }
+      ],
+      "hasActionPower":true,
+      "hasCost":true,
+      "hasDiscountAbility":false,
+      "hasReactPower":false,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":false,
+      "hasVictoryPoint":false,
       "isCreature":false,
       "isDragon":false,
       "name":"Dague Sacrificielle",
@@ -271,9 +625,27 @@ export const GameComponents = [
    },
    {
       "id":"dentDeDragon",
+      "actionPowerList":[
+
+      ],
       "class":"dent_de_dragon",
+      "costEssenceList":[
+         {
+            "quantity":1,
+            "type":"elan"
+         },
+         {
+            "quantity":1,
+            "type":"death"
+         }
+      ],
+      "hasActionPower":true,
+      "hasCost":true,
+      "hasDiscountAbility":false,
+      "hasReactPower":false,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":false,
+      "hasVictoryPoint":false,
       "isCreature":false,
       "isDragon":false,
       "name":"Dent de dragon",
@@ -281,71 +653,168 @@ export const GameComponents = [
    },
    {
       "id":"divination",
+      "actionPowerList":[
+
+      ],
       "class":"divination",
+      "hasActionPower":true,
+      "hasDiscountAbility":false,
+      "hasReactPower":false,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":false,
-      "isCreature":false,
-      "isDragon":false,
       "name":"Divination",
       "type":"magicItem"
    },
    {
       "id":"dragonDOs",
+      "actionPowerList":[
+
+      ],
       "class":"dragon_d_os",
+      "costEssenceList":[
+         {
+            "quantity":4,
+            "type":"death"
+         },
+         {
+            "quantity":1,
+            "type":"life"
+         }
+      ],
+      "hasActionPower":true,
+      "hasCost":true,
+      "hasDiscountAbility":false,
+      "hasReactPower":false,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":false,
+      "hasVictoryPoint":true,
       "isCreature":false,
-      "isDragon":false,
+      "isDragon":true,
       "name":"Dragon d'Os",
-      "type":"artefact"
+      "type":"artefact",
+      "victoryPoint":1
    },
    {
       "id":"dragonDeFeu",
+      "actionPowerList":[
+
+      ],
       "class":"dragon_de_feu",
+      "costEssenceList":[
+         {
+            "quantity":6,
+            "type":"elan"
+         }
+      ],
+      "hasActionPower":true,
+      "hasCost":true,
+      "hasDiscountAbility":false,
+      "hasReactPower":false,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":false,
+      "hasVictoryPoint":true,
       "isCreature":false,
-      "isDragon":false,
+      "isDragon":true,
       "name":"Dragon de Feu",
-      "type":"artefact"
+      "type":"artefact",
+      "victoryPoint":1
    },
    {
       "id":"dragonDeTerre",
+      "actionPowerList":[
+
+      ],
       "class":"dragon_de_terre",
+      "costEssenceList":[
+         {
+            "quantity":4,
+            "type":"elan"
+         },
+         {
+            "quantity":3,
+            "type":"life"
+         }
+      ],
+      "hasActionPower":true,
+      "hasCost":true,
+      "hasDiscountAbility":false,
+      "hasReactPower":false,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":false,
+      "hasVictoryPoint":true,
       "isCreature":false,
-      "isDragon":false,
+      "isDragon":true,
       "name":"Dragon de Terre",
-      "type":"artefact"
+      "type":"artefact",
+      "victoryPoint":1
    },
    {
       "id":"dragonDesEaux",
+      "actionPowerList":[
+
+      ],
       "class":"dragon_des_eaux",
+      "costEssenceList":[
+         {
+            "quantity":6,
+            "type":"calm"
+         }
+      ],
+      "hasActionPower":true,
+      "hasCost":true,
+      "hasDiscountAbility":false,
+      "hasReactPower":false,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":false,
+      "hasVictoryPoint":true,
       "isCreature":false,
-      "isDragon":false,
+      "isDragon":true,
       "name":"Dragon des Eaux",
-      "type":"artefact"
+      "type":"artefact",
+      "victoryPoint":1
    },
    {
       "id":"dragonDesVents",
+      "actionPowerList":[
+
+      ],
       "class":"dragon_des_vents",
+      "costEssenceList":[
+         {
+            "quantity":4,
+            "type":"calm"
+         },
+         {
+            "quantity":4,
+            "type":"any"
+         }
+      ],
+      "hasActionPower":true,
+      "hasCost":true,
+      "hasDiscountAbility":false,
+      "hasReactPower":false,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":false,
+      "hasVictoryPoint":true,
       "isCreature":false,
-      "isDragon":false,
+      "isDragon":true,
       "name":"Dragon des Vents",
-      "type":"artefact"
+      "type":"artefact",
+      "victoryPoint":1
    },
    {
       "id":"druidesse",
+      "actionPowerList":[
+
+      ],
       "class":"druidesse",
+      "hasActionPower":true,
+      "hasAlternative":true,
+      "hasDiscountAbility":false,
+      "hasReactPower":false,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":true,
-      "isCreature":false,
-      "isDragon":false,
+      "isAlternative":false,
       "name":"Druidesse",
       "standardCollectAbility":{
          "essenceList":[
@@ -360,11 +829,17 @@ export const GameComponents = [
    },
    {
       "id":"duelliste",
+      "actionPowerList":[
+
+      ],
       "class":"duelliste",
+      "hasActionPower":true,
+      "hasAlternative":true,
+      "hasDiscountAbility":false,
+      "hasReactPower":false,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":true,
-      "isCreature":false,
-      "isDragon":false,
+      "isAlternative":false,
       "name":"Duelliste",
       "standardCollectAbility":{
          "essenceList":[
@@ -379,9 +854,23 @@ export const GameComponents = [
    },
    {
       "id":"eclatElementaire",
+      "actionPowerList":[
+
+      ],
       "class":"eclat_elementaire",
+      "costEssenceList":[
+         {
+            "quantity":0,
+            "type":"any"
+         }
+      ],
+      "hasActionPower":true,
+      "hasCost":true,
+      "hasDiscountAbility":false,
+      "hasReactPower":false,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":false,
+      "hasVictoryPoint":false,
       "isCreature":false,
       "isDragon":false,
       "name":"Éclat Élémentaire",
@@ -390,11 +879,29 @@ export const GameComponents = [
    {
       "id":"epeeVive",
       "class":"epee_vive",
+      "costEssenceList":[
+         {
+            "quantity":1,
+            "type":"gold"
+         },
+         {
+            "quantity":1,
+            "type":"elan"
+         }
+      ],
+      "hasActionPower":false,
+      "hasCost":true,
+      "hasDiscountAbility":false,
+      "hasReactPower":true,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":true,
+      "hasVictoryPoint":false,
       "isCreature":false,
       "isDragon":false,
       "name":"Épée Vive",
+      "reactPowerList":[
+
+      ],
       "standardCollectAbility":{
          "essenceList":[
             {
@@ -412,19 +919,47 @@ export const GameComponents = [
    },
    {
       "id":"erudit",
+      "actionPowerList":[
+
+      ],
       "class":"erudit",
+      "hasActionPower":true,
+      "hasAlternative":true,
+      "hasDiscountAbility":false,
+      "hasReactPower":false,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":false,
-      "isCreature":false,
-      "isDragon":false,
+      "isAlternative":false,
       "name":"Érudit",
       "type":"mage"
    },
    {
       "id":"etangDeSerenite",
+      "actionPowerList":[
+
+      ],
       "class":"etang_de_serenite",
+      "costEssenceList":[
+         {
+            "quantity":2,
+            "type":"calm"
+         },
+         {
+            "quantity":1,
+            "type":"elan"
+         },
+         {
+            "quantity":1,
+            "type":"death"
+         }
+      ],
+      "hasActionPower":true,
+      "hasCost":true,
+      "hasDiscountAbility":false,
+      "hasReactPower":false,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":true,
+      "hasVictoryPoint":false,
       "isCreature":false,
       "isDragon":false,
       "name":"Étang de Sérénité",
@@ -441,10 +976,28 @@ export const GameComponents = [
    },
    {
       "id":"faucon",
+      "actionPowerList":[
+
+      ],
       "class":"faucon",
+      "costEssenceList":[
+         {
+            "quantity":1,
+            "type":"life"
+         },
+         {
+            "quantity":1,
+            "type":"calm"
+         }
+      ],
+      "hasActionPower":true,
+      "hasCost":true,
+      "hasDiscountAbility":false,
+      "hasReactPower":false,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":true,
-      "isCreature":false,
+      "hasVictoryPoint":false,
+      "isCreature":true,
       "isDragon":false,
       "name":"Faucon",
       "standardCollectAbility":{
@@ -460,9 +1013,27 @@ export const GameComponents = [
    },
    {
       "id":"fontaineDeJouvence",
+      "actionPowerList":[
+
+      ],
       "class":"fontaine_de_jouvence",
+      "costEssenceList":[
+         {
+            "quantity":1,
+            "type":"calm"
+         },
+         {
+            "quantity":1,
+            "type":"death"
+         }
+      ],
+      "hasActionPower":true,
+      "hasCost":true,
+      "hasDiscountAbility":false,
+      "hasReactPower":false,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":true,
+      "hasVictoryPoint":false,
       "isCreature":false,
       "isDragon":false,
       "name":"Fontaine de Jouvence",
@@ -479,25 +1050,64 @@ export const GameComponents = [
    },
    {
       "id":"forgeMaudite",
+      "actionPowerList":[
+
+      ],
       "class":"forge_maudite",
+      "conditionalVictoryPointList":[
+
+      ],
+      "costEssenceList":[
+         {
+            "quantity":6,
+            "type":"elan"
+         },
+         {
+            "quantity":3,
+            "type":"death"
+         }
+      ],
       "excludedComponentId":"mineDesNains",
+      "hasActionPower":true,
+      "hasConditionalVictoryPoint":true,
+      "hasCost":true,
+      "hasDiscountAbility":false,
+      "hasReactPower":false,
       "hasSpecificCollectAbility":true,
       "hasStandardCollectAbility":false,
-      "isCreature":false,
-      "isDragon":false,
+      "hasVictoryPoint":true,
       "name":"Forge Maudite",
-      "type":"placeOfPower",
       "specificCollectAbility":{
          "essenceList":[
 
          ]
-      }
+      },
+      "type":"placeOfPower",
+      "victoryPoint":1
    },
    {
       "id":"fouetArdent",
+      "actionPowerList":[
+
+      ],
       "class":"fouet_ardent",
+      "costEssenceList":[
+         {
+            "quantity":2,
+            "type":"elan"
+         },
+         {
+            "quantity":2,
+            "type":"death"
+         }
+      ],
+      "hasActionPower":true,
+      "hasCost":true,
+      "hasDiscountAbility":false,
+      "hasReactPower":false,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":false,
+      "hasVictoryPoint":false,
       "isCreature":false,
       "isDragon":false,
       "name":"Fouet Ardent",
@@ -506,21 +1116,38 @@ export const GameComponents = [
    {
       "id":"grandePyramide",
       "class":"grande_pyramide",
+      "costEssenceList":[
+         {
+            "quantity":4,
+            "type":"gold"
+         }
+      ],
+      "hasActionPower":false,
+      "hasCost":true,
+      "hasDiscountAbility":false,
+      "hasPlacementPower":false,
+      "hasReactPower":false,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":false,
-      "isCreature":false,
-      "isDragon":false,
+      "hasVictoryPoint":true,
       "name":"Grande Pyramide",
-      "type":"monument"
+      "type":"monument",
+      "victoryPoint":3
    },
    {
       "id":"guerisseur",
       "class":"guerisseur",
+      "hasActionPower":false,
+      "hasAlternative":true,
+      "hasDiscountAbility":false,
+      "hasReactPower":true,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":true,
-      "isCreature":false,
-      "isDragon":false,
+      "isAlternative":false,
       "name":"Guérisseur",
+      "reactPowerList":[
+
+      ],
       "standardCollectAbility":{
          "essenceList":[
             {
@@ -539,20 +1166,60 @@ export const GameComponents = [
    {
       "id":"harnaisDuDragon",
       "class":"harnais_du_dragon",
+      "costEssenceList":[
+         {
+            "quantity":1,
+            "type":"elan"
+         },
+         {
+            "quantity":1,
+            "type":"life"
+         },
+         {
+            "quantity":1,
+            "type":"calm"
+         },
+         {
+            "quantity":1,
+            "type":"death"
+         }
+      ],
+      "discountAbilityList":[
+
+      ],
+      "hasActionPower":false,
+      "hasCost":true,
+      "hasDiscountAbility":true,
+      "hasReactPower":true,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":false,
+      "hasVictoryPoint":true,
       "isCreature":false,
       "isDragon":false,
       "name":"Harnais du Dragon",
-      "type":"artefact"
+      "reactPowerList":[
+
+      ],
+      "type":"artefact",
+      "victoryPoint":1
    },
    {
       "id":"jardinsSuspendus",
       "class":"jardins_suspendus",
+      "costEssenceList":[
+         {
+            "quantity":4,
+            "type":"gold"
+         }
+      ],
+      "hasActionPower":false,
+      "hasCost":true,
+      "hasDiscountAbility":false,
+      "hasPlacementPower":false,
+      "hasReactPower":false,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":true,
-      "isCreature":false,
-      "isDragon":false,
+      "hasVictoryPoint":true,
       "name":"Jardins Suspendus",
       "standardCollectAbility":{
          "essenceList":[
@@ -563,13 +1230,32 @@ export const GameComponents = [
          ],
          "multipleCollectOptions":true
       },
-      "type":"monument"
+      "type":"monument",
+      "victoryPoint":1
    },
    {
       "id":"mainDeGloire",
+      "actionPowerList":[
+
+      ],
       "class":"main_de_gloire",
+      "costEssenceList":[
+         {
+            "quantity":1,
+            "type":"life"
+         },
+         {
+            "quantity":1,
+            "type":"death"
+         }
+      ],
+      "hasActionPower":true,
+      "hasCost":true,
+      "hasDiscountAbility":false,
+      "hasReactPower":false,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":false,
+      "hasVictoryPoint":false,
       "isCreature":false,
       "isDragon":false,
       "name":"Main de Gloire",
@@ -577,43 +1263,120 @@ export const GameComponents = [
    },
    {
       "id":"manoirDeCorail",
+      "actionPowerList":[
+
+      ],
       "class":"manoir_de_corail",
+      "costEssenceList":[
+         {
+            "quantity":5,
+            "type":"elan"
+         },
+         {
+            "quantity":5,
+            "type":"life"
+         },
+         {
+            "quantity":5,
+            "type":"calm"
+         }
+      ],
       "excludedComponentId":"recifDesNaufrageurs",
+      "hasActionPower":true,
+      "hasConditionalVictoryPoint":false,
+      "hasCost":true,
+      "hasDiscountAbility":false,
+      "hasReactPower":true,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":false,
-      "isCreature":false,
-      "isDragon":false,
+      "hasVictoryPoint":true,
       "name":"Manoir de Corail",
-      "type":"placeOfPower"
+      "reactPowerList":[
+
+      ],
+      "type":"placeOfPower",
+      "victoryPoint":3
    },
    {
       "id":"mausolee",
+      "actionPowerList":[
+
+      ],
       "class":"mausolee",
+      "costEssenceList":[
+         {
+            "quantity":4,
+            "type":"gold"
+         }
+      ],
+      "hasActionPower":true,
+      "hasCost":true,
+      "hasDiscountAbility":false,
+      "hasPlacementPower":false,
+      "hasReactPower":false,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":false,
-      "isCreature":false,
-      "isDragon":false,
+      "hasVictoryPoint":true,
       "name":"Mausolée",
-      "type":"monument"
+      "type":"monument",
+      "victoryPoint":2
    },
    {
       "id":"mineDeSalomon",
+      "actionPowerList":[
+
+      ],
       "class":"mine_de_salomon",
+      "costEssenceList":[
+         {
+            "quantity":4,
+            "type":"gold"
+         }
+      ],
+      "hasActionPower":true,
+      "hasCost":true,
+      "hasDiscountAbility":false,
+      "hasPlacementPower":false,
+      "hasReactPower":false,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":false,
-      "isCreature":false,
-      "isDragon":false,
+      "hasVictoryPoint":true,
       "name":"Mine de Salomon",
-      "type":"monument"
+      "type":"monument",
+      "victoryPoint":1
    },
    {
       "id":"mineDesNains",
+      "actionPowerList":[
+
+      ],
       "class":"mine_des_nains",
+      "conditionalVictoryPointList":[
+
+      ],
+      "costEssenceList":[
+         {
+            "quantity":4,
+            "type":"elan"
+         },
+         {
+            "quantity":2,
+            "type":"life"
+         },
+         {
+            "quantity":1,
+            "type":"gold"
+         }
+      ],
       "excludedComponentId":"forgeMaudite",
+      "hasActionPower":true,
+      "hasConditionalVictoryPoint":true,
+      "hasCost":true,
+      "hasDiscountAbility":false,
+      "hasReactPower":false,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":true,
-      "isCreature":false,
-      "isDragon":false,
+      "hasVictoryPoint":false,
       "name":"Mine des Nains",
       "standardCollectAbility":{
          "essenceList":[
@@ -628,20 +1391,52 @@ export const GameComponents = [
    },
    {
       "id":"molosse",
+      "actionPowerList":[
+
+      ],
       "class":"molosse",
+      "costEssenceList":[
+         {
+            "quantity":1,
+            "type":"elan"
+         }
+      ],
+      "hasActionPower":true,
+      "hasCost":true,
+      "hasDiscountAbility":false,
+      "hasReactPower":true,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":false,
-      "isCreature":false,
+      "hasVictoryPoint":false,
+      "isCreature":true,
       "isDragon":false,
       "name":"Molosse",
+      "reactPowerList":[
+
+      ],
       "type":"artefact"
    },
    {
       "id":"montureCeleste",
       "class":"monture_celeste",
+      "costEssenceList":[
+         {
+            "quantity":2,
+            "type":"calm"
+         },
+         {
+            "quantity":1,
+            "type":"elan"
+         }
+      ],
+      "hasActionPower":false,
+      "hasCost":true,
+      "hasDiscountAbility":false,
+      "hasReactPower":false,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":true,
-      "isCreature":false,
+      "hasVictoryPoint":false,
+      "isCreature":true,
       "isDragon":false,
       "name":"Monture Céleste",
       "standardCollectAbility":{
@@ -658,10 +1453,11 @@ export const GameComponents = [
    {
       "id":"mortVie",
       "class":"mort_vie",
+      "hasActionPower":false,
+      "hasDiscountAbility":false,
+      "hasReactPower":false,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":true,
-      "isCreature":false,
-      "isDragon":false,
       "name":"Mort Vie",
       "standardCollectAbility":{
          "essenceList":[
@@ -680,11 +1476,17 @@ export const GameComponents = [
    },
    {
       "id":"necromancienne",
+      "actionPowerList":[
+
+      ],
       "class":"necromancienne",
+      "hasActionPower":true,
+      "hasAlternative":true,
+      "hasDiscountAbility":false,
+      "hasReactPower":false,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":true,
-      "isCreature":false,
-      "isDragon":false,
+      "isAlternative":false,
       "name":"Nécromancienne",
       "standardCollectAbility":{
          "essenceList":[
@@ -700,48 +1502,132 @@ export const GameComponents = [
    {
       "id":"obelisque",
       "class":"obelisque",
+      "costEssenceList":[
+         {
+            "quantity":4,
+            "type":"gold"
+         }
+      ],
+      "hasActionPower":false,
+      "hasCost":true,
+      "hasDiscountAbility":false,
+      "hasPlacementPower":true,
+      "hasReactPower":false,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":false,
-      "isCreature":false,
-      "isDragon":false,
+      "hasVictoryPoint":true,
       "name":"Obélisque",
-      "type":"monument"
+      "placementPowerList":[
+
+      ],
+      "type":"monument",
+      "victoryPoint":1
    },
    {
       "id":"oeufDeDragon",
+      "actionPowerList":[
+
+      ],
       "class":"oeuf_de_dragon",
+      "costEssenceList":[
+         {
+            "quantity":1,
+            "type":"gold"
+         }
+      ],
+      "hasActionPower":true,
+      "hasCost":true,
+      "hasDiscountAbility":false,
+      "hasReactPower":false,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":false,
+      "hasVictoryPoint":true,
       "isCreature":false,
       "isDragon":false,
       "name":"Oeuf de Dragon",
-      "type":"artefact"
+      "type":"artefact",
+      "victoryPoint":1
    },
    {
       "id":"oracle",
+      "actionPowerList":[
+
+      ],
       "class":"oracle",
+      "costEssenceList":[
+         {
+            "quantity":4,
+            "type":"gold"
+         }
+      ],
+      "hasActionPower":true,
+      "hasCost":true,
+      "hasDiscountAbility":false,
+      "hasPlacementPower":false,
+      "hasReactPower":false,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":false,
-      "isCreature":false,
-      "isDragon":false,
+      "hasVictoryPoint":true,
       "name":"Oracle",
-      "type":"monument"
+      "type":"monument",
+      "victoryPoint":2
    },
    {
       "id":"pierrePhilosophale",
+      "actionPowerList":[
+
+      ],
       "class":"pierre_philosophale",
+      "costEssenceList":[
+         {
+            "quantity":2,
+            "type":"elan"
+         },
+         {
+            "quantity":2,
+            "type":"life"
+         },
+         {
+            "quantity":2,
+            "type":"calm"
+         },
+         {
+            "quantity":2,
+            "type":"death"
+         }
+      ],
+      "hasActionPower":true,
+      "hasCost":true,
+      "hasDiscountAbility":false,
+      "hasReactPower":false,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":false,
+      "hasVictoryPoint":true,
       "isCreature":false,
       "isDragon":false,
       "name":"Pierre Philosophale",
-      "type":"artefact"
+      "type":"artefact",
+      "victoryPoint":1
    },
    {
       "id":"piocheDesNains",
+      "actionPowerList":[
+
+      ],
       "class":"pioche_des_nains",
+      "costEssenceList":[
+         {
+            "quantity":1,
+            "type":"elan"
+         }
+      ],
+      "hasActionPower":true,
+      "hasCost":true,
+      "hasDiscountAbility":false,
+      "hasReactPower":false,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":false,
+      "hasVictoryPoint":false,
       "isCreature":false,
       "isDragon":false,
       "name":"Pioche des Nains",
@@ -749,9 +1635,23 @@ export const GameComponents = [
    },
    {
       "id":"prisme",
+      "actionPowerList":[
+
+      ],
       "class":"prisme",
+      "costEssenceList":[
+         {
+            "quantity":0,
+            "type":"any"
+         }
+      ],
+      "hasActionPower":true,
+      "hasCost":true,
+      "hasDiscountAbility":false,
+      "hasReactPower":false,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":false,
+      "hasVictoryPoint":false,
       "isCreature":false,
       "isDragon":false,
       "name":"Prisme",
@@ -760,18 +1660,36 @@ export const GameComponents = [
    {
       "id":"protection",
       "class":"protection",
+      "hasActionPower":false,
+      "hasDiscountAbility":false,
+      "hasReactPower":true,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":false,
-      "isCreature":false,
-      "isDragon":false,
       "name":"Protection",
+      "reactPowerList":[
+
+      ],
       "type":"magicItem"
    },
    {
       "id":"puitsCalcifere",
+      "actionPowerList":[
+
+      ],
       "class":"puits_calcifere",
+      "costEssenceList":[
+         {
+            "quantity":2,
+            "type":"elan"
+         }
+      ],
+      "hasActionPower":true,
+      "hasCost":true,
+      "hasDiscountAbility":false,
+      "hasReactPower":false,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":true,
+      "hasVictoryPoint":false,
       "isCreature":false,
       "isDragon":false,
       "name":"Puits Calcifère",
@@ -788,43 +1706,96 @@ export const GameComponents = [
    },
    {
       "id":"puitsSacrificiel",
+      "actionPowerList":[
+
+      ],
       "class":"puits_sacrificiel",
+      "conditionalVictoryPointList":[
+
+      ],
+      "costEssenceList":[
+         {
+            "quantity":8,
+            "type":"elan"
+         },
+         {
+            "quantity":4,
+            "type":"death"
+         }
+      ],
       "excludedComponentId":"catacombesDeLaMort",
+      "hasActionPower":true,
+      "hasConditionalVictoryPoint":true,
+      "hasCost":true,
+      "hasDiscountAbility":false,
+      "hasReactPower":false,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":false,
-      "isCreature":false,
-      "isDragon":false,
+      "hasVictoryPoint":true,
       "name":"Puits Sacrificiel",
-      "type":"placeOfPower"
+      "type":"placeOfPower",
+      "victoryPoint":2
    },
    {
       "id":"reanimation",
+      "actionPowerList":[
+
+      ],
       "class":"reanimation",
+      "hasActionPower":true,
+      "hasDiscountAbility":false,
+      "hasReactPower":false,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":false,
-      "isCreature":false,
-      "isDragon":false,
       "name":"Réanimation",
       "type":"magicItem"
    },
    {
       "id":"recherches",
+      "actionPowerList":[
+
+      ],
       "class":"recherches",
+      "hasActionPower":true,
+      "hasDiscountAbility":false,
+      "hasReactPower":false,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":false,
-      "isCreature":false,
-      "isDragon":false,
       "name":"Recherches",
       "type":"magicItem"
    },
    {
       "id":"recifDesNaufrageurs",
+      "actionPowerList":[
+
+      ],
       "class":"recif_des_naufrageurs",
+      "conditionalVictoryPointList":[
+
+      ],
+      "costEssenceList":[
+         {
+            "quantity":5,
+            "type":"calm"
+         },
+         {
+            "quantity":2,
+            "type":"elan"
+         },
+         {
+            "quantity":2,
+            "type":"life"
+         }
+      ],
       "excludedComponentId":"manoirDeCorail",
+      "hasActionPower":true,
+      "hasConditionalVictoryPoint":true,
+      "hasCost":true,
+      "hasDiscountAbility":false,
+      "hasReactPower":false,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":true,
-      "isCreature":false,
-      "isDragon":false,
+      "hasVictoryPoint":false,
       "name":"Récif des Naufrageurs",
       "standardCollectAbility":{
          "essenceList":[
@@ -839,32 +1810,80 @@ export const GameComponents = [
    },
    {
       "id":"repaireDesDragons",
+      "actionPowerList":[
+
+      ],
       "class":"repaire_des_dragons",
+      "conditionalVictoryPointList":[
+
+      ],
+      "costEssenceList":[
+         {
+            "quantity":3,
+            "type":"elan"
+         },
+         {
+            "quantity":3,
+            "type":"life"
+         },
+         {
+            "quantity":3,
+            "type":"calm"
+         },
+         {
+            "quantity":3,
+            "type":"death"
+         }
+      ],
+      "discountAbilityList":[
+
+      ],
       "excludedComponentId":"bestiaireDuSorcier",
+      "hasActionPower":true,
+      "hasConditionalVictoryPoint":true,
+      "hasCost":true,
+      "hasDiscountAbility":true,
+      "hasReactPower":false,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":false,
-      "isCreature":false,
-      "isDragon":false,
+      "hasVictoryPoint":false,
       "name":"Repaire des dragons",
       "type":"placeOfPower"
    },
    {
       "id":"rossignol",
       "class":"rossignol",
+      "costEssenceList":[
+         {
+            "quantity":1,
+            "type":"life"
+         },
+         {
+            "quantity":1,
+            "type":"calm"
+         }
+      ],
+      "hasActionPower":false,
+      "hasCost":true,
+      "hasDiscountAbility":false,
+      "hasReactPower":false,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":false,
-      "isCreature":false,
+      "hasVictoryPoint":true,
+      "isCreature":true,
       "isDragon":false,
       "name":"Rossignol",
-      "type":"artefact"
+      "type":"artefact",
+      "victoryPoint":1
    },
    {
       "id":"sereniteVigueur",
       "class":"serenite_vigueur",
+      "hasActionPower":false,
+      "hasDiscountAbility":false,
+      "hasReactPower":false,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":true,
-      "isCreature":false,
-      "isDragon":false,
       "name":"Sérénité Vigueur",
       "standardCollectAbility":{
          "essenceList":[
@@ -883,20 +1902,57 @@ export const GameComponents = [
    },
    {
       "id":"serpentDeMer",
+      "actionPowerList":[
+
+      ],
       "class":"serpent_de_mer",
+      "costEssenceList":[
+         {
+            "quantity":6,
+            "type":"calm"
+         },
+         {
+            "quantity":3,
+            "type":"life"
+         }
+      ],
+      "hasActionPower":true,
+      "hasCost":true,
+      "hasDiscountAbility":false,
+      "hasReactPower":false,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":false,
-      "isCreature":false,
-      "isDragon":false,
+      "hasVictoryPoint":true,
+      "isCreature":true,
+      "isDragon":true,
       "name":"Serpent de Mer",
-      "type":"artefact"
+      "type":"artefact",
+      "victoryPoint":1
    },
    {
       "id":"sirene",
+      "actionPowerList":[
+
+      ],
       "class":"sirene",
+      "costEssenceList":[
+         {
+            "quantity":2,
+            "type":"life"
+         },
+         {
+            "quantity":2,
+            "type":"calm"
+         }
+      ],
+      "hasActionPower":true,
+      "hasCost":true,
+      "hasDiscountAbility":false,
+      "hasReactPower":false,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":true,
-      "isCreature":false,
+      "hasVictoryPoint":false,
+      "isCreature":true,
       "isDragon":false,
       "name":"Sirène",
       "standardCollectAbility":{
@@ -912,11 +1968,17 @@ export const GameComponents = [
    },
    {
       "id":"sorciere",
+      "actionPowerList":[
+
+      ],
       "class":"sorciere",
+      "hasActionPower":true,
+      "hasAlternative":true,
+      "hasDiscountAbility":false,
+      "hasReactPower":false,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":true,
-      "isCreature":false,
-      "isDragon":false,
+      "isAlternative":false,
       "name":"Sorcière",
       "standardCollectAbility":{
          "essenceList":[
@@ -936,11 +1998,33 @@ export const GameComponents = [
    {
       "id":"sourceElementaire",
       "class":"source_elementaire",
+      "costEssenceList":[
+         {
+            "quantity":2,
+            "type":"elan"
+         },
+         {
+            "quantity":1,
+            "type":"life"
+         },
+         {
+            "quantity":1,
+            "type":"calm"
+         }
+      ],
+      "hasActionPower":false,
+      "hasCost":true,
+      "hasDiscountAbility":false,
+      "hasReactPower":true,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":true,
+      "hasVictoryPoint":false,
       "isCreature":false,
       "isDragon":false,
       "name":"Source Élémentaire",
+      "reactPowerList":[
+
+      ],
       "standardCollectAbility":{
          "essenceList":[
             {
@@ -963,31 +2047,77 @@ export const GameComponents = [
    {
       "id":"statueSacree",
       "class":"statue_sacree",
+      "costEssenceList":[
+         {
+            "quantity":4,
+            "type":"gold"
+         }
+      ],
+      "hasActionPower":false,
+      "hasCost":true,
+      "hasDiscountAbility":false,
+      "hasPlacementPower":false,
+      "hasReactPower":true,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":false,
-      "isCreature":false,
-      "isDragon":false,
+      "hasVictoryPoint":true,
       "name":"Statue Sacrée",
-      "type":"monument"
+      "reactPowerList":[
+
+      ],
+      "type":"monument",
+      "victoryPoint":1
    },
    {
       "id":"statuetteOrnee",
+      "actionPowerList":[
+
+      ],
       "class":"statuette_ornee",
+      "costEssenceList":[
+         {
+            "quantity":2,
+            "type":"death"
+         },
+         {
+            "quantity":1,
+            "type":"gold"
+         }
+      ],
+      "hasActionPower":true,
+      "hasCost":true,
+      "hasDiscountAbility":false,
+      "hasReactPower":false,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":false,
+      "hasVictoryPoint":true,
       "isCreature":false,
       "isDragon":false,
       "name":"Statuette Ornée",
-      "type":"artefact"
+      "type":"artefact",
+      "victoryPoint":1
    },
    {
       "id":"temple",
       "class":"temple",
+      "costEssenceList":[
+         {
+            "quantity":4,
+            "type":"gold"
+         }
+      ],
+      "hasActionPower":false,
+      "hasCost":true,
+      "hasDiscountAbility":false,
+      "hasPlacementPower":false,
+      "hasReactPower":true,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":true,
-      "isCreature":false,
-      "isDragon":false,
+      "hasVictoryPoint":true,
       "name":"Temple",
+      "reactPowerList":[
+
+      ],
       "standardCollectAbility":{
          "essenceList":[
             {
@@ -997,17 +2127,37 @@ export const GameComponents = [
          ],
          "multipleCollectOptions":false
       },
-      "type":"monument"
+      "type":"monument",
+      "victoryPoint":2
    },
    {
       "id":"tourDeLAlchimiste",
+      "actionPowerList":[
+
+      ],
       "class":"tour_de_l_alchimiste",
+      "conditionalVictoryPointList":[
+
+      ],
+      "costEssenceList":[
+         {
+            "quantity":3,
+            "type":"gold"
+         }
+      ],
       "excludedComponentId":"bosquetSacre",
+      "hasActionPower":true,
+      "hasConditionalVictoryPoint":true,
+      "hasCost":true,
+      "hasDiscountAbility":false,
+      "hasReactPower":true,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":true,
-      "isCreature":false,
-      "isDragon":false,
+      "hasVictoryPoint":false,
       "name":"Tour de l'Alchimiste",
+      "reactPowerList":[
+
+      ],
       "standardCollectAbility":{
          "essenceList":[
             {
@@ -1021,30 +2171,58 @@ export const GameComponents = [
    },
    {
       "id":"transmutation",
+      "actionPowerList":[
+
+      ],
       "class":"transmutation",
+      "hasActionPower":true,
+      "hasDiscountAbility":false,
+      "hasReactPower":false,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":false,
-      "isCreature":false,
-      "isDragon":false,
       "name":"Transmutation",
       "type":"magicItem"
    },
    {
       "id":"transmutatrice",
+      "actionPowerList":[
+
+      ],
       "class":"transmutatrice",
+      "hasActionPower":true,
+      "hasAlternative":true,
+      "hasDiscountAbility":false,
+      "hasReactPower":false,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":false,
-      "isCreature":false,
-      "isDragon":false,
+      "isAlternative":false,
       "name":"Transmutatrice",
       "type":"mage"
    },
    {
       "id":"treant",
+      "actionPowerList":[
+
+      ],
       "class":"treant",
+      "costEssenceList":[
+         {
+            "quantity":3,
+            "type":"life"
+         },
+         {
+            "quantity":2,
+            "type":"elan"
+         }
+      ],
+      "hasActionPower":true,
+      "hasCost":true,
+      "hasDiscountAbility":false,
+      "hasReactPower":false,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":true,
-      "isCreature":false,
+      "hasVictoryPoint":false,
+      "isCreature":true,
       "isDragon":false,
       "name":"Tréant",
       "standardCollectAbility":{
@@ -1060,11 +2238,17 @@ export const GameComponents = [
    },
    {
       "id":"voyante",
+      "actionPowerList":[
+
+      ],
       "class":"voyante",
+      "hasActionPower":true,
+      "hasAlternative":true,
+      "hasDiscountAbility":false,
+      "hasReactPower":false,
       "hasSpecificCollectAbility":false,
       "hasStandardCollectAbility":true,
-      "isCreature":false,
-      "isDragon":false,
+      "isAlternative":false,
       "name":"Voyante",
       "standardCollectAbility":{
          "essenceList":[

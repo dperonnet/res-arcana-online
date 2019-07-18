@@ -76,6 +76,13 @@ class ComponentForm extends Component {
           delete component.actionPowerList
         }
         break
+      case 'hasPlacementPower':
+        if (valueToUpdate === true) {
+          component.placementPowerList = []
+        } else {
+          delete component.placementPowerList
+        }
+        break
       case 'hasReactPower':
         if (valueToUpdate === true) {
           component.reactPowerList = []
@@ -83,14 +90,14 @@ class ComponentForm extends Component {
           delete component.reactPowerList
         }
         break
-      case 'hasVictoryPoints':
+      case 'hasVictoryPoint':
         if (valueToUpdate === true) {
-          component.victoryPoints = 1
+          component.victoryPoint = 1
         } else {
-          delete component.victoryPoints
+          delete component.victoryPoint
         }
         break
-      case 'hasConditionalVictoryPoints':
+      case 'hasConditionalVictoryPoint':
         if (valueToUpdate === true) {
           component.conditionalVictoryPointList = []
         } else {
@@ -119,10 +126,10 @@ class ComponentForm extends Component {
           component.isCreature = false
         }
         if (valueToUpdate === 'placeOfPower') {
-          component.hasConditionalVictoryPoints = false
+          component.hasConditionalVictoryPoint = false
           component.excludedComponentId = ""
         } else {
-          delete component.hasConditionalVictoryPoints
+          delete component.hasConditionalVictoryPoint
           delete component.excludedComponentId
         }
         break
@@ -317,6 +324,16 @@ class ComponentForm extends Component {
                   onChange={this.handleFormChange}/>
               </InputGroup>
 
+              { component.type === 'monument' &&
+                <InputGroup className="mb-3">
+                  <Form.Check inline type="checkbox" name="hasPlacementPower"
+                    id="hasPlacementPower" label="Has placement power"
+                    value={component.hasPlacementPower}
+                    checked={component.hasPlacementPower}
+                    onChange={this.handleFormChange}/>
+                </InputGroup>
+              }
+
               <InputGroup className="mb-3">
                 <Form.Check inline type="checkbox" name="hasReactPower"
                   id="hasReactPower" label="Has react power"
@@ -328,23 +345,23 @@ class ComponentForm extends Component {
               { component.type !== 'mage' && component.type !== 'magicItem' &&
                 <>
                   <InputGroup className="mb-3">
-                    <Form.Check inline type="checkbox" name="hasVictoryPoints"
-                      id="hasVictoryPoints" label="Has victory point(s)"
-                      value={component.hasVictoryPoints}
-                      checked={component.hasVictoryPoints}
+                    <Form.Check inline type="checkbox" name="hasVictoryPoint"
+                      id="hasVictoryPoint" label="Has victory point(s)"
+                      value={component.hasVictoryPoint}
+                      checked={component.hasVictoryPoint}
                       onChange={this.handleFormChange}/>
 
-                    { component.hasVictoryPoints && 
+                    { component.hasVictoryPoint && 
                       <>
                         <InputGroup.Prepend>
-                          <InputGroup.Text className="victory-points" id="victoryPoints">{component.victoryPoints || 0}</InputGroup.Text>
+                          <InputGroup.Text className="victory-points" id="victoryPoint">{component.victoryPoint || 0}</InputGroup.Text>
                         </InputGroup.Prepend>
                         <InputGroup.Append>
                           <div className="vertical-buttons">
-                            <Button variant="secondary" id="lowerVictoryPoints"
-                              onClick={() => this.increment("victoryPoints")}><span>+</span></Button>
-                            <Button variant="secondary" id="raiseVictoryPoints"
-                              onClick={() => this.decrement("victoryPoints")}><span>-</span></Button>
+                            <Button variant="secondary" id="lowerVictoryPoint"
+                              onClick={() => this.increment("victoryPoint")}><span>+</span></Button>
+                            <Button variant="secondary" id="raiseVictoryPoint"
+                              onClick={() => this.decrement("victoryPoint")}><span>-</span></Button>
                           </div>
                         </InputGroup.Append>
                       </>
@@ -356,10 +373,10 @@ class ComponentForm extends Component {
               { component.type === 'placeOfPower' &&
                 <>
                   <InputGroup className="mb-3">
-                    <Form.Check inline type="checkbox" name="hasConditionalVictoryPoints"
+                    <Form.Check inline type="checkbox" name="hasConditionalVictoryPoint"
                       id="hasConditionalVictoryPoints" label="Has conditional victory point(s)"
-                      value={component.hasConditionalVictoryPoints}
-                      checked={component.hasConditionalVictoryPoints}
+                      value={component.hasConditionalVictoryPoint}
+                      checked={component.hasConditionalVictoryPoint}
                       onChange={this.handleFormChange}/>
                   </InputGroup>
                 </>
@@ -457,7 +474,7 @@ class EssencePanel extends Component {
       return item.type === type
     })    
     if(typeIndex !== -1) {
-      if(data[typeIndex].quantity > 1) {
+      if(data[typeIndex].quantity > 0) {
         --data[typeIndex].quantity
       } else {
         data.splice(typeIndex, 1)
