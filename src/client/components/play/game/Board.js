@@ -441,10 +441,8 @@ class ResArcanaBoard extends Component {
     }
     return <div className={'card-row flex-col ' + profile.cardSize + fixedHeight}>
       {separator && <div className="separator"></div>}
-      <div className="action-container">
-        <div>
-          {hand}
-        </div>
+      <div className="action-container v-centered">
+        {hand}
       </div>
       <h5 className="directive">Cards in hand ({G.publicData.players[playerID].handSize})</h5>
     </div>;
@@ -846,9 +844,8 @@ class ResArcanaBoard extends Component {
     const { addToEssencePickerSelection, essencePickerSelection, resetEssencePickerSelection, selectAction, selectedAction, selectedComponent } = this.props
     let directive = selectedComponent &&<h5 className="directive">Choose an action for {selectedComponent.name}</h5>
     let actionPanel = null
-    let costFrame = null
     let essenceList = Object.entries(essencePickerSelection).map((essence, index) => {
-      let isLast =  index === Object.entries(essencePickerSelection).length -1
+      let isLast = index === Object.entries(essencePickerSelection).length -1
       return <div key={essence[0]} className={'collect-option '}>
         <div className={'type essence ' + essence[0]}>{essence[1] || 0}</div>
         {!isLast && <div className="option-and">
@@ -867,13 +864,13 @@ class ResArcanaBoard extends Component {
           directive =  isValid ?
             <h5 className="directive">
               <div className="inline-text">Discard {selectedComponent.name} for </div>
-              <div className='inline-text collect-options'>{essenceList}</div>
+              <div className="inline-text collect-options">{essenceList}</div>
               <div className="inline-text">?</div>
             </h5>
             :
             <h5 className="directive">
               <div className="inline-text">Select </div>
-              <div className="inline-text collect-options">
+              <div className="inline-text">
                 <div className="collect-option">
                   <div className="inline-essence essence any-but-gold small">2</div>
                 </div>
@@ -885,21 +882,25 @@ class ResArcanaBoard extends Component {
           directive =
             <h5 className="directive">
               <div className="inline-text">Discard {selectedComponent.name} for </div>
-              <div className='inline-text collect-options'>{essenceList}</div>
+              <div className="inline-text">{essenceList}</div>
               <div className="inline-text">?</div>
             </h5>
           splitContainer = false
           break
         case 'PLACE_ARTEFACT':
-          actionPanel = 
+          let essences = selectedComponent.costEssenceList.map((essence) => {
+            return <div className={'inline-essence essence ' + (essence.type)}>{essence.quantity}</div>
+          });
+          actionPanel = <div className="flex-row">
             <div className="cost-frame-v">
               <div className="cost-frame-content">
-                <div className="inline-essence essence elan small">1</div>
-                <div className="inline-essence essence life small">1</div>
-                <div className="inline-essence essence calm small">1</div>
-                <div className="inline-essence essence death small">1</div>
+                {essences}
               </div>
             </div>
+            <div className="cost-container">
+              <EssencePicker essencePickerType={'any'} essenceNumber={2}/>
+            </div>
+          </div>
           break
         default:
       }
@@ -922,7 +923,6 @@ class ResArcanaBoard extends Component {
     return <>
       <div className={'action-container' + (splitContainer ? ' split' : '')}>
         <div className="action-component">
-          {costFrame}
           {this.renderGameComponent(selectedComponent)}
         </div>
         {actionPanel && <div className="action-list">
@@ -935,11 +935,43 @@ class ResArcanaBoard extends Component {
   
   renderClaimAction = () => {
     const { selectedComponent } = this.props
+    let costEssenceList = selectedComponent.costEssenceList ? selectedComponent.costEssenceList : [{type: 'gold', quantity: 4}]
+
+    let costFrameEssenceList = costEssenceList.map((essence) => {
+      return <div className={'inline-essence essence ' + (essence.type)}>{essence.quantity}</div>
+    });
+    let actionPanel = <div className="cost-frame-v">
+      <div className="cost-frame-content">
+        {costFrameEssenceList}
+      </div>
+    </div>
+
+    let directiveEssenceList = costEssenceList.map((essence, index) => {
+      let isLast = index === costEssenceList.length -1
+      return <div key={essence.type} className={'collect-option '}>
+        <div className={'type essence ' + essence.type}>{essence.quantity}</div>
+        {!isLast && <div className="option-and">
+          <FontAwesomeIcon icon={faPlus} size="sm" />
+        </div>}
+      </div>
+    })
+    let componentName = (selectedComponent.name === 'Monument' ? 'a random ' : '') + selectedComponent.name
+    let directive = <h5 className="directive">
+      <div className="inline-text">Claim {componentName} for </div>
+      <div className="inline-text collect-options">{directiveEssenceList}</div>
+      <div className="inline-text">?</div>
+    </h5>
+
     return <>
       <div className="action-container">
-        {this.renderGameComponent(selectedComponent)}
+        <div className="action-component">
+          {this.renderGameComponent(selectedComponent)}
+          {actionPanel && <div className="action-list">
+            {actionPanel}
+          </div>}
+        </div>
       </div>
-      {selectedComponent &&<h5 className="directive">Claim {selectedComponent.name} ?</h5>}
+      {selectedComponent && directive}
     </>
   }
 
@@ -1113,7 +1145,7 @@ class ResArcanaBoard extends Component {
     const sizeSetting = profile && profile.cardSize ? profile.cardSize : 'normal'
     const layoutSetting = profile && profile.layout ? profile.layout : 'vertical'
     return <div className={'board-'+layoutSetting} onClick={() => this.handleBoardClick()}>
-      {false && <div className={'common-board ' + sizeSetting}>
+      {true && <div className={'common-board ' + sizeSetting}>
         {this.renderCommonBoard()}
       </div>}
       <div className="board" ref='board'>

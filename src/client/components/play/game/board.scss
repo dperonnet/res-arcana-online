@@ -141,6 +141,7 @@
   min-width: 320px;
 
   .card-row {
+    position: relative;
     margin: auto;
     text-align: center;
     
@@ -163,7 +164,6 @@
 
     .action-container {
       flex: 1;
-      align-items: center;
       display: flex;
       justify-content: center;
 
@@ -196,6 +196,7 @@
 
   .button-list {
     flex-direction: row;
+    justify-content: center;
   
     .option {
       width: 120px;
@@ -211,8 +212,10 @@
     padding: 0 15px;
     flex: 1;
     z-index: 1;
+    justify-content: center;
     
     .option {
+      height: 43px;
       text-align: left;
     }
 
@@ -223,7 +226,6 @@
 
   .action-list, .button-list {
     display: flex;
-    justify-content: center;
 
     .option {
       width: 190px;
@@ -252,25 +254,35 @@
   }
 }
 
-
 .inline-text {
   display: inline-block;
   vertical-align: top;
-  
-  .collect-option {
-    margin-top: -5px;
+
+  &.collect-options {
+    min-width: unset;
+
+    .collect-option {
+      margin-top: -5px;
+    }
   }
 }
 
 .large, .x-large {
-  .inline-text .collect-option {
-    margin-top: -11px;
+  .inline-text {    
+    &.collect-options {
+      min-width: unset;
+    }
+
+    .collect-option {
+      margin-top: -11px;
+    }
   }
 }
 
 .option {
   .inline-text {
     vertical-align: -webkit-baseline-middle;
+    vertical-align: -moz-middle-with-baseline;
   }
 }
 
@@ -428,8 +440,7 @@
   margin-top: 8px;
   height: 38px;
   font-size: 1.15rem;
-  line-height: 1.4;
-  vertical-align: -webkit-baseline-middle;
+  line-height: 2;
 }
 
 .cost-frame-h {
@@ -543,6 +554,12 @@
     bottom: -14px;
     z-index: 10;
   }
+}
+
+.cost-container {
+  display: inline-block;
+  flex: 1;
+  text-align: left;
 }
 
 .game-icon {

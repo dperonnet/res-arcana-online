@@ -39,7 +39,7 @@ class EssencePicker extends Component {
       picker =  essenceList.map((type, index) => {
         let isLast = index === (Object.entries(essenceList).length -1)
         return <div key={type} className="collect-option">
-          <div className={'essence ' + type}
+          <div className={'essence pointer-cursor ' + type}
             onClick={() => this.handleAddEssence(type)}>
             {essencePickerSelection[type] || 0}
           </div>

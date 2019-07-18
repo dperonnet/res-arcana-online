@@ -8,7 +8,7 @@
   text-align: center;
   background-image: url("../../../assets/image/essences.png");
   background-repeat: no-repeat;
-  background-size: 540px 38px;
+  background-size: 540px 36px;
   height: 50px;
   width: 40px;
   margin: 0 2px;
@@ -31,7 +31,8 @@
     background-position: -185px 5px;
   }
   &.any {
-    background-position: -210px 5px;
+    background-position: -205px 7px;
+    background-size: 489px 34px
   }
   &.any-but-gold {
     background-position: -229px 0;
@@ -77,7 +78,8 @@
       background-position: -146px 0;
     }    
     &.any {
-      background-position: -180px 0;
+      background-position: -168px 0;
+      background-size: 400px 28px;
       width: 32px;
     }
     &.any-but-gold {
