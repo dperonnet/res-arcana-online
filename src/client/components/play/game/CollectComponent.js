@@ -235,7 +235,6 @@ class CollectComponent extends Component {
     let validSpecific = false
 
     const ready = status === 'READY'
-    console.log('component',component);
     if (component.hasSpecificCollectAbility) {
       switch (component.id) {
         case 'automate':

@@ -872,7 +872,7 @@ class ResArcanaBoard extends Component {
               <div className="inline-text">Select </div>
               <div className="inline-text">
                 <div className="collect-option">
-                  <div className="inline-essence essence any-but-gold small">2</div>
+                  <div className="essence any-but-gold small">2</div>
                 </div>
               </div>
             </h5>
@@ -889,16 +889,22 @@ class ResArcanaBoard extends Component {
           break
         case 'PLACE_ARTEFACT':
           let essences = selectedComponent.costEssenceList.map((essence) => {
-            return <div className={'inline-essence essence ' + (essence.type)}>{essence.quantity}</div>
+            let singleEssence = selectedComponent.costEssenceList.length === 1 ? ' single-essence' : ''
+            let payOk = <div className="pay-ok"></div>
+            return <div className={'essence ' + (essence.type) + singleEssence}>{payOk}{essence.quantity}</div>
           });
-          actionPanel = <div className="flex-row">
+          actionPanel = <div className="component-cost flex-row">
             <div className="cost-frame-v">
               <div className="cost-frame-content">
                 {essences}
               </div>
             </div>
             <div className="cost-container">
-              <EssencePicker essencePickerType={'any'} essenceNumber={2}/>
+              <h5>Pay with:</h5>
+              <h5 className="cost-source"><div className="essence any small">-1</div><div className="inline-text"> from Artificier </div></h5>
+              <div className="">
+                <EssencePicker essencePickerType={'any'} essenceNumber={2}/>
+              </div>
             </div>
           </div>
           break
@@ -911,11 +917,11 @@ class ResArcanaBoard extends Component {
         </div>
         <div className="option small" size="sm" onClick={() => selectAction('DISCARD_FOR_2E')}>
           <div className="inline-text">Discard for </div>
-          <div className="inline-essence essence any-but-gold small">2</div>
+          <div className="essence any-but-gold small">2</div>
         </div>
         <div className="option small" size="sm" onClick={() => {resetEssencePickerSelection(); addToEssencePickerSelection('gold'); selectAction('DISCARD_FOR_1G')}}>
           <div className="inline-text">Discard for </div>
-          <div className="inline-essence essence gold small">1</div>
+          <div className="essence gold small">1</div>
         </div>
       </>
     }
@@ -938,9 +944,10 @@ class ResArcanaBoard extends Component {
     let costEssenceList = selectedComponent.costEssenceList ? selectedComponent.costEssenceList : [{type: 'gold', quantity: 4}]
 
     let costFrameEssenceList = costEssenceList.map((essence) => {
-      return <div className={'inline-essence essence ' + (essence.type)}>{essence.quantity}</div>
+      let singleEssence = costEssenceList.length === 1 ? ' single-essence' : ''
+      return <div key={essence.type} className={'essence ' + (essence.type) + singleEssence}>{essence.quantity}</div>
     });
-    let actionPanel = <div className="cost-frame-v">
+    let componentCost = <div className="cost-frame-v">
       <div className="cost-frame-content">
         {costFrameEssenceList}
       </div>
@@ -966,9 +973,9 @@ class ResArcanaBoard extends Component {
       <div className="action-container">
         <div className="action-component">
           {this.renderGameComponent(selectedComponent)}
-          {actionPanel && <div className="action-list">
-            {actionPanel}
-          </div>}
+          <div className="component-cost">
+            {componentCost}
+          </div>
         </div>
       </div>
       {selectedComponent && directive}
@@ -982,13 +989,41 @@ class ResArcanaBoard extends Component {
       return this.renderGameComponent(magicItem, {onClick: (event) => this.handleClick(event, magicItem), onDoubleClick: () => this.pass(magicItem.id)})
     })
     return <>
-      <div className="action-container">
+      <div className="action-container v-centered">
         {magicItems}
       </div>
       {directive}
     </>
   }
   
+  /*canPayCost = (essenceToPayList, ) => {
+    const { G } = this.props
+    let canPay = true
+    let sumDiscount
+    let availableEssencePool = []//copy(playerEssencePool)
+    let anyEssencePool
+    let minEssencePayList = [] // List of the minimum the player must pay for each essences.
+    let legalEssenceList = [] // List of legal essences the player can use to pay the cost.
+
+    // Check if there are enougth gold to pay
+    let goldToPay = essenceToPayList.filter((essence) => essence.type === 'gold')
+    if (goldToPay.length > 0 && goldToPay[0].quantity > availableEssencePool['gold']){
+        return {value: false}
+    } else {
+      let excedentGold = availableEssencePool['gold'] - goldToPay.quantity ? goldToPay.quantity : 0
+      anyEssencePool = excedentGold >= 0 ? excedentGold : 0
+      minEssencePayList['gold'] = goldToPay.quantity
+    }
+
+    let essences = essenceToPayList.filter((essence) => essence.type !== 'gold' && essence.type !== 'any')
+    essences.forEach((essenceToPay) => {
+      //
+    })
+    // Sum discount ability
+
+    return { value: canPay }
+  }*/
+
   renderCurrentAction = () => {
     const { essencePickerSelection, profile, selectAction, selectedAction, selectedComponent } = this.props
 

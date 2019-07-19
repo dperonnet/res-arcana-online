@@ -182,6 +182,11 @@
         display: inline-block;
         align-self: center;
         flex: 1;
+
+        > div {
+          display: inline-block;
+          vertical-align: top;
+        }
       }
 
       &.split {
@@ -191,8 +196,17 @@
           flex-direction: row-reverse;
         }
       }
+
+      .component-cost {
+        margin: 20px 8px 0 8px;
+      }
+    }
+    
+    &.small .action-container .component-cost {
+      margin: 8px 8px 0 8px;
     }
   }
+  
 
   .button-list {
     flex-direction: row;
@@ -510,7 +524,7 @@
 }
 
 .cost-frame-v {
-  display: inline-block;
+  display: flex;
   background-image: url("../../../assets/image/cost-frame-content-v.png");
   background-repeat: repeat-y;
   background-size: 36px 1px;
@@ -519,6 +533,10 @@
   padding-left: -2px;
   width: 38px;
   position: relative;
+
+  .single-essence.essence {
+    margin-left: 4px;
+  }
 
   .cost-frame-content {
     display: inline-block;
@@ -560,6 +578,14 @@
   display: inline-block;
   flex: 1;
   text-align: left;
+  margin-left: 20px;
+  
+  h5 {
+    text-align: left;
+  }
+  .cost-source {
+    margin-left: 8px;
+  }
 }
 
 .game-icon {

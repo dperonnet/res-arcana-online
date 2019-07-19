@@ -13,22 +13,23 @@
   width: 40px;
   margin: 0 2px;
   padding-top: 26px;
+  position: relative;
   vertical-align: top;
   
   &.elan {
     background-position: 4px 5px;
   }
   &.life {
-    background-position: -43px 5px;
+    background-position: -42px 5px;
   }
   &.calm {
-    background-position: -90px 5px;
+    background-position: -89px 5px;
   }
   &.death {
-    background-position: -138px 5px;
+    background-position: -135px 5px;
   }
   &.gold {
-    background-position: -185px 5px;
+    background-position: -182px 5px;
   }
   &.any {
     background-position: -205px 7px;
@@ -66,16 +67,16 @@
       background-position: 3px 0;
     }
     &.life {
-      background-position: -34px 0;
+      background-position: -33px 0;
     }
     &.calm {
-      background-position: -71px 0;
+      background-position: -70px 0;
     }
     &.death {
-      background-position: -109px 0;
+      background-position: -107px 0;
     }
     &.gold {
-      background-position: -146px 0;
+      background-position: -144px 0;
     }    
     &.any {
       background-position: -168px 0;
@@ -196,6 +197,19 @@
   height: 16px;
   width: 16px;
   background-image: url("../../../assets/image/delete.png");
+  background-size: 14px;
+  background-position: 0 0;
+  background-repeat: no-repeat;
+}
+
+.pay-ok {
+  display: block;
+  position: absolute;
+  left: 2px;
+  bottom: 0;
+  height: 16px;
+  width: 16px;
+  background-image: url("../../../assets/image/tick.png");
   background-size: 14px;
   background-position: 0 0;
   background-repeat: no-repeat;
