@@ -24,3 +24,4 @@ yarn-error.log*
 
 src/server/serviceAccountKey.json
 src/client/assets/image/components/*
+package-lock.json
