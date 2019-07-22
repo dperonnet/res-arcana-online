@@ -888,25 +888,7 @@ class ResArcanaBoard extends Component {
           splitContainer = false
           break
         case 'PLACE_ARTEFACT':
-          let essences = selectedComponent.costEssenceList.map((essence) => {
-            let singleEssence = selectedComponent.costEssenceList.length === 1 ? ' single-essence' : ''
-            let payOk = <div className="pay-ok"></div>
-            return <div className={'essence ' + (essence.type) + singleEssence}>{payOk}{essence.quantity}</div>
-          });
-          actionPanel = <div className="component-cost flex-row">
-            <div className="cost-frame-v">
-              <div className="cost-frame-content">
-                {essences}
-              </div>
-            </div>
-            <div className="cost-container">
-              <h5>Pay with:</h5>
-              <h5 className="cost-source"><div className="essence any small">-1</div><div className="inline-text"> from Artificier </div></h5>
-              <div className="">
-                <EssencePicker essencePickerType={'any'} essenceNumber={2}/>
-              </div>
-            </div>
-          </div>
+          actionPanel = this.renderCostHandler()
           break
         default:
       }
@@ -939,6 +921,81 @@ class ResArcanaBoard extends Component {
     </>
   }
   
+  renderCostHandler = () => {
+    const { G, playerID, selectedComponent } = this.props
+    let essences = selectedComponent.costEssenceList.map((essence, index) => {
+      let singleEssence = selectedComponent.costEssenceList.length === 1 ? ' single-essence' : ''
+      let payOk = <div className="pay-ok"></div>
+      return <div key={index} className={'essence ' + (essence.type) + singleEssence}>
+        {payOk}{essence.quantity}
+      </div>
+    });
+
+    let discounts = G.publicData.players[playerID].inPlay.filter((component) => component.hasDiscountAbility).map((component) => {
+      return this.discountValidator(component, selectedComponent).map((ability, index) => 
+        <h5 className="cost-source" key={index}>
+          {ability.discountList.map((discount) => 
+            <div key={discount.type} className={'essence ' + discount.type + ' small'}>{discount.quantity}</div>
+          )}
+          <div className="inline-text"> from {component.name} </div>
+        </h5>
+      )
+    })
+
+    return <div className="component-cost flex-row">
+      <div className="cost-frame-v">
+        <div className="cost-frame-content">
+          {essences}
+        </div>
+      </div>
+      <div className="cost-container">
+        <h5>Pay with:</h5>
+        {discounts}
+        <div className="">
+          <EssencePicker essencePickerType={'any'} essenceNumber={2}/>
+        </div>
+      </div>
+    </div>
+  }
+
+  /**
+   * Return all the valid discounts available from a component for a selected component.
+   * 
+   * @param {*} discountComponent component with discount abilities.
+   * @param {*} component selected component.
+   */
+  discountValidator = (discountComponent, component) => {
+    console.log('discountValidator', discountComponent, component);
+    const validate = (type) => {
+      console.log('validate', type, component);
+      switch(type) {
+        case 'artefact':
+          return component.type === 'artefact'
+        case 'monument':
+          return component.type === 'monument'
+        case 'placeOfPower':
+          return component.type === 'placeOfPower'
+        case 'creature':
+          return component.isCreature
+        case 'dragon':
+          return component.isDragon
+        default:
+          return false
+      }
+    }
+    console.log('abilities', discountComponent.discountAbilityList.filter((discount) => {
+      let valid = false
+      discount.type.forEach((type) => valid |= validate(type))
+      console.log('valid',valid)
+      return valid
+    }))
+    return discountComponent.discountAbilityList.filter((discount) => {
+      let valid = false
+      discount.type.forEach((type) => valid |= validate(type))
+      return valid
+    })
+  }
+
   renderClaimAction = () => {
     const { selectedComponent } = this.props
     let costEssenceList = selectedComponent.costEssenceList ? selectedComponent.costEssenceList : [{type: 'gold', quantity: 4}]
@@ -996,8 +1053,8 @@ class ResArcanaBoard extends Component {
     </>
   }
   
-  /*canPayCost = (essenceToPayList, ) => {
-    const { G } = this.props
+  canPayCost = (essenceToPayList, ) => {
+    const { G, playerID, selectedComponent } = this.props
     let canPay = true
     let sumDiscount
     let availableEssencePool = []//copy(playerEssencePool)
@@ -1005,24 +1062,46 @@ class ResArcanaBoard extends Component {
     let minEssencePayList = [] // List of the minimum the player must pay for each essences.
     let legalEssenceList = [] // List of legal essences the player can use to pay the cost.
 
+    // Sum discount ability
+    G.publicData.players[playerID].inPlay.filter((component) => component.hasDiscountAbility).forEach((component) => {
+      return this.discountValidator(component, selectedComponent).forEach(discount => sumDiscount = sumDiscount + discount.quantity)
+    })
+
+    let essences = essenceToPayList.filter((essence) => essence.type !== 'gold' && essence.type !== 'any')
+    let anyEssences = essenceToPayList.filter((essence) => essence.type === 'any')[0]
+
+    // if there is no discount and no type 'any' in cost list, then the cost is fixed.
+    let fixedCost = anyEssences === 0 && sumDiscount === 0
+
     // Check if there are enougth gold to pay
     let goldToPay = essenceToPayList.filter((essence) => essence.type === 'gold')
     if (goldToPay.length > 0 && goldToPay[0].quantity > availableEssencePool['gold']){
         return {value: false}
     } else {
-      let excedentGold = availableEssencePool['gold'] - goldToPay.quantity ? goldToPay.quantity : 0
+      let excedentGold = availableEssencePool['gold'] - (goldToPay.quantity ? goldToPay.quantity : 0)
       anyEssencePool = excedentGold >= 0 ? excedentGold : 0
       minEssencePayList['gold'] = goldToPay.quantity
     }
 
-    let essences = essenceToPayList.filter((essence) => essence.type !== 'gold' && essence.type !== 'any')
     essences.forEach((essenceToPay) => {
-      //
+      let qttAvailable = availableEssencePool[essenceToPay.type]
+      let qttToPay = essenceToPay.quantity
+      if (qttToPay > 0 && qttToPay > qttAvailable + sumDiscount) {
+        return {value: false}
+      } else {
+        if (qttAvailable >= essenceToPay.quantity) {
+          anyEssencePool = qttAvailable - qttToPay
+        } else {
+          sumDiscount = sumDiscount + (qttAvailable - qttToPay)
+        }
+      }
     })
-    // Sum discount ability
 
+    if (anyEssences.quantity > 0 && anyEssences.quantity > anyEssencePool) {
+      return {value: false}
+    }
     return { value: canPay }
-  }*/
+  }
 
   renderCurrentAction = () => {
     const { essencePickerSelection, profile, selectAction, selectedAction, selectedComponent } = this.props

@@ -1,6 +1,8 @@
-import React, { Component } from 'react'
+import React, { Component, useEffect, useState } from 'react'
 import { Button, ButtonToolbar, Form, InputGroup} from 'react-bootstrap'
-import { COMPONENTS_TYPE, DEFAULT_COMPONENT, SPECIFIC_COLLECT_ABILITY, STANDARD_COLLECT_ABILITY } from './EditorConstants'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPlus, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { COMPONENTS_TYPE, DEFAULT_COMPONENT, DISCOUNT, SPECIFIC_COLLECT_ABILITY, STANDARD_COLLECT_ABILITY } from './EditorConstants'
 import { connect } from 'react-redux'
 import { deleteComponent, saveComponent } from '../../../store/actions/editorActions'
 
@@ -247,7 +249,7 @@ class ComponentForm extends Component {
                       <div className="mb-3">
                         <EssencePanel
                           essenceList={component.costEssenceList}
-                          onChangeByName={(data) => this.handleFormChangeByName('costEssenceList', data)}
+                          onChange={(data) => this.handleFormChangeByName('costEssenceList', data)}
                         />
                       </div>
                     </>
@@ -271,7 +273,7 @@ class ComponentForm extends Component {
                   <div className="mb-3">
                     <EssencePanel
                       essenceList={component.standardCollectAbility && component.standardCollectAbility.essenceList}
-                      onChangeByName={(data) => this.handleFormChangeByName('standardCollectAbility', data)}
+                      onChange={(data) => this.handleFormChangeByName('standardCollectAbility', data)}
                     />
                   </div>
                 </>
@@ -293,7 +295,7 @@ class ComponentForm extends Component {
                   <div className="mb-3">
                     <EssencePanel
                       essenceList={component.specificCollectAbility && component.specificCollectAbility.essenceList}
-                      onChangeByName={(data) => this.handleFormChangeByName('specificCollectAbility', data)}
+                      onChange={(data) => this.handleFormChangeByName('specificCollectAbility', data)}
                     />
                   </div>
                   <div className="mb-3">
@@ -307,14 +309,12 @@ class ComponentForm extends Component {
                   </div>
                 </>
               }
-
-              <InputGroup className="mb-3">
-                <Form.Check inline type="checkbox" name="hasDiscountAbility"
-                  id="hasDiscountAbility" label="Has discount ability"
-                  value={component.hasDiscountAbility}
-                  checked={component.hasDiscountAbility}
-                  onChange={this.handleFormChange}/>
-              </InputGroup>
+              
+              <DiscountPanel 
+                component={component}
+                onChange={(data) => this.handleFormChange(data)}
+                onChangeByName={(name, data) => this.handleFormChangeByName(name, data)}
+              />
 
               <InputGroup className="mb-3">
                 <Form.Check inline type="checkbox" name="hasActionPower"
@@ -480,7 +480,7 @@ class EssencePanel extends Component {
         data.splice(typeIndex, 1)
       }
     }
-    this.props.onChangeByName(data)
+    this.props.onChange(data)
   }
 
   increment = (type) => {
@@ -495,7 +495,7 @@ class EssencePanel extends Component {
     } else {
       data[typeIndex].quantity++
     }
-    this.props.onChangeByName(data)
+    this.props.onChange(data)
   }
 
   render() {
@@ -523,6 +523,88 @@ class EssencePanel extends Component {
       {components}
     </div>
   }
+}
+
+function DiscountPanel({component, onChange, onChangeByName}) {
+  const [abilities, setAbilities] = useState([copy(DISCOUNT)])
+
+  useEffect(() => {
+    setAbilities(component.discountAbilityList || [copy(DISCOUNT)])
+  },[component.name])
+
+  function addAbility() {
+    abilities.push(copy(DISCOUNT))
+    setAbilities(abilities)
+    onChangeByName('discountAbilityList', abilities)
+  }
+
+  function removeAbility() {
+    abilities.pop()
+    setAbilities(abilities)
+    onChangeByName('discountAbilityList', abilities)
+  }
+
+  function updateDiscount(index, data) {
+    abilities[index].discountList = data
+    onChangeByName('discountAbilityList', abilities)
+  }
+
+  function setDiscountType(index, discountType) {
+    console.log('setDiscountType',index, discountType);
+    if (abilities[index].type.includes(discountType)) {
+      abilities[index].type = abilities[index].type.filter((type) => type !== discountType)
+    } else {
+      abilities[index].type.push(discountType)
+    }
+    onChangeByName('discountAbilityList', abilities)
+  }
+
+  const discountTypes = [
+    { id: 'artefact', name: 'Artefact' },
+    { id: 'dragon', name: 'Dragon' },
+    { id: 'creature', name: 'Creature' },
+    { id: 'monument', name: 'Monument' },
+    { id: 'placeOfPower', name: 'Place of Power' }
+  ]
+  
+  return <>
+    <InputGroup className="mb-3">
+      <Form.Check inline type="checkbox" name="hasDiscountAbility"
+        id="hasDiscountAbility" label="Has discount ability"
+        value={component.hasDiscountAbility}
+        checked={component.hasDiscountAbility}
+        onChange={(e) => onChange(e)}/>
+
+        { component.hasDiscountAbility && 
+          <ButtonToolbar>
+            <Button variant="secondary" size="sm" onClick={() => addAbility()}>
+              <FontAwesomeIcon icon={faPlus} size="sm" />
+            </Button>
+            <Button variant="secondary" size="sm" onClick={() => removeAbility()}>
+              <FontAwesomeIcon icon={faTrash} size="sm" />
+            </Button>
+          </ButtonToolbar>
+        }
+    </InputGroup>
+   
+    { component.hasDiscountAbility && abilities.map((discount, index) => 
+      <div key={index}>
+        <div className="mb-3">
+          {discountTypes.map((discountType) => (
+            <Form.Check inline type="checkBox" name="discountType" 
+              key={index + '_type_' + discountType.id} id={index + '_type_' + discountType.id} label={discountType.name}
+              checked={discount.type.includes(discountType.id)}
+              onChange={(e) => setDiscountType(index, discountType.id)}
+            />
+          ))}
+        </div>
+        <EssencePanel 
+          essenceList={discount.discountList}
+          onChange={(data) => updateDiscount(index, data)}
+        />
+      </div>
+    )}
+  </>
 }
 
 function copy(value){

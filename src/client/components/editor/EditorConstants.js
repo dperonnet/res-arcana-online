@@ -34,3 +34,8 @@ export const DEFAULT_COMPONENT = {
   isDragon: false,
   isCreature: false
 }
+
+export const DISCOUNT = {
+  type: ['artefact'],
+  discountList: []
+}

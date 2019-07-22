@@ -121,7 +121,17 @@ export const GameComponents = [
       "id":"artificier",
       "class":"artificier",
       "discountAbilityList":[
-
+         {
+            "discountList":[
+               {
+                  "quantity":1,
+                  "type":"any-but-gold"
+               }
+            ],
+            "type":[
+               "artefact"
+            ]
+         }
       ],
       "hasActionPower":false,
       "hasAlternative":true,
@@ -1185,7 +1195,17 @@ export const GameComponents = [
          }
       ],
       "discountAbilityList":[
-
+         {
+            "discountList":[
+               {
+                  "quantity":3,
+                  "type":"any"
+               }
+            ],
+            "type":[
+               "dragon"
+            ]
+         }
       ],
       "hasActionPower":false,
       "hasCost":true,
@@ -1836,7 +1856,17 @@ export const GameComponents = [
          }
       ],
       "discountAbilityList":[
-
+         {
+            "discountList":[
+               {
+                  "quantity":3,
+                  "type":"any"
+               }
+            ],
+            "type":[
+               "dragon"
+            ]
+         }
       ],
       "excludedComponentId":"bestiaireDuSorcier",
       "hasActionPower":true,

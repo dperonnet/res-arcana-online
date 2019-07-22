@@ -74,6 +74,7 @@ const getInitialState = (ctx, setupData) => {
   G.publicData.monumentsStack = monumentsInGameStack.splice(0, 2)
   
   // Deal 2 mages to players
+  const artificier = copy(components.mage.filter((mage) => mage.id === 'artificier')[0])
   let mages = ctx.random.Shuffle(components.mage)
   for (let i=0; i < ctx.numPlayers; i++) {
     G.players[i].mages = mages.slice(0, 2)
@@ -95,7 +96,7 @@ const getInitialState = (ctx, setupData) => {
       G.players[i].hand = G.players[i].deck.slice(0, 3)
       G.players[i].deck.splice(0, 3)
       G.publicData.players[i].mage = G.players[i].mages[0]
-      G.publicData.players[i].inPlay.push(G.players[i].mages[0])
+      G.publicData.players[i].inPlay.push(artificier)//G.players[i].mages[0])
       G.publicData.players[i].status = 'READY'
       G.publicData.players[i].deckSize = G.players[i].deck.length
       G.publicData.players[i].handSize = G.players[i].hand.length
@@ -109,7 +110,7 @@ const getInitialState = (ctx, setupData) => {
       const essencesTypeNumber = 5
 
       for (let j= 0; j < G.players[i].deck.length; j++) {
-        for (let k = 0; k < essencesTypeNumber; k++) {
+        for (let k = 0; k < ctx.random.Die(essencesTypeNumber); k++) {
           addEssenceOnComponent(G, i, G.players[i].deck[j].id, essencesTypes[k], ctx.random.Die(5))
 
         }
