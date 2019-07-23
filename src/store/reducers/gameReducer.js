@@ -7,7 +7,10 @@ const initState = {
   collectActions: {},
   collectOnComponentActions: {},
   essencePickerSelection: {},
-  focusZoom: true
+  focusZoom: true,
+  canPayCost: {
+    valid: false
+  }
 }
 
 const gameReducer = (state = initState, action) => {
@@ -111,6 +114,10 @@ const gameReducer = (state = initState, action) => {
       essencePickerSelection[action.essenceType] = essencePickerSelection[action.essenceType] ? essencePickerSelection[action.essenceType] + 1 : 1
       return Object.assign({}, state, {
         essencePickerSelection
+      });
+    case 'CAN_PAY_COST':
+      return Object.assign({}, state, {
+        canPayCost: action.info
       });
     default:
       return state;

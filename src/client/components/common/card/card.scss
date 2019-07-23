@@ -165,9 +165,10 @@ img {
     box-shadow: 0 0 2pt 2pt #F5B041;
   }
 }
-
-.card.invalid, .magic-item.invalid, .place-of-power.invalid {
-  box-shadow: 0 0 2pt 2pt #F22C2C;
+.invalid .active {
+  &.card, &.magic-item, &.place-of-power{
+    box-shadow: 0 0 2pt 2pt #F22C2C;
+  }
 }
 
 .ignore-mouse-events {

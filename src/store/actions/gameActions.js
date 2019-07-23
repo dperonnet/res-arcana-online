@@ -428,3 +428,10 @@ export function addToEssencePickerSelection(essenceType) {
     essenceType
   }
 }
+
+export function canPayCost(info) {
+  return {
+    type: 'CAN_PAY_COST',
+    info
+  }
+}
