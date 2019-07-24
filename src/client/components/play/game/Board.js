@@ -1039,10 +1039,11 @@ class ResArcanaBoard extends Component {
   /**
    * Check if the player can pay the component placement cost.
    * 
-   * @returns {valid, minEssencePayList, legalEssenceList}
+   * @returns {valid, minEssencePayList, legalEssenceList, fixedCost}
    * -valid : boolean checking if the player have enough essences to pay the component placement cost.
    * -minEssencePayList : object containing the minimum of each essence type to pay the component placement cost.
-   * -legalEssenceList : array containing the list of essence types allowed to pay the component placement cost.
+   * -legalEssenceList : array containing the list of essences types allowed to pay the component placement cost.
+   * -fixedCost : array containing the list of essences to pay if there is only one way to pay the component placement cost
    */
   canPayCost = (selectedComponent) => {
     const { G, playerID } = this.props
@@ -1053,8 +1054,8 @@ class ResArcanaBoard extends Component {
     if (!selectedComponent || !selectedComponent.costEssenceList) {
       return {valid}
     }
-    const costEssenceList = selectedComponent.costEssenceList
-    const availableEssencePool = G.publicData.players[playerID].essencesPool
+    const costEssenceList = copy(selectedComponent.costEssenceList)
+    const availableEssencePool = copy(G.publicData.players[playerID].essencesPool)
 
     // List of the minimum numbers for each essence the player have to pay to place the component.
     let minEssencePayList = {elan:0, life:0, calm:0, death:0, gold:0} 
@@ -1071,9 +1072,12 @@ class ResArcanaBoard extends Component {
       })
     })
     
+    // essences of type elan/life/calm/death
     const essencesToPay = costEssenceList.filter((essence) => essence.type !== 'gold' && essence.type !== 'any')
+    // essences of type any
     const anyEssencesToPay = costEssenceList.filter((essence) => essence.type === 'any')
     const anyEssenceToPay = anyEssencesToPay.length > 0 ? anyEssencesToPay[0] : {quantity:0}
+    // essences of type gold
     const goldEssence = costEssenceList.filter((essence) => essence.type === 'gold')
     const goldToPay = goldEssence.length > 0 ? goldEssence[0] : {quantity:0}
 
@@ -1084,11 +1088,19 @@ class ResArcanaBoard extends Component {
       let excedentGold = availableEssencePool['gold'] - (goldToPay.quantity ? goldToPay.quantity : 0)
       anyEssencePool = excedentGold > 0 ? excedentGold : 0
       minEssencePayList['gold'] = goldToPay.quantity ? goldToPay.quantity : 0
+      if (goldToPay.quantity > 0) legalEssenceList.push('gold')
     }
 
     const maxDiscount = sumDiscount
 
+    // total of essences, except gold, required to pay the placement cost.
     let essenceCountToPay = 0
+    // total of essences, except gold, available to pay the placement cost.
+    let essenceCountInPool = 0
+    // list of the essences types available to pay the any part the placement cost.
+    let couldPayAnyWith = []
+    // list of the max amount of essence possible to pay the placement cost.
+    let payAsMuchAsPossible = []
     
     const essences = ['elan', 'life', 'calm', 'death']
     essences.forEach((essence) => {
@@ -1100,8 +1112,9 @@ class ResArcanaBoard extends Component {
         valid = false
       } else {
         // if there is enough essences of this type, the exceding part is available in the anyEssencePool
-        if (qttAvailable >= qttToPay) {
+        if (qttAvailable > qttToPay) {
           anyEssencePool = anyEssencePool + qttAvailable - qttToPay
+          couldPayAnyWith.push({type: essence, quantity: qttAvailable - qttToPay})
         // else it reduce the discount count
         } else {
           sumDiscount = (sumDiscount + (qttAvailable - qttToPay)) > 0 ? (sumDiscount + (qttAvailable - qttToPay)) : 0
@@ -1112,6 +1125,10 @@ class ResArcanaBoard extends Component {
           minEssencePayList[essence] = qttToPay - maxDiscount
         }
         essenceCountToPay = essenceCountToPay + qttToPay
+        essenceCountInPool = essenceCountInPool + qttAvailable
+        if(qttToPay > 0) {
+          payAsMuchAsPossible.push({type: essence, quantity: qttToPay > 0 && qttToPay <= qttAvailable ? qttToPay : qttAvailable})
+        }
       }
     })
 
@@ -1119,16 +1136,103 @@ class ResArcanaBoard extends Component {
     if (anyEssencesToPay && anyEssencesToPay.quantity > anyEssencePool) {
       valid = false
     }
-    if (anyEssencesToPay) {
+
+    // get the list of essence type available to pay the placement cost.
+    if (anyEssencesToPay.length > 0) {
       legalEssenceList = ['elan', 'life', 'calm', 'death', 'gold']
     } else {
       essencesToPay.forEach((essence) => legalEssenceList.push(essence.type))
     }
 
-    // if there is no discount and no type 'any' in cost list, then the cost is fixed.
-    let enoughDiscountToPay = anyEssenceToPay.quantity <= sumDiscount
-    fixedCost = (anyEssenceToPay.quantity === 0 && sumDiscount === 0) || essenceCountToPay
 
+    // Determines the fixedCost if possible
+    let noAnyNoDiscount = anyEssenceToPay.quantity === 0 && maxDiscount === 0
+    let discountGTCost = maxDiscount >= (essenceCountToPay + anyEssenceToPay.quantity)
+    let costEQAvailable = (essenceCountToPay + anyEssenceToPay.quantity) === (maxDiscount + essenceCountInPool + availableEssencePool['gold'])
+    let singleCostTypeToPay = anyEssencesToPay.length === 0 && costEssenceList.filter((essence) => essence.type !== 'any').length === 1
+    let fixedDiscountUsage = sumDiscount > 0 && payAsMuchAsPossible.length === 1
+    let zeroDiscountLeft = anyEssencesToPay.length === 0 && sumDiscount === 0
+
+    console.log('maxDiscount:',maxDiscount,', essenceCountToPay:',essenceCountToPay,', anyEssenceToPay.quantity:',anyEssenceToPay.quantity);
+    // Different ways to determine if the cost is fixed if the componant can be paid.
+    if (valid) {
+      // if there is no discount and no type 'any' in cost list.
+      if (noAnyNoDiscount) {
+        console.log('1) noAnyNoDiscount');
+        fixedCost = costEssenceList
+      }
+
+      // if the discount is greater than the cost.
+      // The player only have to pay gold if there is any gold to pay.
+      else if (discountGTCost) {
+        console.log('2) discountGTCost');
+        fixedCost = costEssenceList.filter((essence) => essence.type === 'gold')
+      }
+      
+      // if the number of essence required to pay is equal to the available essence.
+      // The player have to pay with every essences available and complete with the required number of gold.
+      else if (costEQAvailable) {
+        fixedCost = []
+        console.log('3) costEQAvailable');
+        Object.keys(availableEssencePool).forEach((type) => {
+          if (type !== 'gold') {
+            fixedCost.push({type, quantity: availableEssencePool[type]})
+          }
+        })
+        let goldCost = costEssenceList.filter((essence) => essence.type === 'gold')
+        if (goldCost[0]) {
+          fixedCost.push(goldCost[0])
+        }
+      }
+      
+      // if there is only one type of essence required to pay the placement cost.
+      else if (singleCostTypeToPay) {
+        console.log('4) singleCostTypeToPay');
+        let essenceToPay = essencesToPay[0]
+        essenceToPay.quantity = essenceToPay.quantity - maxDiscount
+        fixedCost = [essenceToPay]
+      }
+
+      // if there is only one available type of essence to pay the any part of the placement cost.
+      else if (anyEssenceToPay.quantity > 0 && couldPayAnyWith.length === 1) {
+        console.log('5) anyEssenceToPay.quantity > 0 && couldPayAnyWith.length === 1');
+        fixedCost = essencesToPay
+        fixedCost[couldPayAnyWith[0]].quantity = fixedCost[couldPayAnyWith[0]].quantity + anyEssenceToPay.quantity
+      }
+      
+      // if the number of essences that are available to pay the any part of the placement cost equals the amount of this any part.
+      else if (anyEssenceToPay.quantity > 0 && anyEssenceToPay.quantity === anyEssencePool) {
+        console.log('6) anyEssenceToPay.quantity > 0 && anyEssenceToPay.quantity === anyEssencePool');
+        fixedCost = essencesToPay
+        fixedCost[couldPayAnyWith[0]].quantity = fixedCost[couldPayAnyWith[0]].quantity + anyEssenceToPay.quantity
+      }
+
+      // if there is only one essence type available to consume the discount.
+      else if (fixedDiscountUsage) {
+        console.log('7) fixedDiscountUsage');
+        fixedCost = payAsMuchAsPossible
+        fixedCost[0].quantity = fixedCost[0].quantity - sumDiscount >= 0 ? fixedCost[0].quantity - sumDiscount : 0
+        let goldCost = costEssenceList.filter((essence) => essence.type === 'gold')
+        if (goldCost.length > 0) {
+          fixedCost.push(goldCost[0])
+        }
+      }
+
+      // if the discount left equals 0 after paying the as much essence as possible
+      else if (zeroDiscountLeft) {
+        console.log('8) zeroDiscountLeft');
+        fixedCost = payAsMuchAsPossible
+        let goldCost = costEssenceList.filter((essence) => essence.type === 'gold')
+        if (goldCost.length > 0) {
+          fixedCost.push(goldCost[0])
+        }
+      }
+
+      else {
+        console.log('99) Can\'t fix the cost')
+      }
+    }
+    console.log('res',{valid, minEssencePayList, legalEssenceList, fixedCost});
     return {valid, minEssencePayList, legalEssenceList, fixedCost}
   }
 

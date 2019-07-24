@@ -171,6 +171,10 @@ img {
   }
 }
 
+.card.invalid, .magic-item.invalid, .place-of-power.invalid {
+  box-shadow: 0 0 2pt 2pt #F22C2C;
+}
+
 .ignore-mouse-events {
   pointer-events: none;
 }

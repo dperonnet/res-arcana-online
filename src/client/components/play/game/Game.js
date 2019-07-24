@@ -37,7 +37,7 @@ const getInitialState = (ctx, setupData) => {
     G.publicData.players[i] = {
       essencesOnComponent: {},
       essencesPool: {
-        elan: 1, life: 1, calm: 1, death: 1, gold: 1
+        elan: 1, life: 1, calm: 1, death: 1, gold: 0
       },
       deckSize: 0,
       discard: [],
@@ -93,8 +93,8 @@ const getInitialState = (ctx, setupData) => {
       G.players[i].reminder = G.secret.artefactsInGameStack.slice(0, 8)
       G.secret.artefactsInGameStack.splice(0, 8)
       G.players[i].deck = ctx.random.Shuffle(G.players[i].reminder)
-      G.players[i].hand = G.players[i].deck.slice(0, 3)
-      G.players[i].deck.splice(0, 3)
+      G.players[i].hand = G.players[i].deck.slice(0, 8)
+      G.players[i].deck.splice(0, 5)
       G.publicData.players[i].mage = G.players[i].mages[0]
       G.publicData.players[i].inPlay.push(artificier)//G.players[i].mages[0])
       G.publicData.players[i].status = 'READY'
@@ -103,9 +103,10 @@ const getInitialState = (ctx, setupData) => {
       G.publicData.players[i].inPlay.push(G.players[i].deck[0])
       G.publicData.players[i].inPlay.push(G.players[i].deck[1])
       G.publicData.players[i].inPlay.push(G.players[i].deck[2])
-      G.publicData.players[i].inPlay.push(G.publicData.placesOfPowerInGame[i])
-      G.publicData.players[i].inPlay.push(G.publicData.magicItems[ctx.random.Die(Object.keys(G.publicData.magicItems).length)-1])
-      
+      G.publicData.players[i].inPlay.push(G.publicData.placesOfPowerInGame[0])
+      G.publicData.placesOfPowerInGame.splice(0,1)
+      G.publicData.players[i].inPlay.push(G.publicData.magicItems[0])
+      G.publicData.magicItems.splice(0,1)
       const essencesTypes = ['elan', 'life', 'calm', 'death', 'gold']
       const essencesTypeNumber = 5
 
@@ -760,7 +761,7 @@ export const ResArcanaGame = Game({
   flow: {
     onMove: (G, ctx) => G,
     movesPerTurn: 1,
-    startingPhase: 'collectPhase',
+    startingPhase: 'actionPhase',
 
     phases: {
       setupPhase: {
