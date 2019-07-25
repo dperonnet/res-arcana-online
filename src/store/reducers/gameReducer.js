@@ -117,7 +117,6 @@ const gameReducer = (state = initState, action) => {
       });
     case 'SET_ESSENCE_SELECTION':
       essencePickerSelection = JSON.parse(JSON.stringify(action.essenceSelection))
-      console.log('preSelection',action.essenceSelection);
       return Object.assign({}, state, {
         essencePickerSelection
       });
