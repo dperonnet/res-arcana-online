@@ -429,6 +429,13 @@ export function addToEssencePickerSelection(essenceType) {
   }
 }
 
+export function setEssencePickerSelection(essenceSelection) {
+  return {
+    type: 'SET_ESSENCE_SELECTION',
+    essenceSelection
+  }
+}
+
 export function canPayCost(info) {
   return {
     type: 'CAN_PAY_COST',

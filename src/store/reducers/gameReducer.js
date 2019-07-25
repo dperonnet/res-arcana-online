@@ -58,7 +58,7 @@ const gameReducer = (state = initState, action) => {
       });
     case 'TAP_COMPONENT':
       const { tappedComponents } = state;
-      console.log('card.id', action.card.id)
+      debug && console.log('card.id', action.card.id)
       let index = tappedComponents.indexOf(action.card.id)
       if (index >= 0) {
         tappedComponents.splice(index, 1);
@@ -112,6 +112,12 @@ const gameReducer = (state = initState, action) => {
     case 'ADD_ESSENCE_TO_SELECTION':
       essencePickerSelection = JSON.parse(JSON.stringify(state.essencePickerSelection))
       essencePickerSelection[action.essenceType] = essencePickerSelection[action.essenceType] ? essencePickerSelection[action.essenceType] + 1 : 1
+      return Object.assign({}, state, {
+        essencePickerSelection
+      });
+    case 'SET_ESSENCE_SELECTION':
+      essencePickerSelection = JSON.parse(JSON.stringify(action.essenceSelection))
+      console.log('preSelection',action.essenceSelection);
       return Object.assign({}, state, {
         essencePickerSelection
       });

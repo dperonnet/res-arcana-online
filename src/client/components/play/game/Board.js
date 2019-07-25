@@ -8,7 +8,7 @@ import { compose } from 'redux'
 import { connect } from 'react-redux'
 import { firestoreConnect, isLoaded } from 'react-redux-firebase'
 import { addToEssencePickerSelection, canPayCost, clearZoom, resetCollect, resetEssencePickerSelection, selectAction, 
-  selectComponent, setFocusZoom, zoomCard, setCollectAction } from '../../../../store/actions/gameActions'
+  selectComponent, setFocusZoom, zoomCard, setCollectAction, setEssencePickerSelection } from '../../../../store/actions/gameActions'
 import { toggleChat } from '../../../../store/actions/chatActions'
 import CardZoom from '../../common/card/CardZoom.js'
 import Chat from '../../common/chat/Chat'
@@ -855,87 +855,6 @@ class ResArcanaBoard extends Component {
     </>
   }
   
-  renderInHandActions = () => {
-    const { addToEssencePickerSelection, canPayCost, essencePickerSelection, resetEssencePickerSelection, selectAction, selectedAction, selectedComponent } = this.props
-    let directive = selectedComponent &&<h5 className="directive">Choose an action for {selectedComponent.name}</h5>
-    let actionPanel = null
-    let essenceList = Object.entries(essencePickerSelection).map((essence, index) => {
-      let isLast = index === Object.entries(essencePickerSelection).length -1
-      return <div key={essence[0]} className={'collect-option '}>
-        <div className={'type essence ' + essence[0]}>{essence[1] || 0}</div>
-        {!isLast && <div className="option-and">
-          <FontAwesomeIcon icon={faPlus} size="sm" />
-        </div>}
-      </div>
-    })
-    let splitContainer = true
-
-    if (selectedAction) {
-      switch (selectedAction) {
-        case 'DISCARD_FOR_2E':
-          let count = 0
-          Object.values(essencePickerSelection).forEach((value) => count = count + value)
-          let isValid = count === 2
-          directive =  isValid ?
-            <h5 className="directive">
-              <div className="inline-text">Discard {selectedComponent.name} for </div>
-              <div className="inline-text collect-options">{essenceList}</div>
-              <div className="inline-text">?</div>
-            </h5>
-            :
-            <h5 className="directive">
-              <div className="inline-text">Select </div>
-              <div className="inline-text">
-                <div className="collect-option">
-                  <div className="essence any-but-gold small">2</div>
-                </div>
-              </div>
-            </h5>
-          actionPanel = <EssencePicker essencePickerType={'anyButGold'} essenceNumber={2}/>
-          break
-        case 'DISCARD_FOR_1G':
-          directive =
-            <h5 className="directive">
-              <div className="inline-text">Discard {selectedComponent.name} for </div>
-              <div className="inline-text">{essenceList}</div>
-              <div className="inline-text">?</div>
-            </h5>
-          splitContainer = false
-          break
-        case 'PLACE_ARTEFACT':
-          actionPanel = this.renderCostHandler()
-          break
-        default:
-      }
-    } else {
-      actionPanel = <>
-        <div className={'option' + (canPayCost.valid ? '':' invalid disabled')} size="sm" onClick={() => selectAction('PLACE_ARTEFACT')}>
-          <div className="inline-text">Place Artefact</div>
-        </div>
-        <div className="option small" size="sm" onClick={() => selectAction('DISCARD_FOR_2E')}>
-          <div className="inline-text">Discard for </div>
-          <div className="essence any-but-gold small">2</div>
-        </div>
-        <div className="option small" size="sm" onClick={() => {resetEssencePickerSelection(); addToEssencePickerSelection('gold'); selectAction('DISCARD_FOR_1G')}}>
-          <div className="inline-text">Discard for </div>
-          <div className="essence gold small">1</div>
-        </div>
-      </>
-    }
-
-    return <>
-      <div className={'action-container' + (splitContainer ? ' split' : '')}>
-        <div className="action-component">
-          {this.renderGameComponent(selectedComponent)}
-        </div>
-        {actionPanel && <div className="action-list">
-          {actionPanel}
-        </div>}
-      </div>
-      {directive}
-    </>
-  }
-  
   renderClaimAction = () => {
     const { canPayCost, selectedComponent } = this.props
 
@@ -999,8 +918,95 @@ class ResArcanaBoard extends Component {
     </>
   }
   
+  renderInHandActions = () => {
+    const { addToEssencePickerSelection, canPayCost, essencePickerSelection, resetEssencePickerSelection,
+      selectAction, selectedAction, selectedComponent, setEssencePickerSelection } = this.props
+    let directive = selectedComponent &&<h5 className="directive">Choose an action for {selectedComponent.name}</h5>
+    let actionPanel = null
+    let essenceList = Object.entries(essencePickerSelection).map((essence, index) => {
+      let isLast = index === Object.entries(essencePickerSelection).length -1
+      return <div key={essence[0]} className={'collect-option '}>
+        <div className={'type essence ' + essence[0]}>{essence[1] || 0}</div>
+        {!isLast && <div className="option-and">
+          <FontAwesomeIcon icon={faPlus} size="sm" />
+        </div>}
+      </div>
+    })
+    let splitContainer = true
+
+    if (selectedAction) {
+      switch (selectedAction) {
+        case 'DISCARD_FOR_2E':
+          let count = 0
+          Object.values(essencePickerSelection).forEach((value) => count = count + value)
+          let isValid = count === 2
+          directive =  isValid ?
+            <h5 className="directive">
+              <div className="inline-text">Discard {selectedComponent.name} for </div>
+              <div className="inline-text collect-options">{essenceList}</div>
+              <div className="inline-text">?</div>
+            </h5>
+            :
+            <h5 className="directive">
+              <div className="inline-text">Select </div>
+              <div className="inline-text">
+                <div className="collect-option">
+                  <div className="essence any-but-gold small">2</div>
+                </div>
+              </div>
+            </h5>
+          actionPanel = <EssencePicker essenceList={['elan', 'life', 'calm', 'death']} essenceNumber={2} />
+          break
+        case 'DISCARD_FOR_1G':
+          directive =
+            <h5 className="directive">
+              <div className="inline-text">Discard {selectedComponent.name} for </div>
+              <div className="inline-text">{essenceList}</div>
+              <div className="inline-text">?</div>
+            </h5>
+          splitContainer = false
+          break
+        case 'PLACE_ARTEFACT':
+          actionPanel = this.renderCostHandler()
+          break
+        default:
+      }
+    } else {
+      const handlePlaceAction = () => {
+        const preSelection = !!canPayCost.fixedCost ? canPayCost.fixedCost: canPayCost.minEssencePayList
+        setEssencePickerSelection(preSelection)
+        selectAction('PLACE_ARTEFACT')
+      }
+      actionPanel = <>
+        <div className={'option' + (canPayCost.valid ? '':' invalid disabled')} size="sm" onClick={handlePlaceAction}>
+          <div className="inline-text">Place Artefact</div>
+        </div>
+        <div className="option small" size="sm" onClick={() => selectAction('DISCARD_FOR_2E')}>
+          <div className="inline-text">Discard for </div>
+          <div className="essence any-but-gold small">2</div>
+        </div>
+        <div className="option small" size="sm" onClick={() => {resetEssencePickerSelection(); addToEssencePickerSelection('gold'); selectAction('DISCARD_FOR_1G')}}>
+          <div className="inline-text">Discard for </div>
+          <div className="essence gold small">1</div>
+        </div>
+      </>
+    }
+
+    return <>
+      <div className={'action-container' + (splitContainer ? ' split' : '')}>
+        <div className="action-component">
+          {this.renderGameComponent(selectedComponent)}
+        </div>
+        {actionPanel && <div className="action-list">
+          {actionPanel}
+        </div>}
+      </div>
+      {directive}
+    </>
+  }
+  
   renderCostHandler = () => {
-    const { G, playerID, selectedComponent } = this.props
+    const { G, playerID, canPayCost, selectedComponent } = this.props
     let essences = selectedComponent.costEssenceList.map((essence, index) => {
       let singleEssence = selectedComponent.costEssenceList.length === 1 ? ' single-essence' : ''
       let payOk = <div className="pay-ok"></div>
@@ -1009,17 +1015,22 @@ class ResArcanaBoard extends Component {
       </div>
     });
     
+    // Sum discount abilities
+    let sumDiscount = 0
     let discounts = G.publicData.players[playerID].inPlay.filter((component) => component.hasDiscountAbility).map((component) => {
       return this.discountValidator(component, selectedComponent).map((ability, index) => 
         <h5 className="cost-source" key={index}>
-          {ability.discountList.map((discount) => 
-            <div key={discount.type} className={'essence ' + discount.type + ' small'}>{discount.quantity}</div>
-          )}
+          {ability.discountList.map((discount) => {
+            sumDiscount = sumDiscount + discount.quantity
+            return <div key={discount.type} className={'essence ' + discount.type + ' small'}>{discount.quantity}</div>
+          })}
           <div className="inline-text"> from {component.name} </div>
         </h5>
       )
     })
 
+    const costValid = this.costSelectionValidator(sumDiscount)
+    let sumSelection = Object.values(selectedComponent.costEssenceList).reduce((a,b) => {return a.quantity + b.quantity}, 0)
     return <div className="component-cost flex-row">
       <div className="cost-frame-v">
         <div className="cost-frame-content">
@@ -1030,7 +1041,8 @@ class ResArcanaBoard extends Component {
         <h5>Pay with:</h5>
         {discounts}
         <div className="">
-          <EssencePicker essencePickerType={'any'} essenceNumber={2}/>
+          <EssencePicker essenceList={canPayCost.legalEssenceList} defaultSelection={canPayCost.minEssencePayList}
+            essenceNumber={sumSelection} discount={sumDiscount} placement={true} validCost={costValid.isValid}/>
         </div>
       </div>
     </div>
@@ -1043,21 +1055,21 @@ class ResArcanaBoard extends Component {
    * -valid : boolean checking if the player have enough essences to pay the component placement cost.
    * -minEssencePayList : object containing the minimum of each essence type to pay the component placement cost.
    * -legalEssenceList : array containing the list of essences types allowed to pay the component placement cost.
-   * -fixedCost : array containing the list of essences to pay if there is only one way to pay the component placement cost
+   * -fixedCost : object containing the list of essences to pay if there is only one way to pay the component placement cost
    */
   canPayCost = (selectedComponent) => {
     const { G, playerID } = this.props
     let sumDiscount = 0
     let anyEssencePool
     let valid = true
-    let fixedCost = false
+    let fixedCost
     if (!selectedComponent || !selectedComponent.costEssenceList) {
       return {valid}
     }
     const costEssenceList = copy(selectedComponent.costEssenceList)
     const availableEssencePool = copy(G.publicData.players[playerID].essencesPool)
 
-    // List of the minimum numbers for each essence the player have to pay to place the component.
+    // Object containing the minimum numbers for each essence the player have to pay to place the component.
     let minEssencePayList = {elan:0, life:0, calm:0, death:0, gold:0} 
 
     // List of legal essences the player can use to pay the cost.
@@ -1073,28 +1085,28 @@ class ResArcanaBoard extends Component {
     })
     
     // essences of type elan/life/calm/death
-    const essencesToPay = costEssenceList.filter((essence) => essence.type !== 'gold' && essence.type !== 'any')
+    const essencesRequired = costEssenceList.filter((essence) => essence.type !== 'gold' && essence.type !== 'any')
     // essences of type any
-    const anyEssencesToPay = costEssenceList.filter((essence) => essence.type === 'any')
-    const anyEssenceToPay = anyEssencesToPay.length > 0 ? anyEssencesToPay[0] : {quantity:0}
+    const anyEssencesRequired = costEssenceList.filter((essence) => essence.type === 'any')
+    const anyEssenceRequired = anyEssencesRequired.length > 0 ? anyEssencesRequired[0] : {quantity:0}
     // essences of type gold
     const goldEssence = costEssenceList.filter((essence) => essence.type === 'gold')
-    const goldToPay = goldEssence.length > 0 ? goldEssence[0] : {quantity:0}
+    const goldRequired = goldEssence.length > 0 ? goldEssence[0] : {quantity:0}
 
     // Check if there is enough gold to pay
-    if (goldToPay.quantity > availableEssencePool['gold']) {
+    if (goldRequired.quantity > availableEssencePool['gold']) {
       valid = false
     } else {
-      let excedentGold = availableEssencePool['gold'] - (goldToPay.quantity ? goldToPay.quantity : 0)
+      let excedentGold = availableEssencePool['gold'] - (goldRequired.quantity ? goldRequired.quantity : 0)
       anyEssencePool = excedentGold > 0 ? excedentGold : 0
-      minEssencePayList['gold'] = goldToPay.quantity ? goldToPay.quantity : 0
-      if (goldToPay.quantity > 0) legalEssenceList.push('gold')
+      minEssencePayList['gold'] = goldRequired.quantity ? goldRequired.quantity : 0
+      if (goldRequired.quantity > 0 && availableEssencePool['gold'] > 0) legalEssenceList.push('gold')
     }
 
     const maxDiscount = sumDiscount
 
     // total of essences, except gold, required to pay the placement cost.
-    let essenceCountToPay = 0
+    let nbEssenceRequired = 0
     // total of essences, except gold, available to pay the placement cost.
     let essenceCountInPool = 0
     // list of the essences types available to pay the any part the placement cost.
@@ -1104,133 +1116,148 @@ class ResArcanaBoard extends Component {
     
     const essences = ['elan', 'life', 'calm', 'death']
     essences.forEach((essence) => {
-      let essenceToPay = essencesToPay.filter((item) => item.type === essence)[0]
+      let essenceRequired = essencesRequired.filter((item) => item.type === essence)[0]
       let qttAvailable = availableEssencePool[essence]
-      let qttToPay = essenceToPay ? essenceToPay.quantity : 0
+      let qttRequired = essenceRequired ? essenceRequired.quantity : 0
 
-      if (qttToPay > 0 && qttToPay > qttAvailable + sumDiscount) {
+      if (qttRequired > 0 && qttRequired > qttAvailable + sumDiscount) {
         valid = false
       } else {
         // if there is enough essences of this type, the exceding part is available in the anyEssencePool
-        if (qttAvailable > qttToPay) {
-          anyEssencePool = anyEssencePool + qttAvailable - qttToPay
-          couldPayAnyWith.push({type: essence, quantity: qttAvailable - qttToPay})
+        if (qttAvailable > qttRequired) {
+          anyEssencePool = anyEssencePool + qttAvailable - qttRequired
+          couldPayAnyWith.push({type: essence, quantity: qttAvailable - qttRequired})
         // else it reduce the discount count
         } else {
-          sumDiscount = (sumDiscount + (qttAvailable - qttToPay)) > 0 ? (sumDiscount + (qttAvailable - qttToPay)) : 0
+          sumDiscount = (sumDiscount + (qttAvailable - qttRequired)) > 0 ? (sumDiscount + (qttAvailable - qttRequired)) : 0
         }
         // if the discount can't provide enough reduction for a type, the difference is the minimum
         // number of this type the player have to pay.
-        if (qttToPay > maxDiscount) {
-          minEssencePayList[essence] = qttToPay - maxDiscount
+        if (qttRequired > maxDiscount) {
+          console.log('qttRequired > maxDiscount',maxDiscount, minEssencePayList)
+          minEssencePayList[essence] = qttRequired - maxDiscount
         }
-        essenceCountToPay = essenceCountToPay + qttToPay
+        nbEssenceRequired = nbEssenceRequired + qttRequired
         essenceCountInPool = essenceCountInPool + qttAvailable
-        if(qttToPay > 0) {
-          payAsMuchAsPossible.push({type: essence, quantity: qttToPay > 0 && qttToPay <= qttAvailable ? qttToPay : qttAvailable})
+        if(qttRequired > 0) {
+          payAsMuchAsPossible.push({type: essence, quantity: qttRequired > 0 && qttRequired <= qttAvailable ? qttRequired : qttAvailable})
         }
       }
     })
 
     // finally check if there is enough essence in the anyEssencePool to pay the any type essences left
-    if (anyEssencesToPay && anyEssencesToPay.quantity > anyEssencePool) {
+    if (anyEssenceRequired && anyEssenceRequired.quantity > anyEssencePool + sumDiscount) {
       valid = false
     }
 
     // get the list of essence type available to pay the placement cost.
-    if (anyEssencesToPay.length > 0) {
-      legalEssenceList = ['elan', 'life', 'calm', 'death', 'gold']
+    if (anyEssencesRequired.length > 0) {
+      const types = ['elan', 'life', 'calm', 'death', 'gold']
+      types.forEach((type) => {
+        if (availableEssencePool[type] > 0) {
+          legalEssenceList.push(type)
+        }
+      })
     } else {
-      essencesToPay.forEach((essence) => legalEssenceList.push(essence.type))
+      essencesRequired.forEach((essence) => {
+        if (availableEssencePool[essence.type] > 0) {
+          legalEssenceList.push(essence.type)
+        }
+      })
     }
 
 
     // Determines the fixedCost if possible
-    let noAnyNoDiscount = anyEssenceToPay.quantity === 0 && maxDiscount === 0
-    let discountGTCost = maxDiscount >= (essenceCountToPay + anyEssenceToPay.quantity)
-    let costEQAvailable = (essenceCountToPay + anyEssenceToPay.quantity) === (maxDiscount + essenceCountInPool + availableEssencePool['gold'])
-    let singleCostTypeToPay = anyEssencesToPay.length === 0 && costEssenceList.filter((essence) => essence.type !== 'any').length === 1
+    let noAnyNoDiscount = anyEssenceRequired.quantity === 0 && maxDiscount === 0
+    let discountGTCost = maxDiscount >= (nbEssenceRequired + anyEssenceRequired.quantity)
+    let costEQAvailable = (nbEssenceRequired + anyEssenceRequired.quantity) === (maxDiscount + essenceCountInPool + availableEssencePool['gold'])
+    let onlyOneCostTypeRequired = anyEssencesRequired.length === 0 && costEssenceList.filter((essence) => essence.type !== 'any').length === 1
     let fixedDiscountUsage = sumDiscount > 0 && payAsMuchAsPossible.length === 1
-    let zeroDiscountLeft = anyEssencesToPay.length === 0 && sumDiscount === 0
-
-    console.log('maxDiscount:',maxDiscount,', essenceCountToPay:',essenceCountToPay,', anyEssenceToPay.quantity:',anyEssenceToPay.quantity);
+    let zeroDiscountLeft = anyEssencesRequired.length === 0 && sumDiscount === 0
+    
     // Different ways to determine if the cost is fixed if the componant can be paid.
     if (valid) {
+      let preSelection = []
+      fixedCost = {}
+
       // if there is no discount and no type 'any' in cost list.
       if (noAnyNoDiscount) {
         console.log('1) noAnyNoDiscount');
-        fixedCost = costEssenceList
+        preSelection = costEssenceList
       }
 
       // if the discount is greater than the cost.
       // The player only have to pay gold if there is any gold to pay.
       else if (discountGTCost) {
         console.log('2) discountGTCost');
-        fixedCost = costEssenceList.filter((essence) => essence.type === 'gold')
+        preSelection = costEssenceList.filter((essence) => essence.type === 'gold')
       }
       
       // if the number of essence required to pay is equal to the available essence.
       // The player have to pay with every essences available and complete with the required number of gold.
       else if (costEQAvailable) {
-        fixedCost = []
+        preSelection = []
         console.log('3) costEQAvailable');
         Object.keys(availableEssencePool).forEach((type) => {
           if (type !== 'gold') {
-            fixedCost.push({type, quantity: availableEssencePool[type]})
+            preSelection.push({type, quantity: availableEssencePool[type]})
           }
         })
         let goldCost = costEssenceList.filter((essence) => essence.type === 'gold')
         if (goldCost[0]) {
-          fixedCost.push(goldCost[0])
+          preSelection.push(goldCost[0])
         }
       }
       
       // if there is only one type of essence required to pay the placement cost.
-      else if (singleCostTypeToPay) {
-        console.log('4) singleCostTypeToPay');
-        let essenceToPay = essencesToPay[0]
-        essenceToPay.quantity = essenceToPay.quantity - maxDiscount
-        fixedCost = [essenceToPay]
+      else if (onlyOneCostTypeRequired) {
+        console.log('4) onlyOneCostTypeRequired');
+        let essenceRequired = essencesRequired[0]
+        essenceRequired.quantity = essenceRequired.quantity - maxDiscount
+        preSelection = [essenceRequired]
       }
 
       // if there is only one available type of essence to pay the any part of the placement cost.
-      else if (anyEssenceToPay.quantity > 0 && couldPayAnyWith.length === 1) {
-        console.log('5) anyEssenceToPay.quantity > 0 && couldPayAnyWith.length === 1');
-        fixedCost = essencesToPay
-        fixedCost[couldPayAnyWith[0]].quantity = fixedCost[couldPayAnyWith[0]].quantity + anyEssenceToPay.quantity
+      else if (anyEssenceRequired.quantity > 0 && couldPayAnyWith.length === 1) {
+        console.log('5) anyEssenceRequired.quantity > 0 && couldPayAnyWith.length === 1');
+        preSelection = essencesRequired
+        preSelection[couldPayAnyWith[0]].quantity = preSelection[couldPayAnyWith[0]].quantity + anyEssenceRequired.quantity
       }
       
       // if the number of essences that are available to pay the any part of the placement cost equals the amount of this any part.
-      else if (anyEssenceToPay.quantity > 0 && anyEssenceToPay.quantity === anyEssencePool) {
-        console.log('6) anyEssenceToPay.quantity > 0 && anyEssenceToPay.quantity === anyEssencePool');
-        fixedCost = essencesToPay
-        fixedCost[couldPayAnyWith[0]].quantity = fixedCost[couldPayAnyWith[0]].quantity + anyEssenceToPay.quantity
+      else if (anyEssenceRequired.quantity > 0 && anyEssenceRequired.quantity === anyEssencePool) {
+        console.log('6) anyEssenceRequired.quantity > 0 && anyEssenceRequired.quantity === anyEssencePool');
+        preSelection = essencesRequired
+        preSelection[couldPayAnyWith[0]].quantity = preSelection[couldPayAnyWith[0]].quantity + anyEssenceRequired.quantity
       }
 
       // if there is only one essence type available to consume the discount.
       else if (fixedDiscountUsage) {
         console.log('7) fixedDiscountUsage');
-        fixedCost = payAsMuchAsPossible
-        fixedCost[0].quantity = fixedCost[0].quantity - sumDiscount >= 0 ? fixedCost[0].quantity - sumDiscount : 0
+        preSelection = payAsMuchAsPossible
+        preSelection[0].quantity = preSelection[0].quantity - sumDiscount >= 0 ? preSelection[0].quantity - sumDiscount : 0
         let goldCost = costEssenceList.filter((essence) => essence.type === 'gold')
         if (goldCost.length > 0) {
-          fixedCost.push(goldCost[0])
+          preSelection.push(goldCost[0])
         }
       }
 
       // if the discount left equals 0 after paying the as much essence as possible
       else if (zeroDiscountLeft) {
         console.log('8) zeroDiscountLeft');
-        fixedCost = payAsMuchAsPossible
+        preSelection = payAsMuchAsPossible
         let goldCost = costEssenceList.filter((essence) => essence.type === 'gold')
         if (goldCost.length > 0) {
-          fixedCost.push(goldCost[0])
+          preSelection.push(goldCost[0])
         }
       }
 
       else {
         console.log('99) Can\'t fix the cost')
+        fixedCost = false
       }
+      
+      preSelection.forEach((essence) => fixedCost[essence.type] = essence.quantity)
     }
     console.log('res',{valid, minEssencePayList, legalEssenceList, fixedCost});
     return {valid, minEssencePayList, legalEssenceList, fixedCost}
@@ -1266,8 +1293,68 @@ class ResArcanaBoard extends Component {
     })
   }
 
+  costSelectionValidator = (discount) => {
+    const { essencePickerSelection, selectedComponent } = this.props
+    const costList = copy(selectedComponent.costEssenceList)
+    const selectionList = copy(essencePickerSelection)
+    console.log('selectionList',selectionList);
+    
+    let sumDiscount = discount
+    let essencesAsAny = 0
+    let isValid = true
+    
+    Object.entries(selectionList).forEach((essence) => {
+      let essenceRequired = costList.filter((item) => item.type === essence[0])[0]
+      let qttRequired = essenceRequired ? essenceRequired.quantity : 0
+      let qttSelected = essence[1]
+      
+      if (qttRequired > 0 && qttRequired > qttSelected + (essence[0] !== 'gold' ? sumDiscount : 0)) {
+        isValid = false
+      } else {
+        // if there is enough essences of this type, the exceding part is available in the anyEssencePool
+        if (qttSelected > qttRequired) {
+          essencesAsAny = essencesAsAny + qttSelected - qttRequired
+        // else it reduce the discount count
+        } else if (qttSelected < qttRequired) {
+          const diff = qttRequired - qttSelected
+          if (diff > sumDiscount) {
+            isValid = false
+          } else {
+            // considere essence quantity equal to the required quantity
+            selectionList[essence[0]] = qttRequired 
+            sumDiscount = sumDiscount - diff > 0 ? sumDiscount - diff : 0
+          }
+        }
+      }
+    })
+    
+    let typeValidators = {}
+
+    costList.forEach((essence) => {
+      if (essence.type === 'any') {
+        typeValidators[essence.type] = essence.quantity === essencesAsAny + sumDiscount
+      } else if (Object.keys(selectionList).length > 0) {
+        typeValidators[essence.type] = essence.quantity === selectionList[essence.type]
+      } else {
+        isValid = false
+      }
+    })
+    Object.entries(typeValidators).forEach((item) => {
+      console.log(typeValidators, item)
+      isValid = isValid && item[1]
+    })
+
+    // if there is no type any in cost essence list, check if the discount is consumed
+    isValid = isValid && costList.filter((essence) => essence.type === 'any').length === 0 ? sumDiscount === 0 : true
+
+    typeValidators.isvalid = isValid
+
+    console.log('########### typeValidators',typeValidators);
+    return typeValidators
+  }
+
   renderCurrentAction = () => {
-    const { canPayCost, essencePickerSelection, profile, selectAction, selectedAction, selectedComponent } = this.props
+    const { essencePickerSelection, profile, selectAction, selectedAction, selectedComponent } = this.props
 
     let handleConfirm
     let availableActions
@@ -1311,6 +1398,7 @@ class ResArcanaBoard extends Component {
         default:
       }
     }
+
     const handleCancel = (event) => {
       selectAction(undefined)
       return this.handleClick(event, undefined)
@@ -1469,6 +1557,7 @@ const mapDispatchToProps = (dispatch) => {
     setFocusZoom: (flag) => dispatch(setFocusZoom(flag)),
     selectAction: (action) => dispatch(selectAction(action)),
     selectComponent: (card) => dispatch(selectComponent(card)),
+    setEssencePickerSelection: (essenceSelection) => dispatch(setEssencePickerSelection(essenceSelection)),
     toggleChat: () => dispatch(toggleChat()),
     zoomCard: (card) => dispatch(zoomCard(card)),
   }

@@ -1,12 +1,15 @@
 import React, { Component } from 'react';
-import { addToEssencePickerSelection, resetEssencePickerSelection } from '../../../../store/actions/gameActions'
+import { addToEssencePickerSelection, resetEssencePickerSelection, setEssencePickerSelection } from '../../../../store/actions/gameActions'
 import { connect } from 'react-redux';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 
 class EssencePicker extends Component {
   componentDidMount() {
-    this.props.resetEssencePickerSelection()
+    const { placement } = this.props
+    if(!placement) {
+      this.props.resetEssencePickerSelection()
+    }
   }
 
   handleAddEssence = (essenceType) => {
@@ -14,27 +17,23 @@ class EssencePicker extends Component {
   }
 
   handleReset = () => {
-    this.props.resetEssencePickerSelection()
+    const { defaultSelection, resetEssencePickerSelection, setEssencePickerSelection } = this.props
+    if (defaultSelection) {
+      setEssencePickerSelection(defaultSelection)
+    } else {
+      resetEssencePickerSelection()
+    }
   }
 
   renderEssencePicker = () => {
-    const { essenceNumber, essencePickerSelection, essencePickerType } = this.props
+    const { essenceNumber, essencePickerSelection, essenceList, fixedCost, placement, sumDiscount } = this.props
     let count = 0
     Object.values(essencePickerSelection).forEach((value) => count = count + value)
-    let isValid = essenceNumber === count
+    console.log('essencePickerSelection',essencePickerSelection);
+    let isValid = essenceNumber === count + (placement ? sumDiscount : 0)
     let picker
-    const essenceList = ['elan', 'life', 'calm', 'death', 'gold']
-    switch (essencePickerType) {
-      case 'anyButGold':
-        essenceList.pop()
-        break
-      case 'anyButDeathGold':
-        essenceList.pop()
-        essenceList.pop()
-        break
-      default:
-    }
-    
+
+    // while not valid, the picker allow to add essence to the selection
     if (!isValid) {
       picker =  essenceList.map((type, index) => {
         let isLast = index === (Object.entries(essenceList).length -1)
@@ -51,12 +50,13 @@ class EssencePicker extends Component {
     } else {
       // renderedCount is used to fade the last Plus icon
       let renderedCount = 0
-      picker = essenceList.map((essence, index) => {
-        let isLast =  index === essenceList.length -1
+      let essenceListRef = !!fixedCost ? fixedCost : essenceList
+      picker = essenceListRef.map((essence, index) => {
+        let isLast =  index === essenceListRef.length -1
         renderedCount = essencePickerSelection[essence] ? renderedCount + 1 : renderedCount
         let lastToRender = renderedCount === Object.keys(essencePickerSelection).length ? ' fade-option' : ''
         let fade = !essencePickerSelection[essence] ? ' fade-option' : ''
-        return <div key={essence} className={'collect-option ' + fade} onClick={() => this.handleReset()}>
+        return <div key={essence} className={'collect-option ' + fade} onClick={() => !fixedCost ? this.handleReset() : null}>
           <div className={'type essence ' + essence}>{essencePickerSelection[essence] || 0}</div>
           {!isLast && <div className={'option-and ' + lastToRender}>
             <FontAwesomeIcon icon={faPlus} size="sm" />
@@ -82,6 +82,7 @@ class EssencePicker extends Component {
 const mapStateToProps = (state) => {
   return {
     essencePickerSelection: state.game.essencePickerSelection,
+    selectedComponent: state.game.selectedComponent
   }
 }
 
@@ -89,7 +90,12 @@ const mapDispatchToProps = (dispatch) => {
   return {
     addToEssencePickerSelection: (essenceType) => dispatch(addToEssencePickerSelection(essenceType)),
     resetEssencePickerSelection: () => dispatch(resetEssencePickerSelection()),
+    setEssencePickerSelection: (selection) => dispatch(setEssencePickerSelection(selection)),
   }
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(EssencePicker)
+
+function copy(value){
+  return JSON.parse(JSON.stringify(value))
+}
