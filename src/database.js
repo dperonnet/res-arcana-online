@@ -1151,8 +1151,8 @@ export const GameComponents = [
       "hasAlternative":true,
       "hasDiscountAbility":false,
       "hasReactPower":true,
-      "hasSpecificCollectAbility":false,
-      "hasStandardCollectAbility":true,
+      "hasSpecificCollectAbility":true,
+      "hasStandardCollectAbility":false,
       "isAlternative":false,
       "name":"Guérisseur",
       "reactPowerList":[
@@ -1171,7 +1171,20 @@ export const GameComponents = [
          ],
          "multipleCollectOptions":true
       },
-      "type":"mage"
+      "type":"mage",
+      "specificCollectAbility":{
+         "essenceList":[
+            {
+               "quantity":1,
+               "type":"calm"
+            },
+            {
+               "quantity":1,
+               "type":"life"
+            }
+         ],
+         "multipleCollectOptions":true
+      }
    },
    {
       "id":"harnaisDuDragon",
@@ -1476,8 +1489,8 @@ export const GameComponents = [
       "hasActionPower":false,
       "hasDiscountAbility":false,
       "hasReactPower":false,
-      "hasSpecificCollectAbility":false,
-      "hasStandardCollectAbility":true,
+      "hasSpecificCollectAbility":true,
+      "hasStandardCollectAbility":false,
       "name":"Mort Vie",
       "standardCollectAbility":{
          "essenceList":[
@@ -1492,7 +1505,20 @@ export const GameComponents = [
          ],
          "multipleCollectOptions":true
       },
-      "type":"magicItem"
+      "type":"magicItem",
+      "specificCollectAbility":{
+         "essenceList":[
+            {
+               "quantity":1,
+               "type":"death"
+            },
+            {
+               "quantity":1,
+               "type":"life"
+            }
+         ],
+         "multipleCollectOptions":true
+      }
    },
    {
       "id":"necromancienne",
@@ -1912,8 +1938,8 @@ export const GameComponents = [
       "hasActionPower":false,
       "hasDiscountAbility":false,
       "hasReactPower":false,
-      "hasSpecificCollectAbility":false,
-      "hasStandardCollectAbility":true,
+      "hasSpecificCollectAbility":true,
+      "hasStandardCollectAbility":false,
       "name":"Sérénité Vigueur",
       "standardCollectAbility":{
          "essenceList":[
@@ -1928,7 +1954,20 @@ export const GameComponents = [
          ],
          "multipleCollectOptions":true
       },
-      "type":"magicItem"
+      "type":"magicItem",
+      "specificCollectAbility":{
+         "essenceList":[
+            {
+               "quantity":1,
+               "type":"calm"
+            },
+            {
+               "quantity":1,
+               "type":"elan"
+            }
+         ],
+         "multipleCollectOptions":true
+      }
    },
    {
       "id":"serpentDeMer",
@@ -2006,8 +2045,8 @@ export const GameComponents = [
       "hasAlternative":true,
       "hasDiscountAbility":false,
       "hasReactPower":false,
-      "hasSpecificCollectAbility":false,
-      "hasStandardCollectAbility":true,
+      "hasSpecificCollectAbility":true,
+      "hasStandardCollectAbility":false,
       "isAlternative":false,
       "name":"Sorcière",
       "standardCollectAbility":{
@@ -2023,7 +2062,20 @@ export const GameComponents = [
          ],
          "multipleCollectOptions":true
       },
-      "type":"mage"
+      "type":"mage",
+      "specificCollectAbility":{
+         "essenceList":[
+            {
+               "quantity":1,
+               "type":"life"
+            },
+            {
+               "quantity":1,
+               "type":"death"
+            }
+         ],
+         "multipleCollectOptions":true
+      }
    },
    {
       "id":"sourceElementaire",

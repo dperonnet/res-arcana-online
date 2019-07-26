@@ -105,6 +105,7 @@ const getInitialState = (ctx, setupData) => {
       G.publicData.players[i].inPlay.push(G.players[i].deck[2])
       G.publicData.players[i].inPlay.push(G.publicData.placesOfPowerInGame[0])
       G.publicData.placesOfPowerInGame.splice(0,1)
+      G.publicData.magicItems = ctx.random.Shuffle(G.publicData.magicItems)
       G.publicData.players[i].inPlay.push(G.publicData.magicItems[0])
       G.publicData.magicItems.splice(0,1)
       const essencesTypes = ['elan', 'life', 'calm', 'death', 'gold']
@@ -651,25 +652,63 @@ const activatePower = (G, ctx) => {
 
 /**
  * Role: Move
- * Place an artefact in play.
+ * Place a component in play.
  */
-const placeArtefact = (G, ctx, artefactId) => {
-  return G
-}
+const placeComponent = (G, ctx, type, id, essenceList) => {
+  const playerID = ctx.currentPlayer
+  let selectedComponent
 
-/**
- * Role: Move
- * Claim a monument.
- */
-const claimMonument = (G, ctx) => {
-  return G
-}
+  if (type === 'artefact') {
+    selectedComponent = copy(G.players[playerID].hand.filter((component) => {
+      return component.id === id
+    })[0])
 
-/**
- * Role: Move
- * Claim a place of power.
- */
-const claimPlaceOfPower = (G, ctx) => {
+    G.players[playerID].hand = copy(G.players[playerID].hand.filter((component) => {
+      return component.id !== id
+    }))
+    G.publicData.players[playerID].handSize = G.players[playerID].hand.length
+
+  } else if (type === 'monument' || type === 'back') {
+
+    if (id === 'back_monument') {
+      selectedComponent = copy(G.publicData.monumentsStack[0])
+      // remove top monument card
+      if (G.publicData.monumentsStack.length > 0 ) {
+        G.publicData.monumentsStack = G.publicData.monumentsStack.splice(0, 1)
+      }
+
+    } else {
+      selectedComponent = copy(G.publicData.monumentsRevealed.filter((component) => {
+        return component.id === id
+      })[0])
+      // remove the monument from the revealed monument
+      G.publicData.monumentsRevealed = copy(G.publicData.monumentsStack.filter((component) => {
+        return component.id !== id
+      }))
+      
+      // reveal the top monument card
+      if (G.publicData.monumentsStack.length > 0 ) {
+        G.publicData.monumentsRevealed.push(G.publicData.monumentsStack.slice(0, 1))
+        G.publicData.monumentsStack = G.publicData.monumentsStack.splice(0, 1)
+      }
+    }
+
+  } else if (type === 'placeOfPower') {
+    selectedComponent = copy(G.publicData.placesOfPowerInGame.filter((placeOfPower) => {
+      return placeOfPower.id === id
+    })[0])
+    
+    G.publicData.placesOfPowerInGame = copy(G.publicData.placesOfPowerInGame.filter((component) => {
+      return component.id !== id
+    }))
+  }
+
+  G.publicData.players[playerID].inPlay.push(selectedComponent)
+ 
+  Object.entries(essenceList).forEach((essence) => {
+    console.log('add',essence[0],essence[1])
+    G.publicData.players[playerID].essencesPool[essence[0]] = G.publicData.players[playerID].essencesPool[essence[0]] - essence[1]
+  })
   return G
 }
 
@@ -750,9 +789,7 @@ export const ResArcanaGame = Game({
     pickArtefact: pickArtefact,
     pickMage: pickMage,
     pickMagicItem: pickMagicItem,
-    placeArtefact: placeArtefact,
-    claimMonument: claimMonument,
-    claimPlaceOfPower: claimPlaceOfPower,
+    placeComponent: placeComponent,
     discardArtefact: discardArtefact,
     activatePower: activatePower,
     pass: pass,
@@ -796,7 +833,7 @@ export const ResArcanaGame = Game({
       },
       actionPhase: {
         onPhaseBegin: (G, ctx) => initActionPhase(G, ctx),
-        allowedMoves: ['placeArtefact','claimMonument','claimPlaceOfPower','discardArtefact','activatePower','pass'],
+        allowedMoves: ['placeComponent','discardArtefact','activatePower','pass'],
         turnOrder: {
           playOrder: (G, ctx) => getTurnOrder(G, ctx),
           first: (G, ctx) => 0,

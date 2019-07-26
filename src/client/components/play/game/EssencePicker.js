@@ -13,7 +13,15 @@ class EssencePicker extends Component {
   }
 
   handleAddEssence = (essenceType) => {
-    this.props.addToEssencePickerSelection(essenceType)
+    const { addToEssencePickerSelection, asCost, essencesPool, essencePickerSelection, setEssencePickerSelection } = this.props
+    const currentQtty = essencePickerSelection[essenceType] ? essencePickerSelection[essenceType] : 0
+    if (!asCost || essencesPool[essenceType] > currentQtty) {
+      addToEssencePickerSelection(essenceType)
+    } else {
+      let selection = copy(essencePickerSelection)
+      selection[essenceType] = 0
+      setEssencePickerSelection(selection)
+    }
   }
 
   handleReset = () => {
@@ -26,7 +34,7 @@ class EssencePicker extends Component {
   }
 
   renderEssencePicker = () => {
-    const { essenceListType, essenceNumber, essencePickerSelection, enabledEssencesList, asCost, sumDiscount, validCost } = this.props
+    const { essenceListType, essenceNumber, essencePickerSelection, enabledEssencesList, asCost, sumDiscount, validCost, lock } = this.props
     let count = 0
     Object.values(essencePickerSelection).forEach((value) => count = count + value)
     let isValid = asCost ? validCost : essenceNumber === count + (asCost ? sumDiscount : 0)
@@ -52,7 +60,7 @@ class EssencePicker extends Component {
     } else {
       handleOnClick = (type) => this.handleAddEssence(type)
     }
-
+    
     // renderedCount is used to fade the last Plus icon
     let hidePlus
     let renderedCount = 0
@@ -60,8 +68,9 @@ class EssencePicker extends Component {
     picker = essenceList.map((type, index) => {
       let enabled = enabledEssences && enabledEssences.includes(type)
       let fade = (isValid && !essencePickerSelection[type]) || !enabled ? ' fade-option' : ''
-      let pointer = enabled ? isValid ? ' delete-cursor' : ' pointer-cursor' : ''
+      let pointer = !lock && enabled ? isValid ? ' delete-cursor' : ' pointer-cursor' : ''
       let isLast =  index === essenceList.length -1
+      let pointerLock = lock ? ' not-allowed-cursor' : ''
 
       if (isValid) {
         renderedCount = essencePickerSelection[type] ? renderedCount + 1 : renderedCount
@@ -70,13 +79,13 @@ class EssencePicker extends Component {
       } else {
         if (index < essenceList.length - 1) {
           let nextEssenceInList = essenceList[index+1]
-          console.log('index:',index,',nextEssenceInList',nextEssenceInList);
           hidePlus = enabled && !fade && !enabledEssences.includes(nextEssenceInList) ? ' fade-option' : ''
         }
       }
       
-      return <div key={type} className={'collect-option ' + fade} onClick={ () => enabled ? handleOnClick(type) : null}>
-          <div className={'essence ' + type + pointer}>{essencePickerSelection[type] || 0}
+      return <div key={type} className={'collect-option ' + fade + pointerLock} onClick={ () => isValid && !lock ? handleOnClick(type) : null}>
+          <div className={'essence ' + type + pointer} onClick={ () => !isValid && enabled && !lock ? handleOnClick(type) : null}>
+          {essencePickerSelection[type] || 0}
         </div>
         {!isLast && <div className={'option-and ' + hidePlus}>
           <FontAwesomeIcon icon={faPlus} size="sm" />
@@ -86,7 +95,6 @@ class EssencePicker extends Component {
     
     return <div className={isValid ? ' delete-cursor' : ' '}>
       {picker}
-      <div>## isValid ? {isValid ? 'true': 'false'}</div>
     </div>
   }
 
@@ -115,3 +123,7 @@ const mapDispatchToProps = (dispatch) => {
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(EssencePicker)
+
+function copy(value){
+  return JSON.parse(JSON.stringify(value))
+}
