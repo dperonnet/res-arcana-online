@@ -37,7 +37,7 @@ const getInitialState = (ctx, setupData) => {
     G.publicData.players[i] = {
       essencesOnComponent: {},
       essencesPool: {
-        elan: 1, life: 1, calm: 1, death: 1, gold: 0
+        elan: 1, life: 1, calm: 1, death: 1, gold: 1
       },
       deckSize: 0,
       discard: [],
@@ -70,11 +70,11 @@ const getInitialState = (ctx, setupData) => {
   
   // Reveal 2 monuments
   let monumentsInGameStack = ctx.random.Shuffle(components.monument)
-  G.publicData.monumentsRevealed = monumentsInGameStack.slice(0, 2)
-  G.publicData.monumentsStack = monumentsInGameStack.splice(0, 2)
+  G.publicData.monumentsRevealed = monumentsInGameStack.splice(0, 2)
+  G.publicData.monumentsStack = monumentsInGameStack
   
   // Deal 2 mages to players
-  const artificier = copy(components.mage.filter((mage) => mage.id === 'artificier')[0])
+  // const artificier = copy(components.mage.filter((mage) => mage.id === 'artificier')[0])
   let mages = ctx.random.Shuffle(components.mage)
   for (let i=0; i < ctx.numPlayers; i++) {
     G.players[i].mages = mages.slice(0, 2)
@@ -93,20 +93,19 @@ const getInitialState = (ctx, setupData) => {
       G.players[i].reminder = G.secret.artefactsInGameStack.slice(0, 8)
       G.secret.artefactsInGameStack.splice(0, 8)
       G.players[i].deck = ctx.random.Shuffle(G.players[i].reminder)
-      G.players[i].hand = G.players[i].deck.slice(0, 8)
-      G.players[i].deck.splice(0, 5)
+      G.players[i].hand = G.players[i].deck.splice(0, 3)
       G.publicData.players[i].mage = G.players[i].mages[0]
-      G.publicData.players[i].inPlay.push(artificier)//G.players[i].mages[0])
+      G.publicData.players[i].inPlay.push(G.players[i].mages[0])
       G.publicData.players[i].status = 'READY'
-      G.publicData.players[i].deckSize = G.players[i].deck.length
-      G.publicData.players[i].handSize = G.players[i].hand.length
       G.publicData.players[i].inPlay.push(G.players[i].deck[0])
       G.publicData.players[i].inPlay.push(G.players[i].deck[1])
       G.publicData.players[i].inPlay.push(G.players[i].deck[2])
+      G.players[i].deck.splice(0, 3)
       G.publicData.players[i].inPlay.push(G.publicData.placesOfPowerInGame[0])
       G.publicData.placesOfPowerInGame.splice(0,1)
       G.publicData.magicItems = ctx.random.Shuffle(G.publicData.magicItems)
       G.publicData.players[i].inPlay.push(G.publicData.magicItems[0])
+      G.publicData.players[i].magicItem = copy(G.publicData.magicItems[0])
       G.publicData.magicItems.splice(0,1)
       const essencesTypes = ['elan', 'life', 'calm', 'death', 'gold']
       const essencesTypeNumber = 5
@@ -114,10 +113,11 @@ const getInitialState = (ctx, setupData) => {
       for (let j= 0; j < G.players[i].deck.length; j++) {
         for (let k = 0; k < ctx.random.Die(essencesTypeNumber); k++) {
           addEssenceOnComponent(G, i, G.players[i].deck[j].id, essencesTypes[k], ctx.random.Die(5))
-
         }
       }
 
+      G.publicData.players[i].deckSize = G.players[i].deck.length
+      G.publicData.players[i].handSize = G.players[i].hand.length
     }
   }
   G.skipDraftPhase = skip
@@ -668,13 +668,13 @@ const placeComponent = (G, ctx, type, id, essenceList) => {
     }))
     G.publicData.players[playerID].handSize = G.players[playerID].hand.length
 
-  } else if (type === 'monument' || type === 'back') {
+  } else if (type === 'monument' || type === 'backMonument') {
 
     if (id === 'back_monument') {
       selectedComponent = copy(G.publicData.monumentsStack[0])
       // remove top monument card
       if (G.publicData.monumentsStack.length > 0 ) {
-        G.publicData.monumentsStack = G.publicData.monumentsStack.splice(0, 1)
+        G.publicData.monumentsStack.splice(0, 1)
       }
 
     } else {
@@ -682,14 +682,14 @@ const placeComponent = (G, ctx, type, id, essenceList) => {
         return component.id === id
       })[0])
       // remove the monument from the revealed monument
-      G.publicData.monumentsRevealed = copy(G.publicData.monumentsStack.filter((component) => {
+      G.publicData.monumentsRevealed = copy(G.publicData.monumentsRevealed.filter((component) => {
         return component.id !== id
       }))
       
       // reveal the top monument card
       if (G.publicData.monumentsStack.length > 0 ) {
-        G.publicData.monumentsRevealed.push(G.publicData.monumentsStack.slice(0, 1))
-        G.publicData.monumentsStack = G.publicData.monumentsStack.splice(0, 1)
+        G.publicData.monumentsRevealed.push(copy(G.publicData.monumentsStack[0]))
+        G.publicData.monumentsStack.splice(0, 1)
       }
     }
 

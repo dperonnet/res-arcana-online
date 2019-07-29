@@ -20,22 +20,23 @@ const CARD_BACK_ARTEFACT = {
   class: 'back_artefact',
   id: 'back_artefact',
   name: 'Artefact',
-  type: 'back',
+  type: 'backArtefact',
 }
 
 const CARD_BACK_MAGE = {
   class: 'back_mage',
   id: 'back_mage',
   name: 'Mage',
-  type: 'back',
+  type: 'backMage',
 }
 
 const CARD_BACK_MONUMENT = {
   class: 'back_monument',
   id: 'back_monument',
   name: 'Monument',
-  type: 'back',
-  costEssenceList : [{type: 'gold', quantity: 4}]
+  type: 'backMonument',
+  costEssenceList : [{type: 'gold', quantity: 4}],
+  hasCost: true
 }
 
 let interval
@@ -129,14 +130,15 @@ class ResArcanaBoard extends Component {
     board.scrollTop = 0
     this.props.selectComponent(component)
 
-    let canPayCost
     if (component) {
-      canPayCost = this.canPayCost(component)
-      const preSelection = !!canPayCost.fixedCost ? canPayCost.fixedCost: canPayCost.minEssencePayList
-      this.props.setEssencePickerSelection(preSelection)
+      let canPayCost
+      if (component.hasCost) {
+        canPayCost = this.canPayCost(component)
+        const preSelection = !!canPayCost.fixedCost ? canPayCost.fixedCost: canPayCost.minEssencePayList
+        this.props.setEssencePickerSelection(preSelection)
+      }
+      this.props.setCanPayCost(component.hasCost ? canPayCost : {valid: true})
     }
-    this.props.setCanPayCost(component ? canPayCost : {valid: true})
-    
   }
 
   /**
@@ -162,7 +164,7 @@ class ResArcanaBoard extends Component {
   handleMouseOver = (component) => {
     const { profile } = this.props
     clearInterval(interval)
-    if (component.type !== 'back') {
+    if (component && !component.type.startsWith('back')) {
       interval = setInterval(() => this.props.zoomCard(component), profile.zoomFadeTime ? profile.zoomFadeTime : 600)
     }
   }
@@ -270,10 +272,14 @@ class ResArcanaBoard extends Component {
    * Trigger the pass move.
    */
   pass = (magicItemId) => {
-    const { isActive } = this.props
+    const { isActive, selectAction } = this.props
     if (isActive) {
       this.props.moves.pass(magicItemId)
     }
+    this.props.selectComponent(undefined)
+    this.props.setCanPayCost({})
+    this.handleBoardClick()
+    selectAction(undefined)
   }
 
   /**
@@ -351,11 +357,22 @@ class ResArcanaBoard extends Component {
    * Places of Power, Magic Items and Monuments.
    */
   renderCommonBoard = () => {
-    const { G, canPayCost} = this.props
+    const { G, canPayCost, selectAction} = this.props
     const handleClick = (component) => {
       return G.phase === 'PLAY_PHASE' ? {
         onClick: (event) => {
           this.handleClick(event, component)
+          switch (component.type) {
+            case 'magicItem':
+              selectAction('PASS')
+              break
+            case 'monument':
+            case 'backMonument':
+            case 'placeOfPower':
+              selectAction('CLAIM')
+              break
+            default:
+          }
         }
       } : null
     }
@@ -377,9 +394,9 @@ class ResArcanaBoard extends Component {
         </div>
       </div>
       <div className={'components' + (canPayCost.valid ? '' : ' invalid')}>
-        <h5>Monuments</h5>
+        <h5>Monuments ({G.publicData.monumentsStack.length + G.publicData.monumentsRevealed.length} left)</h5>
         <div className="monument-container">
-          {monumentsStack}
+          {G.publicData.monumentsStack.length > 0 && monumentsStack}
           <div className="monuments-revealed">{monuments}</div>
         </div>
       </div>
@@ -463,7 +480,7 @@ class ResArcanaBoard extends Component {
    * Render the cards in the hand of the player.
    */
   renderPlayerHand = (separator = true) => {
-    const { G, playerID, profile } = this.props
+    const { G, playerID, profile, selectAction } = this.props
     let hand
     let fixedHeight
     switch (G.phase) {
@@ -473,6 +490,7 @@ class ResArcanaBoard extends Component {
             onClick: (event) => {
               this.handleClick(event, card) 
               clearInterval(interval)
+              selectAction('HAND')
             }
           })
         })
@@ -950,8 +968,11 @@ class ResArcanaBoard extends Component {
   renderInHandActions = () => {
     const { addToEssencePickerSelection, canPayCost, essencePickerSelection, resetEssencePickerSelection,
       selectAction, selectedAction, selectedComponent, setEssencePickerSelection } = this.props
-    let directive = selectedComponent &&<h5 className="directive">Choose an action for {selectedComponent.name}</h5>
+
     let actionPanel = null
+    let splitContainer = true
+    let directive = selectedComponent &&<h5 className="directive">Choose an action for {selectedComponent.name}</h5>
+
     let essenceList = Object.entries(essencePickerSelection).map((essence, index) => {
       let isLast = index === Object.entries(essencePickerSelection).length -1
       return <div key={essence[0]} className={'collect-option '}>
@@ -961,64 +982,62 @@ class ResArcanaBoard extends Component {
         </div>}
       </div>
     })
-    let splitContainer = true
 
-    if (selectedAction) {
-      switch (selectedAction) {
-        case 'DISCARD_FOR_2E':
-          let count = 0
-          Object.values(essencePickerSelection).forEach((value) => count = count + value)
-          let isValid = count === 2
-          directive =  isValid ?
-            <h5 className="directive">
-              <div className="inline-text">Discard {selectedComponent.name} for </div>
-              <div className="inline-text collect-options">{essenceList}</div>
-              <div className="inline-text">?</div>
-            </h5>
-            :
-            <h5 className="directive">
-              <div className="inline-text">Select </div>
-              <div className="inline-text">
-                <div className="collect-option">
-                  <div className="essence any-but-gold">2</div>
-                </div>
+    switch (selectedAction) {
+      case 'DISCARD_FOR_2E':
+        let count = 0
+        Object.values(essencePickerSelection).forEach((value) => count = count + value)
+        let isValid = count === 2
+        directive =  isValid ?
+          <h5 className="directive">
+            <div className="inline-text">Discard {selectedComponent.name} for </div>
+            <div className="inline-text collect-options">{essenceList}</div>
+            <div className="inline-text">?</div>
+          </h5>
+          :
+          <h5 className="directive">
+            <div className="inline-text">Select </div>
+            <div className="inline-text">
+              <div className="collect-option">
+                <div className="essence any-but-gold">2</div>
               </div>
-            </h5>
-          actionPanel = <EssencePicker essenceListType={'anyButGold'} essenceNumber={2} />
-          break
-        case 'DISCARD_FOR_1G':
-          directive =
-            <h5 className="directive">
-              <div className="inline-text">Discard {selectedComponent.name} for </div>
-              <div className="inline-text">{essenceList}</div>
-              <div className="inline-text">?</div>
-            </h5>
-          splitContainer = false
-          break
-        case 'PLACE_ARTEFACT':
-          actionPanel = this.renderCostHandler()
-          break
-        default:
-      }
-    } else {
-      const handlePlaceAction = () => {
-        const preSelection = !!canPayCost.fixedCost ? canPayCost.fixedCost: canPayCost.minEssencePayList
-        setEssencePickerSelection(preSelection)
-        selectAction('PLACE_ARTEFACT')
-      }
-      actionPanel = <>
-        <div className={'option' + (canPayCost.valid ? '':' invalid disabled')} size="sm" onClick={canPayCost.valid ? handlePlaceAction : null}>
-          <div className="inline-text">Place Artefact</div>
-        </div>
-        <div className="option small" size="sm" onClick={() => selectAction('DISCARD_FOR_2E')}>
-          <div className="inline-text">Discard for </div>
-          <div className="essence any-but-gold small">2</div>
-        </div>
-        <div className="option small" size="sm" onClick={() => {resetEssencePickerSelection(); addToEssencePickerSelection('gold'); selectAction('DISCARD_FOR_1G')}}>
-          <div className="inline-text">Discard for </div>
-          <div className="essence gold small">1</div>
-        </div>
-      </>
+            </div>
+          </h5>
+        actionPanel = <EssencePicker essenceListType={'anyButGold'} essenceNumber={2} />
+        break
+      case 'DISCARD_FOR_1G':
+        directive =
+          <h5 className="directive">
+            <div className="inline-text">Discard {selectedComponent.name} for </div>
+            <div className="inline-text">{essenceList}</div>
+            <div className="inline-text">?</div>
+          </h5>
+        splitContainer = false
+        break
+      case 'PLACE_ARTEFACT':
+        actionPanel = this.renderCostHandler()
+        break
+      case 'HAND':
+        const handlePlaceAction = () => {
+          const preSelection = !!canPayCost.fixedCost ? canPayCost.fixedCost: canPayCost.minEssencePayList
+          setEssencePickerSelection(preSelection)
+          selectAction('PLACE_ARTEFACT')
+        }
+        actionPanel = <>
+          <div className={'option' + (canPayCost.valid ? '':' invalid disabled')} size="sm" onClick={canPayCost.valid ? handlePlaceAction : null}>
+            <div className="inline-text">Place Artefact</div>
+          </div>
+          <div className="option small" size="sm" onClick={() => selectAction('DISCARD_FOR_2E')}>
+            <div className="inline-text">Discard for </div>
+            <div className="essence any-but-gold small">2</div>
+          </div>
+          <div className="option small" size="sm" onClick={() => {resetEssencePickerSelection(); addToEssencePickerSelection('gold'); selectAction('DISCARD_FOR_1G')}}>
+            <div className="inline-text">Discard for </div>
+            <div className="essence gold small">1</div>
+          </div>
+        </>
+        break
+      default:
     }
 
     return <>
@@ -1229,20 +1248,14 @@ class ResArcanaBoard extends Component {
         preSelection = costEssenceList.filter((essence) => essence.type === 'gold')
       }
       
-      // if the number of essence required to pay is equal to the available essence.
-      // The player have to pay with every essences available and complete with the required number of gold.
+      // if the number of essence required to pay is equal to the available essence,
+      // the player have to pay with every essences available.
       else if (costEQAvailable) {
         preSelection = []
         console.log('3) costEQAvailable');
         Object.keys(availableEssencePool).forEach((type) => {
-          if (type !== 'gold') {
-            preSelection.push({type, quantity: availableEssencePool[type]})
-          }
+          preSelection.push({type, quantity: availableEssencePool[type]})
         })
-        let goldCost = costEssenceList.filter((essence) => essence.type === 'gold')
-        if (goldCost[0]) {
-          preSelection.push(goldCost[0])
-        }
       }
       
       // if there is only one type of essence required to pay the placement cost.
@@ -1256,17 +1269,31 @@ class ResArcanaBoard extends Component {
       // if there is only one available type of essence to pay the any part of the placement cost.
       else if (anyEssenceRequired.quantity > 0 && couldPayAnyWith.length === 1) {
         console.log('5) anyEssenceRequired.quantity > 0 && couldPayAnyWith.length === 1');
-        preSelection = essencesRequired
-        preSelection[couldPayAnyWith[0]].quantity = preSelection[couldPayAnyWith[0]].quantity + anyEssenceRequired.quantity
+        preSelection = payAsMuchAsPossible
+        couldPayAnyWith.forEach((essence) => {
+          let asAnyEssence = preSelection.filter((item) => item.type === essence.type)
+          if (asAnyEssence.length > 0) {
+            asAnyEssence[0].quantity = asAnyEssence[0].quantity + essence.quantity
+          } else {
+            preSelection.push(essence)
+          }
+        })
       }
       
       // if the number of essences that are available to pay the any part of the placement cost equals the amount of this any part.
-      else if (anyEssenceRequired.quantity > 0 && anyEssenceRequired.quantity === anyEssencePool) {
+      else if (anyEssenceRequired.quantity > 0 && (anyEssenceRequired.quantity - sumDiscount) === anyEssencePool) {
         console.log('6) anyEssenceRequired.quantity > 0 && anyEssenceRequired.quantity === anyEssencePool');
-        preSelection = essencesRequired
-        preSelection[couldPayAnyWith[0]].quantity = preSelection[couldPayAnyWith[0]].quantity + anyEssenceRequired.quantity
+        preSelection = payAsMuchAsPossible
+        console.log('couldPayAnyWith',couldPayAnyWith,preSelection);
+        couldPayAnyWith.forEach((essence) => {
+          let asAnyEssence = preSelection.filter((item) => item.type === essence.type)
+          if (asAnyEssence.length > 0) {
+            asAnyEssence[0].quantity = asAnyEssence[0].quantity + essence.quantity
+          } else {
+            preSelection.push(essence)
+          }
+        })
       }
-
 
       // if the discount left equals 0 after paying as much essence as possible
       else if (zeroDiscountLeft) {
@@ -1445,57 +1472,52 @@ class ResArcanaBoard extends Component {
   renderCurrentAction = () => {
     const { essencePickerSelection, profile, selectAction, selectedAction, selectedComponent } = this.props
 
-    let handleConfirm
     let availableActions
+    let costValid
     let showConfirmButton = true
-    
-    if (selectedAction === 'PASS') {
-      availableActions = this.renderPassAction()
-      handleConfirm = selectedComponent && (() => this.pass(selectedComponent.id))
-    } else if (selectedComponent) {
-      let location = this.getComponentLocation().location
-      switch (location) {
-        case 'HAND':
-          availableActions = this.renderInHandActions()
-          if (selectedAction) {
-            switch (selectedAction) {
-              case 'DISCARD_FOR_2E':
-                  handleConfirm = Object.values(essencePickerSelection).reduce((a,b) => {return a + b}, 0) === 2 ? 
-                    () => this.discardArtefact(selectedComponent.id, essencePickerSelection) : null
-                break
-              case 'DISCARD_FOR_1G':
-                  handleConfirm = () => this.discardArtefact(selectedComponent.id, essencePickerSelection)
-                break
-              case 'PLACE_ARTEFACT':
-                  const costValid = this.costSelectionValidator()
-                  handleConfirm = costValid.isValid ? () => this.placeComponent(selectedComponent.type, selectedComponent.id, essencePickerSelection) : null
-                break
-              default:
-            }
-          } else {
-            showConfirmButton = false
-          }
-          break
-        case 'PLAY':
-          availableActions = this.renderInPlayActions()
-          break
-        case 'COMMON_BOARD':
-          if (selectedComponent.type === 'magicItem') {
-            availableActions = this.renderPassAction()
-          } else {
-            availableActions = this.renderClaimAction()
-            const costValid = this.costSelectionValidator()
-            handleConfirm = costValid.isValid ?() => this.placeComponent(selectedComponent.type, selectedComponent.id, essencePickerSelection) : null
-          }
-          break
-        default:
-      }
+    let handleConfirm
+    let handleCancel = (event) => {
+      selectAction(undefined)
+      this.handleClick(event, undefined)
     }
 
-    const handleCancel = (event) => {
-      selectAction(undefined)
-      return this.handleClick(event, undefined)
+    switch (selectedAction) {
+      case 'PASS':
+        availableActions = this.renderPassAction()
+        handleConfirm = selectedComponent && (() => this.pass(selectedComponent.id))
+        break
+      case 'HAND':
+        availableActions = this.renderInHandActions()
+        showConfirmButton = false
+        break
+      case 'PLACE_ARTEFACT':
+        costValid = this.costSelectionValidator()
+        availableActions = this.renderInHandActions()
+        handleConfirm = costValid.isValid ? () => this.placeComponent(selectedComponent.type, selectedComponent.id, essencePickerSelection) : null
+        handleCancel = () => selectAction('HAND')
+        break
+      case 'DISCARD_FOR_2E':
+        availableActions = this.renderInHandActions()
+        handleConfirm = Object.values(essencePickerSelection).reduce((a,b) => {return a + b}, 0) === 2 ? 
+          () => this.discardArtefact(selectedComponent.id, essencePickerSelection) : null
+        handleCancel = () => selectAction('HAND')
+        break
+      case 'DISCARD_FOR_1G':
+        availableActions = this.renderInHandActions()
+        handleConfirm = () => this.discardArtefact(selectedComponent.id, essencePickerSelection)
+        handleCancel = () => selectAction('HAND')
+        break
+      case 'PLAY':
+        availableActions = this.renderInPlayActions()
+        break
+      case 'CLAIM':
+        availableActions = this.renderClaimAction()
+        costValid = this.costSelectionValidator()
+        handleConfirm = costValid.isValid ?() => this.placeComponent(selectedComponent.type, selectedComponent.id, essencePickerSelection) : null
+        break
+      default:
     }
+
     const confirmButton = showConfirmButton && <div className={'option' + (handleConfirm  ? ' valid' : ' disabled')} onClick={handleConfirm} disabled={!handleConfirm}>Confirm</div>
     const cancelButton = <div className="option" onClick={handleCancel}>Cancel</div>
 

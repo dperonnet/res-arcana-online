@@ -4,7 +4,9 @@ import { connect } from 'react-redux';
 
 const COMPONENTS_STYLES = {
   artefact: 'card',
-  back: 'card',
+  backArtefact: 'card',
+  backMonument: 'card',
+  backMage: 'card',
   mage: 'card', 
   magicItem: 'magic-item',
   monument: 'card',
@@ -32,7 +34,8 @@ class GameComponent extends Component {
     const {component, classes, discard, onClick, onDoubleClick, onMouseOut, onMouseOver, profile, selectedComponent, tappedComponents } = this.props
     let src = null
     if (component.class) {
-      src = require('../../../assets/image/components/' + component.type + '/' + component.class + '.jpg')
+      const folder = component.type.startsWith('back') ? 'back' : component.type
+      src = require('../../../assets/image/components/' + folder + '/' + component.class + '.jpg')
     }
     const cardSize = (profile.cardSize ? profile.cardSize : ' normal ')
     const componentType = COMPONENTS_STYLES[component.type]
