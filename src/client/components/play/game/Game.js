@@ -12,6 +12,8 @@ const getInitialState = (ctx, setupData) => {
     secret: {
       artefactsInGameStack: [],
     },
+    allPassed: false,
+    passOrder: [],
     players: {},
     publicData: {
       placesOfPowerInGame: [],
@@ -619,13 +621,25 @@ const discardArtefact = (G, ctx, cardId, essenceList) => {
  */
 const pass = (G, ctx, magicItemId) => {
   const playerID = ctx.currentPlayer
-  Pass(G, ctx)
+  
+  G.passOrder.push(playerID)
+  G.allPassed = G.passOrder.length >= ctx.numPlayers
+
+  getFirstPlayerToken(G, ctx)
   pickMagicItem(G, ctx, magicItemId)
+  drawCard(G, ctx)
+  
+  return G
+}
+
+/**
+ * If the player is the first player to pass then he gain the first player token.
+ */
+const getFirstPlayerToken = (G, ctx) => {
+  const playerID = ctx.currentPlayer
   if (G.passOrder && G.passOrder[0] === playerID) {
     G.publicData.firstPlayer = playerID
   }
-  drawCard(G, ctx)
-  return G
 }
 
 const drawCard = (G, ctx) => {
@@ -722,8 +736,39 @@ const getTurnOrder = (G, ctx) => {
   return order
 }
 
+const getNextPlayerActionPhase = (G, ctx) => {
+  console.log('[Call to getNextPlayerActionPhase]')
+  let nextPlayerId = undefined
+  for (let i=1; i <= ctx.numPlayers; i++) {
+    // compute the next position
+    let nextPlayerPos = (ctx.playOrderPos + i) % ctx.numPlayers
+    // get the corresponding player id in playOrder list
+    let nextPlayerIdInPlayOrder = ctx.playOrder[parseInt(nextPlayerPos)]
+    // check that this player is not in passOrder list
+    if (!G.passOrder.includes(nextPlayerIdInPlayOrder)) {
+      nextPlayerId = nextPlayerPos
+      break
+    }
+  }
+  return nextPlayerId
+}
+
+const allPlayersPassed = (G, ctx) => {
+  if (G.allPassed) {
+    console.log('[allPlayersPassed] All players passed, return "checkVictoryPhase"')
+    return {next: 'checkVictoryPhase' }
+  }
+  console.log('[allPlayersPassed] One player at least is sill playing, return "actionPhase"')
+}
+
+function copy(value) {
+  return JSON.parse(JSON.stringify(value))
+}
+
 // ########## VICTORY CHECK PHASE ##########
 const initVictoryCheckPhase = (G, ctx) => {
+  console.log('[initVictoryCheckPhase] Call to initVictoryCheckPhase()')
+  G.phase = 'PLAY_PHASE'
   return G
 }
 
@@ -738,18 +783,6 @@ const getCheckVictoryTurnOrder = (G, ctx) => {
     }
   }
   return order
-}
-
-const allPlayersPassed = (G, ctx) => {
-  if (G.allPassed) {
-    console.log('[allPlayersPassed] All players passed, return "checkVictoryPhase"')
-    return {next: 'checkVictoryPhase' }
-  }
-  console.log('[allPlayersPassed] One player at least is sill playing, return "actionPhase"')
-}
-
-function copy(value) {
-  return JSON.parse(JSON.stringify(value))
 }
 
 // ########## game options setup (KO) ##########
@@ -837,11 +870,11 @@ export const ResArcanaGame = Game({
         turnOrder: {
           playOrder: (G, ctx) => getTurnOrder(G, ctx),
           first: (G, ctx) => 0,
-          next: (G, ctx) => (ctx.playOrderPos + 1) % ctx.numPlayers,
+          next: (G, ctx) => getNextPlayerActionPhase(G, ctx),
         },
         endPhaseIf: (G, ctx) => allPlayersPassed(G, ctx)
       },
-      victoryCheckPhase: {
+      checkVictoryPhase: {
         onPhaseBegin: (G, ctx) => initVictoryCheckPhase(G, ctx),
         turnOrder: {
           playOrder: (G, ctx) => getCheckVictoryTurnOrder(G, ctx),

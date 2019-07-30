@@ -10,9 +10,8 @@ Game
 -auto confirm feature
 -cancel actions if not available anymore (if attack or other player claim first)
 -show discard content
--monument count
 -turn count
--confirm when collecting on place of power
+-confirm when collecting on place of power (victory point loss)
 -state reset on new games
 -toggle show cards in hand
 

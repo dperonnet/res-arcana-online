@@ -4,6 +4,7 @@
   background-color: rgba(34,34,34,.8);
   height: 100%;
   width:100%;
+  position: relative;
 }
 
 .bgio-client {
@@ -35,6 +36,14 @@
   text-align: center;
   flex-shrink: 0;
   margin-left: -15px;
+}
+
+@media (max-width: 768px) {
+  .common-board {
+    position: absolute;
+    z-index: 300;
+    height: 100%;
+  }
 }
 
 .monuments-revealed {

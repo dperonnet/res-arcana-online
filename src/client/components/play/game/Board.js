@@ -305,9 +305,9 @@ class ResArcanaBoard extends Component {
   /**
    * Render the first player token.
    */
-  renderFirstPlayerToken = (playerId, flip) => {
+  renderFirstPlayerToken = (playerId) => {
     const { G } = this.props
-    let passe = flip ? '_passe': ''
+    let passe = G.passOrder.includes(playerId) ? '_passe': ''
     const src = require('../../../assets/image/components/premier_joueur' + passe + '.png')
     return G.publicData.firstPlayer === playerId && <img src={src} alt={'First Player'}  />
   }
@@ -440,11 +440,16 @@ class ResArcanaBoard extends Component {
     const handSize = G.publicData.players[playerId].handSize
     const cardsInHand = <div>{handSize}</div>
     const activePlayer = G.phase !== 'DRAFT_PHASE' && playerId === ctx.currentPlayer ? ' active-player': ''
-    const passed = G.passOrder && G.passOrder.includes(playerId) ? ' passed': ''
+    const playerPassed = G.passOrder.includes(playerId)
+    const passed = playerPassed ? ' passed': ''
+    
     return <div className={'ruban ' + activePlayer + passed}>
       <div className="leftCell">
         <div className="first-player">{firstPlayer}</div>
-        <div className="player-name">{playerName}</div>
+        <div className="player-name">
+          {playerName}
+          {playerPassed ? <span> (passed)</span> : null}
+        </div>
       </div>
       <div className="rightCell">
         <div className="player-pool">{playerPool}</div>
