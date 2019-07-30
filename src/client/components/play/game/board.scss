@@ -185,24 +185,13 @@
 
         > div {
           display: inline-block;
-          vertical-align: top;
-        }
-      }
-
-      &.split {
-        .action-component {
-          text-align: right;
-          display: flex;
-          flex-direction: row-reverse;
-          flex: 4 1;
-        }
-        .action-list {
-          flex: 5 1;
+          vertical-align: -webkit-baseline-middle;
+          vertical-align: middle;
         }
       }
 
       .component-cost {
-        margin: 20px 8px 0 8px;
+        margin: 0 8px;
       }
     }
     
@@ -210,7 +199,6 @@
       margin: 8px 8px 0 8px;
     }
   }
-  
 
   .button-list {
     flex-direction: row;
@@ -231,6 +219,7 @@
     flex: 1;
     z-index: 1;
     justify-content: center;
+    min-width: 220px;
     
     .option {
       height: 43px;
@@ -241,7 +230,12 @@
       width: fit-content;
     }
   }
-
+  
+  .large, .x-large {
+    .action-list {
+      min-width: 260px;
+    }
+  }
   .action-list, .button-list {
     display: flex;
 
@@ -617,6 +611,12 @@
 .collect-icon {
   @extend .game-icon;
   background-image: url("../../../assets/image/collect_icon.png");
+  background-position: 0 0px;
+}
+
+.action-icon {
+  @extend .game-icon;
+  background-image: url("../../../assets/image/dragon_icon.png");
   background-position: 0 0px;
 }
 

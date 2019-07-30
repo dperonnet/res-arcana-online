@@ -467,11 +467,11 @@ class ResArcanaBoard extends Component {
     return <div className="draw-pile">
       <div className="card-container discard">
         <span className="component-legend">Discard ({countDiscard})</span>
-        {this.renderGameComponent({...discardPile, class: countDiscard > 0 ? discardPile.class : null}, {discard: true})}
+        {this.renderGameComponent(discardPile, {classes: countDiscard > 0 ? '' : ' empty', discard: true})}
       </div>
       <div className="card-container">
         <span className="component-legend">Draw pile ({countDeck})</span>
-        {this.renderGameComponent({...drawPile, class: countDeck > 0 ? drawPile.class : null})}
+        {this.renderGameComponent(drawPile, {classes: countDeck > 0 ? '' : ' empty'})}
       </div>
     </div>
   }
@@ -970,7 +970,6 @@ class ResArcanaBoard extends Component {
       selectAction, selectedAction, selectedComponent, setEssencePickerSelection } = this.props
 
     let actionPanel = null
-    let splitContainer = true
     let directive = selectedComponent &&<h5 className="directive">Choose an action for {selectedComponent.name}</h5>
 
     let essenceList = Object.entries(essencePickerSelection).map((essence, index) => {
@@ -1003,7 +1002,10 @@ class ResArcanaBoard extends Component {
               </div>
             </div>
           </h5>
-        actionPanel = <EssencePicker essenceListType={'anyButGold'} essenceNumber={2} />
+        actionPanel = <div>
+          <h5>Discard for:</h5>
+          <EssencePicker essenceListType={'anyButGold'} essenceNumber={2} />
+        </div>
         break
       case 'DISCARD_FOR_1G':
         directive =
@@ -1012,7 +1014,6 @@ class ResArcanaBoard extends Component {
             <div className="inline-text">{essenceList}</div>
             <div className="inline-text">?</div>
           </h5>
-        splitContainer = false
         break
       case 'PLACE_ARTEFACT':
         actionPanel = this.renderCostHandler()
@@ -1041,13 +1042,15 @@ class ResArcanaBoard extends Component {
     }
 
     return <>
-      <div className={'action-container' + (splitContainer ? ' split' : '')}>
+      <div className="action-container">
         <div className="action-component">
           {this.renderGameComponent(selectedComponent)}
+          {actionPanel && 
+            <div className="action-list">
+              {actionPanel}
+            </div>
+          }
         </div>
-        {actionPanel && <div className="action-list">
-          {actionPanel}
-        </div>}
       </div>
       {directive}
     </>
@@ -1556,7 +1559,7 @@ class ResArcanaBoard extends Component {
 
     return <>
       <div className='dialog-panel'>
-        <h5><div className="collect-icon"></div>{title}{waitingFor}</h5>
+        <h5><div className="action-icon"></div>{title}{waitingFor}</h5>
         {waiting ? <h5 className="directive">{waitingFor}</h5> : <>{directive}</>}
         {(selectedComponent || selectedAction) ? currentAction : hand}
         {!(selectedComponent || selectedAction) && <div className="button-list">
