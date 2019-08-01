@@ -2,7 +2,7 @@ import React, { Component, useEffect, useState } from 'react'
 import { Button, ButtonToolbar, Form, InputGroup} from 'react-bootstrap'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faTrash } from '@fortawesome/free-solid-svg-icons';
-import { COMPONENTS_TYPE, DEFAULT_COMPONENT, DISCOUNT, SPECIFIC_COLLECT_ABILITY, STANDARD_COLLECT_ABILITY } from './EditorConstants'
+import { COMPONENTS_TYPE, DEFAULT_COMPONENT, DISCOUNT, REACT_POWER, SPECIFIC_COLLECT_ABILITY, STANDARD_COLLECT_ABILITY } from './EditorConstants'
 import { connect } from 'react-redux'
 import { deleteComponent, saveComponent } from '../../../store/actions/editorActions'
 
@@ -195,7 +195,7 @@ class ComponentForm extends Component {
         {component && 
           <form onSubmit={onSave}>
             <Form.Group controlId="ComponentSettingsForm">
-              <InputGroup size="sm" className="mb-3">
+              <InputGroup size="sm" className="mb-2">
                 <InputGroup.Prepend>
                   <InputGroup.Text id="name">Name</InputGroup.Text>
                 </InputGroup.Prepend>
@@ -207,7 +207,7 @@ class ComponentForm extends Component {
                 />
               </InputGroup>
 
-              <div className="mb-3">
+              <div className="mb-2">
                 {componentsType.map((type) => (
                   <Form.Check inline type="radio" name="type"
                     key={'editor'+type.id} id={'editor'+type.id} value={type.id} label={type.name}
@@ -218,7 +218,7 @@ class ComponentForm extends Component {
               </div>
 
               {component.type === 'placeOfPower' &&
-                <InputGroup size="sm" className="mb-3">
+                <InputGroup size="sm" className="mb-2">
                   <InputGroup.Prepend>
                     <InputGroup.Text id="name">Excluded component id</InputGroup.Text>
                   </InputGroup.Prepend>
@@ -233,7 +233,7 @@ class ComponentForm extends Component {
 
               { component.type !== 'mage' && component.type !== 'magicItem' &&
                 <>
-                  <InputGroup className="mb-3">
+                  <InputGroup className="mb-2">
                     <Form.Check inline type="checkbox" name="hasCost"
                       id="hasCost" label="Has cost"
                       value={component.hasCost}
@@ -246,7 +246,7 @@ class ComponentForm extends Component {
 
                   { component.hasCost && 
                     <>
-                      <div className="mb-3">
+                      <div className="mb-2">
                         <EssencePanel
                           essenceList={component.costEssenceList}
                           onChange={(data) => this.handleFormChangeByName('costEssenceList', data)}
@@ -257,7 +257,7 @@ class ComponentForm extends Component {
                 </>
               }
 
-              <InputGroup className="mb-3">
+              <InputGroup className="mb-2">
                 <Form.Check inline type="checkbox" name="hasStandardCollectAbility"
                   id="hasStandardCollectAbility" label="Has standard collect ability"
                   value={component.hasStandardCollectAbility}
@@ -270,7 +270,7 @@ class ComponentForm extends Component {
 
               { component.hasStandardCollectAbility && 
                 <>
-                  <div className="mb-3">
+                  <div className="mb-2">
                     <EssencePanel
                       essenceList={component.standardCollectAbility && component.standardCollectAbility.essenceList}
                       onChange={(data) => this.handleFormChangeByName('standardCollectAbility', data)}
@@ -279,7 +279,7 @@ class ComponentForm extends Component {
                 </>
               }
 
-              <InputGroup className="mb-3">
+              <InputGroup className="mb-2">
                 <Form.Check inline type="checkbox" name="hasSpecificCollectAbility"
                   id="hasSpecificCollectAbility" label="Has specific collect ability"
                   value={component.hasSpecificCollectAbility}
@@ -292,14 +292,14 @@ class ComponentForm extends Component {
 
               { component.hasSpecificCollectAbility && 
                 <>
-                  <div className="mb-3">
+                  <div className="mb-2">
                     <EssencePanel
                       essenceList={component.specificCollectAbility && component.specificCollectAbility.essenceList}
                       onChange={(data) => this.handleFormChangeByName('specificCollectAbility', data)}
                     />
                   </div>
-                  <div className="mb-3">
-                    <InputGroup className="mb-3">
+                  <div className="mb-2">
+                    <InputGroup className="mb-2">
                       <Form.Check inline type="checkbox" name="multipleCollectOptions"
                         id="multipleCollectOptions" label="Player can choose different essences"
                         value={component.specificCollectAbility.multipleCollectOptions}
@@ -316,7 +316,7 @@ class ComponentForm extends Component {
                 onChangeByName={(name, data) => this.handleFormChangeByName(name, data)}
               />
 
-              <InputGroup className="mb-3">
+              <InputGroup className="mb-2">
                 <Form.Check inline type="checkbox" name="hasActionPower"
                   id="hasActionPower" label="Has action Power(s)"
                   value={component.hasActionPower}
@@ -325,7 +325,7 @@ class ComponentForm extends Component {
               </InputGroup>
 
               { component.type === 'monument' &&
-                <InputGroup className="mb-3">
+                <InputGroup className="mb-2">
                   <Form.Check inline type="checkbox" name="hasPlacementPower"
                     id="hasPlacementPower" label="Has placement power"
                     value={component.hasPlacementPower}
@@ -334,25 +334,25 @@ class ComponentForm extends Component {
                 </InputGroup>
               }
 
-              <InputGroup className="mb-3">
-                <Form.Check inline type="checkbox" name="hasReactPower"
-                  id="hasReactPower" label="Has react power"
-                  value={component.hasReactPower}
-                  checked={component.hasReactPower}
-                  onChange={this.handleFormChange}/>
-              </InputGroup>
+              <ReactPowerPanel 
+                component={component}
+                onChange={(data) => this.handleFormChange(data)}
+                onChangeByName={(name, data) => this.handleFormChangeByName(name, data)}
+              />
 
               { component.type !== 'mage' && component.type !== 'magicItem' &&
                 <>
-                  <InputGroup className="mb-3">
+                  <div className="inline-label mb-2">
                     <Form.Check inline type="checkbox" name="hasVictoryPoint"
                       id="hasVictoryPoint" label="Has victory point(s)"
                       value={component.hasVictoryPoint}
                       checked={component.hasVictoryPoint}
                       onChange={this.handleFormChange}/>
 
-                    { component.hasVictoryPoint && 
-                      <>
+                  </div>
+                  
+                  { component.hasVictoryPoint && 
+                      <div className="inline-input">
                         <InputGroup.Prepend>
                           <InputGroup.Text className="victory-points" id="victoryPoint">{component.victoryPoint || 0}</InputGroup.Text>
                         </InputGroup.Prepend>
@@ -364,15 +364,14 @@ class ComponentForm extends Component {
                               onClick={() => this.decrement("victoryPoint")}><span>-</span></Button>
                           </div>
                         </InputGroup.Append>
-                      </>
+                      </div>
                     }
-                  </InputGroup>
                 </>
               }
 
               { component.type === 'placeOfPower' &&
                 <>
-                  <InputGroup className="mb-3">
+                  <InputGroup className="mb-2">
                     <Form.Check inline type="checkbox" name="hasConditionalVictoryPoint"
                       id="hasConditionalVictoryPoints" label="Has conditional victory point(s)"
                       value={component.hasConditionalVictoryPoint}
@@ -384,7 +383,7 @@ class ComponentForm extends Component {
 
               { component.type === 'artefact' && 
                 <>
-                  <InputGroup className="mb-3">
+                  <InputGroup className="mb-2">
                     <Form.Check inline type="checkbox" name="isCreature"
                       id="isCreature" label="Is a creature"
                       value={component.isCreature}
@@ -392,7 +391,7 @@ class ComponentForm extends Component {
                       onChange={this.handleFormChange}/>
                   </InputGroup>
 
-                  <InputGroup className="mb-3">
+                  <InputGroup className="mb-2">
                     <Form.Check inline type="checkbox" name="isDragon"
                       id="isDragon" label="Is a dragon"
                       value={component.isDragon}
@@ -404,7 +403,7 @@ class ComponentForm extends Component {
 
               { component.type === 'mage' && 
                 <>
-                  <InputGroup className="mb-3">
+                  <InputGroup className="mb-2">
                     <Form.Check inline type="checkbox" name="hasAlternative"
                       id="hasAlternative" label="Has an alternative card"
                       value={component.hasAlternative}
@@ -412,7 +411,7 @@ class ComponentForm extends Component {
                       onChange={this.handleFormChange}/>
                   </InputGroup>
 
-                  <InputGroup className="mb-3">
+                  <InputGroup className="mb-2">
                     <Form.Check inline type="checkbox" name="isAlternative"
                       id="isAlternative" label="Is an alternative card"
                       value={component.isAlternative}
@@ -421,7 +420,7 @@ class ComponentForm extends Component {
                   </InputGroup>
 
                   {component.isAlternative && 
-                      <InputGroup size="sm" className="mb-3">
+                      <InputGroup size="sm" className="mb-2">
                         <InputGroup.Prepend>
                           <InputGroup.Text id="name">Component Id</InputGroup.Text>
                         </InputGroup.Prepend>
@@ -504,7 +503,7 @@ class EssencePanel extends Component {
     const components = essenceTypes.map((type, index) => {
       let essence = Array.isArray(essenceList) ? essenceList.find((item) => item.type === type) : null
       return (
-        <div className="essence-list small" key={index} >
+        <div className="inline-input small" key={index} >
           <InputGroup.Prepend>
             <InputGroup.Text className={"essence "+type} id={type+'Essence'}>{(essence && essence.quantity) || 0}</InputGroup.Text>
           </InputGroup.Prepend>
@@ -519,7 +518,7 @@ class EssencePanel extends Component {
         </div>
       )
     })
-    return <div className="mb-3">
+    return <div className="mb-2">
       {components}
     </div>
   }
@@ -568,7 +567,7 @@ function DiscountPanel({component, onChange, onChangeByName}) {
   ]
   
   return <>
-    <InputGroup className="mb-3">
+    <InputGroup className="mb-2">
       <Form.Check inline type="checkbox" name="hasDiscountAbility"
         id="hasDiscountAbility" label="Has discount ability"
         value={component.hasDiscountAbility}
@@ -589,18 +588,182 @@ function DiscountPanel({component, onChange, onChangeByName}) {
    
     { component.hasDiscountAbility && abilities.map((discount, index) => 
       <div key={index}>
-        <div className="mb-3">
-          {discountTypes.map((discountType) => (
-            <Form.Check inline type="checkBox" name="discountType" 
-              key={index + '_type_' + discountType.id} id={index + '_type_' + discountType.id} label={discountType.name}
-              checked={discount.type.includes(discountType.id)}
-              onChange={(e) => setDiscountType(index, discountType.id)}
-            />
-          ))}
+        <div className="mb-2 ml-2">
+          <div className="inline-label mr-2">Discount target :</div>
+          <div className="inline-checkbox ml-2">
+            {discountTypes.map((discountType) => (
+              <Form.Check inline type="checkBox" name="discountType" 
+                key={index + '_type_' + discountType.id} id={index + '_type_' + discountType.id} label={discountType.name}
+                checked={discount.type.includes(discountType.id)}
+                onChange={(e) => setDiscountType(index, discountType.id)}
+              />
+            ))}
+          </div>
         </div>
         <EssencePanel 
           essenceList={discount.discountList}
           onChange={(data) => updateDiscount(index, data)}
+        />
+      </div>
+    )}
+  </>
+}
+
+
+function ReactPowerPanel({component, onChange, onChangeByName}) {
+  const [reactPowers, setReactPowers] = useState([copy(REACT_POWER)])
+
+  useEffect(() => {
+    setReactPowers(component.reactPowerList || [copy(REACT_POWER)])
+  },[component.name])
+
+  function addReactPower() {
+    reactPowers.push(copy(REACT_POWER))
+    setReactPowers(reactPowers)
+    onChangeByName('reactPowerList', reactPowers)
+  }
+
+  function removeReactPower() {
+    reactPowers.pop()
+    setReactPowers(reactPowers)
+    onChangeByName('reactPowerList', reactPowers)
+  }
+
+  function updateReactPower(index, data, target) {
+    if (target === 'costEssenceList') {
+      reactPowers[index].cost.essenceList = data
+    } else if (target === 'gainEssenceList') {
+      reactPowers[index].gain.essenceList = data
+    } else if (target === 'costTurn') {
+      reactPowers[index].cost.turn = !!reactPowers[index].cost.turn ? false : true
+    } else if (target === 'gainIgnore') {
+      reactPowers[index].gain.ignore = !!reactPowers[index].gain.ignore ? false : true
+    } else if (target === 'gainOnComponent') {
+      reactPowers[index].gain.onComponent = !!reactPowers[index].gain.onComponent ? false : true
+    }
+    onChangeByName('reactPowerList', reactPowers)
+  }
+
+  function setReactPowerType(index, reactPowerType) {
+    console.log('setReactPowerType',index, reactPowerType);
+    if (reactPowers[index].type.includes(reactPowerType)) {
+      reactPowers[index].type = reactPowers[index].type.filter((type) => type !== reactPowerType)
+    } else {
+      reactPowers[index].type.push(reactPowerType)
+    }
+    onChangeByName('reactPowerList', reactPowers)
+  }
+
+  function decrement(index) {
+    let tempVP = reactPowers[index].gain.temporaryVictoryPoints
+    if (tempVP === 0) {
+      delete reactPowers[index].gain.temporaryVictoryPoints
+    } else {
+      tempVP = tempVP - 1
+      reactPowers[index].gain.temporaryVictoryPoints = tempVP
+    }
+    onChangeByName('reactPowerList', reactPowers)
+  }
+
+  function increment (index) {
+    let tempVP = reactPowers[index].gain.temporaryVictoryPoints
+    if (tempVP > 0) {
+      tempVP = tempVP + 1
+    } else {
+      tempVP = 1
+    }
+    reactPowers[index].gain.temporaryVictoryPoints = tempVP
+    onChangeByName('reactPowerList', reactPowers)
+  }
+
+  const reactPowerTypes = [
+    { id: 'LIFE_LOSS', name: 'Life loss' },
+    { id: 'DRAGON', name: 'Dragon' },
+    { id: 'VICTORY_CHECK', name: 'Victory Check' }
+  ]
+  
+  return <>
+    <InputGroup className="mb-2">
+      <Form.Check inline type="checkbox" name="hasReactPower"
+        id="hasReactPower" label="Has react power"
+        value={component.hasReactPower}
+        checked={component.hasReactPower}
+        onChange={(e) => onChange(e)}/>
+
+        { component.hasReactPower && 
+          <ButtonToolbar>
+            <Button variant="secondary" size="sm" onClick={() => addReactPower()}>
+              <FontAwesomeIcon icon={faPlus} size="sm" />
+            </Button>
+            <Button variant="secondary" size="sm" onClick={() => removeReactPower()}>
+              <FontAwesomeIcon icon={faTrash} size="sm" />
+            </Button>
+          </ButtonToolbar>
+        }
+    </InputGroup>
+   
+    { component.hasReactPower && reactPowers.map((reactPower, index) => 
+      <div key={index}>
+        <div className="mb-2 ml-2">
+          <div className="inline-label">Type List :</div>
+          <div className="inline-checkbox ml-2">
+            {reactPowerTypes.map((reactPowerType) => (
+              <Form.Check inline type="checkBox" name="reactPowerType" 
+                key={index + '_type_' + reactPowerType.id} id={index + '_type_' + reactPowerType.id} label={reactPowerType.name}
+                checked={reactPower.type.includes(reactPowerType.id)}
+                onChange={(e) => setReactPowerType(index, reactPowerType.id)}
+              />
+            ))}
+          </div>
+        </div>
+
+        <div className="mb-2 ml-2">
+          <div className="inline-label">Cost List :</div>
+          <input name="costTurn" type="checkBox" id={'costTurn_' + index} className="inline-checkbox ml-2"
+            checked={reactPower.cost.turn}
+            onChange={(e) => updateReactPower(index, null, 'costTurn')}
+          />
+          <div className="tap-component-icon" onClick={(e) => updateReactPower(index, null, 'costTurn')}></div>
+        </div>
+        <EssencePanel
+          essenceList={reactPower.cost.essenceList}
+          onChange={(data) => updateReactPower(index, data, 'costEssenceList')}
+        />
+        <div className="mb-2 ml-2">
+          <div className="inline-label">Gain List :</div>
+          <Form.Check inline type="checkBox" name="gainIgnore" label="Ignore"
+            id={'gainIgnore_' + index} className="ml-2"
+            checked={reactPower.gain.ignore}
+            onChange={(e) => updateReactPower(index, null, 'gainIgnore')}
+          />
+          <Form.Check inline type="checkBox" name="gainOnComponent" label="Essence on component"
+            id={'gainOnComponent_' + index} className="ml-2"
+            checked={reactPower.gain.onComponent}
+            onChange={(e) => updateReactPower(index, null, 'gainOnComponent')}
+          />
+          { reactPowers[index].type.filter((type) => type === 'VICTORY_CHECK').length > 0 && 
+            <>
+              <div className="inline-label">Temporary Victory Points </div>
+              <div className="inline-input">
+                  <InputGroup.Prepend>
+                    <InputGroup.Text className="victory-points" id="victoryPoint">{reactPower.gain.temporaryVictoryPoints || 0}</InputGroup.Text>
+                  </InputGroup.Prepend>
+                  <InputGroup.Append>
+                    <div className="vertical-buttons">
+                      <Button variant="secondary" id="lowerVictoryPoint"
+                        onClick={() => increment(index)}><span>+</span></Button>
+                      <Button variant="secondary" id="raiseVictoryPoint"
+                        onClick={() => decrement(index)}><span>-</span></Button>
+                    </div>
+                  </InputGroup.Append>
+              </div>
+            </>
+          }
+        </div>
+        
+        <EssencePanel
+          essenceList={reactPower.gain.essenceList}
+          onChange={(data) => updateReactPower(index, data, 'gainEssenceList')}
         />
       </div>
     )}

@@ -31,11 +31,12 @@ class GameComponent extends Component {
   }
 
   render() {
-    const {component, classes, discard, onClick, onDoubleClick, onMouseOut, onMouseOver, profile, selectedComponent, tappedComponents } = this.props
+    const {component, classes, discard, onClick, onDoubleClick, onMouseOut, onMouseOver, profile, selectedComponent, specificName, tappedComponents } = this.props
     let src = null
     if (component.class) {
       const folder = component.type.startsWith('back') ? 'back' : component.type
-      src = require('../../../assets/image/components/' + folder + '/' + component.class + '.jpg')
+      const imageName = specificName ? specificName : component.class
+      src = require('../../../assets/image/components/' + folder + '/' + imageName + '.jpg')
     }
     const cardSize = (profile.cardSize ? profile.cardSize : ' normal ')
     const componentType = COMPONENTS_STYLES[component.type]

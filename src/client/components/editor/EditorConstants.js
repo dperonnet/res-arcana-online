@@ -39,3 +39,14 @@ export const DISCOUNT = {
   type: ['artefact'],
   discountList: []
 }
+
+export const REACT_POWER = {
+  type: ['LIFE_LOSS'],
+  cost: {
+    essenceList: []
+  },
+  gain: {
+    essenceList: [],
+    ignore: true
+  }
+}

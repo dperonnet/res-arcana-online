@@ -65,11 +65,6 @@ h5 {
       margin-left: .5em;
     }
 
-    .essence-list {
-      display: inline-flex;
-      margin: 0 10px;
-    }
-    
     .input-group-prepend {
       margin: 0 2px 8px 0;
     }
@@ -107,6 +102,24 @@ h5 {
     .victory-points {
       height: 35px;
       width: 30px;
+    }
+
+    .inline-checkbox {
+      display: inline-block;
+      vertical-align: middle;
+    }
+    .inline-input {
+      display: inline-flex;
+      margin: 0 10px;
+    }
+    .inline-label {
+      display: inline-block;
+      min-width: 75px;
+    }
+    
+    .tap-component-icon {
+      margin-top: -3px;
+      margin-left: 4px;
     }
   }
 }

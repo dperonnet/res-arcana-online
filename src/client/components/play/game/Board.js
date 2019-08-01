@@ -330,10 +330,10 @@ class ResArcanaBoard extends Component {
    */
   renderGameComponent = (component, args) => {
     return <GameComponent
+      key={component.id}
       component={component} 
       onMouseOver={() => this.handleMouseOver(component)}
       onMouseOut={() => this.handleMouseOut()}
-      key={component.id}
       onClick={args && args.onClick ? args.onClick : (event) => event.stopPropagation()}
       {...args}
     />
@@ -440,16 +440,12 @@ class ResArcanaBoard extends Component {
     const handSize = G.publicData.players[playerId].handSize
     const cardsInHand = <div>{handSize}</div>
     const activePlayer = G.phase !== 'DRAFT_PHASE' && playerId === ctx.currentPlayer ? ' active-player': ''
-    const playerPassed = G.passOrder.includes(playerId)
-    const passed = playerPassed ? ' passed': ''
+    const passed = G.passOrder.includes(playerId) ? ' passed': ''
     
     return <div className={'ruban ' + activePlayer + passed}>
       <div className="leftCell">
         <div className="first-player">{firstPlayer}</div>
-        <div className="player-name">
-          {playerName}
-          {playerPassed ? <span> (passed)</span> : null}
-        </div>
+        <div className="player-name">{playerName}</div>
       </div>
       <div className="rightCell">
         <div className="player-pool">{playerPool}</div>
@@ -508,22 +504,25 @@ class ResArcanaBoard extends Component {
     }
     return <div className={'card-row flex-col ' + profile.cardSize + fixedHeight}>
       {separator && <div className="separator"></div>}
-      <div className="action-container v-centered">
-        {hand}
+      <div className="action-container">
+        <div className="action-component">
+          {hand}
+        </div>
       </div>
       <h5 className="directive">Cards in hand ({G.publicData.players[playerID].handSize})</h5>
     </div>;
   }
 
   /**
-   * This board render the cards in play of the player.
-   * This board is player specific and will not be available for spectators.
+   * This board render the in play components of a player.
+   * This board is player specific and is not available for spectators during draft phase.
    */
   renderPlayerBoard = (id) => {
     const { G, playerID, profile } = this.props
     if (!Number.isInteger(parseInt(id))) return null
 
     let cards = null
+    let magicItem = null
     let drawPileAndDiscard = this.renderPlayerDrawPileAndDiscard(id)
     let essencesOnComponent = null
     let tappedComponents = G.publicData.tappedComponents
@@ -542,14 +541,23 @@ class ResArcanaBoard extends Component {
       case 'READY':
       default:
         essencesOnComponent = G.publicData.players[id].essencesOnComponent
-        cards = G.publicData.players[id].inPlay.map((card) => {
-          return this.renderGameComponent(card, {essencesOnComponent: essencesOnComponent[card.id], tappedComponents})
+        magicItem = G.publicData.players[id].inPlay.filter((component) => component.type === 'magicItem').map((card) => {
+          let args = {essencesOnComponent: essencesOnComponent[card.id], tappedComponents}
+          if (card.type === 'magicItem' && G.passOrder.includes(id)) {
+            args.specificName = 'passe'
+          }
+          return this.renderGameComponent(card, args)
+        })
+        cards = G.publicData.players[id].inPlay.filter((component) => component.type !== 'magicItem').map((card) => {
+          let args = {essencesOnComponent: essencesOnComponent[card.id], tappedComponents}
+          return this.renderGameComponent(card, args)
         })
     }
 
     return <>
       <div className={'in-play card-row ' + profile.cardSize}>
         {drawPileAndDiscard}
+        {magicItem}
         {cards}
       </div>
     </>
@@ -963,14 +971,16 @@ class ResArcanaBoard extends Component {
       return this.renderGameComponent(magicItem, {onClick: (event) => this.handleClick(event, magicItem), onDoubleClick: () => this.pass(magicItem.id)})
     })
     return <>
-      <div className="action-container v-centered">
-        {magicItems}
+      <div className="action-container">
+        <div className="action-component">
+          {magicItems}
+        </div>
       </div>
       {directive}
     </>
   }
   
-  renderInHandActions = () => {
+  renderInHandActions = (costValid) => {
     const { addToEssencePickerSelection, canPayCost, essencePickerSelection, resetEssencePickerSelection,
       selectAction, selectedAction, selectedComponent, setEssencePickerSelection } = this.props
 
@@ -1022,6 +1032,30 @@ class ResArcanaBoard extends Component {
         break
       case 'PLACE_ARTEFACT':
         actionPanel = this.renderCostHandler()
+        const selection = Object.entries(essencePickerSelection).filter((item) =>  item[1] > 0)
+        essenceList = selection.length > 0 ? selection.map((essence, index) => {
+          let isLast = index === Object.entries(essencePickerSelection).length -1
+          return <div key={essence[0]} className={'collect-option '}>
+            <div className={'type essence ' + essence[0]}>{essence[1] || 0}</div>
+            {!isLast && <div className="option-and">
+              <FontAwesomeIcon icon={faPlus} size="sm" />
+            </div>}
+          </div>
+        }) 
+        : 
+        <div className="collect-option">
+          <div className="essence any">0</div>
+        </div>
+        directive =  costValid.isValid ?
+          <h5 className="directive">
+            <div className="inline-text">Place {selectedComponent.name} for </div>
+            <div className="inline-text collect-options">{essenceList}</div>
+            <div className="inline-text">?</div>
+          </h5>
+          :
+          <h5 className="directive">
+            <div className="inline-text">Select essences to pay {selectedComponent.name}'s placement cost.</div>
+          </h5>
         break
       case 'HAND':
         const handlePlaceAction = () => {
@@ -1094,17 +1128,17 @@ class ResArcanaBoard extends Component {
     
     const essencesPool = G.publicData.players[playerID].essencesPool
     return <div className="component-cost flex-row">
-      <div className="cost-frame-v">
-        <div className="cost-frame-content">
-          {essences}
-        </div>
-      </div>
       <div className="cost-container">
-        <h5>Pay with:</h5>
+        <h5 className="pb-2">Pay with:</h5>
         {discounts}
         <div className="">
           <EssencePicker enabledEssencesList={canPayCost.enabledEssencesList} defaultSelection={canPayCost.minEssencePayList} essencesPool={essencesPool}
             essenceNumber={sumSelection} discount={sumDiscount} asCost={true} validCost={costValid.isValid} lock={!!canPayCost.fixedCost}/>
+        </div>
+      </div>
+      <div className="cost-frame-v">
+        <div className="cost-frame-content">
+          {essences}
         </div>
       </div>
     </div>
@@ -1500,7 +1534,7 @@ class ResArcanaBoard extends Component {
         break
       case 'PLACE_ARTEFACT':
         costValid = this.costSelectionValidator()
-        availableActions = this.renderInHandActions()
+        availableActions = this.renderInHandActions(costValid)
         handleConfirm = costValid.isValid ? () => this.placeComponent(selectedComponent.type, selectedComponent.id, essencePickerSelection) : null
         handleCancel = () => selectAction('HAND')
         break
