@@ -31,7 +31,7 @@ class GameComponent extends Component {
   }
 
   render() {
-    const {component, classes, discard, onClick, onDoubleClick, onMouseOut, onMouseOver, profile, selectedComponent, specificName, tappedComponents } = this.props
+    const {component, classes, discard, onClick, onDoubleClick, onMouseOut, onMouseOver, profile, selectedComponent, specificName, turnedComponents } = this.props
     let src = null
     if (component.class) {
       const folder = component.type.startsWith('back') ? 'back' : component.type
@@ -42,13 +42,13 @@ class GameComponent extends Component {
     const componentType = COMPONENTS_STYLES[component.type]
     const propsClasses = classes ? classes : ''
     const active = selectedComponent && selectedComponent.id === component.id ? ' active ' : ''
-    const tapped = (tappedComponents && tappedComponents[component.id]) || discard ? ' tapped ' : ''
+    const turned = (turnedComponents && turnedComponents[component.id]) ? ' turned ' : discard ? ' discarded' : ''
     const layout = ' vertical ';
     const essences = this.renderEssences()
     return (
       <div
         key={component.id}
-        className={cardSize + layout + componentType + active + tapped + propsClasses}
+        className={cardSize + layout + componentType + active + turned + propsClasses}
         onClick={onClick}
         onDoubleClick={onDoubleClick}
         onMouseOver={onMouseOver}

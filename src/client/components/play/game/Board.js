@@ -525,7 +525,7 @@ class ResArcanaBoard extends Component {
     let magicItem = null
     let drawPileAndDiscard = this.renderPlayerDrawPileAndDiscard(id)
     let essencesOnComponent = null
-    let tappedComponents = G.publicData.tappedComponents
+    let turnedComponents = G.publicData.turnedComponents
     switch (G.publicData.players[playerID].status) {
       case 'DRAFTING_ARTEFACTS':
         const mages = G.players[playerID].mages.map((card) => {
@@ -542,14 +542,14 @@ class ResArcanaBoard extends Component {
       default:
         essencesOnComponent = G.publicData.players[id].essencesOnComponent
         magicItem = G.publicData.players[id].inPlay.filter((component) => component.type === 'magicItem').map((card) => {
-          let args = {essencesOnComponent: essencesOnComponent[card.id], tappedComponents}
+          let args = {essencesOnComponent: essencesOnComponent[card.id], turnedComponents}
           if (card.type === 'magicItem' && G.passOrder.includes(id)) {
             args.specificName = 'passe'
           }
           return this.renderGameComponent(card, args)
         })
         cards = G.publicData.players[id].inPlay.filter((component) => component.type !== 'magicItem').map((card) => {
-          let args = {essencesOnComponent: essencesOnComponent[card.id], tappedComponents}
+          let args = {essencesOnComponent: essencesOnComponent[card.id], turnedComponents}
           return this.renderGameComponent(card, args)
         })
     }
@@ -1011,7 +1011,7 @@ class ResArcanaBoard extends Component {
           :
           <h5 className="directive">
             <div className="inline-text">Select </div>
-            <div className="inline-text">
+            <div className="inline-text collect-options">
               <div className="collect-option">
                 <div className="essence any-but-gold">2</div>
               </div>
@@ -1670,7 +1670,7 @@ class ResArcanaBoard extends Component {
     const sizeSetting = profile && profile.cardSize ? profile.cardSize : 'normal'
     const layoutSetting = profile && profile.layout ? profile.layout : 'vertical'
     return <div className={'board-'+layoutSetting} onClick={() => this.handleBoardClick()}>
-      {true && <div className={'common-board ' + sizeSetting}>
+      {false && <div className={'common-board ' + sizeSetting}>
         {this.renderCommonBoard()}
       </div>}
       <div className="board" ref='board'>

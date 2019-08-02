@@ -400,22 +400,18 @@
 
 .draw-pile {
   position: relative;
-  margin-right: 58px;
-  margin-left: 20px;
+  margin-left: 74px;
   float: right;
   right: 16px;
 }
-.x-small .draw-pile {
-  margin-right: 34px;
-}
 .small .draw-pile {
-  margin-right: 46px;
+  margin-left: 62px;
 }
 .large .draw-pile {
-  margin-right: 70px;
+  margin-left: 80px;
 }
 .x-large .draw-pile {
-  margin-right: 82px;
+  margin-left: 86px;
 }
 
 .x-small .component-legend, .small .component-legend {
@@ -442,12 +438,12 @@
 .discard {
   position: absolute;
   bottom: 3px;
-  left: 15px;
+  right: 15px;
 }
 
 .discard .component-legend {
   left: unset;
-  right: 0;
+  left: 0;
 }
 
 .close-chat {
@@ -642,11 +638,27 @@
   background-position: 0 5px;
   height: 30px;
 }  
-.tap-component-icon {
+.turn-component-icon {
   @extend .game-icon;
-  background-image: url("../../../assets/image/tap_component.png");
+  background-image: url("../../../assets/image/turn_component.png");
   background-position: 0 5px;
   height: 30px;
+}
+.turn-dragon-icon {
+  @extend .game-icon;
+  background-image: url("../../../assets/image/turn_dragon.png");
+  background-position: 0 0px;
+  background-size: 34px;
+  height: 30px;
+  width: 40px;
+}
+.turn-creature-icon {
+  @extend .game-icon;
+  background-image: url("../../../assets/image/turn_creature.png");
+  background-position: 0 0px;
+  background-size: 34px;
+  height: 30px;
+  width: 40px;
 }
 
 .large, .x-large {
@@ -658,13 +670,29 @@
     height: 50px;
     width: 30px;
   }  
-  .tap-component-icon {
+  .turn-component-icon {
     @extend .game-icon;
-    background-image: url("../../../assets/image/tap_component.png");
+    background-image: url("../../../assets/image/turn_component.png");
     background-position: 0 8px;
     background-size: 35px;
     height: 50px;
     width: 40px;
+  }
+  .turn-dragon-icon {
+    @extend .game-icon;
+    background-image: url("../../../assets/image/turn_dragon.png");
+    background-position: 0 0px;
+    background-size: 50px;
+    height: 50px;
+    width: 65px;
+  }
+  .turn-creature-icon {
+    @extend .game-icon;
+    background-image: url("../../../assets/image/turn_creature.png");
+    background-position: 0 0px;
+    background-size: 50px;
+    height: 50px;
+    width: 65px;
   }
 }
 

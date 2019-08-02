@@ -6,9 +6,9 @@
   font-size: large;
   line-height:0;
   text-align: center;
-  background-image: url("../../../assets/image/essences.png");
+  background-image: url("../../../assets/image/essence_icons.png");
   background-repeat: no-repeat;
-  background-size: 540px 36px;
+  background-size: 588px 36px;
   height: 50px;
   width: 40px;
   margin: 0 2px;
@@ -33,22 +33,20 @@
     background-position: -182px 5px;
   }
   &.any {
-    background-position: -205px 7px;
+    background-position: -187px 7px;
     background-size: 489px 34px
   }
   &.any-but-gold {
-    background-position: -229px 0;
+    background-position: -229px 5px;
     font-size: large;
     padding-left: 15px;
-    padding-top: 20px;
     text-align: left;
     width: 84px;
   }
   &.any-but-death-gold {
-    background-position: -317px 0;
+    background-position: -317px 5px;
     font-size: large;
     padding-left: 15px;
-    padding-top: 20px;
     text-align: left;
     width: 107px;
   }
@@ -57,7 +55,7 @@
 .small, .normal {
   .essence {
     @extend .essence;
-    background-size: 425px 30px;
+    background-size: 462px 30px;
     height: 35px;
     width: 30px;
     padding-top: 16px;
@@ -77,10 +75,10 @@
       background-position: -107px 0;
     }
     &.gold {
-      background-position: -144px 0;
+      background-position: -143px 0;
     }    
     &.any {
-      background-position: -168px 0;
+      background-position: -154px 0;
       background-size: 400px 28px;
       width: 32px;
     }

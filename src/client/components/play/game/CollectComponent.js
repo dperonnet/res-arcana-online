@@ -199,7 +199,7 @@ class CollectComponent extends Component {
       <div className="option-or">
         <FontAwesomeIcon icon={faSlash} size="sm" rotation={90} />
       </div>
-      <div className="tap-component-icon pointer-cursor" onClick={() => handleTap()}></div>
+      <div className="turn-component-icon pointer-cursor" onClick={() => handleTap()}></div>
     </div>
   }
 
@@ -211,7 +211,7 @@ class CollectComponent extends Component {
     const ready = status === 'READY'
     return <div onClick={!ready ? handleOnClick : null}>
       <div className="collect-option">
-        <div className="tap-component-icon"></div>
+        <div className="turn-component-icon"></div>
       </div>
     </div>
   }
@@ -335,7 +335,7 @@ const mapStateToProps = (state) => {
     collectActions: state.game.collectActions,
     collectOnComponentActions: state.game.collectOnComponentActions,
     profile: state.firebase.profile,
-    tappedComponents: state.game.tappedComponents,
+    turnedComponents: state.game.turnedComponents,
   }
 }
 

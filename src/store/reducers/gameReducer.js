@@ -3,7 +3,7 @@ const initState = {
   games: [],
   selectedComponent: undefined,
   selectedAction: undefined,
-  tappedComponents: [],
+  turnedComponents: [],
   collectActions: {},
   collectOnComponentActions: {},
   essencePickerSelection: {},
@@ -57,16 +57,16 @@ const gameReducer = (state = initState, action) => {
         zoomCard: undefined
       });
     case 'TAP_COMPONENT':
-      const { tappedComponents } = state;
+      const { turnedComponents } = state;
       debug && console.log('card.id', action.card.id)
-      let index = tappedComponents.indexOf(action.card.id)
+      let index = turnedComponents.indexOf(action.card.id)
       if (index >= 0) {
-        tappedComponents.splice(index, 1);
+        turnedComponents.splice(index, 1);
       } else {
-        tappedComponents.push(action.card.id)
+        turnedComponents.push(action.card.id)
       }
       return Object.assign({}, state, {
-        tappedComponents
+        turnedComponents
       });
     case 'RESET_COLLECT':
       return Object.assign({}, state, {

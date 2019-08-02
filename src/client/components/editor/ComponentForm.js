@@ -316,13 +316,11 @@ class ComponentForm extends Component {
                 onChangeByName={(name, data) => this.handleFormChangeByName(name, data)}
               />
 
-              <InputGroup className="mb-2">
-                <Form.Check inline type="checkbox" name="hasActionPower"
-                  id="hasActionPower" label="Has action Power(s)"
-                  value={component.hasActionPower}
-                  checked={component.hasActionPower}
-                  onChange={this.handleFormChange}/>
-              </InputGroup>
+              <ActionPowerPanel 
+                component={component}
+                onChange={(data) => this.handleFormChange(data)}
+                onChangeByName={(name, data) => this.handleFormChangeByName(name, data)}
+              />
 
               { component.type === 'monument' &&
                 <InputGroup className="mb-2">
@@ -609,7 +607,9 @@ function DiscountPanel({component, onChange, onChangeByName}) {
   </>
 }
 
-
+/**
+ * Render the reaction action power panel to add reaction powers to the component.
+ */
 function ReactPowerPanel({component, onChange, onChangeByName}) {
   const [reactPowers, setReactPowers] = useState([copy(REACT_POWER)])
 
@@ -723,7 +723,7 @@ function ReactPowerPanel({component, onChange, onChangeByName}) {
             checked={reactPower.cost.turn}
             onChange={(e) => updateReactPower(index, null, 'costTurn')}
           />
-          <div className="tap-component-icon" onClick={(e) => updateReactPower(index, null, 'costTurn')}></div>
+          <div className="turn-component-icon" onClick={(e) => updateReactPower(index, null, 'costTurn')}></div>
         </div>
         <EssencePanel
           essenceList={reactPower.cost.essenceList}
@@ -764,6 +764,128 @@ function ReactPowerPanel({component, onChange, onChangeByName}) {
         <EssencePanel
           essenceList={reactPower.gain.essenceList}
           onChange={(data) => updateReactPower(index, data, 'gainEssenceList')}
+        />
+      </div>
+    )}
+  </>
+}
+
+/**
+ * Render the action power panel to add actions to the component.
+ */
+function ActionPowerPanel({component, onChange, onChangeByName}) {
+  const [actionPowers, setActionPowers] = useState([copy(REACT_POWER)])
+
+  useEffect(() => {
+    setActionPowers(component.actionPowerList || [copy(REACT_POWER)])
+  },[component.name])
+
+  function addActionPower() {
+    actionPowers.push(copy(REACT_POWER))
+    setActionPowers(actionPowers)
+    onChangeByName('actionPowerList', actionPowers)
+  }
+
+  function removeActionPower() {
+    actionPowers.pop()
+    setActionPowers(actionPowers)
+    onChangeByName('actionPowerList', actionPowers)
+  }
+
+  function updateActionPower(index, data, target) {
+    if (target === 'costEssenceList') {
+      actionPowers[index].cost.essenceList = data
+    } else if (target === 'costSameType') {
+      actionPowers[index].cost.sameType = data
+    } else if (target === 'costTurn') {
+      actionPowers[index].cost.turn = !!actionPowers[index].cost.turn ? false : true
+    } else if (target === 'costTurnDragon') {
+      actionPowers[index].cost.turnDragon = !!actionPowers[index].cost.turnDragon ? false : true
+    } else if (target === 'costTurnCreature') {
+      actionPowers[index].cost.turnCreature = !!actionPowers[index].cost.turnCreature ? false : true
+    } else if (target === 'costOnComponent') {
+      actionPowers[index].cost.onComponent = !!actionPowers[index].cost.onComponent ? false : true
+    } else if (target === 'gainEssenceList') {
+      actionPowers[index].gain.essenceList = data
+    } else if (target === 'gainOnComponent') {
+      actionPowers[index].gain.onComponent = !!actionPowers[index].gain.onComponent ? false : true
+    }
+    onChangeByName('actionPowerList', actionPowers)
+  }
+
+  return <>
+    <InputGroup className="mb-2">
+      <Form.Check inline type="checkbox" name="hasActionPower"
+        id="hasActionPower" label="Has action power"
+        value={component.hasActionPower}
+        checked={component.hasActionPower}
+        onChange={(e) => onChange(e)}/>
+
+        { component.hasActionPower && 
+          <ButtonToolbar>
+            <Button variant="secondary" size="sm" onClick={() => addActionPower()}>
+              <FontAwesomeIcon icon={faPlus} size="sm" />
+            </Button>
+            <Button variant="secondary" size="sm" onClick={() => removeActionPower()}>
+              <FontAwesomeIcon icon={faTrash} size="sm" />
+            </Button>
+          </ButtonToolbar>
+        }
+    </InputGroup>
+   
+    { component.hasActionPower && actionPowers.map((actionPower, index) => 
+      <div key={index}>
+
+        <div className="mb-2 ml-2">
+          <div className="inline-label">Cost List :</div>
+
+          <input type="checkBox" name="costTurn" id={'costTurn_' + index} className="inline-checkbox ml-2"
+            checked={actionPower.cost.turn}
+            onChange={(e) => updateActionPower(index, null, 'costTurn')}
+          />
+          <div className="turn-component-icon" onClick={(e) => updateActionPower(index, null, 'costTurn')}></div>
+
+          <input type="checkBox" name="costTurnDragon" id={'costTurnDragon_' + index} className="inline-checkbox ml-2"
+            checked={actionPower.cost.turnDragon}
+            onChange={(e) => updateActionPower(index, null, 'costTurnDragon')}
+          />
+          <div className="turn-dragon-icon" onClick={(e) => updateActionPower(index, null, 'costTurnDragon')}></div>
+
+          <input type="checkBox" name="costTurnCreature" id={'costTurnCreature_' + index} className="inline-checkbox ml-2"
+            checked={actionPower.cost.turnCreature}
+            onChange={(e) => updateActionPower(index, null, 'costTurnCreature')}
+          />
+          <div className="turn-creature-icon" onClick={(e) => updateActionPower(index, null, 'costTurnCreature')}></div>
+
+          <input type="checkBox" name="costOnComponent" id={'costOnComponent_' + index} className="inline-checkbox ml-2"
+            checked={actionPower.gain.onComponent}
+            onChange={(e) => updateActionPower(index, null, 'costOnComponent')}
+          />
+          <label for={'costOnComponent_' + index} className="inline-label">Essence on component</label>
+          
+          <input type="checkBox" name="costSameType" id={'costSameType_' + index} className="inline-checkbox ml-2"
+            checked={actionPower.cost.sameType}
+            onChange={(e) => updateActionPower(index, null, 'costSameType')}
+          />
+          <div className="pay-same-type" onClick={(e) => updateActionPower(index, null, 'costSameType')}></div>
+
+        </div>
+        <EssencePanel
+          essenceList={actionPower.cost.essenceList}
+          onChange={(data) => updateActionPower(index, data, 'costEssenceList')}
+        />
+        <div className="mb-2 ml-2">
+          <div className="inline-label">Gain List :</div>
+          <Form.Check inline type="checkBox" name="gainOnComponent" label="Essence on component"
+            id={'gainOnComponent_' + index} className="ml-2"
+            checked={actionPower.gain.onComponent}
+            onChange={(e) => updateActionPower(index, null, 'gainOnComponent')}
+          />
+        </div>
+        
+        <EssencePanel
+          essenceList={actionPower.gain.essenceList}
+          onChange={(data) => updateActionPower(index, data, 'gainEssenceList')}
         />
       </div>
     )}

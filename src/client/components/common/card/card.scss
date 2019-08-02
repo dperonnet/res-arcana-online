@@ -52,7 +52,7 @@ $xx-large: 241px;
   height: $height;
   width: ($height * $ratio);
 
-  &.tapped {
+  &.turned, &.discarded {
     width: $height;
     height: $height * $ratio;
     img {
@@ -112,12 +112,20 @@ $xx-large: 241px;
   }
 }
 
-.tapped img {
+.turned img {
   -webkit-transform: rotate(90deg);
   -moz-transform: rotate(90deg);
   -o-transform: rotate(90deg);
   -ms-transform: rotate(90deg);
   transform: rotate(90deg);
+}
+
+.discarded img {
+  -webkit-transform: rotate(-90deg);
+  -moz-transform: rotate(-90deg);
+  -o-transform: rotate(-90deg);
+  -ms-transform: rotate(-90deg);
+  transform: rotate(-90deg);
 }
 
 div.magic-item, div.card, div.place-of-power {

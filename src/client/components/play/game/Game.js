@@ -21,7 +21,7 @@ const getInitialState = (ctx, setupData) => {
       monumentsStack: [],
       monumentsRevealed: [],
       players: {},
-      tappedComponents: {},
+      turnedComponents: {},
       waitingFor: []
     },
   }
@@ -516,7 +516,7 @@ const collectEssences = (G, ctx, collectActions, collectOnComponentActions) => {
         G.publicData.players[playerID].essencesPool[essence.type] = G.publicData.players[playerID].essencesPool[essence.type]- essence.quantity
       })
     } else if (action.type === 'TAP') {
-      G.publicData.tappedComponents[action.id] = true
+      G.publicData.turnedComponents[action.id] = true
     }
   })
   // Collect of essences on components
