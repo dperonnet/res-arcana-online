@@ -117,9 +117,11 @@ const getInitialState = (ctx, setupData) => {
       const essencesTypes = ['elan', 'life', 'calm', 'death', 'gold']
       const essencesTypeNumber = 5
 
-      for (let j= 0; j < G.players[i].deck.length; j++) {
-        for (let k = 0; k < ctx.random.Die(essencesTypeNumber); k++) {
-          addEssenceOnComponent(G, i, G.players[i].deck[j].id, essencesTypes[k], ctx.random.Die(5))
+      for (let j= 0; j < G.publicData.players[i].inPlay.length; j++) {
+        if (G.publicData.players[i].inPlay[j].type === 'artefact') {
+          for (let k = 0; k < ctx.random.Die(essencesTypeNumber); k++) {
+            addEssenceOnComponent(G, i, G.publicData.players[i].inPlay[j].id, essencesTypes[ctx.random.Die(essencesTypeNumber)-1], ctx.random.Die(5))
+          }
         }
       }
     }
@@ -922,7 +924,7 @@ export const ResArcanaGame = Game({
   flow: {
     onMove: (G, ctx) => G,
     movesPerTurn: 1,
-    startingPhase: 'actionPhase',
+    startingPhase: 'collectPhase',
 
     phases: {
       setupPhase: {

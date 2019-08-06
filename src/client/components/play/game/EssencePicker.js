@@ -87,7 +87,7 @@ class EssencePicker extends Component {
           <div className={'essence ' + type + pointer} onClick={ () => !isValid && enabled && !lock ? handleOnClick(type) : null}>
           {essencePickerSelection[type] || 0}
         </div>
-        {!isLast && <div className={'option-and ' + hidePlus}>
+        {!isLast && <div className={'operator ' + hidePlus}>
           <FontAwesomeIcon icon={faPlus} size="sm" />
         </div>}
       </div>

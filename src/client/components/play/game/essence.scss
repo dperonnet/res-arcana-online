@@ -1,110 +1,66 @@
+@import './icons.scss';
 
 .essence {
-  display: inline-block;
-  color: ghostwhite;
-  font-weight: bold;
-  font-size: large;
-  line-height:0;
-  text-align: center;
-  background-image: url("../../../assets/image/essence_icons.png");
-  background-repeat: no-repeat;
-  background-size: 588px 36px;
-  height: 50px;
+  @extend .game-icon;
+  background-size: 628px 102px;
+  line-height: 2.5;
+  height: 40px;
   width: 40px;
-  margin: 0 2px;
-  padding-top: 26px;
+  margin: 0;
   position: relative;
   user-select: none;
   vertical-align: top;
   
   &.elan {
-    background-position: 4px 5px;
+    background-position: 4px 0;
   }
   &.life {
-    background-position: -42px 5px;
+    background-position: -35px 0;
   }
   &.calm {
-    background-position: -89px 5px;
+    background-position: -75px 0;
   }
   &.death {
-    background-position: -135px 5px;
+    background-position: -115px 0;
   }
   &.gold {
-    background-position: -182px 5px;
+    background-position: -155px 0;
   }
   &.any {
-    background-position: -187px 7px;
-    background-size: 489px 34px
+    background-position: -199px 0;
   }
   &.any-but-gold {
-    background-position: -229px 5px;
+    background-position: -243px 0;
     font-size: large;
-    padding-left: 15px;
+    padding-left: 17px;
     text-align: left;
-    width: 84px;
+    width: 78px;
   }
   &.any-but-death-gold {
-    background-position: -317px 5px;
+    background-position: -325px 0;
     font-size: large;
     padding-left: 15px;
     text-align: left;
-    width: 107px;
+    width: 104px;
   }
-}
-
-.small, .normal {
-  .essence {
-    @extend .essence;
-    background-size: 462px 30px;
-    height: 35px;
-    width: 30px;
-    padding-top: 16px;
-    vertical-align: top;
-    text-align: center;
-
-    &.elan {
-      background-position: 3px 0;
-    }
-    &.life {
-      background-position: -33px 0;
-    }
-    &.calm {
-      background-position: -70px 0;
-    }
-    &.death {
-      background-position: -107px 0;
-    }
-    &.gold {
-      background-position: -143px 0;
-    }    
-    &.any {
-      background-position: -154px 0;
-      background-size: 400px 28px;
-      width: 32px;
-    }
-    &.any-but-gold {
-      background-position: -180px 0;
-      font-size: large;
-      padding-left: 11px;
-      text-align: left;
-      width: 65px;
-    }
-    &.any-but-death-gold {
-      background-position: -249px 0;
-      font-size: large;
-      padding-left: 11px;
-      text-align: left;
-      width: 86px;
-    }
+  &.any-but-life-gold {
+    background-position: -433px 0;
+    font-size: large;
+    padding-left: 15px;
+    text-align: left;
+    width: 104px;
+  }
+  &.any-same-type {
+    background-position: -540px 0;
   }
 }
 
 .essence-on-component {
   position: relative;
-  z-index: 32;
   text-align: center;
   vertical-align: middle;
   height: 100%;
+  z-index: 32;
 
   &:before {
     content: "";
@@ -127,9 +83,10 @@
 }
 
 .collect-options {
-  min-height: 37px;
+  min-height: 46px;
   min-width: 110px;
   padding-left: 5px;
+  margin-bottom: 4px;
 
   .collect-option {
     display: inline-block;
@@ -147,40 +104,8 @@
     min-width: unset;
     padding-left: unset;
   }
-
-  .option-reset {
-    font-size: 1rem;
-    opacity: 0.5;
-    margin-left: 4px;
-    color: white;
-
-    &:hover {
-      text-decoration: none;
-      cursor: pointer;
-    }
-    
-    &:not(:disabled):not(.disabled):focus, &:not(:disabled):not(.disabled):hover {
-      opacity: 0.75;
-    }
-  }
-
-  .option-and, .option-or, .option-reset {
-    display: inline-block;
-    padding-top: 10px;
-    padding-left: 2px;
-  }
-}
-
-.large, .x-large {
-  .collect-options {
-    min-height: 50px;
-    min-width: 140px;
-    
-    .option-and, .option-or, .option-reset {
-      display: inline-block;
-      padding-top: 18px;
-      padding-left: 2px;
-    }
+  &.no-min-height {
+    min-height: 0;
   }
 }
 
@@ -195,9 +120,9 @@
   bottom: 0;
   height: 16px;
   width: 16px;
-  background-image: url("../../../assets/image/delete.png");
-  background-size: 14px;
-  background-position: 0 0;
+  background-image: url("../../../assets/image/game_icons.png");
+  background-size: 250px 38px;
+  background-position: -190px -16px;
   background-repeat: no-repeat;
 }
 
@@ -208,10 +133,16 @@
   bottom: 0;
   height: 16px;
   width: 16px;
-  background-image: url("../../../assets/image/tick.png");
-  background-size: 14px;
-  background-position: 0 0;
+  background-image: url("../../../assets/image/game_icons.png");
+  background-size: 250px 38px;
+  background-position: -174px -16px;
   background-repeat: no-repeat;
+}
+
+.operator {
+  display: inline-block;
+  padding-top: 16px;
+  padding-left: 2px;
 }
 
 .card-zoom-frame {

@@ -1,0 +1,105 @@
+.game-icon {
+  background-image: url("../../../assets/image/game_icons.png");
+  display: inline-block;
+  color: ghostwhite;
+  font-weight: bold;
+  font-size: large;
+  text-align: center;
+  background-repeat: no-repeat;
+  background-size: 584px 89px;
+  height: 28px;
+  width: 24px;
+  margin-right: 4px;
+  padding-top: 0px;
+  vertical-align: top;
+}
+
+.collect-icon {
+  @extend .game-icon;
+  background-position: -28px -46px;
+  width: 28px;
+}
+.component-cost-icon {
+  @extend .game-icon;
+  background-position: -3px -42px;
+  width: 26px;
+  height: 33px;
+}
+.dragon-icon {
+  @extend .game-icon;
+  background-position: -204px -43px;
+  width: 24px;
+  height: 30px;
+}
+.creature-icon {
+  @extend .game-icon;
+  background-position: -228px -43px;
+  width: 24px;
+  height: 30px;
+}
+.component-icon {
+  @extend .game-icon;
+  background-size: 468px 74px;
+  background-position: -46px -34px;
+  height: 28px;
+  width: 20px;
+}
+.on-component-icon {
+  @extend .game-icon;
+  background-size: 468px 74px;
+  background-position: -66px -34px;
+  height: 28px;
+  width: 20px;
+}
+.turn-component-icon {
+  @extend .game-icon;
+  background-size: 468px 74px;
+  background-position: -86px -34px;
+  height: 28px;
+  width: 25px;
+}
+.straighten-component-icon {
+  @extend .game-icon;
+  background-size: 468px 74px;
+  background-position: -112px -34px;
+  height: 28px;
+  width: 24px;
+}
+.straighten-self-icon {
+  @extend .game-icon;
+  background-size: 468px 74px;
+  background-position: -138px -34px;
+  height: 28px;
+  width: 24px;
+}
+.turn-dragon-icon {
+  @extend .game-icon;
+  background-size: 520px 78px;
+  background-position: -226px -36px;
+  height: 28px;
+  width: 34px;
+}
+.turn-creature-icon {
+  @extend .game-icon;
+  background-size: 520px 78px;
+  background-position: -260px -36px;
+  height: 28px;
+  width: 34px;
+}
+.straighten-creature-icon {
+  @extend .game-icon;
+  background-size: 520px 78px;
+  background-position: -298px -36px;
+  height: 28px;
+  width: 24px;
+}
+.cards-in-hand-icon {
+  @extend .game-icon;
+  background-size: 655px 98px;
+  background-position: -421px -40px;
+  height: 50px;
+  width: 34px;
+  margin-left: 20px;
+  padding-top: 2px;
+  padding-left: 6px;
+}

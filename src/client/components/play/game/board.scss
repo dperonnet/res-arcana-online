@@ -1,3 +1,4 @@
+@import './icons.scss';
 @import '../../common/card/card.scss';
 
 .game-board {
@@ -99,16 +100,15 @@
 ::-webkit-scrollbar-track {
   background: #f1f1f1; 
 }
-
 /* Handle */
 ::-webkit-scrollbar-thumb {
   background: #888; 
 }
-
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
   background: #555; 
 }
+
 .common-board.x-small, .common-board.small {
   width: 296px;
 }
@@ -122,13 +122,11 @@
   width: 425px;
 }
 
-.game-board .card-zoom-frame {
-  position: absolute;
-  top: 45px;
-  right: 0px;
-}
 .card-zoom-frame {
+  position: absolute;
+  right: 0px;
   z-index: 20;
+
   &.focus {
     z-index: 40;
   }
@@ -158,16 +156,16 @@
       z-index: 30;
     }
 
-    &.action.small {
+    &.action-row.small {
       min-height: $normal + 52;
     }
-    &.action.normal {
+    &.action-row.normal {
       min-height: $large + 52;
     }
-    &.action.large {
+    &.action-row.large {
       min-height: $x-large + 62;
     }
-    &.action.x-large {
+    &.action-row.x-large {
       min-height: $xx-large + 70;
     }
 
@@ -208,7 +206,7 @@
     flex-direction: row;
     justify-content: center;
   
-    .option {
+    .action-button {
       width: 120px;
       text-align: center;
       margin: 0 5px;
@@ -223,15 +221,20 @@
     flex: 1;
     z-index: 1;
     justify-content: center;
-    min-width: 220px;
+    min-width: 260px;
 
     h5 {
       text-align: left;
     }
     
-    .option {
+    .action-button {
       height: 43px;
       text-align: left;
+      
+      .inline-icons {
+        margin-left: 4px;
+        margin-top: -2px;
+      }
     }
 
     .essence-picker {
@@ -239,15 +242,10 @@
     }
   }
   
-  .large, .x-large {
-    .action-list {
-      min-width: 260px;
-    }
-  }
   .action-list, .button-list {
     display: flex;
 
-    .option {
+    .action-button {
       width: 190px;
       min-height: 35px;
       background-color: rgb(75, 56, 27);
@@ -257,6 +255,10 @@
       border: 1px solid rgba(245,176,65,0.7);
       cursor: pointer;
       
+      .inline-text {
+        vertical-align: -webkit-baseline-middle;
+        vertical-align: -moz-middle-with-baseline;
+      }
       &:hover:not(.disabled), &.valid:hover {
         background-color: rgb(201, 144, 53);
         border: 1px solid rgb(201, 144, 53);
@@ -282,35 +284,18 @@
 .inline-text {
   display: inline-block;
   vertical-align: top;
-
-  &.collect-options {
-    min-width: unset;
-
-    .collect-option {
-      margin-top: -5px;
-    }
-  }
 }
 
-.large, .x-large {
-  .inline-text {    
-    &.collect-options {
-      min-width: unset;
-    }
-
-    .collect-option {
-      margin-top: -11px;
-    }
+.inline-icons {
+  display: inline-block;
+  vertical-align: top;
+  
+  .icons {
+    display: inline-block;
+    vertical-align: bottom;
+    line-height:0;
   }
 }
-
-.option {
-  .inline-text {
-    vertical-align: -webkit-baseline-middle;
-    vertical-align: -moz-middle-with-baseline;
-  }
-}
-
 .info {
   text-align: center;
   margin: 8px auto;
@@ -321,7 +306,7 @@
   line-height: 50px;
   background-color: rgba(63,46,33,.8);
   background-blend-mode: luminosity;
-  background-image: url("../../../assets/image/ruban.png");
+  background-image: url("../../../assets/image/background_ruban.png");
   background-repeat: repeat-x;
   background-size: 920px 50px;
   white-space: nowrap;
@@ -379,23 +364,7 @@
 
 .player-pool {
   margin-left: 20px;
-}
-
-.cards-in-hand {
-  display: inline-block;
-  color: ghostwhite;
-  font-weight: bold;
-  font-size: large;
-  text-align: center;
-  background-image: url("../../../assets/image/cards.png");
-  background-repeat: no-repeat;
-  background-size: 34px;
-  height: 50px;
-  width: 40px;
-  margin-left: 20px;
-  padding-top: 2px;
-  vertical-align: top;
-  background-position: 0 5px;
+  padding-top: 5px;
 }
 
 .draw-pile {
@@ -466,87 +435,26 @@
   margin-top: 8px;
   height: 38px;
   font-size: 1.15rem;
-  line-height: 2;
-  .option-and, .option-or {
+
+  .operator, .operator {
     font-size: 0.875em;
   }
-}
 
-.cost-frame-h {
-  display: inline-block;
-  background-image: url("../../../assets/image/cost-frame-content-h.png");
-  background-repeat: repeat-x;
-  background-size: 1px 36px;
-  background-position: 0px 1px;
-  height: 38px;
-  padding-top: 4px;
-  width: max-content;
-  position: relative;
-
-  .cost-frame-content {
-    display: inline-block;
-    z-index: 9;
-  }
-
-  &:before {
-    content: "";
-    display: inline-block;
-    background-image: url("../../../assets/image/cost-frame-before-h.png");
-    background-size: 8px 40px;
-    background-position: 2px 0px;
-    background-repeat: no-repeat;
-    position: absolute;
-    height: 40px;
-    width: 11px;
-    top: -1px;
-    left: -9px;
-    z-index: 10;
-  }
-
-  &:after {
-    content: "";
-    display: inline-block;
-    background-image: url("../../../assets/image/cost-frame-after-h.png");
-    background-size: 15px 36px;
-    background-position: 2px 0px;
-    background-repeat: no-repeat;
-    position: absolute;
-    height: 38px;
-    width: 17px;
-    top: 1px;
-    right: -15px;
-    z-index: -1;
-  }
-}
-.large, .x-large {
-  .cost-frame-v {
-    background-size: 42px 1px;
-    width: 44px;
-    
-    .essence {
-      height: 43px;
-    }
-    
-    &:before {
-      background-size: 46px 8px;
-      width: 46px;
-    }
-    &:after {
-      background-size: 42px 15px;
-      width: 44px;
-    }
+  .inline-icons {
+    margin-left: 4px;
+    margin-top: -11px;
   }
 }
 
-.cost-frame-v {
+.cost-frame {
   display: flex;
-  background-image: url("../../../assets/image/cost-frame-content-v.png");
+  background-image: url("../../../assets/image/cost-frame-content.png");
   background-repeat: repeat-y;
-  background-size: 36px 1px;
+  background-size: 42px 1px;
   background-position: 1px 0px;
   height: max-content;
   padding-left: -2px;
-  width: 38px;
+  width: 44px;
   position: relative;
 
   .single-essence.essence {
@@ -561,13 +469,13 @@
   &:before {
     content: "";
     display: inline-block;
-    background-image: url("../../../assets/image/cost-frame-before-v.png");
-    background-size: 40px 8px;
+    background-image: url("../../../assets/image/cost-frame-before.png");
+    background-size: 46px 8px;
     background-position: 0px 2px;
     background-repeat: no-repeat;
     position: absolute;
     height: 11px;
-    width: 40px;
+    width: 46px;
     top: -9px;
     left: -1px;
     z-index: 10;
@@ -576,13 +484,13 @@
   &:after {
     content: "";
     display: inline-block;
-    background-image: url("../../../assets/image/cost-frame-after-v.png");
-    background-size: 36px 15px;
+    background-image: url("../../../assets/image/cost-frame-after.png");
+    background-size: 42px 15px;
     background-position: 1px 2px;
     background-repeat: no-repeat;
     position: absolute;
     height: 17px;
-    width: 38px;
+    width: 44px;
     left: 0;
     bottom: -14px;
     z-index: 10;
@@ -605,95 +513,16 @@
   }
 }
 
-.game-icon {
-  display: inline-block;
-  color: ghostwhite;
-  font-weight: bold;
-  font-size: large;
-  text-align: center;
-  background-repeat: no-repeat;
-  background-size: 24px;
-  height: 24px;
-  width: 24px;
-  margin-right: 4px;
-  padding-top: 0px;
-  vertical-align: top;
-}
-
-.collect-icon {
-  @extend .game-icon;
-  background-image: url("../../../assets/image/collect_icon.png");
-  background-position: 0 0px;
-}
-
-.action-icon {
-  @extend .game-icon;
-  background-image: url("../../../assets/image/dragon_icon.png");
-  background-position: 0 0px;
-}
-
-.on-component-icon {
-  @extend .game-icon;
-  background-image: url("../../../assets/image/on_component.png");
-  background-position: 0 5px;
-  height: 30px;
-}  
-.turn-component-icon {
-  @extend .game-icon;
-  background-image: url("../../../assets/image/turn_component.png");
-  background-position: 0 5px;
-  height: 30px;
-}
-.turn-dragon-icon {
-  @extend .game-icon;
-  background-image: url("../../../assets/image/turn_dragon.png");
-  background-position: 0 0px;
-  background-size: 34px;
-  height: 30px;
-  width: 40px;
-}
-.turn-creature-icon {
-  @extend .game-icon;
-  background-image: url("../../../assets/image/turn_creature.png");
-  background-position: 0 0px;
-  background-size: 34px;
-  height: 30px;
-  width: 40px;
-}
-
 .large, .x-large {
-  .on-component-icon {
+  .same-type-icon {
     @extend .game-icon;
-    background-image: url("../../../assets/image/on_component.png");
-    background-position: 0 5px;
-    background-size: 34px;
-    height: 50px;
-    width: 30px;
-  }  
-  .turn-component-icon {
-    @extend .game-icon;
-    background-image: url("../../../assets/image/turn_component.png");
     background-position: 0 8px;
     background-size: 35px;
     height: 50px;
     width: 40px;
   }
-  .turn-dragon-icon {
-    @extend .game-icon;
-    background-image: url("../../../assets/image/turn_dragon.png");
-    background-position: 0 0px;
-    background-size: 50px;
-    height: 50px;
-    width: 65px;
-  }
-  .turn-creature-icon {
-    @extend .game-icon;
-    background-image: url("../../../assets/image/turn_creature.png");
-    background-position: 0 0px;
-    background-size: 50px;
-    height: 50px;
-    width: 65px;
-  }
+
+
 }
 
 .delete-cursor {

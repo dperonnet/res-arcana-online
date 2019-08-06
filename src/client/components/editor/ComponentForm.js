@@ -497,11 +497,11 @@ class EssencePanel extends Component {
 
   render() {
     const { essenceList } = this.props
-    const essenceTypes = [ 'elan', 'life', 'calm', 'death', 'gold', 'any', 'any-but-gold', 'any-but-death-gold']
+    const essenceTypes = [ 'elan', 'life', 'calm', 'death', 'gold', 'any', 'any-but-gold', 'any-but-death-gold', 'any-but-life-gold']
     const components = essenceTypes.map((type, index) => {
       let essence = Array.isArray(essenceList) ? essenceList.find((item) => item.type === type) : null
       return (
-        <div className="inline-input small" key={index} >
+        <div className="inline-input" key={index} >
           <InputGroup.Prepend>
             <InputGroup.Text className={"essence "+type} id={type+'Essence'}>{(essence && essence.quantity) || 0}</InputGroup.Text>
           </InputGroup.Prepend>
@@ -795,8 +795,6 @@ function ActionPowerPanel({component, onChange, onChangeByName}) {
   function updateActionPower(index, data, target) {
     if (target === 'costEssenceList') {
       actionPowers[index].cost.essenceList = data
-    } else if (target === 'costSameType') {
-      actionPowers[index].cost.sameType = data
     } else if (target === 'costTurn') {
       actionPowers[index].cost.turn = !!actionPowers[index].cost.turn ? false : true
     } else if (target === 'costTurnDragon') {
@@ -805,11 +803,26 @@ function ActionPowerPanel({component, onChange, onChangeByName}) {
       actionPowers[index].cost.turnCreature = !!actionPowers[index].cost.turnCreature ? false : true
     } else if (target === 'costOnComponent') {
       actionPowers[index].cost.onComponent = !!actionPowers[index].cost.onComponent ? false : true
+    } else if (target === 'costSameType') {
+      actionPowers[index].cost.sameType = !!actionPowers[index].cost.sameType ? false : true
+    } else if (target === 'costDiscardOneArtefact') {
+      actionPowers[index].cost.discardOneArtefact = !!actionPowers[index].cost.discardOneArtefact ? false : true
+    } else if (target === 'costDestroyThisArtefact') {
+      actionPowers[index].cost.destroyThisArtefact = !!actionPowers[index].cost.destroyThisArtefact ? false : true
+    } else if (target === 'costDestroyOneArtefact') {
+      actionPowers[index].cost.destroyOneArtefact = !!actionPowers[index].cost.destroyOneArtefact ? false : true
+    } else if (target === 'costDestroyOneOtherArtefact') {
+      actionPowers[index].cost.destroyOneOtherArtefact = !!actionPowers[index].cost.destroyOneOtherArtefact ? false : true
     } else if (target === 'gainEssenceList') {
       actionPowers[index].gain.essenceList = data
     } else if (target === 'gainOnComponent') {
       actionPowers[index].gain.onComponent = !!actionPowers[index].gain.onComponent ? false : true
+    } else if (target === 'gainPlaceDragonOrCreatureFromAnyDiscard') {
+      actionPowers[index].gain.placeDragonOrCreatureFromAnyDiscard = !!actionPowers[index].gain.placeDragonOrCreatureFromAnyDiscard ? false : true
+    } else if (target === 'gainPlaceArtefactFromDiscard') {
+      actionPowers[index].gain.placeArtefactFromDiscard = !!actionPowers[index].gain.placeArtefactFromDiscard ? false : true
     }
+    
     onChangeByName('actionPowerList', actionPowers)
   }
 
@@ -843,32 +856,44 @@ function ActionPowerPanel({component, onChange, onChangeByName}) {
             checked={actionPower.cost.turn}
             onChange={(e) => updateActionPower(index, null, 'costTurn')}
           />
-          <div className="turn-component-icon" onClick={(e) => updateActionPower(index, null, 'costTurn')}></div>
+          <label htmlFor={'costTurn_' + index} className="inline-label"><div className="turn-component-icon"></div></label>
 
           <input type="checkBox" name="costTurnDragon" id={'costTurnDragon_' + index} className="inline-checkbox ml-2"
             checked={actionPower.cost.turnDragon}
             onChange={(e) => updateActionPower(index, null, 'costTurnDragon')}
           />
-          <div className="turn-dragon-icon" onClick={(e) => updateActionPower(index, null, 'costTurnDragon')}></div>
+          <label htmlFor={'costTurnDragon_' + index} className="inline-label"><div className="turn-dragon-icon"></div></label>
 
           <input type="checkBox" name="costTurnCreature" id={'costTurnCreature_' + index} className="inline-checkbox ml-2"
             checked={actionPower.cost.turnCreature}
             onChange={(e) => updateActionPower(index, null, 'costTurnCreature')}
           />
-          <div className="turn-creature-icon" onClick={(e) => updateActionPower(index, null, 'costTurnCreature')}></div>
+          <label htmlFor={'costTurnCreature_' + index} className="inline-label"><div className="turn-creature-icon"></div></label>
 
           <input type="checkBox" name="costOnComponent" id={'costOnComponent_' + index} className="inline-checkbox ml-2"
             checked={actionPower.gain.onComponent}
             onChange={(e) => updateActionPower(index, null, 'costOnComponent')}
           />
-          <label for={'costOnComponent_' + index} className="inline-label">Essence on component</label>
+          <label htmlFor={'costOnComponent_' + index} className="inline-label">Essence <div className="on-component-icon"></div></label>
           
           <input type="checkBox" name="costSameType" id={'costSameType_' + index} className="inline-checkbox ml-2"
             checked={actionPower.cost.sameType}
             onChange={(e) => updateActionPower(index, null, 'costSameType')}
           />
-          <div className="pay-same-type" onClick={(e) => updateActionPower(index, null, 'costSameType')}></div>
+          <label htmlFor={'costSameType_' + index} className="inline-label"><div className="essence any-same-type"></div></label>
 
+          <input type="checkBox" name="costDestroyOneArtefact" id={'costDestroyOneArtefact_' + index} className="inline-checkbox ml-2"
+            checked={actionPower.gain.destroyOneArtefact}
+            onChange={(e) => updateActionPower(index, null, 'costDestroyOneArtefact')}
+          />
+          <label htmlFor={'costDestroyOneArtefact_' + index} className="inline-label">Destroy one of your artefacts</label>
+          
+          <input type="checkBox" name="costDestroyOneOtherArtefact" id={'costDestroyOneOtherArtefact_' + index} className="inline-checkbox ml-2"
+            checked={actionPower.gain.destroyOneOtherArtefact}
+            onChange={(e) => updateActionPower(index, null, 'costDestroyOneOtherArtefact')}
+          />
+          <label htmlFor={'costDestroyOneOtherArtefact_' + index} className="inline-label">Destroy one of your artefacts</label>
+          
         </div>
         <EssencePanel
           essenceList={actionPower.cost.essenceList}
@@ -876,11 +901,38 @@ function ActionPowerPanel({component, onChange, onChangeByName}) {
         />
         <div className="mb-2 ml-2">
           <div className="inline-label">Gain List :</div>
-          <Form.Check inline type="checkBox" name="gainOnComponent" label="Essence on component"
-            id={'gainOnComponent_' + index} className="ml-2"
+          <input type="checkBox" name="gainOnComponent" id={'gainOnComponent_' + index} className="inline-checkbox ml-2"
             checked={actionPower.gain.onComponent}
             onChange={(e) => updateActionPower(index, null, 'gainOnComponent')}
           />
+          <label htmlFor={'gainOnComponent_' + index} className="inline-label">Essence <div className="on-component-icon"></div></label>
+          
+          <input type="checkBox" name="gainPlaceDragonOrCreatureFromAnyDiscard" id={'gainPlaceDragonOrCreatureFromAnyDiscard_' + index} className="inline-checkbox ml-2"
+            checked={actionPower.gain.placeDragonOrCreatureFromAnyDiscard_}
+            onChange={(e) => updateActionPower(index, null, 'gainPlaceDragonOrCreatureFromAnyDiscard')}
+          />
+          <label htmlFor={'gainPlaceDragonOrCreatureFromAnyDiscard_' + index} className="inline-label">
+            Place <div className="dragon-icon"></div>or<div className="creature-icon"></div>from any discard
+          </label>
+          <input type="checkBox" name="gainPlaceArtefactFromDiscard" id={'gainPlaceArtefactFromDiscard_' + index} className="inline-checkbox ml-2"
+            checked={actionPower.gain.placeArtefactFromDiscard}
+            onChange={(e) => updateActionPower(index, null, 'gainPlaceArtefactFromDiscard')}
+          />
+          <label htmlFor={'gainPlaceArtefactFromDiscard_' + index} className="inline-label">
+            Place an artefact from discard
+          </label>
+          
+          <div className="component-cost-icon"></div>
+          <div className="component-icon"></div>
+          <div className="on-component-icon"></div>
+          <div className="turn-component-icon"></div>
+          <div className="straighten-component-icon"></div>
+          <div className="straighten-self-icon"></div>
+          <div className="dragon-icon"></div>
+          <div className="creature-icon"></div>
+          <div className="turn-dragon-icon"></div>
+          <div className="turn-creature-icon"></div>
+          <div className="straighten-creature-icon"></div>
         </div>
         
         <EssencePanel

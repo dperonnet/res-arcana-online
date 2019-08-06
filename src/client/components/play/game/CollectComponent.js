@@ -157,7 +157,7 @@ class CollectComponent extends Component {
             onClick={() => this.handleAddTypeToOption(type)}>
             {(selection && selection.quantity) || 0}
           </div>
-          {!isLast && <div className="option-or">
+          {!isLast && <div className="operator">
             <FontAwesomeIcon icon={faPlus} size="sm" />
           </div>}
         </div>
@@ -169,7 +169,7 @@ class CollectComponent extends Component {
         let isLast =  index === essenceList.length -1
         return <div key={essence.type} className="collect-option">
           <div className={'essence pointer-cursor ' + essence.type} onClick={() => this.handleSelectOption(essence.type)}>{essence.quantity}</div>
-          {!isLast && <div className="option-or">
+          {!isLast && <div className="operator">
             <FontAwesomeIcon icon={faSlash} size="sm" rotation={90} />
           </div>}
         </div>
@@ -196,7 +196,7 @@ class CollectComponent extends Component {
     }
     return <div className="collect-option">
       <div className="type essence death cost-container pointer-cursor" onClick={!ready ? () => handleCost() : null}><div className="cost"></div>1</div>
-      <div className="option-or">
+      <div className="operator">
         <FontAwesomeIcon icon={faSlash} size="sm" rotation={90} />
       </div>
       <div className="turn-component-icon pointer-cursor" onClick={() => handleTap()}></div>
@@ -305,6 +305,7 @@ class CollectComponent extends Component {
     const classes = invalid + cursorGameComponent
     const cursorCollectAbility = !ready && collectActionsRef[component.id] && valid ? ' delete-cursor' : ' '
     const cursorOnComponent = !ready && collectOnComponentActionsRef[component.id] ? ' delete-cursor' : ' '
+    const flat = component.type === 'placeOfPower' ? ' no-min-height' : ''
 
     const handleOnClick = (event) => {
       event.stopPropagation(); 
@@ -323,7 +324,7 @@ class CollectComponent extends Component {
         onMouseOut={() => onMouseOut()}
         onMouseOver={() => onMouseOver(component)}
       />
-      <div className={'collect-options' + cursorOnComponent} onClick={!ready ? handleClickEssenceOnComponent : null}>
+      <div className={'collect-options' + cursorOnComponent + flat} onClick={!ready ? handleClickEssenceOnComponent : null}>
         {collectOnComponent}
       </div>
     </div>

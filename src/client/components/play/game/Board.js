@@ -320,7 +320,7 @@ class ResArcanaBoard extends Component {
     const essences = ['elan', 'life', 'calm', 'death', 'gold']
     return essences.map((essence, index) => {
       return <div className={'essence ' + essence} key={index}>
-        <div className="essence-count">{G.publicData.players[id].essencesPool[essence]}</div>
+        {G.publicData.players[id].essencesPool[essence]}
       </div>
     })
   }
@@ -438,7 +438,6 @@ class ResArcanaBoard extends Component {
     const firstPlayer = this.renderFirstPlayerToken(playerId)
     const playerPool = this.renderPlayerPool(playerId)
     const handSize = G.publicData.players[playerId].handSize
-    const cardsInHand = <div>{handSize}</div>
     const activePlayer = G.phase !== 'DRAFT_PHASE' && playerId === ctx.currentPlayer ? ' active-player': ''
     const passed = G.passOrder.includes(playerId) ? ' passed': ''
     
@@ -449,7 +448,7 @@ class ResArcanaBoard extends Component {
       </div>
       <div className="rightCell">
         <div className="player-pool">{playerPool}</div>
-        <div className="cards-in-hand">{cardsInHand}</div>
+        <div className="cards-in-hand-icon">{handSize}</div>
       </div>
     </div>
   }
@@ -495,7 +494,7 @@ class ResArcanaBoard extends Component {
             }
           })
         })
-        fixedHeight = !separator ? ' action' : ''
+        fixedHeight = !separator ? ' action-row' : ''
         break
       default:
         hand = G.players[playerID].hand.map((card) => {
@@ -706,9 +705,9 @@ class ResArcanaBoard extends Component {
       default:
     }
 
-    const confirmButton = <div className={'option' + (selectedComponent ? ' valid' : ' disabled')}
+    const confirmButton = <div className={'action-button' + (selectedComponent ? ' valid' : ' disabled')}
       onClick={selectedComponent && handleConfirm}>Confirm</div>
-    const cancelButton = !lastDraftCard && <div className="option" onClick={selectedComponent && ((event) => this.handleClick(event))}>Cancel</div>
+    const cancelButton = !lastDraftCard && <div className="action-button" onClick={selectedComponent && ((event) => this.handleClick(event))}>Cancel</div>
     
     return <>
       <div className='dialog-panel'>
@@ -761,8 +760,8 @@ class ResArcanaBoard extends Component {
         showButtons = false
     }
 
-    const confirmButton = <div className={'option' + (selectedComponent ? ' valid' : ' disabled')} onClick={selectedComponent && handleConfirm}>Confirm</div>
-    const cancelButton = <div className="option" onClick={selectedComponent && ((event) => this.handleClick(event))}>Cancel</div>
+    const confirmButton = <div className={'action-button' + (selectedComponent ? ' valid' : ' disabled')} onClick={selectedComponent && handleConfirm}>Confirm</div>
+    const cancelButton = <div className="action-button" onClick={selectedComponent && ((event) => this.handleClick(event))}>Cancel</div>
     
     return <>
       <div className='dialog-panel'>
@@ -886,9 +885,9 @@ class ResArcanaBoard extends Component {
           showButtons = false
     }
 
-    const confirmButton = <div className={'option' + ((collectValid && costValid) ? ' valid' : ' disabled')}
+    const confirmButton = <div className={'action-button' + ((collectValid && costValid) ? ' valid' : ' disabled')}
       onClick={collectValid && costValid ? handleConfirm : null}>Confirm</div>
-    const resetButton = <div className="option" onClick={() => this.handleResetCollect()}>Reset</div>
+    const resetButton = <div className="action-button" onClick={() => this.handleResetCollect()}>Reset</div>
 
     return <>
       <div className='dialog-panel'>
@@ -924,7 +923,7 @@ class ResArcanaBoard extends Component {
       let singleEssence = costEssenceList.length === 1 ? ' single-essence' : ''
       return <div key={essence.type} className={'essence ' + (essence.type) + singleEssence}>{essence.quantity}</div>
     });
-    let componentCost = <div className="cost-frame-v">
+    let componentCost = <div className="cost-frame">
       <div className="cost-frame-content">
         {costFrameEssenceList}
       </div>
@@ -932,9 +931,9 @@ class ResArcanaBoard extends Component {
 
     let directiveEssenceList = costEssenceList.map((essence, index) => {
       let isLast = index === costEssenceList.length -1
-      return <div key={essence.type} className={'collect-option '}>
+      return <div key={essence.type} className={'icon '}>
         <div className={'type essence ' + essence.type}>{essence.quantity}</div>
-        {!isLast && <div className="option-and">
+        {!isLast && <div className="operator">
           <FontAwesomeIcon icon={faPlus} size="sm" />
         </div>}
       </div>
@@ -943,7 +942,7 @@ class ResArcanaBoard extends Component {
     let directive = canPayCost.valid ? 
       <h5 className="directive">
         <div className="inline-text">Claim {componentName} for </div>
-        <div className="inline-text collect-options">{directiveEssenceList}</div>
+        <div className="inline-icons">{directiveEssenceList}</div>
         <div className="inline-text">?</div>
       </h5>
       :
@@ -989,9 +988,9 @@ class ResArcanaBoard extends Component {
 
     let essenceList = Object.entries(essencePickerSelection).map((essence, index) => {
       let isLast = index === Object.entries(essencePickerSelection).length -1
-      return <div key={essence[0]} className={'collect-option '}>
+      return <div key={essence[0]} className={'icons '}>
         <div className={'type essence ' + essence[0]}>{essence[1] || 0}</div>
-        {!isLast && <div className="option-and">
+        {!isLast && <div className="operator">
           <FontAwesomeIcon icon={faPlus} size="sm" />
         </div>}
       </div>
@@ -1005,14 +1004,14 @@ class ResArcanaBoard extends Component {
         directive =  isValid ?
           <h5 className="directive">
             <div className="inline-text">Discard {selectedComponent.name} for </div>
-            <div className="inline-text collect-options">{essenceList}</div>
+            <div className="inline-icons">{essenceList}</div>
             <div className="inline-text">?</div>
           </h5>
           :
           <h5 className="directive">
             <div className="inline-text">Select </div>
-            <div className="inline-text collect-options">
-              <div className="collect-option">
+            <div className="inline-icons">
+              <div className="icons">
                 <div className="essence any-but-gold">2</div>
               </div>
             </div>
@@ -1026,7 +1025,7 @@ class ResArcanaBoard extends Component {
         directive =
           <h5 className="directive">
             <div className="inline-text">Discard {selectedComponent.name} for </div>
-            <div className="inline-text">{essenceList}</div>
+            <div className="inline-icons">{essenceList}</div>
             <div className="inline-text">?</div>
           </h5>
         break
@@ -1035,9 +1034,9 @@ class ResArcanaBoard extends Component {
         const selection = Object.entries(essencePickerSelection).filter((item) =>  item[1] > 0)
         essenceList = selection.length > 0 ? selection.map((essence, index) => {
           let isLast = index === Object.entries(essencePickerSelection).length -1
-          return <div key={essence[0]} className={'collect-option '}>
+          return <div key={essence[0]} className={'icons '}>
             <div className={'type essence ' + essence[0]}>{essence[1] || 0}</div>
-            {!isLast && <div className="option-and">
+            {!isLast && <div className="operator">
               <FontAwesomeIcon icon={faPlus} size="sm" />
             </div>}
           </div>
@@ -1049,7 +1048,7 @@ class ResArcanaBoard extends Component {
         directive =  costValid.isValid ?
           <h5 className="directive">
             <div className="inline-text">Place {selectedComponent.name} for </div>
-            <div className="inline-text collect-options">{essenceList}</div>
+            <div className="inline-icons">{essenceList}</div>
             <div className="inline-text">?</div>
           </h5>
           :
@@ -1057,24 +1056,35 @@ class ResArcanaBoard extends Component {
             <div className="inline-text">Select essences to pay {selectedComponent.name}'s placement cost.</div>
           </h5>
         break
+
+      // render the selected card from hand and display the differents actions available for this card.
       case 'HAND':
         const handlePlaceAction = () => {
           const preSelection = !!canPayCost.fixedCost ? canPayCost.fixedCost: canPayCost.minEssencePayList
           setEssencePickerSelection(preSelection)
           selectAction('PLACE_ARTEFACT')
         }
+        
         actionPanel = <>
-          <div className={'option' + (canPayCost.valid ? '':' invalid disabled')} size="sm" onClick={canPayCost.valid ? handlePlaceAction : null}>
+          <div className={'action-button' + (canPayCost.valid ? '':' invalid disabled')} size="sm" onClick={canPayCost.valid ? handlePlaceAction : null}>
             <div className="inline-text">Place Artefact</div>
           </div>
-          <div className="option small" size="sm" onClick={() => selectAction('DISCARD_FOR_2E')}>
+          <div className="action-button" size="sm" onClick={() => selectAction('DISCARD_FOR_2E')}>
             <div className="inline-text">Discard for </div>
-            <div className="essence any-but-gold small">2</div>
+            <div className="inline-icons">
+              <div className="icons">
+                <div className="essence any-but-gold">2</div>
+              </div>
+            </div>
           </div>
-          <div className="option small" size="sm" onClick={() => {resetEssencePickerSelection(); addToEssencePickerSelection('gold'); selectAction('DISCARD_FOR_1G')}}>
+          <div className="action-button" size="sm" onClick={() => {resetEssencePickerSelection(); addToEssencePickerSelection('gold'); selectAction('DISCARD_FOR_1G')}}>
             <div className="inline-text">Discard for </div>
-            <div className="essence gold small">1</div>
-          </div>
+            <div className="inline-icons">
+              <div className="icons">
+                <div className="essence gold">1</div>
+              </div>
+            </div>
+          </div>          
         </>
         break
       default:
@@ -1136,7 +1146,7 @@ class ResArcanaBoard extends Component {
             essenceNumber={sumSelection} discount={sumDiscount} asCost={true} validCost={costValid.isValid} lock={!!canPayCost.fixedCost}/>
         </div>
       </div>
-      <div className="cost-frame-v">
+      <div className="cost-frame">
         <div className="cost-frame-content">
           {essences}
         </div>
@@ -1560,11 +1570,11 @@ class ResArcanaBoard extends Component {
       default:
     }
 
-    const confirmButton = showConfirmButton && <div className={'option' + (handleConfirm  ? ' valid' : ' disabled')} onClick={handleConfirm} disabled={!handleConfirm}>Confirm</div>
-    const cancelButton = <div className="option" onClick={handleCancel}>Cancel</div>
+    const confirmButton = showConfirmButton && <div className={'action-button' + (handleConfirm  ? ' valid' : ' disabled')} onClick={handleConfirm} disabled={!handleConfirm}>Confirm</div>
+    const cancelButton = <div className="action-button" onClick={handleCancel}>Cancel</div>
 
     return <>
-      <div className={'card-row flex-col ' + profile.cardSize + ' action'}>
+      <div className={'card-row flex-col ' + profile.cardSize + ' action-row'}>
         {availableActions}
       </div>
       <div className="button-list">
@@ -1592,13 +1602,13 @@ class ResArcanaBoard extends Component {
     let currentAction = (selectedComponent || selectedAction) && this.renderCurrentAction()
     let directive = null
 
-    const passButton = <div className="option" onClick={() => selectAction('PASS')}>
+    const passButton = <div className="action-button" onClick={() => selectAction('PASS')}>
       Pass
     </div>
 
     return <>
       <div className='dialog-panel'>
-        <h5><div className="action-icon"></div>{title}{waitingFor}</h5>
+        <h5><div className="dragon-icon"></div>{title}{waitingFor}</h5>
         {waiting ? <h5 className="directive">{waitingFor}</h5> : <>{directive}</>}
         {(selectedComponent || selectedAction) ? currentAction : hand}
         {!(selectedComponent || selectedAction) && <div className="button-list">

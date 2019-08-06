@@ -96,9 +96,6 @@ h5 {
       box-shadow: none;
     }
 
-    .essence {
-      padding-left: 10px;
-    }
     .victory-points {
       height: 35px;
       width: 30px;
@@ -111,16 +108,13 @@ h5 {
     }
     .inline-input {
       display: inline-flex;
-      margin: 0 10px;
+      margin-left: 10px;
     }
     .inline-label {
       display: inline-block;
-      min-width: 75px;
     }
-    
-    .turn-component-icon {
-      margin-top: -3px;
-      margin-left: 4px;
-    }
+  }
+  .any-same-type {
+    margin-top: -8px;
   }
 }
