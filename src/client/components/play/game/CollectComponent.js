@@ -33,7 +33,7 @@ class CollectComponent extends Component {
   handleSelectOption = (type) => {
     const { component } = this.props
     let essenceList = {}
-    essenceList[type] = component.standardCollectAbility.essenceList.find((essence) => essence.type === type).quantity
+    essenceList[type] = component.specificCollectAbility.essenceList.find((essence) => essence.type === type).quantity
     const action = this.buildCollectAction(component, essenceList)
     this.props.setCollectAction(action)
   }
@@ -104,7 +104,7 @@ class CollectComponent extends Component {
     })
     return <div onClick={!ready ? handleOnClick : null}>
       {essences}
-      {onComponent && <div className="on-component-icon"></div>}
+      {onComponent && <> on <div className="on-component-icon"></div></>}
     </div>
   }
 

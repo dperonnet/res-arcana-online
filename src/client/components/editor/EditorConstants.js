@@ -50,3 +50,8 @@ export const REACT_POWER = {
     ignore: true
   }
 }
+
+export const ACTION_POWER = {
+  cost: {},
+  gain: {}
+}

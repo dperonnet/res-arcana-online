@@ -2,7 +2,7 @@ import React, { Component, useEffect, useState } from 'react'
 import { Button, ButtonToolbar, Form, InputGroup} from 'react-bootstrap'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faTrash } from '@fortawesome/free-solid-svg-icons';
-import { COMPONENTS_TYPE, DEFAULT_COMPONENT, DISCOUNT, REACT_POWER, SPECIFIC_COLLECT_ABILITY, STANDARD_COLLECT_ABILITY } from './EditorConstants'
+import { ACTION_POWER, COMPONENTS_TYPE, DEFAULT_COMPONENT, DISCOUNT, REACT_POWER, SPECIFIC_COLLECT_ABILITY, STANDARD_COLLECT_ABILITY } from './EditorConstants'
 import { connect } from 'react-redux'
 import { deleteComponent, saveComponent } from '../../../store/actions/editorActions'
 
@@ -247,7 +247,7 @@ class ComponentForm extends Component {
                   { component.hasCost && 
                     <>
                       <div className="mb-2">
-                        <EssencePanel
+                        <EssencePanel panelType="cost"
                           essenceList={component.costEssenceList}
                           onChange={(data) => this.handleFormChangeByName('costEssenceList', data)}
                         />
@@ -293,7 +293,7 @@ class ComponentForm extends Component {
               { component.hasSpecificCollectAbility && 
                 <>
                   <div className="mb-2">
-                    <EssencePanel
+                    <EssencePanel panelType="all"
                       essenceList={component.specificCollectAbility && component.specificCollectAbility.essenceList}
                       onChange={(data) => this.handleFormChangeByName('specificCollectAbility', data)}
                     />
@@ -301,7 +301,7 @@ class ComponentForm extends Component {
                   <div className="mb-2">
                     <InputGroup className="mb-2">
                       <Form.Check inline type="checkbox" name="multipleCollectOptions"
-                        id="multipleCollectOptions" label="Player can choose different essences"
+                        id="multipleCollectOptions" label="Player can choose essences"
                         value={component.specificCollectAbility.multipleCollectOptions}
                         checked={component.specificCollectAbility.multipleCollectOptions}
                         onChange={this.handleFormChange}/>
@@ -340,30 +340,29 @@ class ComponentForm extends Component {
 
               { component.type !== 'mage' && component.type !== 'magicItem' &&
                 <>
-                  <div className="inline-label mb-2">
+                  <div className="inline-block mb-2">
                     <Form.Check inline type="checkbox" name="hasVictoryPoint"
                       id="hasVictoryPoint" label="Has victory point(s)"
                       value={component.hasVictoryPoint}
                       checked={component.hasVictoryPoint}
                       onChange={this.handleFormChange}/>
-
                   </div>
                   
                   { component.hasVictoryPoint && 
-                      <div className="inline-input">
-                        <InputGroup.Prepend>
-                          <InputGroup.Text className="victory-points" id="victoryPoint">{component.victoryPoint || 0}</InputGroup.Text>
-                        </InputGroup.Prepend>
-                        <InputGroup.Append>
-                          <div className="vertical-buttons">
-                            <Button variant="secondary" id="lowerVictoryPoint"
-                              onClick={() => this.increment("victoryPoint")}><span>+</span></Button>
-                            <Button variant="secondary" id="raiseVictoryPoint"
-                              onClick={() => this.decrement("victoryPoint")}><span>-</span></Button>
-                          </div>
-                        </InputGroup.Append>
-                      </div>
-                    }
+                    <div className="inline-input">
+                      <InputGroup.Prepend>
+                        <InputGroup.Text className="victory-points" id="victoryPoint">{component.victoryPoint || 0}</InputGroup.Text>
+                      </InputGroup.Prepend>
+                      <InputGroup.Append>
+                        <div className="vertical-buttons">
+                          <Button variant="secondary" id="lowerVictoryPoint"
+                            onClick={() => this.increment("victoryPoint")}><span>+</span></Button>
+                          <Button variant="secondary" id="raiseVictoryPoint"
+                            onClick={() => this.decrement("victoryPoint")}><span>-</span></Button>
+                        </div>
+                      </InputGroup.Append>
+                    </div>
+                  }
                 </>
               }
 
@@ -496,8 +495,19 @@ class EssencePanel extends Component {
   }
 
   render() {
-    const { essenceList } = this.props
-    const essenceTypes = [ 'elan', 'life', 'calm', 'death', 'gold', 'any', 'any-but-gold', 'any-but-death-gold', 'any-but-life-gold']
+    const { essenceList, panelType } = this.props
+    let essenceTypes
+    if (panelType === 'cost') {
+      essenceTypes = ['elan', 'life', 'calm', 'death', 'gold', 'any']
+    } else if (panelType === 'any') {
+      essenceTypes = ['any']
+    } else if (panelType === 'anyBut') {
+      essenceTypes = ['any-but-gold', 'any-but-death-gold', 'any-but-life-gold']
+    } else if (panelType === 'all') {
+      essenceTypes = ['elan', 'life', 'calm', 'death', 'gold', 'any', 'any-but-gold', 'any-but-death-gold', 'any-but-life-gold']
+    } else {
+      essenceTypes = ['elan', 'life', 'calm', 'death', 'gold']
+    }
     const components = essenceTypes.map((type, index) => {
       let essence = Array.isArray(essenceList) ? essenceList.find((item) => item.type === type) : null
       return (
@@ -587,7 +597,7 @@ function DiscountPanel({component, onChange, onChangeByName}) {
     { component.hasDiscountAbility && abilities.map((discount, index) => 
       <div key={index}>
         <div className="mb-2 ml-2">
-          <div className="inline-label mr-2">Discount target :</div>
+          <div className="inline-block mr-2">Discount target :</div>
           <div className="inline-checkbox ml-2">
             {discountTypes.map((discountType) => (
               <Form.Check inline type="checkBox" name="discountType" 
@@ -705,7 +715,7 @@ function ReactPowerPanel({component, onChange, onChangeByName}) {
     { component.hasReactPower && reactPowers.map((reactPower, index) => 
       <div key={index}>
         <div className="mb-2 ml-2">
-          <div className="inline-label">Type List :</div>
+          <div className="inline-block">Type List :</div>
           <div className="inline-checkbox ml-2">
             {reactPowerTypes.map((reactPowerType) => (
               <Form.Check inline type="checkBox" name="reactPowerType" 
@@ -718,7 +728,7 @@ function ReactPowerPanel({component, onChange, onChangeByName}) {
         </div>
 
         <div className="mb-2 ml-2">
-          <div className="inline-label">Cost List :</div>
+          <div className="inline-block">Cost List :</div>
           <input name="costTurn" type="checkBox" id={'costTurn_' + index} className="inline-checkbox ml-2"
             checked={reactPower.cost.turn}
             onChange={(e) => updateReactPower(index, null, 'costTurn')}
@@ -730,7 +740,7 @@ function ReactPowerPanel({component, onChange, onChangeByName}) {
           onChange={(data) => updateReactPower(index, data, 'costEssenceList')}
         />
         <div className="mb-2 ml-2">
-          <div className="inline-label">Gain List :</div>
+          <div className="inline-block">Gain List :</div>
           <Form.Check inline type="checkBox" name="gainIgnore" label="Ignore"
             id={'gainIgnore_' + index} className="ml-2"
             checked={reactPower.gain.ignore}
@@ -743,7 +753,7 @@ function ReactPowerPanel({component, onChange, onChangeByName}) {
           />
           { reactPowers[index].type.filter((type) => type === 'VICTORY_CHECK').length > 0 && 
             <>
-              <div className="inline-label">Temporary Victory Points </div>
+              <div className="inline-block">Temporary Victory Points </div>
               <div className="inline-input">
                   <InputGroup.Prepend>
                     <InputGroup.Text className="victory-points" id="victoryPoint">{reactPower.gain.temporaryVictoryPoints || 0}</InputGroup.Text>
@@ -774,57 +784,62 @@ function ReactPowerPanel({component, onChange, onChangeByName}) {
  * Render the action power panel to add actions to the component.
  */
 function ActionPowerPanel({component, onChange, onChangeByName}) {
-  const [actionPowers, setActionPowers] = useState([copy(REACT_POWER)])
+  const [actionPowers, setActionPowers] = useState([copy(ACTION_POWER)])
 
   useEffect(() => {
-    setActionPowers(component.actionPowerList || [copy(REACT_POWER)])
+    setActionPowers(component.actionPowerList || [copy(ACTION_POWER)])
   },[component.name])
 
   function addActionPower() {
-    actionPowers.push(copy(REACT_POWER))
+    actionPowers.push(copy(ACTION_POWER))
     setActionPowers(actionPowers)
     onChangeByName('actionPowerList', actionPowers)
   }
 
-  function removeActionPower() {
-    actionPowers.pop()
+  function removeActionPower(index) {
+    actionPowers.splice(index, 1)
     setActionPowers(actionPowers)
     onChangeByName('actionPowerList', actionPowers)
   }
 
-  function updateActionPower(index, data, target) {
-    if (target === 'costEssenceList') {
-      actionPowers[index].cost.essenceList = data
-    } else if (target === 'costTurn') {
-      actionPowers[index].cost.turn = !!actionPowers[index].cost.turn ? false : true
-    } else if (target === 'costTurnDragon') {
-      actionPowers[index].cost.turnDragon = !!actionPowers[index].cost.turnDragon ? false : true
-    } else if (target === 'costTurnCreature') {
-      actionPowers[index].cost.turnCreature = !!actionPowers[index].cost.turnCreature ? false : true
-    } else if (target === 'costOnComponent') {
-      actionPowers[index].cost.onComponent = !!actionPowers[index].cost.onComponent ? false : true
-    } else if (target === 'costSameType') {
-      actionPowers[index].cost.sameType = !!actionPowers[index].cost.sameType ? false : true
-    } else if (target === 'costDiscardOneArtefact') {
-      actionPowers[index].cost.discardOneArtefact = !!actionPowers[index].cost.discardOneArtefact ? false : true
-    } else if (target === 'costDestroyThisArtefact') {
-      actionPowers[index].cost.destroyThisArtefact = !!actionPowers[index].cost.destroyThisArtefact ? false : true
-    } else if (target === 'costDestroyOneArtefact') {
-      actionPowers[index].cost.destroyOneArtefact = !!actionPowers[index].cost.destroyOneArtefact ? false : true
-    } else if (target === 'costDestroyOneOtherArtefact') {
-      actionPowers[index].cost.destroyOneOtherArtefact = !!actionPowers[index].cost.destroyOneOtherArtefact ? false : true
-    } else if (target === 'gainEssenceList') {
-      actionPowers[index].gain.essenceList = data
-    } else if (target === 'gainOnComponent') {
-      actionPowers[index].gain.onComponent = !!actionPowers[index].gain.onComponent ? false : true
-    } else if (target === 'gainPlaceDragonOrCreatureFromAnyDiscard') {
-      actionPowers[index].gain.placeDragonOrCreatureFromAnyDiscard = !!actionPowers[index].gain.placeDragonOrCreatureFromAnyDiscard ? false : true
-    } else if (target === 'gainPlaceArtefactFromDiscard') {
-      actionPowers[index].gain.placeArtefactFromDiscard = !!actionPowers[index].gain.placeArtefactFromDiscard ? false : true
+  function updateActionPower(index, type, target, data) {
+    if(!!data) {
+      actionPowers[index][type][target] = data
+    } else {
+      if(!actionPowers[index][type][target]) {
+        actionPowers[index][type][target] = true
+      } else {
+        delete actionPowers[index][type][target]
+      }
     }
     
     onChangeByName('actionPowerList', actionPowers)
   }
+
+  function renderCheckBox(index, type, target, label, data, checked, key) {
+    console.log('renderCheckBox',index, type, target, label, data, checked, key);
+    return <div className="inline-block">
+      <input type="checkBox" className="inline-checkbox ml-2"
+        name={type + target + '_' + index + key}
+        id={type + target + '_' + index + key}
+        checked={checked !== null ? checked : actionPowers[index][type][target]}
+        onChange={(e) => updateActionPower(index, type, target, data)}
+      />
+      <label htmlFor={type + target + '_' + index + key} className="inline-block">
+        {label}
+      </label>
+    </div>
+  }
+
+  function renderCheckBoxCost(index, target, label, data, checked, key) {
+    return renderCheckBox(index, 'cost', target, label, data, checked, key)
+  }
+
+  function renderCheckBoxGain(index, target, label, data, checked, key) {
+    return renderCheckBox(index, 'gain', target, label, data, checked, key)
+  }
+
+  const splitter = <div className="clear"></div>
 
   return <>
     <InputGroup className="mb-2">
@@ -839,106 +854,119 @@ function ActionPowerPanel({component, onChange, onChangeByName}) {
             <Button variant="secondary" size="sm" onClick={() => addActionPower()}>
               <FontAwesomeIcon icon={faPlus} size="sm" />
             </Button>
-            <Button variant="secondary" size="sm" onClick={() => removeActionPower()}>
-              <FontAwesomeIcon icon={faTrash} size="sm" />
-            </Button>
           </ButtonToolbar>
         }
     </InputGroup>
    
     { component.hasActionPower && actionPowers.map((actionPower, index) => 
       <div key={index}>
+        <InputGroup className="mb-2 ml-2">
+          <div className="inline-flex">Action {index+1}</div>
+          { component.hasActionPower && 
+            <ButtonToolbar>
+              <Button variant="secondary" size="sm" onClick={() => removeActionPower(index)}>
+                <FontAwesomeIcon icon={faTrash} size="sm" />
+              </Button>
+            </ButtonToolbar>
+          }
+        </InputGroup>
+
+        <div className="mb-2 ml-3">
+          <div className="inline-block">Cost List</div>
+
+          <div className="ml-2">
+            {renderCheckBoxCost(index, 'turn',
+              <><div className="icon turn-component-icon"></div></>
+            )}
+            {renderCheckBoxCost(index, 'turnDragon',
+              <><div className="icon turn-dragon-icon"></div></>
+            )}
+            {renderCheckBoxCost(index, 'turnCreature',
+              <><div className="icon turn-creature-icon"></div></>
+            )}
+            <EssencePanel
+              essenceList={actionPower.cost.essenceList || []} panelType='standard'
+              onChange={(data) => updateActionPower(index, 'cost', 'essenceList', data)}
+            />
+            {renderCheckBoxCost(index, 'onComponent',
+              <>Essence on <div className="icon on-component-icon"></div></>
+            )}
+            {renderCheckBoxCost(index, 'sameType',
+              <>+ <div className="essence any-same-type"></div></>
+            )}
+            {splitter}
+            {renderCheckBoxCost(index, 'destroyOneArtefact',
+              <>Destroy one of your artifacts</>
+            )}
+            {splitter}
+            {renderCheckBoxCost(index, 'destroyAnotherArtefact',
+              <>Destroy another of your artifacts</>
+            )}
+          </div>
+        </div>
 
         <div className="mb-2 ml-2">
-          <div className="inline-label">Cost List :</div>
-
-          <input type="checkBox" name="costTurn" id={'costTurn_' + index} className="inline-checkbox ml-2"
-            checked={actionPower.cost.turn}
-            onChange={(e) => updateActionPower(index, null, 'costTurn')}
-          />
-          <label htmlFor={'costTurn_' + index} className="inline-label"><div className="turn-component-icon"></div></label>
-
-          <input type="checkBox" name="costTurnDragon" id={'costTurnDragon_' + index} className="inline-checkbox ml-2"
-            checked={actionPower.cost.turnDragon}
-            onChange={(e) => updateActionPower(index, null, 'costTurnDragon')}
-          />
-          <label htmlFor={'costTurnDragon_' + index} className="inline-label"><div className="turn-dragon-icon"></div></label>
-
-          <input type="checkBox" name="costTurnCreature" id={'costTurnCreature_' + index} className="inline-checkbox ml-2"
-            checked={actionPower.cost.turnCreature}
-            onChange={(e) => updateActionPower(index, null, 'costTurnCreature')}
-          />
-          <label htmlFor={'costTurnCreature_' + index} className="inline-label"><div className="turn-creature-icon"></div></label>
-
-          <input type="checkBox" name="costOnComponent" id={'costOnComponent_' + index} className="inline-checkbox ml-2"
-            checked={actionPower.gain.onComponent}
-            onChange={(e) => updateActionPower(index, null, 'costOnComponent')}
-          />
-          <label htmlFor={'costOnComponent_' + index} className="inline-label">Essence <div className="on-component-icon"></div></label>
-          
-          <input type="checkBox" name="costSameType" id={'costSameType_' + index} className="inline-checkbox ml-2"
-            checked={actionPower.cost.sameType}
-            onChange={(e) => updateActionPower(index, null, 'costSameType')}
-          />
-          <label htmlFor={'costSameType_' + index} className="inline-label"><div className="essence any-same-type"></div></label>
-
-          <input type="checkBox" name="costDestroyOneArtefact" id={'costDestroyOneArtefact_' + index} className="inline-checkbox ml-2"
-            checked={actionPower.gain.destroyOneArtefact}
-            onChange={(e) => updateActionPower(index, null, 'costDestroyOneArtefact')}
-          />
-          <label htmlFor={'costDestroyOneArtefact_' + index} className="inline-label">Destroy one of your artefacts</label>
-          
-          <input type="checkBox" name="costDestroyOneOtherArtefact" id={'costDestroyOneOtherArtefact_' + index} className="inline-checkbox ml-2"
-            checked={actionPower.gain.destroyOneOtherArtefact}
-            onChange={(e) => updateActionPower(index, null, 'costDestroyOneOtherArtefact')}
-          />
-          <label htmlFor={'costDestroyOneOtherArtefact_' + index} className="inline-label">Destroy one of your artefacts</label>
-          
+          <div className="inline-block">Gain List</div>
+          <div className="ml-2">
+            <EssencePanel panelType="all"
+              essenceList={actionPower.gain.essenceList || []}
+              onChange={(data) => updateActionPower(index, 'gain', 'essenceList', data)}
+            />
+            {renderCheckBoxGain(index, 'onComponent',
+              <>Essence on <div className="icon on-component-icon"></div></>
+            )}
+            {renderCheckBoxGain(index, 'straightenComponent',
+              <><div className="icon straighten-component-icon"></div></>
+            )}
+            {renderCheckBoxGain(index, 'straightenSelf',
+              <><div className="icon straighten-self-icon"></div></>
+            )}
+            {renderCheckBoxGain(index, 'straightenCreature',
+              <><div className="icon straighten-creature-icon"></div></>
+            )}
+            {splitter}
+            {renderCheckBoxGain(index, 'placeDragonFromAnyDiscardPile',
+              <>Place <div className="icon dragon-icon"></div>from any player's discard pile at <div className="icon component-cost-icon"></div></>
+            )}
+            {splitter}
+            {renderCheckBoxGain(index, 'placeArtefactFromDiscard',
+              <>Place any of your discards at <div className="icon component-cost-icon"></div></>
+            )}
+            {splitter}
+            {renderCheckBoxGain(index, 'checkVictoryNow',
+              <>Check victory now!</>
+            )}
+            {splitter}
+            {renderCheckBoxGain(index, 'rivalsGain',
+              <>All Rivals Gain</>
+            )}
+            {actionPower.gain.rivalsGain && 
+              <EssencePanel 
+                essenceList={actionPower.gain.rivalsEssenceList || []}
+                onChange={(data) => updateActionPower(index, 'gain', 'rivalsEssenceList', data)}
+              />
+            }
+            {splitter}
+            {renderCheckBoxGain(index, 'rivalsLoseLife',
+              <>All Rivals Lose <div className="icon essence life-loss">1</div></>, 
+              actionPower.gain.rivalsLoseLife !== 1 ? 1 : null, actionPower.gain.rivalsLoseLife === 1, 1
+            )}
+            {renderCheckBoxGain(index, 'rivalsLoseLife',
+              <>All Rivals Lose <div className="icon essence life-loss">2</div></>, 
+              actionPower.gain.rivalsLoseLife !== 2 ? 2 : null, actionPower.gain.rivalsLoseLife === 2, 2
+            )}
+            {splitter}
+            {renderCheckBoxGain(index, 'drawOne',
+              <>Draw 1 card</>
+            )}
+            {renderCheckBoxGain(index, 'drawThreeDiscardThree',
+              <>Draw 3 cards, add to hand, discard 3</>
+            )}
+            {renderCheckBoxGain(index, 'reorderThree',
+              <>Draw 3 cards, reorder, put back (may also use on Monument deck)</>
+            )}
+          </div>
         </div>
-        <EssencePanel
-          essenceList={actionPower.cost.essenceList}
-          onChange={(data) => updateActionPower(index, data, 'costEssenceList')}
-        />
-        <div className="mb-2 ml-2">
-          <div className="inline-label">Gain List :</div>
-          <input type="checkBox" name="gainOnComponent" id={'gainOnComponent_' + index} className="inline-checkbox ml-2"
-            checked={actionPower.gain.onComponent}
-            onChange={(e) => updateActionPower(index, null, 'gainOnComponent')}
-          />
-          <label htmlFor={'gainOnComponent_' + index} className="inline-label">Essence <div className="on-component-icon"></div></label>
-          
-          <input type="checkBox" name="gainPlaceDragonOrCreatureFromAnyDiscard" id={'gainPlaceDragonOrCreatureFromAnyDiscard_' + index} className="inline-checkbox ml-2"
-            checked={actionPower.gain.placeDragonOrCreatureFromAnyDiscard_}
-            onChange={(e) => updateActionPower(index, null, 'gainPlaceDragonOrCreatureFromAnyDiscard')}
-          />
-          <label htmlFor={'gainPlaceDragonOrCreatureFromAnyDiscard_' + index} className="inline-label">
-            Place <div className="dragon-icon"></div>or<div className="creature-icon"></div>from any discard
-          </label>
-          <input type="checkBox" name="gainPlaceArtefactFromDiscard" id={'gainPlaceArtefactFromDiscard_' + index} className="inline-checkbox ml-2"
-            checked={actionPower.gain.placeArtefactFromDiscard}
-            onChange={(e) => updateActionPower(index, null, 'gainPlaceArtefactFromDiscard')}
-          />
-          <label htmlFor={'gainPlaceArtefactFromDiscard_' + index} className="inline-label">
-            Place an artefact from discard
-          </label>
-          
-          <div className="component-cost-icon"></div>
-          <div className="component-icon"></div>
-          <div className="on-component-icon"></div>
-          <div className="turn-component-icon"></div>
-          <div className="straighten-component-icon"></div>
-          <div className="straighten-self-icon"></div>
-          <div className="dragon-icon"></div>
-          <div className="creature-icon"></div>
-          <div className="turn-dragon-icon"></div>
-          <div className="turn-creature-icon"></div>
-          <div className="straighten-creature-icon"></div>
-        </div>
-        
-        <EssencePanel
-          essenceList={actionPower.gain.essenceList}
-          onChange={(data) => updateActionPower(index, data, 'gainEssenceList')}
-        />
       </div>
     )}
   </>

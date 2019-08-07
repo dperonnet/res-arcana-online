@@ -110,9 +110,21 @@ h5 {
       display: inline-flex;
       margin-left: 10px;
     }
-    .inline-label {
+    .inline-flex {
+      align-items: center;
+      margin-right: .75rem;
+      display: inline-flex;
+    }
+    .inline-block {
       display: inline-block;
     }
+  }
+  .icon {
+    margin-top: -4px;
+  }
+  .life-loss {
+    margin-top: -11px;
+    padding-left: 3px;
   }
   .any-same-type {
     margin-top: -8px;

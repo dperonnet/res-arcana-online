@@ -1041,14 +1041,12 @@ class ResArcanaBoard extends Component {
             </div>}
           </div>
         }) 
-        : 
-        <div className="collect-option">
-          <div className="essence any">0</div>
-        </div>
+        : null
+        
         directive =  costValid.isValid ?
           <h5 className="directive">
             <div className="inline-text">Place {selectedComponent.name} for </div>
-            <div className="inline-icons">{essenceList}</div>
+            {essenceList ? <div className="inline-icons">{essenceList}</div> : <> free</>}
             <div className="inline-text">?</div>
           </h5>
           :
@@ -1128,13 +1126,20 @@ class ResArcanaBoard extends Component {
     let sumSelection = Object.values(selectedComponent.costEssenceList).reduce((a,b) => {return a.quantity + b.quantity}, 0)
 
     const costValid = this.costSelectionValidator(sumDiscount)
-    let essences = selectedComponent.costEssenceList.map((essence, index) => {
-      let singleEssence = selectedComponent.costEssenceList.length === 1 ? ' single-essence' : ''
-      let payOk = costValid[essence.type] || costValid.isValid ? <div className="pay-ok"></div> : null
-      return <div key={index} className={'essence ' + (essence.type) + singleEssence}>
-        {payOk}{essence.quantity}
+    let essences 
+    if (selectedComponent.costEssenceList.length > 0) {
+      essences = selectedComponent.costEssenceList.map((essence, index) => {
+        let singleEssence = selectedComponent.costEssenceList.length === 1 ? ' single-essence' : ''
+        let payOk = costValid[essence.type] || costValid.isValid ? <div className="pay-ok"></div> : null
+        return <div key={index} className={'essence ' + (essence.type) + singleEssence}>
+          {payOk}{essence.quantity}
+        </div>
+      });
+    } else {
+      essences = <div className={'essence zero-essence single-essence'}>
+        <div className="pay-ok"></div>0
       </div>
-    });
+    }
     
     const essencesPool = G.publicData.players[playerID].essencesPool
     return <div className="component-cost flex-row">

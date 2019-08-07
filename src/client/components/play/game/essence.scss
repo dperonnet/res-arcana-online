@@ -53,6 +53,20 @@
   &.any-same-type {
     background-position: -540px 0;
   }
+  &.life-loss {
+    background-position: -586px 0;
+    width: 45px;
+  }
+  
+  &.zero-essence {
+    background: none;
+    color: #957357;
+    line-height: 1.8;
+    font-weight: bolder;
+    font-size: x-large;
+    padding-left: 12px;
+    text-align: left;
+  }
 }
 
 .essence-on-component {
@@ -87,6 +101,7 @@
   min-width: 110px;
   padding-left: 5px;
   margin-bottom: 4px;
+  line-height: 2.2;
 
   .collect-option {
     display: inline-block;
@@ -106,6 +121,20 @@
   }
   &.no-min-height {
     min-height: 0;
+  }
+
+  .on-component-icon {
+    background-size: 620px 98px;
+    background-position: -89px -44px;
+    height: 40px;
+    width: 24px;
+  }
+  
+  .turn-component-icon {
+    background-size: 620px 98px;
+    background-position: -114px -44px;
+    height: 40px;
+    width: 33px;
   }
 }
 

@@ -207,8 +207,7 @@ export const GameComponents = [
                "quantity":1,
                "type":"death"
             }
-         ],
-         "multipleCollectOptions":false
+         ]
       },
       "type":"artefact"
    },
@@ -249,7 +248,8 @@ export const GameComponents = [
       "specificCollectAbility":{
          "essenceList":[
 
-         ]
+         ],
+         "multipleCollectOptions":false
       },
       "type":"artefact"
    },
@@ -391,8 +391,7 @@ export const GameComponents = [
                "quantity":1,
                "type":"life"
             }
-         ],
-         "multipleCollectOptions":false
+         ]
       },
       "type":"artefact"
    },
@@ -427,8 +426,7 @@ export const GameComponents = [
                "quantity":1,
                "type":"death"
             }
-         ],
-         "multipleCollectOptions":false
+         ]
       },
       "type":"placeOfPower"
    },
@@ -464,7 +462,8 @@ export const GameComponents = [
                "quantity":2,
                "type":"any-but-gold"
             }
-         ]
+         ],
+         "multipleCollectOptions":true
       },
       "type":"artefact"
    },
@@ -548,8 +547,7 @@ export const GameComponents = [
                "quantity":2,
                "type":"elan"
             }
-         ],
-         "multipleCollectOptions":false
+         ]
       },
       "type":"artefact"
    },
@@ -832,8 +830,7 @@ export const GameComponents = [
                "quantity":1,
                "type":"life"
             }
-         ],
-         "multipleCollectOptions":false
+         ]
       },
       "type":"mage"
    },
@@ -857,8 +854,7 @@ export const GameComponents = [
                "quantity":1,
                "type":"elan"
             }
-         ],
-         "multipleCollectOptions":false
+         ]
       },
       "type":"mage"
    },
@@ -869,10 +865,7 @@ export const GameComponents = [
       ],
       "class":"eclat_elementaire",
       "costEssenceList":[
-         {
-            "quantity":0,
-            "type":"any"
-         }
+
       ],
       "hasActionPower":true,
       "hasCost":true,
@@ -922,8 +915,7 @@ export const GameComponents = [
                "quantity":1,
                "type":"elan"
             }
-         ],
-         "multipleCollectOptions":false
+         ]
       },
       "type":"artefact"
    },
@@ -979,8 +971,7 @@ export const GameComponents = [
                "quantity":2,
                "type":"calm"
             }
-         ],
-         "multipleCollectOptions":false
+         ]
       },
       "type":"artefact"
    },
@@ -1016,8 +1007,7 @@ export const GameComponents = [
                "quantity":1,
                "type":"calm"
             }
-         ],
-         "multipleCollectOptions":false
+         ]
       },
       "type":"artefact"
    },
@@ -1053,8 +1043,7 @@ export const GameComponents = [
                "quantity":1,
                "type":"life"
             }
-         ],
-         "multipleCollectOptions":false
+         ]
       },
       "type":"artefact"
    },
@@ -1090,7 +1079,8 @@ export const GameComponents = [
       "specificCollectAbility":{
          "essenceList":[
 
-         ]
+         ],
+         "multipleCollectOptions":false
       },
       "type":"placeOfPower",
       "victoryPoint":1
@@ -1158,20 +1148,6 @@ export const GameComponents = [
       "reactPowerList":[
 
       ],
-      "standardCollectAbility":{
-         "essenceList":[
-            {
-               "quantity":1,
-               "type":"calm"
-            },
-            {
-               "quantity":1,
-               "type":"life"
-            }
-         ],
-         "multipleCollectOptions":true
-      },
-      "type":"mage",
       "specificCollectAbility":{
          "essenceList":[
             {
@@ -1184,7 +1160,8 @@ export const GameComponents = [
             }
          ],
          "multipleCollectOptions":true
-      }
+      },
+      "type":"mage"
    },
    {
       "id":"harnaisDuDragon",
@@ -1417,8 +1394,7 @@ export const GameComponents = [
                "quantity":1,
                "type":"gold"
             }
-         ],
-         "multipleCollectOptions":false
+         ]
       },
       "type":"placeOfPower"
    },
@@ -1492,20 +1468,6 @@ export const GameComponents = [
       "hasSpecificCollectAbility":true,
       "hasStandardCollectAbility":false,
       "name":"Mort Vie",
-      "standardCollectAbility":{
-         "essenceList":[
-            {
-               "quantity":1,
-               "type":"death"
-            },
-            {
-               "quantity":1,
-               "type":"life"
-            }
-         ],
-         "multipleCollectOptions":true
-      },
-      "type":"magicItem",
       "specificCollectAbility":{
          "essenceList":[
             {
@@ -1518,7 +1480,8 @@ export const GameComponents = [
             }
          ],
          "multipleCollectOptions":true
-      }
+      },
+      "type":"magicItem"
    },
    {
       "id":"necromancienne",
@@ -1540,8 +1503,7 @@ export const GameComponents = [
                "quantity":1,
                "type":"death"
             }
-         ],
-         "multipleCollectOptions":false
+         ]
       },
       "type":"mage"
    },
@@ -1686,10 +1648,7 @@ export const GameComponents = [
       ],
       "class":"prisme",
       "costEssenceList":[
-         {
-            "quantity":0,
-            "type":"any"
-         }
+
       ],
       "hasActionPower":true,
       "hasCost":true,
@@ -1745,8 +1704,7 @@ export const GameComponents = [
                "quantity":1,
                "type":"elan"
             }
-         ],
-         "multipleCollectOptions":false
+         ]
       },
       "type":"artefact"
    },
@@ -1849,8 +1807,7 @@ export const GameComponents = [
                "quantity":1,
                "type":"gold"
             }
-         ],
-         "multipleCollectOptions":false
+         ]
       },
       "type":"placeOfPower"
    },
@@ -1941,20 +1898,6 @@ export const GameComponents = [
       "hasSpecificCollectAbility":true,
       "hasStandardCollectAbility":false,
       "name":"Sérénité Vigueur",
-      "standardCollectAbility":{
-         "essenceList":[
-            {
-               "quantity":1,
-               "type":"calm"
-            },
-            {
-               "quantity":1,
-               "type":"elan"
-            }
-         ],
-         "multipleCollectOptions":true
-      },
-      "type":"magicItem",
       "specificCollectAbility":{
          "essenceList":[
             {
@@ -1967,7 +1910,8 @@ export const GameComponents = [
             }
          ],
          "multipleCollectOptions":true
-      }
+      },
+      "type":"magicItem"
    },
    {
       "id":"serpentDeMer",
@@ -2030,8 +1974,7 @@ export const GameComponents = [
                "quantity":1,
                "type":"calm"
             }
-         ],
-         "multipleCollectOptions":false
+         ]
       },
       "type":"artefact"
    },
@@ -2049,20 +1992,6 @@ export const GameComponents = [
       "hasStandardCollectAbility":false,
       "isAlternative":false,
       "name":"Sorcière",
-      "standardCollectAbility":{
-         "essenceList":[
-            {
-               "quantity":1,
-               "type":"life"
-            },
-            {
-               "quantity":1,
-               "type":"death"
-            }
-         ],
-         "multipleCollectOptions":true
-      },
-      "type":"mage",
       "specificCollectAbility":{
          "essenceList":[
             {
@@ -2075,7 +2004,8 @@ export const GameComponents = [
             }
          ],
          "multipleCollectOptions":true
-      }
+      },
+      "type":"mage"
    },
    {
       "id":"sourceElementaire",
@@ -2121,8 +2051,7 @@ export const GameComponents = [
                "quantity":1,
                "type":"elan"
             }
-         ],
-         "multipleCollectOptions":false
+         ]
       },
       "type":"artefact"
    },
@@ -2206,8 +2135,7 @@ export const GameComponents = [
                "quantity":1,
                "type":"life"
             }
-         ],
-         "multipleCollectOptions":false
+         ]
       },
       "type":"monument",
       "victoryPoint":2
@@ -2313,8 +2241,7 @@ export const GameComponents = [
                "quantity":2,
                "type":"life"
             }
-         ],
-         "multipleCollectOptions":false
+         ]
       },
       "type":"artefact"
    },
@@ -2338,8 +2265,7 @@ export const GameComponents = [
                "quantity":1,
                "type":"calm"
             }
-         ],
-         "multipleCollectOptions":false
+         ]
       },
       "type":"mage"
    }
