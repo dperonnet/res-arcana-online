@@ -35,6 +35,10 @@
     padding-left: 17px;
     text-align: left;
     width: 78px;
+    
+    &.modifier {
+      padding-left: 10px;
+    }
   }
   &.any-but-death-gold {
     background-position: -325px 0;

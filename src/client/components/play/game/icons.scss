@@ -103,3 +103,9 @@
   padding-top: 2px;
   padding-left: 6px;
 }
+.gain-icon {
+  @extend .game-icon;
+  background-size: 800px 150px;
+  background-position: -498px -86px;
+  width: 14px;
+}

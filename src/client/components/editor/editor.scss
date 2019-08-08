@@ -52,6 +52,11 @@ h5 {
       color: lightgray;
     }
 
+    .scrollable {
+      flex: 1;
+      overflow-y: auto;
+    }
+
     .form-panel {
       border-width: .2rem .2rem 0;
       position: relative;
@@ -108,7 +113,7 @@ h5 {
     }
     .inline-input {
       display: inline-flex;
-      margin-left: 10px;
+      margin-left: 4px;
     }
     .inline-flex {
       align-items: center;
@@ -122,11 +127,16 @@ h5 {
   .icon {
     margin-top: -4px;
   }
+  label div, label.inline-block div .input-group-prepend {
+    display: inline-block;
+    vertical-align: middle;
+    margin-bottom: 0;
+  }
   .life-loss {
     margin-top: -11px;
     padding-left: 3px;
   }
-  .any-same-type {
-    margin-top: -8px;
-  }
+  .operator {
+    padding-top: 8px;
+}
 }

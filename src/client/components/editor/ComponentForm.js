@@ -1,7 +1,7 @@
 import React, { Component, useEffect, useState } from 'react'
 import { Button, ButtonToolbar, Form, InputGroup} from 'react-bootstrap'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faPlus, faSlash, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { ACTION_POWER, COMPONENTS_TYPE, DEFAULT_COMPONENT, DISCOUNT, REACT_POWER, SPECIFIC_COLLECT_ABILITY, STANDARD_COLLECT_ABILITY } from './EditorConstants'
 import { connect } from 'react-redux'
 import { deleteComponent, saveComponent } from '../../../store/actions/editorActions'
@@ -191,7 +191,7 @@ class ComponentForm extends Component {
     const componentsType = JSON.parse(JSON.stringify(COMPONENTS_TYPE))
 
     return (
-      <div className="form-panel flex-grow">
+      <div className="form-panel scrollable">
         {component && 
           <form onSubmit={onSave}>
             <Form.Group controlId="ComponentSettingsForm">
@@ -470,11 +470,14 @@ class EssencePanel extends Component {
       return item.type === type
     })    
     if(typeIndex !== -1) {
-      if(data[typeIndex].quantity > 0) {
+      if(data[typeIndex].quantity !== 0) {
         --data[typeIndex].quantity
       } else {
         data.splice(typeIndex, 1)
       }
+    } else {
+      let item = { type, quantity: -1}
+      data.push(item)
     }
     this.props.onChange(data)
   }
@@ -495,12 +498,14 @@ class EssencePanel extends Component {
   }
 
   render() {
-    const { essenceList, panelType } = this.props
+    const { cost, essenceList, modifier, or, panelType } = this.props
     let essenceTypes
     if (panelType === 'cost') {
       essenceTypes = ['elan', 'life', 'calm', 'death', 'gold', 'any']
     } else if (panelType === 'any') {
       essenceTypes = ['any']
+    } else if (panelType === 'anyButGold') {
+      essenceTypes = ['any-but-gold']
     } else if (panelType === 'anyBut') {
       essenceTypes = ['any-but-gold', 'any-but-death-gold', 'any-but-life-gold']
     } else if (panelType === 'all') {
@@ -510,10 +515,15 @@ class EssencePanel extends Component {
     }
     const components = essenceTypes.map((type, index) => {
       let essence = Array.isArray(essenceList) ? essenceList.find((item) => item.type === type) : null
+      let isLast = index === essenceTypes.length - 1
+      let classModifier = modifier && essence && essence.quantity ? ' modifier' : ''
+      let signModifier = modifier && essence && essence.quantity > 0 ? '+' : ''
       return (
         <div className="inline-input" key={index} >
           <InputGroup.Prepend>
-            <InputGroup.Text className={"essence "+type} id={type+'Essence'}>{(essence && essence.quantity) || 0}</InputGroup.Text>
+            <InputGroup.Text className={"essence "+type+classModifier} id={type+'Essence'}>
+              {cost && <div className="cost"></div>}{signModifier}{(essence && essence.quantity) || 0}
+            </InputGroup.Text>
           </InputGroup.Prepend>
           <InputGroup.Append>
             <div className="vertical-buttons">
@@ -523,12 +533,15 @@ class EssencePanel extends Component {
                 onClick={() => this.decrement(type)}><span>-</span></Button>
             </div>
           </InputGroup.Append>
+          {!isLast && or &&
+            <div className={'operator'}>
+              <FontAwesomeIcon icon={faSlash} size="sm" rotation={90} />
+            </div>
+          }
         </div>
       )
     })
-    return <div className="mb-2">
-      {components}
-    </div>
+    return components
   }
 }
 
@@ -545,8 +558,8 @@ function DiscountPanel({component, onChange, onChangeByName}) {
     onChangeByName('discountAbilityList', abilities)
   }
 
-  function removeAbility() {
-    abilities.pop()
+  function removeAbility(index) {
+    abilities.splice(index, 1)
     setAbilities(abilities)
     onChangeByName('discountAbilityList', abilities)
   }
@@ -574,6 +587,8 @@ function DiscountPanel({component, onChange, onChangeByName}) {
     { id: 'placeOfPower', name: 'Place of Power' }
   ]
   
+  const splitter = <div className="clear"></div>
+  
   return <>
     <InputGroup className="mb-2">
       <Form.Check inline type="checkbox" name="hasDiscountAbility"
@@ -581,39 +596,47 @@ function DiscountPanel({component, onChange, onChangeByName}) {
         value={component.hasDiscountAbility}
         checked={component.hasDiscountAbility}
         onChange={(e) => onChange(e)}/>
-
-        { component.hasDiscountAbility && 
-          <ButtonToolbar>
-            <Button variant="secondary" size="sm" onClick={() => addAbility()}>
-              <FontAwesomeIcon icon={faPlus} size="sm" />
-            </Button>
-            <Button variant="secondary" size="sm" onClick={() => removeAbility()}>
-              <FontAwesomeIcon icon={faTrash} size="sm" />
-            </Button>
-          </ButtonToolbar>
-        }
     </InputGroup>
    
     { component.hasDiscountAbility && abilities.map((discount, index) => 
       <div key={index}>
-        <div className="mb-2 ml-2">
-          <div className="inline-block mr-2">Discount target :</div>
-          <div className="inline-checkbox ml-2">
-            {discountTypes.map((discountType) => (
-              <Form.Check inline type="checkBox" name="discountType" 
-                key={index + '_type_' + discountType.id} id={index + '_type_' + discountType.id} label={discountType.name}
-                checked={discount.type.includes(discountType.id)}
-                onChange={(e) => setDiscountType(index, discountType.id)}
-              />
-            ))}
+        <InputGroup className="mb-2 ml-2">
+          <div className="inline-flex">Discount ability {index+1}</div>
+          <ButtonToolbar>
+            <Button variant="secondary" size="sm" onClick={() => removeAbility(index)}>
+              <FontAwesomeIcon icon={faTrash} size="sm" />
+            </Button>
+          </ButtonToolbar>
+        </InputGroup>
+        
+        <div className="mb-2 ml-3">
+          <div className="mb-2">
+            <div className="inline-block">Discount target :</div>
+            <div className="inline-checkbox ml-2">
+              {discountTypes.map((discountType) => (
+                <Form.Check inline type="checkBox" name="discountType" 
+                  key={index + '_type_' + discountType.id} id={index + '_type_' + discountType.id} label={discountType.name}
+                  checked={discount.type.includes(discountType.id)}
+                  onChange={(e) => setDiscountType(index, discountType.id)}
+                />
+              ))}
+            </div>
           </div>
+          {splitter}
+          <EssencePanel panelType="all"
+            essenceList={discount.discountList}
+            onChange={(data) => updateDiscount(index, data)}
+          />
         </div>
-        <EssencePanel 
-          essenceList={discount.discountList}
-          onChange={(data) => updateDiscount(index, data)}
-        />
       </div>
     )}
+    { component.hasDiscountAbility && 
+      <ButtonToolbar className="ml-3">
+        <Button variant="secondary" size="sm" onClick={() => addAbility()}>
+          Add discount ability
+        </Button>
+      </ButtonToolbar>
+    }
   </>
 }
 
@@ -633,8 +656,8 @@ function ReactPowerPanel({component, onChange, onChangeByName}) {
     onChangeByName('reactPowerList', reactPowers)
   }
 
-  function removeReactPower() {
-    reactPowers.pop()
+  function removeReactPower(index) {
+    reactPowers.splice(index, 1)
     setReactPowers(reactPowers)
     onChangeByName('reactPowerList', reactPowers)
   }
@@ -691,6 +714,8 @@ function ReactPowerPanel({component, onChange, onChangeByName}) {
     { id: 'DRAGON', name: 'Dragon' },
     { id: 'VICTORY_CHECK', name: 'Victory Check' }
   ]
+
+  const splitter = <div className="clear"></div>
   
   return <>
     <InputGroup className="mb-2">
@@ -699,23 +724,25 @@ function ReactPowerPanel({component, onChange, onChangeByName}) {
         value={component.hasReactPower}
         checked={component.hasReactPower}
         onChange={(e) => onChange(e)}/>
-
-        { component.hasReactPower && 
-          <ButtonToolbar>
-            <Button variant="secondary" size="sm" onClick={() => addReactPower()}>
-              <FontAwesomeIcon icon={faPlus} size="sm" />
-            </Button>
-            <Button variant="secondary" size="sm" onClick={() => removeReactPower()}>
-              <FontAwesomeIcon icon={faTrash} size="sm" />
-            </Button>
-          </ButtonToolbar>
-        }
     </InputGroup>
    
     { component.hasReactPower && reactPowers.map((reactPower, index) => 
       <div key={index}>
-        <div className="mb-2 ml-2">
-          <div className="inline-block">Type List :</div>
+        
+        <InputGroup className="mb-2 ml-2">
+          <div className="inline-flex">React power {index+1}</div>
+          { component.hasReactPower && 
+            <ButtonToolbar>
+              <Button variant="secondary" size="sm" onClick={() => removeReactPower(index)}>
+                <FontAwesomeIcon icon={faTrash} size="sm" />
+              </Button>
+            </ButtonToolbar>
+          }
+        </InputGroup>
+
+        <div className="mb-2 ml-3">
+          <div className="inline-block">React type :</div>
+
           <div className="inline-checkbox ml-2">
             {reactPowerTypes.map((reactPowerType) => (
               <Form.Check inline type="checkBox" name="reactPowerType" 
@@ -727,56 +754,77 @@ function ReactPowerPanel({component, onChange, onChangeByName}) {
           </div>
         </div>
 
-        <div className="mb-2 ml-2">
+        <div className="mb-2 ml-3">
           <div className="inline-block">Cost List :</div>
-          <input name="costTurn" type="checkBox" id={'costTurn_' + index} className="inline-checkbox ml-2"
-            checked={reactPower.cost.turn}
-            onChange={(e) => updateReactPower(index, null, 'costTurn')}
-          />
-          <div className="turn-component-icon" onClick={(e) => updateReactPower(index, null, 'costTurn')}></div>
-        </div>
-        <EssencePanel
-          essenceList={reactPower.cost.essenceList}
-          onChange={(data) => updateReactPower(index, data, 'costEssenceList')}
-        />
-        <div className="mb-2 ml-2">
+
+          <div className="ml-2">
+            <div className="mb-2 inline-block">
+              <input name="costTurn" type="checkBox" id={'costTurn_' + index} className="inline-checkbox ml-2"
+                checked={reactPower.cost.turn}
+                onChange={(e) => updateReactPower(index, null, 'costTurn')}
+              />
+              <div className="turn-component-icon" onClick={(e) => updateReactPower(index, null, 'costTurn')}></div>
+            </div>
+            {splitter}
+            <EssencePanel
+              essenceList={reactPower.cost.essenceList}
+              onChange={(data) => updateReactPower(index, data, 'costEssenceList')}
+            />
+          </div>
+
           <div className="inline-block">Gain List :</div>
-          <Form.Check inline type="checkBox" name="gainIgnore" label="Ignore"
-            id={'gainIgnore_' + index} className="ml-2"
-            checked={reactPower.gain.ignore}
-            onChange={(e) => updateReactPower(index, null, 'gainIgnore')}
-          />
-          <Form.Check inline type="checkBox" name="gainOnComponent" label="Essence on component"
-            id={'gainOnComponent_' + index} className="ml-2"
-            checked={reactPower.gain.onComponent}
-            onChange={(e) => updateReactPower(index, null, 'gainOnComponent')}
-          />
-          { reactPowers[index].type.filter((type) => type === 'VICTORY_CHECK').length > 0 && 
-            <>
-              <div className="inline-block">Temporary Victory Points </div>
-              <div className="inline-input">
-                  <InputGroup.Prepend>
-                    <InputGroup.Text className="victory-points" id="victoryPoint">{reactPower.gain.temporaryVictoryPoints || 0}</InputGroup.Text>
-                  </InputGroup.Prepend>
-                  <InputGroup.Append>
-                    <div className="vertical-buttons">
-                      <Button variant="secondary" id="lowerVictoryPoint"
-                        onClick={() => increment(index)}><span>+</span></Button>
-                      <Button variant="secondary" id="raiseVictoryPoint"
-                        onClick={() => decrement(index)}><span>-</span></Button>
-                    </div>
-                  </InputGroup.Append>
+
+          <div className="ml-2">
+            <div className="mb-2 inline-block">
+              <Form.Check inline type="checkBox" name="gainIgnore" label="Ignore"
+                id={'gainIgnore_' + index} className="ml-2"
+                checked={reactPower.gain.ignore}
+                onChange={(e) => updateReactPower(index, null, 'gainIgnore')}
+              />
+            </div>
+            {splitter}
+            <EssencePanel
+              essenceList={reactPower.gain.essenceList}
+              onChange={(data) => updateReactPower(index, data, 'gainEssenceList')}
+            />
+            {splitter}
+            <div className="mb-2 inline-block">
+              <Form.Check inline type="checkBox" name="gainOnComponent" label={<>Essence gain on component <div className="icon on-component-icon"></div></>}
+                id={'gainOnComponent_' + index} className="ml-2"
+                checked={reactPower.gain.onComponent}
+                onChange={(e) => updateReactPower(index, null, 'gainOnComponent')}
+              />
+            </div>
+            {splitter}
+            { reactPowers[index].type.filter((type) => type === 'VICTORY_CHECK').length > 0 && 
+              <div className="mb-2 ml-2 inline-block">
+                <div className="inline-block">Temporary Victory Points </div>
+                <div className="inline-input">
+                    <InputGroup.Prepend>
+                      <InputGroup.Text className="victory-points" id="victoryPoint">{reactPower.gain.temporaryVictoryPoints || 0}</InputGroup.Text>
+                    </InputGroup.Prepend>
+                    <InputGroup.Append>
+                      <div className="vertical-buttons">
+                        <Button variant="secondary" id="lowerVictoryPoint"
+                          onClick={() => increment(index)}><span>+</span></Button>
+                        <Button variant="secondary" id="raiseVictoryPoint"
+                          onClick={() => decrement(index)}><span>-</span></Button>
+                      </div>
+                    </InputGroup.Append>
+                </div>
               </div>
-            </>
-          }
+            }
+          </div>
         </div>
-        
-        <EssencePanel
-          essenceList={reactPower.gain.essenceList}
-          onChange={(data) => updateReactPower(index, data, 'gainEssenceList')}
-        />
       </div>
     )}
+    { component.hasReactPower && 
+      <ButtonToolbar className="ml-3">
+        <Button variant="secondary" size="sm" onClick={() => addReactPower()}>
+          Add react Power
+        </Button>
+      </ButtonToolbar>
+    }
   </>
 }
 
@@ -812,31 +860,29 @@ function ActionPowerPanel({component, onChange, onChangeByName}) {
         delete actionPowers[index][type][target]
       }
     }
-    
     onChangeByName('actionPowerList', actionPowers)
   }
 
-  function renderCheckBox(index, type, target, label, data, checked, key) {
-    console.log('renderCheckBox',index, type, target, label, data, checked, key);
+  function renderCheckBox(index, type, target, label, data) {
     return <div className="inline-block">
       <input type="checkBox" className="inline-checkbox ml-2"
-        name={type + target + '_' + index + key}
-        id={type + target + '_' + index + key}
-        checked={checked !== null ? checked : actionPowers[index][type][target]}
+        name={type + target + '_' + index}
+        id={type + target + '_' + index}
+        checked={actionPowers[index][type][target]}
         onChange={(e) => updateActionPower(index, type, target, data)}
       />
-      <label htmlFor={type + target + '_' + index + key} className="inline-block">
+      <label htmlFor={type + target + '_' + index} className="inline-block">
         {label}
       </label>
     </div>
   }
 
-  function renderCheckBoxCost(index, target, label, data, checked, key) {
-    return renderCheckBox(index, 'cost', target, label, data, checked, key)
+  function renderCheckBoxCost(index, target, label, data) {
+    return renderCheckBox(index, 'cost', target, label, data)
   }
 
-  function renderCheckBoxGain(index, target, label, data, checked, key) {
-    return renderCheckBox(index, 'gain', target, label, data, checked, key)
+  function renderCheckBoxGain(index, target, label, data) {
+    return renderCheckBox(index, 'gain', target, label, data)
   }
 
   const splitter = <div className="clear"></div>
@@ -848,14 +894,6 @@ function ActionPowerPanel({component, onChange, onChangeByName}) {
         value={component.hasActionPower}
         checked={component.hasActionPower}
         onChange={(e) => onChange(e)}/>
-
-        { component.hasActionPower && 
-          <ButtonToolbar>
-            <Button variant="secondary" size="sm" onClick={() => addActionPower()}>
-              <FontAwesomeIcon icon={faPlus} size="sm" />
-            </Button>
-          </ButtonToolbar>
-        }
     </InputGroup>
    
     { component.hasActionPower && actionPowers.map((actionPower, index) => 
@@ -872,7 +910,7 @@ function ActionPowerPanel({component, onChange, onChangeByName}) {
         </InputGroup>
 
         <div className="mb-2 ml-3">
-          <div className="inline-block">Cost List</div>
+          <div className="inline-block">Cost List :</div>
 
           <div className="ml-2">
             {renderCheckBoxCost(index, 'turn',
@@ -884,15 +922,30 @@ function ActionPowerPanel({component, onChange, onChangeByName}) {
             {renderCheckBoxCost(index, 'turnCreature',
               <><div className="icon turn-creature-icon"></div></>
             )}
-            <EssencePanel
-              essenceList={actionPower.cost.essenceList || []} panelType='standard'
-              onChange={(data) => updateActionPower(index, 'cost', 'essenceList', data)}
-            />
-            {renderCheckBoxCost(index, 'onComponent',
-              <>Essence on <div className="icon on-component-icon"></div></>
+            {renderCheckBoxCost(index, 'onlyWhenTurned',
+              <>When this card is turned</>
             )}
-            {renderCheckBoxCost(index, 'sameType',
-              <>+ <div className="essence any-same-type"></div></>
+            {splitter}
+            {renderCheckBoxCost(index, 'multipleCostOptions',
+              <>The player can choose which essence to pay</>
+            )}
+            {splitter}
+            <label className="ml-2">
+              <EssencePanel or={actionPower.cost.multipleCostOptions} cost={true}
+                essenceList={actionPower.cost.essenceList || []} panelType='cost'
+                onChange={(data) => updateActionPower(index, 'cost', 'essenceList', data)}
+              />
+                {renderCheckBoxCost(index, 'sameType',
+                  <>+ <div className="essence any-same-type"><div className="cost"></div></div></>
+                )}
+            </label>
+            {splitter}
+            {renderCheckBoxCost(index, 'onComponent',
+              <>Essence cost from <div className="icon on-component-icon"></div></>
+            )}
+            {splitter}
+            {renderCheckBoxCost(index, 'destroySelf',
+              <>Destroy <div className="icon on-component-icon"></div></>
             )}
             {splitter}
             {renderCheckBoxCost(index, 'destroyOneArtefact',
@@ -902,19 +955,17 @@ function ActionPowerPanel({component, onChange, onChangeByName}) {
             {renderCheckBoxCost(index, 'destroyAnotherArtefact',
               <>Destroy another of your artifacts</>
             )}
+            {splitter}
+            {renderCheckBoxCost(index, 'discardArtefact',
+              <>Discard a card</>
+            )}
           </div>
         </div>
 
-        <div className="mb-2 ml-2">
-          <div className="inline-block">Gain List</div>
+        <div className="mb-2 ml-3">
+          <div className="inline-block">Gain List :</div>
+
           <div className="ml-2">
-            <EssencePanel panelType="all"
-              essenceList={actionPower.gain.essenceList || []}
-              onChange={(data) => updateActionPower(index, 'gain', 'essenceList', data)}
-            />
-            {renderCheckBoxGain(index, 'onComponent',
-              <>Essence on <div className="icon on-component-icon"></div></>
-            )}
             {renderCheckBoxGain(index, 'straightenComponent',
               <><div className="icon straighten-component-icon"></div></>
             )}
@@ -925,12 +976,57 @@ function ActionPowerPanel({component, onChange, onChangeByName}) {
               <><div className="icon straighten-creature-icon"></div></>
             )}
             {splitter}
+            <div className="ml-2">
+              <EssencePanel panelType="all"
+                essenceList={actionPower.gain.essenceList || []}
+                onChange={(data) => updateActionPower(index, 'gain', 'essenceList', data)}
+              />
+            </div>
+            {renderCheckBoxGain(index, 'onComponent',
+              <>Essence gain on <div className="icon on-component-icon"></div></>
+            )}
+            {splitter}
+            {renderCheckBoxGain(index, 'putItOnComponent',
+              <>Essence paid goes on <div className="icon on-component-icon"></div></>
+            )}
+            {splitter}
+            {renderCheckBoxGain(index, 'asManyGold',
+              <>? from power cost as <div className="essence gold mt-n2">?</div></>
+            )}
+            {splitter}
+            {renderCheckBoxGain(index, 'asAnyButGold',
+              <><div className="icon component-cost-icon"></div> as <div className="essence any-but-gold"></div> with modifier
+                <EssencePanel panelType="anyButGold" modifier={true}
+                  essenceList={(actionPower.gain.asAnyButGold && actionPower.gain.modifierList) || []}
+                  onChange={(data) => updateActionPower(index, 'gain', 'modifierList', data)}
+                />
+              </>
+            )}
+            {splitter}
             {renderCheckBoxGain(index, 'placeDragonFromAnyDiscardPile',
               <>Place <div className="icon dragon-icon"></div>from any player's discard pile at <div className="icon component-cost-icon"></div></>
             )}
             {splitter}
+            {renderCheckBoxGain(index, 'placeDragonForFree',
+              <>Place <div className="icon dragon-icon"></div> for free</>
+            )}
+            {splitter}
+            {renderCheckBoxGain(index, 'placeDragon',
+              <>Place <div className="icon dragon-icon"></div> at <div className="icon component-cost-icon"></div> with modifier
+                <EssencePanel panelType="anyButGold" modifier={true}
+                  essenceList={(actionPower.gain.placeDragon && actionPower.gain.modifierList) || []}
+                  onChange={(data) => updateActionPower(index, 'gain', 'modifierList', data)}
+                />
+              </>
+            )}
+            {splitter}
             {renderCheckBoxGain(index, 'placeArtefactFromDiscard',
-              <>Place any of your discards at <div className="icon component-cost-icon"></div></>
+              <>Place any of your discards at <div className="icon component-cost-icon"></div> with modifier
+                <EssencePanel panelType="anyButGold" modifier={true}
+                  essenceList={(actionPower.gain.placeArtefactFromDiscard && actionPower.gain.modifierList) || []}
+                  onChange={(data) => updateActionPower(index, 'gain', 'modifierList', data)}
+                />
+              </>
             )}
             {splitter}
             {renderCheckBoxGain(index, 'checkVictoryNow',
@@ -941,34 +1037,82 @@ function ActionPowerPanel({component, onChange, onChangeByName}) {
               <>All Rivals Gain</>
             )}
             {actionPower.gain.rivalsGain && 
-              <EssencePanel 
-                essenceList={actionPower.gain.rivalsEssenceList || []}
-                onChange={(data) => updateActionPower(index, 'gain', 'rivalsEssenceList', data)}
-              />
+              <div className="ml-2">
+                <EssencePanel 
+                  essenceList={actionPower.gain.rivalsGainEssenceList || []}
+                  onChange={(data) => updateActionPower(index, 'gain', 'rivalsGainEssenceList', data)}
+                />
+              </div>
             }
             {splitter}
-            {renderCheckBoxGain(index, 'rivalsLoseLife',
-              <>All Rivals Lose <div className="icon essence life-loss">1</div></>, 
-              actionPower.gain.rivalsLoseLife !== 1 ? 1 : null, actionPower.gain.rivalsLoseLife === 1, 1
+            <div className="inline-block">
+              <input type="checkBox" className="inline-checkbox ml-2"
+                name={'gainrivalsLoseLife_1' + index} id={'gainrivalsLoseLife_1' + index}
+                checked={actionPowers[index]['gain']['rivalsLoseLife'] === 1}
+                onChange={(e) => updateActionPower(index, 'gain', 'rivalsLoseLife', actionPower.gain.rivalsLoseLife !== 1 ? 1 : null)}
+              />
+              <label htmlFor={'gainrivalsLoseLife_1' + index} className="inline-block">
+                <>All Rivals Lose <div className="icon essence life-loss">1</div></>
+              </label>
+            </div>
+            <div className="inline-block">
+              <input type="checkBox" className="inline-checkbox ml-2"
+                name={'gainrivalsLoseLife_2' + index} id={'gainrivalsLoseLife_2' + index}
+                checked={actionPowers[index]['gain']['rivalsLoseLife'] === 2}
+                onChange={(e) => updateActionPower(index, 'gain', 'rivalsLoseLife', actionPower.gain.rivalsLoseLife !== 2 ? 2 : null)}
+              />
+              <label htmlFor={'gainrivalsLoseLife_2' + index} className="inline-block">
+                <>All Rivals Lose <div className="icon essence life-loss">2</div></>
+              </label>
+            </div>
+            {splitter}
+            {actionPowers[index]['gain']['rivalsLoseLife'] && 
+              <div className="ml-2">Rivals can ignore life loss with
+                <EssencePanel cost={true}
+                  essenceList={actionPower.gain.canIgnoreWithEssenceList || []}
+                  onChange={(data) => updateActionPower(index, 'gain', 'canIgnoreWithEssenceList', data)}
+                />
+              </div>
+            }
+            {splitter}
+            {actionPowers[index]['gain']['rivalsLoseLife'] && renderCheckBoxGain(index, 'canIgnoreWithDestroyArtefact',
+              <>Rivals can destroy one artifact to ignore life loss</>
             )}
-            {renderCheckBoxGain(index, 'rivalsLoseLife',
-              <>All Rivals Lose <div className="icon essence life-loss">2</div></>, 
-              actionPower.gain.rivalsLoseLife !== 2 ? 2 : null, actionPower.gain.rivalsLoseLife === 2, 2
+            {splitter}
+            {actionPowers[index]['gain']['rivalsLoseLife'] && renderCheckBoxGain(index, 'canIgnoreWithDiscardArtefact',
+              <>Rivals can discard one card to ignore life loss</>
             )}
             {splitter}
             {renderCheckBoxGain(index, 'drawOne',
               <>Draw 1 card</>
             )}
+            {splitter}
             {renderCheckBoxGain(index, 'drawThreeDiscardThree',
               <>Draw 3 cards, add to hand, discard 3</>
             )}
+            {splitter}
             {renderCheckBoxGain(index, 'reorderThree',
               <>Draw 3 cards, reorder, put back (may also use on Monument deck)</>
+            )}
+            {splitter}
+            {renderCheckBoxGain(index, 'asManyCalmThanRivalsElan',
+              <>Gain <div className="essence calm">?</div> equal to <div className="essence elan">?</div> of one rival</>
+            )}
+            {splitter}
+            {renderCheckBoxGain(index, 'asManyElanThanRivalsDeath',
+              <>Gain <div className="essence elan">?</div> equal to <div className="essence death">?</div> of one rival</>
             )}
           </div>
         </div>
       </div>
     )}
+    { component.hasActionPower && 
+      <ButtonToolbar className="ml-3">
+        <Button variant="secondary" size="sm" onClick={() => addActionPower()}>
+          Add action Power
+        </Button>
+      </ButtonToolbar>
+    }
   </>
 }
 

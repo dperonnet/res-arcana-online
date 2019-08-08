@@ -67,35 +67,23 @@ class DatabaseEditor extends Component {
           <div className="main-section">
             <Row className="flex-row">
               <Col xs="12" md="6" className="flex-col">
-                <Row>
-                  <Col>
-                    <h2>Database Editor</h2>
-                    <DatabaseContent
-                      onSelect={this.handleSelect}
-                      onCreate={this.handleCreate}
-                      onDelete={this.handleDelete}
-                      />
-                  </Col>
-                </Row>
-                <Row className="flex-grow">
-                  <Col className="flex-col">
-                    <h2>Component settings</h2>
-                    <ComponentForm
-                      onSave={this.handleSave}
-                      onReset={this.handleReset}
-                      />
-                  </Col>
-                </Row>
+                <h2>Database Editor</h2>
+                <DatabaseContent
+                  onSelect={this.handleSelect}
+                  onCreate={this.handleCreate}
+                  onDelete={this.handleDelete}
+                />
+                <h2>Component settings</h2>
+                <ComponentForm
+                  onSave={this.handleSave}
+                  onReset={this.handleReset}
+                />
               </Col>
               <Col xs="12" md="6" className="flex-col">
-                <Row className="flex-grow">
-                  <Col className="flex-col">
-                    <h2>Component datas</h2>
-                    <pre className="form-panel flex-grow">
-                      {jsonComponent}
-                    </pre>
-                  </Col>
-                </Row>
+                <h2>Component datas</h2>
+                <pre className="form-panel scrollable">
+                  {jsonComponent}
+                </pre>
               </Col>
             </Row>
           </div>

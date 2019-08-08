@@ -1,4 +1,4 @@
-import { Game, Pass, PlayerView, TurnOrder   } from 'boardgame.io/core'
+import { Game, PlayerView, TurnOrder   } from 'boardgame.io/core'
 import { GameComponents } from '../../../../database'
 import logger from 'redux-logger'
 import { applyMiddleware } from 'redux'
@@ -809,9 +809,8 @@ const getCheckVictoryTurnOrder = (G, ctx, source) => {
   let order = []
   for (let i=0; i < ctx.numPlayers; i++) {
     let componentWithReactPower = G.publicData.players[i].inPlay.filter((component) => {
-      let hasReactPower = true
       if (component.hasReactPower) {
-
+        // TODO
       }
       return false
     })
@@ -868,6 +867,7 @@ const getConditionalVictoryPoints = (ctx, component) => {
   return 0
 }
 
+/*
 const checkWinner = (G, ctx) => {
   console.log('[checkWinner] No one reached 10 victory points, untap components and go to collectPhase')
   if (G.allPassed) {
@@ -876,6 +876,7 @@ const checkWinner = (G, ctx) => {
   }
   console.log('[checkAllPlayersPassed] One player at least is sill playing, return "actionPhase"')
 }
+*/
 
 // ########## game options setup (KO) ##########
 const setupGameComponents = (G, ctx) => {
