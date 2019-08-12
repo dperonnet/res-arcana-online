@@ -40,6 +40,25 @@ class DatabaseEditor extends Component {
 
   getJsonFromObject = object => JSON.stringify(object, undefined, 2)
 
+  renderActionCost = (action) => {
+    return <>
+      {action.cost.turn && <div className="icon turn-component-icon"></div>}
+      {action.cost.turnDragon && <div className="icon turn-dragon-icon"></div>}
+      {action.cost.turnCreature && <div className="icon turn-creature-icon"></div>}
+      {action.cost.onComponent && <div className="icon on-component-icon"></div>}
+    </>
+  }
+
+  renderActionGain = (action) => {
+    return <>
+      {action.gain.straightenComponent && <div className="icon straighten-component-icon"></div>}
+      {action.gain.straightenSelf && <div className="icon straighten-self-icon"></div>}
+      {action.gain.straightenCreature && <div className="icon straighten-creature-icon"></div>}
+      {action.gain.onComponent && <div className="icon on-component-icon"></div>}
+      {action.cost.onlyWhenTurned && <div class="action-text">(When this card is turned)</div>}
+    </>
+  }
+
   render() {
     const { auth, component, pristineComponent } = this.props;
     const jsonComponent = this.getJsonFromObject(component);
@@ -60,6 +79,20 @@ class DatabaseEditor extends Component {
         card = <div>No file found for {pristineComponent.class}.jpg</div>
       }
     }
+    
+    let actionPowers = component.actionPowerList && component.actionPowerList.map((action) => {
+      let cost = this.renderActionCost(action)
+      let gain = this.renderActionGain(action)
+      return <div className="component-action">
+          <div className="action-cost-part">{cost}</div>
+          <div className="icon gain-icon"></div>
+          <div className="action-gain-part">{gain}</div>
+        </div>
+    })
+
+    let actions = <div class="col">
+      {actionPowers}
+    </div>
 
     return (
       <Container className="editor-container">
@@ -89,6 +122,7 @@ class DatabaseEditor extends Component {
           </div>
           <div className="side-section">
             {card}
+            {actions}
           </div>
         </div>
       </Container>

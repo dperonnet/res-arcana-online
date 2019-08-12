@@ -132,11 +132,61 @@ h5 {
     vertical-align: middle;
     margin-bottom: 0;
   }
+  label {
+    text-align: left;
+  }
   .life-loss {
     margin-top: -11px;
     padding-left: 3px;
   }
   .operator {
     padding-top: 8px;
+  }
 }
+
+.component-action {
+  display: flex;
+  border: 1px solid rgba(245, 176, 65, 0.7);
+  border-radius: 4px;
+  background-color: rgba(241, 216, 167, 1);
+  color: black;
+  margin: 8px;
+  padding: 2px;
+  min-height: 45px;
+  align-items: center;
+  text-align: center;
+  justify-content: center;
+  
+  background-blend-mode: luminosity;
+  background-image: url("../../assets/image/background_action.png");
+  background-repeat: repeat-x;
+  background-size: 400px 400px;
+  background-position: -42px;
+
+  .action-cost-part {
+    flex: 0 auto;
+    display: flex;
+    background-color: rgba(0, 0, 0, 0.3);
+    align-items: center;
+    border-radius: 4px;
+    padding: 4px;
+  }
+  .action-gain-part {
+    flex: 0 auto;
+    display: flex;
+    align-items: center;
+  }
+  
+  .action-text {
+    flex: 1;
+    font-size: x-small;
+  }
+  .icon {
+    flex: 0 auto;
+  }
+  .gain-icon {
+    flex: 0 auto;
+    flex: none;
+    margin: 0 2px 0 -5px;
+  }
 }

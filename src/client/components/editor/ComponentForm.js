@@ -1,7 +1,7 @@
 import React, { Component, useEffect, useState } from 'react'
 import { Button, ButtonToolbar, Form, InputGroup} from 'react-bootstrap'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus, faSlash, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faSlash, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { ACTION_POWER, COMPONENTS_TYPE, DEFAULT_COMPONENT, DISCOUNT, REACT_POWER, SPECIFIC_COLLECT_ABILITY, STANDARD_COLLECT_ABILITY } from './EditorConstants'
 import { connect } from 'react-redux'
 import { deleteComponent, saveComponent } from '../../../store/actions/editorActions'
@@ -248,7 +248,7 @@ class ComponentForm extends Component {
                     <>
                       <div className="mb-2">
                         <EssencePanel panelType="cost"
-                          essenceList={component.costEssenceList}
+                          essenceList={component.costEssenceList || []}
                           onChange={(data) => this.handleFormChangeByName('costEssenceList', data)}
                         />
                       </div>
@@ -272,7 +272,7 @@ class ComponentForm extends Component {
                 <>
                   <div className="mb-2">
                     <EssencePanel
-                      essenceList={component.standardCollectAbility && component.standardCollectAbility.essenceList}
+                      essenceList={(component.standardCollectAbility && component.standardCollectAbility.essenceList) || []}
                       onChange={(data) => this.handleFormChangeByName('standardCollectAbility', data)}
                     />
                   </div>
@@ -294,7 +294,7 @@ class ComponentForm extends Component {
                 <>
                   <div className="mb-2">
                     <EssencePanel panelType="all"
-                      essenceList={component.specificCollectAbility && component.specificCollectAbility.essenceList}
+                      essenceList={(component.specificCollectAbility && component.specificCollectAbility.essenceList) || []}
                       onChange={(data) => this.handleFormChangeByName('specificCollectAbility', data)}
                     />
                   </div>
@@ -599,8 +599,9 @@ function DiscountPanel({component, onChange, onChangeByName}) {
     </InputGroup>
    
     { component.hasDiscountAbility && abilities.map((discount, index) => 
-      <div key={index}>
-        <InputGroup className="mb-2 ml-2">
+      <div key={index} className="mb-2 ml-2">
+
+        <InputGroup>
           <div className="inline-flex">Discount ability {index+1}</div>
           <ButtonToolbar>
             <Button variant="secondary" size="sm" onClick={() => removeAbility(index)}>
@@ -609,29 +610,30 @@ function DiscountPanel({component, onChange, onChangeByName}) {
           </ButtonToolbar>
         </InputGroup>
         
-        <div className="mb-2 ml-3">
-          <div className="mb-2">
-            <div className="inline-block">Discount target :</div>
-            <div className="inline-checkbox ml-2">
+        <div className="mb-2 ml-2">
+          <div className="inline-block">Discount target :</div>
+
+          <div className="ml-1">
+            <div className="inline-block mb-2">
               {discountTypes.map((discountType) => (
-                <Form.Check inline type="checkBox" name="discountType" 
+                <Form.Check inline type="checkBox" name="discountType"  className="ml-2"
                   key={index + '_type_' + discountType.id} id={index + '_type_' + discountType.id} label={discountType.name}
                   checked={discount.type.includes(discountType.id)}
                   onChange={(e) => setDiscountType(index, discountType.id)}
                 />
               ))}
             </div>
+            {splitter}
+            <EssencePanel panelType="all"
+              essenceList={discount.discountList || []}
+              onChange={(data) => updateDiscount(index, data)}
+            />
           </div>
-          {splitter}
-          <EssencePanel panelType="all"
-            essenceList={discount.discountList}
-            onChange={(data) => updateDiscount(index, data)}
-          />
         </div>
       </div>
     )}
     { component.hasDiscountAbility && 
-      <ButtonToolbar className="ml-3">
+      <ButtonToolbar className="ml-3 mb-2">
         <Button variant="secondary" size="sm" onClick={() => addAbility()}>
           Add discount ability
         </Button>
@@ -727,9 +729,9 @@ function ReactPowerPanel({component, onChange, onChangeByName}) {
     </InputGroup>
    
     { component.hasReactPower && reactPowers.map((reactPower, index) => 
-      <div key={index}>
+      <div key={index} className="mb-2 ml-2">
         
-        <InputGroup className="mb-2 ml-2">
+        <InputGroup>
           <div className="inline-flex">React power {index+1}</div>
           { component.hasReactPower && 
             <ButtonToolbar>
@@ -740,24 +742,27 @@ function ReactPowerPanel({component, onChange, onChangeByName}) {
           }
         </InputGroup>
 
-        <div className="mb-2 ml-3">
+        <div className="mb-2 ml-2">
           <div className="inline-block">React type :</div>
 
-          <div className="inline-checkbox ml-2">
-            {reactPowerTypes.map((reactPowerType) => (
-              <Form.Check inline type="checkBox" name="reactPowerType" 
-                key={index + '_type_' + reactPowerType.id} id={index + '_type_' + reactPowerType.id} label={reactPowerType.name}
-                checked={reactPower.type.includes(reactPowerType.id)}
-                onChange={(e) => setReactPowerType(index, reactPowerType.id)}
-              />
-            ))}
+          <div className="ml-1">
+            <div className="inline-block">
+              {reactPowerTypes.map((reactPowerType) => (
+                <Form.Check inline type="checkBox" name="reactPowerType" className="ml-2"
+                  key={index + '_type_' + reactPowerType.id} id={index + '_type_' + reactPowerType.id} label={reactPowerType.name}
+                  checked={reactPower.type.includes(reactPowerType.id)}
+                  onChange={(e) => setReactPowerType(index, reactPowerType.id)}
+                />
+              ))}
+            </div>
           </div>
+          {splitter}
         </div>
 
-        <div className="mb-2 ml-3">
+        <div className="mb-2 ml-2">
           <div className="inline-block">Cost List :</div>
 
-          <div className="ml-2">
+          <div className="ml-1">
             <div className="mb-2 inline-block">
               <input name="costTurn" type="checkBox" id={'costTurn_' + index} className="inline-checkbox ml-2"
                 checked={reactPower.cost.turn}
@@ -767,14 +772,16 @@ function ReactPowerPanel({component, onChange, onChangeByName}) {
             </div>
             {splitter}
             <EssencePanel
-              essenceList={reactPower.cost.essenceList}
+              essenceList={reactPower.cost.essenceList || []}
               onChange={(data) => updateReactPower(index, data, 'costEssenceList')}
             />
           </div>
+        </div>
 
+        <div className="mb-2 ml-2">
           <div className="inline-block">Gain List :</div>
 
-          <div className="ml-2">
+          <div className="ml-1">
             <div className="mb-2 inline-block">
               <Form.Check inline type="checkBox" name="gainIgnore" label="Ignore"
                 id={'gainIgnore_' + index} className="ml-2"
@@ -784,7 +791,7 @@ function ReactPowerPanel({component, onChange, onChangeByName}) {
             </div>
             {splitter}
             <EssencePanel
-              essenceList={reactPower.gain.essenceList}
+              essenceList={reactPower.gain.essenceList || []}
               onChange={(data) => updateReactPower(index, data, 'gainEssenceList')}
             />
             {splitter}
@@ -819,7 +826,7 @@ function ReactPowerPanel({component, onChange, onChangeByName}) {
       </div>
     )}
     { component.hasReactPower && 
-      <ButtonToolbar className="ml-3">
+      <ButtonToolbar className="ml-3 mb-2">
         <Button variant="secondary" size="sm" onClick={() => addReactPower()}>
           Add react Power
         </Button>
@@ -897,8 +904,8 @@ function ActionPowerPanel({component, onChange, onChangeByName}) {
     </InputGroup>
    
     { component.hasActionPower && actionPowers.map((actionPower, index) => 
-      <div key={index}>
-        <InputGroup className="mb-2 ml-2">
+      <div key={index} className="mb-2 ml-2">
+        <InputGroup>
           <div className="inline-flex">Action {index+1}</div>
           { component.hasActionPower && 
             <ButtonToolbar>
@@ -909,10 +916,10 @@ function ActionPowerPanel({component, onChange, onChangeByName}) {
           }
         </InputGroup>
 
-        <div className="mb-2 ml-3">
+        <div className="mb-2 ml-2">
           <div className="inline-block">Cost List :</div>
 
-          <div className="ml-2">
+          <div className="ml-1">
             {renderCheckBoxCost(index, 'turn',
               <><div className="icon turn-component-icon"></div></>
             )}
@@ -952,6 +959,10 @@ function ActionPowerPanel({component, onChange, onChangeByName}) {
               <>Destroy one of your artifacts</>
             )}
             {splitter}
+            {renderCheckBoxCost(index, 'destroyOneDragonOrCreature',
+              <>Destroy one of your Dragons or Creatures</>
+            )}
+            {splitter}
             {renderCheckBoxCost(index, 'destroyAnotherArtefact',
               <>Destroy another of your artifacts</>
             )}
@@ -962,10 +973,10 @@ function ActionPowerPanel({component, onChange, onChangeByName}) {
           </div>
         </div>
 
-        <div className="mb-2 ml-3">
+        <div className="mb-2 ml-2">
           <div className="inline-block">Gain List :</div>
 
-          <div className="ml-2">
+          <div className="ml-1">
             {renderCheckBoxGain(index, 'straightenComponent',
               <><div className="icon straighten-component-icon"></div></>
             )}
@@ -990,14 +1001,22 @@ function ActionPowerPanel({component, onChange, onChangeByName}) {
               <>Essence paid goes on <div className="icon on-component-icon"></div></>
             )}
             {splitter}
-            {renderCheckBoxGain(index, 'asManyGold',
-              <>? from power cost as <div className="essence gold mt-n2">?</div></>
+            {renderCheckBoxGain(index, 'powerCostAsGold',
+              <><div className="essence any-same-type"><div className="cost"></div></div> as <div className="essence gold mt-n2">?</div></>
             )}
             {splitter}
-            {renderCheckBoxGain(index, 'asAnyButGold',
+            {renderCheckBoxGain(index, 'powerCostAsAnyButGoldSameType',
+              <><div className="essence any-same-type"><div className="cost"></div></div> as <div className="essence any-same-type-but-gold mt-n2"></div></>
+            )}
+            {splitter}
+            {renderCheckBoxGain(index, 'placementCostAsGold',
+              <><div className="icon component-cost-icon"></div> as <div className="essence gold mt-n2">?</div></>
+            )}
+            {splitter}
+            {renderCheckBoxGain(index, 'placementCostAsAnyButGold',
               <><div className="icon component-cost-icon"></div> as <div className="essence any-but-gold"></div> with modifier
                 <EssencePanel panelType="anyButGold" modifier={true}
-                  essenceList={(actionPower.gain.asAnyButGold && actionPower.gain.modifierList) || []}
+                  essenceList={(actionPower.gain.placementCostAsAnyButGold && actionPower.gain.modifierList) || []}
                   onChange={(data) => updateActionPower(index, 'gain', 'modifierList', data)}
                 />
               </>
@@ -1107,7 +1126,7 @@ function ActionPowerPanel({component, onChange, onChangeByName}) {
       </div>
     )}
     { component.hasActionPower && 
-      <ButtonToolbar className="ml-3">
+      <ButtonToolbar className="ml-3 mb-2">
         <Button variant="secondary" size="sm" onClick={() => addActionPower()}>
           Add action Power
         </Button>

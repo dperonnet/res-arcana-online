@@ -2,7 +2,7 @@
 
 .essence {
   @extend .game-icon;
-  background-size: 628px 102px;
+  background-size: 780px 100px;
   line-height: 2.5;
   height: 40px;
   width: 40px;
@@ -57,8 +57,12 @@
   &.any-same-type {
     background-position: -540px 0;
   }
+  &.any-same-type-but-gold {
+    background-position: -582px 0;
+    width: 78px;
+  }
   &.life-loss {
-    background-position: -586px 0;
+    background-position: -664px 0;
     width: 45px;
   }
   
@@ -128,14 +132,14 @@
   }
 
   .on-component-icon {
-    background-size: 620px 98px;
+    background-size: 770px 98px;
     background-position: -89px -44px;
     height: 40px;
     width: 24px;
   }
   
   .turn-component-icon {
-    background-size: 620px 98px;
+    background-size: 770px 98px;
     background-position: -114px -44px;
     height: 40px;
     width: 33px;
@@ -154,7 +158,7 @@
   height: 16px;
   width: 16px;
   background-image: url("../../../assets/image/game_icons.png");
-  background-size: 250px 38px;
+  background-size: 310px 38px;
   background-position: -190px -16px;
   background-repeat: no-repeat;
 }
@@ -167,7 +171,7 @@
   height: 16px;
   width: 16px;
   background-image: url("../../../assets/image/game_icons.png");
-  background-size: 250px 38px;
+  background-size: 310px 38px;
   background-position: -174px -16px;
   background-repeat: no-repeat;
 }

@@ -10,13 +10,10 @@ export const COMPONENTS_TYPE = [
   { id: 'placeOfPower', name: 'Place of Power' }
 ]
 
-export const STANDARD_COLLECT_ABILITY = {
-  essenceList: []
-}
+export const STANDARD_COLLECT_ABILITY = {}
 
 export const SPECIFIC_COLLECT_ABILITY = {
-  multipleCollectOptions: false,
-  essenceList: []
+  multipleCollectOptions: false
 }
 
 export const DEFAULT_COMPONENT = {
@@ -36,19 +33,13 @@ export const DEFAULT_COMPONENT = {
 }
 
 export const DISCOUNT = {
-  type: ['artefact'],
-  discountList: []
+  type: ['artefact']
 }
 
 export const REACT_POWER = {
-  type: ['LIFE_LOSS'],
-  cost: {
-    essenceList: []
-  },
-  gain: {
-    essenceList: [],
-    ignore: true
-  }
+  type: [],
+  cost: {},
+  gain: {}
 }
 
 export const ACTION_POWER = {
