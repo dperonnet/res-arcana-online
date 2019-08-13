@@ -1001,6 +1001,10 @@ function ActionPowerPanel({component, onChange, onChangeByName}) {
               <>Essence paid goes on <div className="icon on-component-icon"></div></>
             )}
             {splitter}
+            {renderCheckBoxGain(index, 'putItOnAnyComponent',
+              <>Put the essence spend on <div className="icon component-icon"></div></>
+            )}
+            {splitter}
             {renderCheckBoxGain(index, 'powerCostAsGold',
               <><div className="essence any-same-type"><div className="cost"></div></div> as <div className="essence gold mt-n2">?</div></>
             )}
@@ -1010,11 +1014,11 @@ function ActionPowerPanel({component, onChange, onChangeByName}) {
             )}
             {splitter}
             {renderCheckBoxGain(index, 'placementCostAsGold',
-              <><div className="icon component-cost-icon"></div> as <div className="essence gold mt-n2">?</div></>
+              <><div className="icon placement-cost-icon"></div> as <div className="essence gold mt-n2">?</div></>
             )}
             {splitter}
             {renderCheckBoxGain(index, 'placementCostAsAnyButGold',
-              <><div className="icon component-cost-icon"></div> as <div className="essence any-but-gold"></div> with modifier
+              <><div className="icon placement-cost-icon"></div> as <div className="essence any-but-gold"></div> with modifier
                 <EssencePanel panelType="anyButGold" modifier={true}
                   essenceList={(actionPower.gain.placementCostAsAnyButGold && actionPower.gain.modifierList) || []}
                   onChange={(data) => updateActionPower(index, 'gain', 'modifierList', data)}
@@ -1023,7 +1027,7 @@ function ActionPowerPanel({component, onChange, onChangeByName}) {
             )}
             {splitter}
             {renderCheckBoxGain(index, 'placeDragonFromAnyDiscardPile',
-              <>Place <div className="icon dragon-icon"></div>from any player's discard pile at <div className="icon component-cost-icon"></div></>
+              <>Place <div className="icon dragon-icon"></div>from any player's discard pile at <div className="icon placement-cost-icon"></div></>
             )}
             {splitter}
             {renderCheckBoxGain(index, 'placeDragonForFree',
@@ -1031,7 +1035,7 @@ function ActionPowerPanel({component, onChange, onChangeByName}) {
             )}
             {splitter}
             {renderCheckBoxGain(index, 'placeDragon',
-              <>Place <div className="icon dragon-icon"></div> at <div className="icon component-cost-icon"></div> with modifier
+              <>Place <div className="icon dragon-icon"></div> at <div className="icon placement-cost-icon"></div> with modifier
                 <EssencePanel panelType="anyButGold" modifier={true}
                   essenceList={(actionPower.gain.placeDragon && actionPower.gain.modifierList) || []}
                   onChange={(data) => updateActionPower(index, 'gain', 'modifierList', data)}
@@ -1040,7 +1044,7 @@ function ActionPowerPanel({component, onChange, onChangeByName}) {
             )}
             {splitter}
             {renderCheckBoxGain(index, 'placeArtefactFromDiscard',
-              <>Place any of your discards at <div className="icon component-cost-icon"></div> with modifier
+              <>Place any of your discards at <div className="icon placement-cost-icon"></div> with modifier
                 <EssencePanel panelType="anyButGold" modifier={true}
                   essenceList={(actionPower.gain.placeArtefactFromDiscard && actionPower.gain.modifierList) || []}
                   onChange={(data) => updateActionPower(index, 'gain', 'modifierList', data)}

@@ -88,3 +88,11 @@ body {
 .small {
   font-size: 1rem;
 }
+
+.fa-rotate-80 {
+  -webkit-transform: rotate(80deg);
+  -moz-transform: rotate(80deg);
+  -o-transform: rotate(80deg);
+  -ms-transform: rotate(80deg);
+  transform: rotate(80deg);
+}
