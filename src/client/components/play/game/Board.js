@@ -12,7 +12,7 @@ import { addToEssencePickerSelection, canPayCost, clearZoom, resetCollect, reset
 import { toggleChat } from '../../../../store/actions/chatActions'
 import CardZoom from '../../common/card/CardZoom.js'
 import Chat from '../../common/chat/Chat'
-import GameComponent from './GameComponent'
+import GameComponent, { COMPONENTS_STYLES } from './GameComponent'
 import CollectComponent from './CollectComponent'
 import EssencePicker from './EssencePicker'
 
@@ -294,7 +294,7 @@ class ResArcanaBoard extends Component {
     })[0]
     const focus = focusZoom ? ' focus ': ''
     const essencesOnComponent = playerOwningCard ? playerOwningCard.essencesOnComponent[component.id] : null
-    return <div className={'card-zoom-frame large' + focus} 
+    return <div className={'card-zoom-frame ' + COMPONENTS_STYLES[component.type] + focus} 
       onClick={(event) => this.handleMouseClickZoom(event)} 
       onMouseOver={() => this.handleMouseOver(component)} 
       onMouseOut={() => this.handleMouseOut()}>
@@ -1685,7 +1685,7 @@ class ResArcanaBoard extends Component {
     const sizeSetting = profile && profile.cardSize ? profile.cardSize : 'normal'
     const layoutSetting = profile && profile.layout ? profile.layout : 'vertical'
     return <div className={'board-'+layoutSetting} onClick={() => this.handleBoardClick()}>
-      {false && <div className={'common-board ' + sizeSetting}>
+      {true && <div className={'common-board ' + sizeSetting}>
         {this.renderCommonBoard()}
       </div>}
       <div className="board" ref='board'>

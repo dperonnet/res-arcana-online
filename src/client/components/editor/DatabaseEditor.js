@@ -3,13 +3,24 @@ import { Redirect } from 'react-router-dom';
 import { Col, Container, Row } from 'react-bootstrap';
 import { DEFAULT_COMPONENT } from './EditorConstants';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus, faSlash } from '@fortawesome/free-solid-svg-icons';
+import { faSlash } from '@fortawesome/free-solid-svg-icons';
 import ComponentForm from './ComponentForm';
 import DatabaseContent from './DatabaseContent';
 import CardZoom from '../common/card/CardZoom.js';
 import './editor.scss';
 import { connect } from 'react-redux';
 import { deleteComponent, saveComponent } from '../../../store/actions/editorActions'
+
+const COMPONENTS_STYLES = {
+  artefact: 'card',
+  backArtefact: 'card',
+  backMonument: 'card',
+  backMage: 'card',
+  mage: 'card', 
+  magicItem: 'magic-item',
+  monument: 'card',
+  placeOfPower: 'place-of-power'
+}
 
 class DatabaseEditor extends Component {
   
@@ -51,7 +62,7 @@ class DatabaseEditor extends Component {
         <div className={'essence sm ' + essence.type + classModifier}>
         {cost && <div className="cost"></div>}
         {signModifier}{(essence.quantity > 1) || (essence.quantity < 0) ? essence.quantity : ''}</div>
-        {plus && !isLast && <div className="operator mt-n2">+</div>}
+        {plus && !isLast && <div className="operator mt-n2 mr-0 ml-0">+</div>}
         {slash && !isLast && <div className="operator mt-n2">
           <FontAwesomeIcon icon={faSlash} size="xs" rotation={80} />
         </div>}
@@ -59,7 +70,7 @@ class DatabaseEditor extends Component {
     })
   }
   renderCostEssenceList = (essenceList, slash) => {
-    return this.renderEssenceList(essenceList, true, slash, false)
+    return this.renderEssenceList(essenceList, true, slash, !slash)
   }
   
   renderGainEssenceList = (essenceList, modifier) => {
@@ -72,11 +83,33 @@ class DatabaseEditor extends Component {
 
     return <>
       {action.cost.turn && <div className="icon turn-component-icon"></div>}
-      {action.cost.turnDragon && <div className="icon turn-dragon-icon"></div>}
-      {action.cost.turnCreature && <div className="icon turn-creature-icon"></div>}
+      {action.cost.turnDragon && <>
+        {action.cost.turn && <>+</>}
+        <div className="icon turn-dragon-icon ml-1"></div>
+      </>}
+      {action.cost.turnCreature && <>
+        {action.cost.turn && <>+</>}
+        <div className="icon turn-creature-icon ml-1"></div>
+      </>}
       {essencePrefix && <>+</>}{essences}
-      {action.cost.onComponent && <><div class="action-text mr-1">on</div><div className="icon on-component-icon"></div></>}
+      {action.cost.onComponent && <><div class="action-text">on</div><div className="icon on-component-icon"></div></>}
       {action.cost.sameType && <>+ <div className="essence sm any-same-type"><div className="cost"></div></div></>}
+      {action.cost.destroySelf && <>
+        <div class="action-text">Destroy</div>
+        <div className="icon on-component-icon"></div>
+      </>}
+      {action.cost.destroyOneArtefact && <>+
+        <div class="action-text max-85">destroy <i>any one</i> of your artifacts</div>
+      </>}
+      {action.cost.destroyAnotherArtefact && <>+
+        <div class="action-text max-85">destroy <i>another</i> of your artifacts</div>
+      </>}
+      {action.cost.destroyOneDragonOrCreature && <>+
+        <div class="action-text">destroy one of your <i>dragons</i> or <i>creatures</i></div>
+      </>}
+      {action.cost.discardArtefact && <>
+        +<div class="action-text max-60">discard a card</div>
+      </>}
     </>
   }
 
@@ -96,12 +129,46 @@ class DatabaseEditor extends Component {
         <div class="action-text">all rivals</div>
         <div className="icon essence sm life-loss">{action.gain.rivalsLoseLife > 1 ? action.gain.rivalsLoseLife : ''}</div>
       </>}
-      {action.gain.powerCostAsGold && <div className="icon essence sm gold"><div className="qm"></div></div>}
-      {action.gain.drawOne > 0 && <div class="action-text">draw 1 card</div>}
+      {action.gain.checkVictoryNow && <div class="action-text">check vitory now!</div>}
+      {action.gain.drawOne && <div class="action-text">draw <span className="large">1</span> card</div>}
+      {action.gain.drawThreeDiscardThree && <div class="action-text max-125">draw <span className="large">3</span> cards, add to hand, discard <span className="large">3</span></div>}
+      {action.gain.reorderThree > 0 && <div class="action-text">draw <span className="large">3</span> cards, reorder, put back <i>(may also use on Monument deck)</i></div>}
       {action.gain.onComponent && <><div class="action-text mr-1">on</div><div className="icon on-component-icon"></div></>}
-      {action.cost.onlyWhenTurned && <div class="action-text">(When this card is turned)</div>}
+      {action.cost.onlyWhenTurned && <div class="action-text max-95">(When this card is turned)</div>}
       {action.gain.putItOnAnyComponent && <><div class="action-text max-60">put the essence spent on</div><div className="icon component-icon"></div></>}
       {action.gain.putItOnComponent && <><div class="action-text">put it on</div><div className="icon on-component-icon"></div></>}
+      {action.gain.placeArtefactFromDiscard && <>
+        <div class="action-text max-75">place one of <i>your</i> discards at</div>
+        <div className="icon placement-cost-icon"><div className="qm-dark"></div></div>
+        {modifierList}
+      </>}
+      {action.gain.powerCostAsGold && <div className="icon essence sm gold"><div className="qm"></div></div>}
+      {action.gain.powerCostAsAnySameTypeButGold && <div className="essence sm any-same-type-but-gold"></div>}
+      {action.gain.placementCostAsGold && <>
+        <div class="action-text">gain</div>
+        <div className="icon placement-cost-icon max-95"><div className="qm-dark"></div></div>
+        <div class="action-text">in</div>
+        <div className="essence gold"></div>
+        </>}
+      {action.gain.placementCostAsAnyButGold && <>
+        <div class="action-text">gain</div>
+        <div className="icon placement-cost-icon"><div className="qm-dark"></div></div>
+        <div class="action-text">in</div>
+        {modifierList}
+      </>}
+      {action.gain.placeDragonForFree && <>
+        <div class="action-text mr-1">Place</div>
+        <div className="icon dragon-icon"></div>
+        <div class="action-text ml-1 mr-1">at</div>
+        <div className="icon placement-cost-icon"><div className="zero">0</div></div>
+      </>}
+      {action.gain.placeDragon && <>
+        <div class="action-text mr-1">Place</div>
+        <div className="icon dragon-icon"></div>
+        <div class="action-text ml-1 mr-1">at</div>
+        <div className="icon placement-cost-icon"><div className="qm-dark"></div></div>
+        {modifierList}
+      </>}
       {action.gain.asManyCalmThanRivalsElan && <>
         <div class="action-text">Gain</div>
         <div className="essence sm calm"><div className="qm"></div></div>
@@ -109,11 +176,20 @@ class DatabaseEditor extends Component {
         <div className="essence sm elan"><div className="qm"></div></div>
         <div class="action-text">of one rival</div>
       </>}
-      {action.gain.placeArtefactFromDiscard && <>
-        <div class="action-text max-75">place one of your discards at</div>
-        <div className="icon placement-cost-icon"></div>
-        {modifierList}
+      {action.gain.asManyElanThanRivalsDeath && <>
+        <div class="action-text">Gain</div>
+        <div className="essence sm elan"><div className="qm"></div></div>
+        <div class="action-text">equal to</div>
+        <div className="essence sm death"><div className="qm"></div></div>
+        <div class="action-text">of one rival</div>
       </>}
+      {action.gain.placeDragonFromAnyDiscardPile && <>
+        <div class="action-text">Place</div>
+        <div className="icon dragon-icon"></div>
+        <div class="action-text max-95">from <i>any</i> player's discard pile at</div>
+        <div className="icon placement-cost-icon"><div className="qm-dark"></div></div>
+      </>}
+      
     </>
   }
 
@@ -127,7 +203,7 @@ class DatabaseEditor extends Component {
     if (pristineComponent && pristineComponent.class) {
       try {
         const src = require('../../assets/image/components/' + pristineComponent.type + '/' + pristineComponent.class + '.jpg');
-        card = <div className="card-zoom-frame">
+        card = <div className={'card-zoom-frame ' + COMPONENTS_STYLES[component.type]}>
           <CardZoom
             src={ src }
             alt={ pristineComponent.name ? pristineComponent.name : null } 
@@ -141,7 +217,8 @@ class DatabaseEditor extends Component {
     let actions = component.actionPowerList && component.actionPowerList.map((action, index) => {
       let cost = this.renderActionCost(action)
       let gain = this.renderActionGain(action)
-      return <div className={'component-action position-'+index}>
+      let color = component.type === 'placeOfPower' ? ' place-of-power-action': ''
+      return <div className={'component-action position-'+index + color}>
           <div className="action-cost-part">{cost}</div>
           <div className="icon gain-icon"></div>
           <div className="action-gain-part">{gain}</div>
@@ -175,7 +252,9 @@ class DatabaseEditor extends Component {
         </div>
         <div className="side-section">
           {card}
-          {actions}
+          <div className="action-renderer">
+            {actions}
+          </div>
         </div>
       </div>
     </Container>

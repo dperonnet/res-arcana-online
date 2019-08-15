@@ -2,7 +2,25 @@ export const GameComponents = [
    {
       "id":"alchimie",
       "actionPowerList":[
-
+         {
+            "cost":{
+               "essenceList":[
+                  {
+                     "quantity":4,
+                     "type":"any"
+                  }
+               ],
+               "turn":true
+            },
+            "gain":{
+               "essenceList":[
+                  {
+                     "quantity":2,
+                     "type":"gold"
+                  }
+               ]
+            }
+         }
       ],
       "class":"alchimie",
       "hasActionPower":true,
@@ -16,7 +34,38 @@ export const GameComponents = [
    {
       "id":"alchimiste",
       "actionPowerList":[
-
+         {
+            "cost":{
+               "essenceList":[
+                  {
+                     "quantity":4,
+                     "type":"any"
+                  }
+               ],
+               "turn":true
+            },
+            "gain":{
+               "essenceList":[
+                  {
+                     "quantity":2,
+                     "type":"gold"
+                  }
+               ]
+            }
+         },
+         {
+            "cost":{
+               "turn":true
+            },
+            "gain":{
+               "essenceList":[
+                  {
+                     "quantity":1,
+                     "type":"any-but-gold"
+                  }
+               ]
+            }
+         }
       ],
       "class":"alchimiste",
       "hasActionPower":true,
@@ -32,7 +81,39 @@ export const GameComponents = [
    {
       "id":"anneauDeMidas",
       "actionPowerList":[
-
+         {
+            "cost":{
+               "essenceList":[
+                  {
+                     "quantity":2,
+                     "type":"life"
+                  }
+               ]
+            },
+            "gain":{
+               "essenceList":[
+                  {
+                     "quantity":1,
+                     "type":"gold"
+                  }
+               ],
+               "onComponent":true
+            }
+         },
+         {
+            "cost":{
+               "turn":true
+            },
+            "gain":{
+               "essenceList":[
+                  {
+                     "quantity":1,
+                     "type":"gold"
+                  }
+               ],
+               "onComponent":true
+            }
+         }
       ],
       "class":"anneau_de_midas",
       "costEssenceList":[
@@ -61,7 +142,26 @@ export const GameComponents = [
    {
       "id":"arbreDeVie",
       "actionPowerList":[
-
+         {
+            "cost":{
+               "turn":true
+            },
+            "gain":{
+               "essenceList":[
+                  {
+                     "quantity":3,
+                     "type":"life"
+                  }
+               ],
+               "rivalsGain":true,
+               "rivalsGainEssenceList":[
+                  {
+                     "quantity":1,
+                     "type":"life"
+                  }
+               ]
+            }
+         }
       ],
       "class":"arbre_de_vie",
       "costEssenceList":[
@@ -85,14 +185,44 @@ export const GameComponents = [
       "isDragon":false,
       "name":"Arbre de vie",
       "reactPowerList":[
-
+         {
+            "cost":{
+               "essenceList":[
+                  {
+                     "quantity":1,
+                     "type":"life"
+                  }
+               ]
+            },
+            "gain":{
+               "ignore":true
+            },
+            "type":[
+               "LIFE_LOSS"
+            ]
+         }
       ],
       "type":"artefact"
    },
    {
       "id":"arcElfique",
       "actionPowerList":[
-
+         {
+            "cost":{
+               "turn":true
+            },
+            "gain":{
+               "rivalsLoseLife":1
+            }
+         },
+         {
+            "cost":{
+               "turn":true
+            },
+            "gain":{
+               "drawOne":true
+            }
+         }
       ],
       "class":"arc_elfique",
       "costEssenceList":[
@@ -146,7 +276,42 @@ export const GameComponents = [
    {
       "id":"athanor",
       "actionPowerList":[
-
+         {
+            "cost":{
+               "essenceList":[
+                  {
+                     "quantity":1,
+                     "type":"elan"
+                  }
+               ],
+               "turn":true
+            },
+            "gain":{
+               "essenceList":[
+                  {
+                     "quantity":2,
+                     "type":"elan"
+                  }
+               ],
+               "onComponent":true
+            }
+         },
+         {
+            "cost":{
+               "essenceList":[
+                  {
+                     "quantity":6,
+                     "type":"elan"
+                  }
+               ],
+               "onComponent":true,
+               "sameType":true,
+               "turn":true
+            },
+            "gain":{
+               "powerCostAsGold":true
+            }
+         }
       ],
       "class":"athanor",
       "costEssenceList":[
@@ -174,7 +339,40 @@ export const GameComponents = [
    {
       "id":"autelCorrompu",
       "actionPowerList":[
-
+         {
+            "cost":{
+               "essenceList":[
+                  {
+                     "quantity":2,
+                     "type":"life"
+                  }
+               ]
+            },
+            "gain":{
+               "essenceList":[
+                  {
+                     "quantity":3,
+                     "type":"elan"
+                  }
+               ],
+               "onComponent":true
+            }
+         },
+         {
+            "cost":{
+               "destroyOneArtefact":true,
+               "turn":true
+            },
+            "gain":{
+               "modifierList":[
+                  {
+                     "quantity":2,
+                     "type":"any-but-gold"
+                  }
+               ],
+               "placementCostAsAnyButGold":true
+            }
+         }
       ],
       "class":"autel_corrompu",
       "costEssenceList":[
@@ -214,7 +412,21 @@ export const GameComponents = [
    {
       "id":"automate",
       "actionPowerList":[
-
+         {
+            "cost":{
+               "essenceList":[
+                  {
+                     "quantity":1,
+                     "type":"any"
+                  }
+               ],
+               "multipleCostOptions":true,
+               "turn":true
+            },
+            "gain":{
+               "putItOnComponent":true
+            }
+         }
       ],
       "class":"automate",
       "costEssenceList":[
@@ -256,7 +468,28 @@ export const GameComponents = [
    {
       "id":"bestiaireDuSorcier",
       "actionPowerList":[
-
+         {
+            "cost":{
+               "turn":true
+            },
+            "gain":{
+               "checkVictoryNow":true
+            }
+         },
+         {
+            "cost":{
+               "essenceList":[
+                  {
+                     "quantity":4,
+                     "type":"any"
+                  }
+               ],
+               "turn":true
+            },
+            "gain":{
+               "placeDragonFromAnyDiscardPile":true
+            }
+         }
       ],
       "class":"bestiaire_du_sorcier",
       "conditionalVictoryPointList":[
@@ -295,7 +528,14 @@ export const GameComponents = [
    {
       "id":"bibliotheque",
       "actionPowerList":[
-
+         {
+            "cost":{
+               "turn":true
+            },
+            "gain":{
+               "drawOne":true
+            }
+         }
       ],
       "class":"bibliotheque",
       "costEssenceList":[
@@ -319,7 +559,40 @@ export const GameComponents = [
    {
       "id":"bosquetSacre",
       "actionPowerList":[
-
+         {
+            "cost":{
+               "essenceList":[
+                  {
+                     "quantity":1,
+                     "type":"calm"
+                  }
+               ],
+               "turn":true
+            },
+            "gain":{
+               "essenceList":[
+                  {
+                     "quantity":5,
+                     "type":"life"
+                  }
+               ]
+            }
+         },
+         {
+            "cost":{
+               "turn":true,
+               "turnCreature":true
+            },
+            "gain":{
+               "essenceList":[
+                  {
+                     "quantity":1,
+                     "type":"life"
+                  }
+               ],
+               "onComponent":true
+            }
+         }
       ],
       "class":"bosquet_sacre",
       "conditionalVictoryPointList":[
@@ -351,7 +624,29 @@ export const GameComponents = [
    {
       "id":"caliceDeVie",
       "actionPowerList":[
-
+         {
+            "cost":{
+               "essenceList":[
+                  {
+                     "quantity":2,
+                     "type":"calm"
+                  }
+               ]
+            },
+            "gain":{
+               "essenceList":[
+                  {
+                     "quantity":2,
+                     "type":"calm"
+                  },
+                  {
+                     "quantity":1,
+                     "type":"life"
+                  }
+               ],
+               "onComponent":true
+            }
+         }
       ],
       "class":"calice_de_vie",
       "costEssenceList":[
@@ -379,7 +674,17 @@ export const GameComponents = [
       "isDragon":false,
       "name":"Calice de Vie",
       "reactPowerList":[
-
+         {
+            "cost":{
+               "turn":true
+            },
+            "gain":{
+               "ignore":true
+            },
+            "type":[
+               "LIFE_LOSS"
+            ]
+         }
       ],
       "standardCollectAbility":{
          "essenceList":[
@@ -398,7 +703,39 @@ export const GameComponents = [
    {
       "id":"catacombesDeLaMort",
       "actionPowerList":[
-
+         {
+            "cost":{
+               "essenceList":[
+                  {
+                     "quantity":5,
+                     "type":"death"
+                  }
+               ]
+            },
+            "gain":{
+               "essenceList":[
+                  {
+                     "quantity":1,
+                     "type":"death"
+                  }
+               ],
+               "onComponent":true
+            }
+         },
+         {
+            "cost":{
+               "turn":true
+            },
+            "gain":{
+               "essenceList":[
+                  {
+                     "quantity":1,
+                     "type":"death"
+                  }
+               ],
+               "onComponent":true
+            }
+         }
       ],
       "class":"catacombes_de_la_mort",
       "conditionalVictoryPointList":[
@@ -433,7 +770,20 @@ export const GameComponents = [
    {
       "id":"coffreFort",
       "actionPowerList":[
-
+         {
+            "cost":{
+               "turn":true
+            },
+            "gain":{
+               "essenceList":[
+                  {
+                     "quantity":1,
+                     "type":"gold"
+                  }
+               ],
+               "onComponent":true
+            }
+         }
       ],
       "class":"coffre_fort",
       "costEssenceList":[
@@ -470,7 +820,26 @@ export const GameComponents = [
    {
       "id":"colosse",
       "actionPowerList":[
-
+         {
+            "cost":{
+               "essenceList":[
+                  {
+                     "quantity":1,
+                     "type":"any"
+                  }
+               ],
+               "turn":true
+            },
+            "gain":{
+               "essenceList":[
+                  {
+                     "quantity":1,
+                     "type":"gold"
+                  }
+               ],
+               "onComponent":true
+            }
+         }
       ],
       "class":"colosse",
       "costEssenceList":[
@@ -494,7 +863,32 @@ export const GameComponents = [
    {
       "id":"corneDAbondance",
       "actionPowerList":[
-
+         {
+            "cost":{
+               "turn":true
+            },
+            "gain":{
+               "essenceList":[
+                  {
+                     "quantity":3,
+                     "type":"any-but-gold"
+                  }
+               ]
+            }
+         },
+         {
+            "cost":{
+               "turn":true
+            },
+            "gain":{
+               "essenceList":[
+                  {
+                     "quantity":1,
+                     "type":"gold"
+                  }
+               ]
+            }
+         }
       ],
       "class":"corne_d_abondance",
       "costEssenceList":[
@@ -518,7 +912,20 @@ export const GameComponents = [
    {
       "id":"coupeDeFeu",
       "actionPowerList":[
-
+         {
+            "cost":{
+               "essenceList":[
+                  {
+                     "quantity":1,
+                     "type":"elan"
+                  }
+               ],
+               "turn":true
+            },
+            "gain":{
+               "straightenComponent":true
+            }
+         }
       ],
       "class":"coupe_de_feu",
       "costEssenceList":[
@@ -554,7 +961,26 @@ export const GameComponents = [
    {
       "id":"craneMaudit",
       "actionPowerList":[
-
+         {
+            "cost":{
+               "essenceList":[
+                  {
+                     "quantity":1,
+                     "type":"life"
+                  }
+               ],
+               "turn":true
+            },
+            "gain":{
+               "essenceList":[
+                  {
+                     "quantity":3,
+                     "type":"any-but-life-gold"
+                  }
+               ],
+               "onComponent":true
+            }
+         }
       ],
       "class":"crane_maudit",
       "costEssenceList":[
@@ -578,7 +1004,39 @@ export const GameComponents = [
    {
       "id":"crypte",
       "actionPowerList":[
-
+         {
+            "cost":{
+               "turn":true
+            },
+            "gain":{
+               "essenceList":[
+                  {
+                     "quantity":2,
+                     "type":"death"
+                  }
+               ]
+            }
+         },
+         {
+            "cost":{
+               "essenceList":[
+                  {
+                     "quantity":1,
+                     "type":"death"
+                  }
+               ],
+               "turn":true
+            },
+            "gain":{
+               "modifierList":[
+                  {
+                     "quantity":-2,
+                     "type":"any-but-gold"
+                  }
+               ],
+               "placeArtefactFromDiscard":true
+            }
+         }
       ],
       "class":"crypte",
       "costEssenceList":[
@@ -606,7 +1064,41 @@ export const GameComponents = [
    {
       "id":"dagueSacrificielle",
       "actionPowerList":[
-
+         {
+            "cost":{
+               "essenceList":[
+                  {
+                     "quantity":1,
+                     "type":"life"
+                  }
+               ],
+               "turn":true
+            },
+            "gain":{
+               "essenceList":[
+                  {
+                     "quantity":3,
+                     "type":"death"
+                  }
+               ],
+               "onComponent":true
+            }
+         },
+         {
+            "cost":{
+               "destroySelf":true,
+               "discardArtefact":true
+            },
+            "gain":{
+               "modifierList":[
+                  {
+                     "quantity":0,
+                     "type":"any-but-gold"
+                  }
+               ],
+               "placementCostAsAnyButGold":true
+            }
+         }
       ],
       "class":"dague_sacrificielle",
       "costEssenceList":[
@@ -634,7 +1126,39 @@ export const GameComponents = [
    {
       "id":"dentDeDragon",
       "actionPowerList":[
-
+         {
+            "cost":{
+               "essenceList":[
+                  {
+                     "quantity":2,
+                     "type":"elan"
+                  }
+               ]
+            },
+            "gain":{
+               "essenceList":[
+                  {
+                     "quantity":3,
+                     "type":"elan"
+                  }
+               ],
+               "onComponent":true
+            }
+         },
+         {
+            "cost":{
+               "essenceList":[
+                  {
+                     "quantity":3,
+                     "type":"elan"
+                  }
+               ],
+               "turn":true
+            },
+            "gain":{
+               "placeDragonForFree":true
+            }
+         }
       ],
       "class":"dent_de_dragon",
       "costEssenceList":[
@@ -662,7 +1186,14 @@ export const GameComponents = [
    {
       "id":"divination",
       "actionPowerList":[
-
+         {
+            "cost":{
+               "turn":true
+            },
+            "gain":{
+               "drawThreeDiscardThree":true
+            }
+         }
       ],
       "class":"divination",
       "hasActionPower":true,
@@ -676,7 +1207,20 @@ export const GameComponents = [
    {
       "id":"dragonDOs",
       "actionPowerList":[
-
+         {
+            "cost":{
+               "turn":true
+            },
+            "gain":{
+               "canIgnoreWithEssenceList":[
+                  {
+                     "quantity":1,
+                     "type":"death"
+                  }
+               ],
+               "rivalsLoseLife":2
+            }
+         }
       ],
       "class":"dragon_d_os",
       "costEssenceList":[
@@ -705,7 +1249,20 @@ export const GameComponents = [
    {
       "id":"dragonDeFeu",
       "actionPowerList":[
-
+         {
+            "cost":{
+               "turn":true
+            },
+            "gain":{
+               "canIgnoreWithEssenceList":[
+                  {
+                     "quantity":1,
+                     "type":"calm"
+                  }
+               ],
+               "rivalsLoseLife":2
+            }
+         }
       ],
       "class":"dragon_de_feu",
       "costEssenceList":[
@@ -730,7 +1287,20 @@ export const GameComponents = [
    {
       "id":"dragonDeTerre",
       "actionPowerList":[
-
+         {
+            "cost":{
+               "turn":true
+            },
+            "gain":{
+               "canIgnoreWithEssenceList":[
+                  {
+                     "quantity":1,
+                     "type":"gold"
+                  }
+               ],
+               "rivalsLoseLife":2
+            }
+         }
       ],
       "class":"dragon_de_terre",
       "costEssenceList":[
@@ -759,7 +1329,20 @@ export const GameComponents = [
    {
       "id":"dragonDesEaux",
       "actionPowerList":[
-
+         {
+            "cost":{
+               "turn":true
+            },
+            "gain":{
+               "canIgnoreWithEssenceList":[
+                  {
+                     "quantity":1,
+                     "type":"elan"
+                  }
+               ],
+               "rivalsLoseLife":2
+            }
+         }
       ],
       "class":"dragon_des_eaux",
       "costEssenceList":[
@@ -784,7 +1367,15 @@ export const GameComponents = [
    {
       "id":"dragonDesVents",
       "actionPowerList":[
-
+         {
+            "cost":{
+               "turn":true
+            },
+            "gain":{
+               "canIgnoreWithDiscardArtefact":true,
+               "rivalsLoseLife":2
+            }
+         }
       ],
       "class":"dragon_des_vents",
       "costEssenceList":[
@@ -813,7 +1404,14 @@ export const GameComponents = [
    {
       "id":"druidesse",
       "actionPowerList":[
-
+         {
+            "cost":{
+               "turn":true
+            },
+            "gain":{
+               "straightenCreature":true
+            }
+         }
       ],
       "class":"druidesse",
       "hasActionPower":true,
@@ -837,7 +1435,26 @@ export const GameComponents = [
    {
       "id":"duelliste",
       "actionPowerList":[
-
+         {
+            "cost":{
+               "essenceList":[
+                  {
+                     "quantity":1,
+                     "type":"death"
+                  }
+               ],
+               "turn":true
+            },
+            "gain":{
+               "essenceList":[
+                  {
+                     "quantity":1,
+                     "type":"gold"
+                  }
+               ],
+               "onComponent":true
+            }
+         }
       ],
       "class":"duelliste",
       "hasActionPower":true,
@@ -861,7 +1478,19 @@ export const GameComponents = [
    {
       "id":"eclatElementaire",
       "actionPowerList":[
-
+         {
+            "cost":{
+               "turn":true
+            },
+            "gain":{
+               "essenceList":[
+                  {
+                     "quantity":1,
+                     "type":"any-but-gold"
+                  }
+               ]
+            }
+         }
       ],
       "class":"eclat_elementaire",
       "costEssenceList":[
@@ -903,7 +1532,29 @@ export const GameComponents = [
       "isDragon":false,
       "name":"Épée Vive",
       "reactPowerList":[
-
+         {
+            "cost":{
+               "essenceList":[
+                  {
+                     "quantity":1,
+                     "type":"elan"
+                  }
+               ]
+            },
+            "gain":{
+               "essenceList":[
+                  {
+                     "quantity":1,
+                     "type":"death"
+                  }
+               ],
+               "ignore":true,
+               "onComponent":true
+            },
+            "type":[
+               "LIFE_LOSS"
+            ]
+         }
       ],
       "standardCollectAbility":{
          "essenceList":[
@@ -922,7 +1573,20 @@ export const GameComponents = [
    {
       "id":"erudit",
       "actionPowerList":[
-
+         {
+            "cost":{
+               "essenceList":[
+                  {
+                     "quantity":1,
+                     "type":"any"
+                  }
+               ],
+               "turn":true
+            },
+            "gain":{
+               "drawOne":true
+            }
+         }
       ],
       "class":"erudit",
       "hasActionPower":true,
@@ -938,7 +1602,14 @@ export const GameComponents = [
    {
       "id":"etangDeSerenite",
       "actionPowerList":[
-
+         {
+            "cost":{
+               "turn":true
+            },
+            "gain":{
+               "asManyCalmThanRivalsElan":true
+            }
+         }
       ],
       "class":"etang_de_serenite",
       "costEssenceList":[
@@ -978,7 +1649,28 @@ export const GameComponents = [
    {
       "id":"faucon",
       "actionPowerList":[
-
+         {
+            "cost":{
+               "turn":true
+            },
+            "gain":{
+               "reorderThree":true
+            }
+         },
+         {
+            "cost":{
+               "essenceList":[
+                  {
+                     "quantity":2,
+                     "type":"calm"
+                  }
+               ],
+               "turn":true
+            },
+            "gain":{
+               "drawOne":true
+            }
+         }
       ],
       "class":"faucon",
       "costEssenceList":[
@@ -1014,7 +1706,29 @@ export const GameComponents = [
    {
       "id":"fontaineDeJouvence",
       "actionPowerList":[
-
+         {
+            "cost":{
+               "essenceList":[
+                  {
+                     "quantity":2,
+                     "type":"death"
+                  }
+               ]
+            },
+            "gain":{
+               "essenceList":[
+                  {
+                     "quantity":2,
+                     "type":"life"
+                  },
+                  {
+                     "quantity":1,
+                     "type":"calm"
+                  }
+               ],
+               "onComponent":true
+            }
+         }
       ],
       "class":"fontaine_de_jouvence",
       "costEssenceList":[
@@ -1050,7 +1764,29 @@ export const GameComponents = [
    {
       "id":"forgeMaudite",
       "actionPowerList":[
-
+         {
+            "cost":{
+               "essenceList":[
+                  {
+                     "quantity":2,
+                     "type":"elan"
+                  },
+                  {
+                     "quantity":1,
+                     "type":"gold"
+                  }
+               ]
+            },
+            "gain":{
+               "essenceList":[
+                  {
+                     "quantity":1,
+                     "type":"gold"
+                  }
+               ],
+               "onComponent":true
+            }
+         }
       ],
       "class":"forge_maudite",
       "conditionalVictoryPointList":[
@@ -1088,7 +1824,41 @@ export const GameComponents = [
    {
       "id":"fouetArdent",
       "actionPowerList":[
-
+         {
+            "cost":{
+               "turn":true
+            },
+            "gain":{
+               "essenceList":[
+                  {
+                     "quantity":3,
+                     "type":"elan"
+                  }
+               ],
+               "rivalsGain":true,
+               "rivalsGainEssenceList":[
+                  {
+                     "quantity":1,
+                     "type":"elan"
+                  }
+               ]
+            }
+         },
+         {
+            "cost":{
+               "destroyAnotherArtefact":true,
+               "turn":true
+            },
+            "gain":{
+               "modifierList":[
+                  {
+                     "quantity":2,
+                     "type":"any-but-gold"
+                  }
+               ],
+               "placementCostAsAnyButGold":true
+            }
+         }
       ],
       "class":"fouet_ardent",
       "costEssenceList":[
@@ -1146,7 +1916,17 @@ export const GameComponents = [
       "isAlternative":false,
       "name":"Guérisseur",
       "reactPowerList":[
-
+         {
+            "cost":{
+               "turn":true
+            },
+            "gain":{
+               "ignore":true
+            },
+            "type":[
+               "LIFE_LOSS"
+            ]
+         }
       ],
       "specificCollectAbility":{
          "essenceList":[
@@ -1208,7 +1988,17 @@ export const GameComponents = [
       "isDragon":false,
       "name":"Harnais du Dragon",
       "reactPowerList":[
-
+         {
+            "cost":{
+               "turn":true
+            },
+            "gain":{
+               "ignore":true
+            },
+            "type":[
+               "DRAGON"
+            ]
+         }
       ],
       "type":"artefact",
       "victoryPoint":1
@@ -1246,7 +2036,26 @@ export const GameComponents = [
    {
       "id":"mainDeGloire",
       "actionPowerList":[
-
+         {
+            "cost":{
+               "turn":true
+            },
+            "gain":{
+               "essenceList":[
+                  {
+                     "quantity":2,
+                     "type":"death"
+                  }
+               ],
+               "rivalsGain":true,
+               "rivalsGainEssenceList":[
+                  {
+                     "quantity":1,
+                     "type":"death"
+                  }
+               ]
+            }
+         }
       ],
       "class":"main_de_gloire",
       "costEssenceList":[
@@ -1274,7 +2083,14 @@ export const GameComponents = [
    {
       "id":"manoirDeCorail",
       "actionPowerList":[
-
+         {
+            "cost":{
+               "turn":true
+            },
+            "gain":{
+               "checkVictoryNow":true
+            }
+         }
       ],
       "class":"manoir_de_corail",
       "costEssenceList":[
@@ -1302,7 +2118,17 @@ export const GameComponents = [
       "hasVictoryPoint":true,
       "name":"Manoir de Corail",
       "reactPowerList":[
-
+         {
+            "cost":{
+               "turn":true
+            },
+            "gain":{
+               "ignore":true
+            },
+            "type":[
+               "LIFE_LOSS"
+            ]
+         }
       ],
       "type":"placeOfPower",
       "victoryPoint":3
@@ -1310,7 +2136,25 @@ export const GameComponents = [
    {
       "id":"mausolee",
       "actionPowerList":[
-
+         {
+            "cost":{
+               "essenceList":[
+                  {
+                     "quantity":1,
+                     "type":"any"
+                  }
+               ]
+            },
+            "gain":{
+               "essenceList":[
+                  {
+                     "quantity":1,
+                     "type":"death"
+                  }
+               ],
+               "onComponent":true
+            }
+         }
       ],
       "class":"mausolee",
       "costEssenceList":[
@@ -1334,7 +2178,19 @@ export const GameComponents = [
    {
       "id":"mineDeSalomon",
       "actionPowerList":[
-
+         {
+            "cost":{
+               "turn":true
+            },
+            "gain":{
+               "essenceList":[
+                  {
+                     "quantity":1,
+                     "type":"gold"
+                  }
+               ]
+            }
+         }
       ],
       "class":"mine_de_salomon",
       "costEssenceList":[
@@ -1358,7 +2214,49 @@ export const GameComponents = [
    {
       "id":"mineDesNains",
       "actionPowerList":[
-
+         {
+            "cost":{
+               "essenceList":[
+                  {
+                     "quantity":5,
+                     "type":"elan"
+                  }
+               ],
+               "turn":true
+            },
+            "gain":{
+               "essenceList":[
+                  {
+                     "quantity":3,
+                     "type":"gold"
+                  }
+               ]
+            }
+         },
+         {
+            "cost":{
+               "essenceList":[
+                  {
+                     "quantity":3,
+                     "type":"death"
+                  },
+                  {
+                     "quantity":3,
+                     "type":"elan"
+                  }
+               ],
+               "turn":true
+            },
+            "gain":{
+               "essenceList":[
+                  {
+                     "quantity":2,
+                     "type":"gold"
+                  }
+               ],
+               "onComponent":true
+            }
+         }
       ],
       "class":"mine_des_nains",
       "conditionalVictoryPointList":[
@@ -1401,7 +2299,20 @@ export const GameComponents = [
    {
       "id":"molosse",
       "actionPowerList":[
-
+         {
+            "cost":{
+               "essenceList":[
+                  {
+                     "quantity":1,
+                     "type":"elan"
+                  }
+               ],
+               "onlyWhenTurned":true
+            },
+            "gain":{
+               "straightenSelf":true
+            }
+         }
       ],
       "class":"molosse",
       "costEssenceList":[
@@ -1421,7 +2332,17 @@ export const GameComponents = [
       "isDragon":false,
       "name":"Molosse",
       "reactPowerList":[
-
+         {
+            "cost":{
+               "turn":true
+            },
+            "gain":{
+               "ignore":true
+            },
+            "type":[
+               "LIFE_LOSS"
+            ]
+         }
       ],
       "type":"artefact"
    },
@@ -1486,7 +2407,26 @@ export const GameComponents = [
    {
       "id":"necromancienne",
       "actionPowerList":[
-
+         {
+            "cost":{
+               "essenceList":[
+                  {
+                     "quantity":2,
+                     "type":"life"
+                  }
+               ],
+               "turn":true
+            },
+            "gain":{
+               "essenceList":[
+                  {
+                     "quantity":3,
+                     "type":"death"
+                  }
+               ],
+               "onComponent":true
+            }
+         }
       ],
       "class":"necromancienne",
       "hasActionPower":true,
@@ -1534,7 +2474,20 @@ export const GameComponents = [
    {
       "id":"oeufDeDragon",
       "actionPowerList":[
-
+         {
+            "cost":{
+               "destroySelf":true
+            },
+            "gain":{
+               "modifierList":[
+                  {
+                     "quantity":-4,
+                     "type":"any-but-gold"
+                  }
+               ],
+               "placeDragon":true
+            }
+         }
       ],
       "class":"oeuf_de_dragon",
       "costEssenceList":[
@@ -1559,7 +2512,14 @@ export const GameComponents = [
    {
       "id":"oracle",
       "actionPowerList":[
-
+         {
+            "cost":{
+               "turn":true
+            },
+            "gain":{
+               "reorderThree":true
+            }
+         }
       ],
       "class":"oracle",
       "costEssenceList":[
@@ -1583,7 +2543,21 @@ export const GameComponents = [
    {
       "id":"pierrePhilosophale",
       "actionPowerList":[
-
+         {
+            "cost":{
+               "essenceList":[
+                  {
+                     "quantity":2,
+                     "type":"any"
+                  }
+               ],
+               "sameType":true,
+               "turn":true
+            },
+            "gain":{
+               "powerCostAsGold":true
+            }
+         }
       ],
       "class":"pierre_philosophale",
       "costEssenceList":[
@@ -1620,7 +2594,25 @@ export const GameComponents = [
    {
       "id":"piocheDesNains",
       "actionPowerList":[
-
+         {
+            "cost":{
+               "essenceList":[
+                  {
+                     "quantity":1,
+                     "type":"elan"
+                  }
+               ],
+               "turn":true
+            },
+            "gain":{
+               "essenceList":[
+                  {
+                     "quantity":1,
+                     "type":"gold"
+                  }
+               ]
+            }
+         }
       ],
       "class":"pioche_des_nains",
       "costEssenceList":[
@@ -1644,7 +2636,34 @@ export const GameComponents = [
    {
       "id":"prisme",
       "actionPowerList":[
-
+         {
+            "cost":{
+               "essenceList":[
+                  {
+                     "quantity":1,
+                     "type":"any"
+                  }
+               ],
+               "turn":true
+            },
+            "gain":{
+               "essenceList":[
+                  {
+                     "quantity":2,
+                     "type":"any-but-gold"
+                  }
+               ]
+            }
+         },
+         {
+            "cost":{
+               "sameType":true,
+               "turn":true
+            },
+            "gain":{
+               "powerCostAsAnySameTypeButGold":true
+            }
+         }
       ],
       "class":"prisme",
       "costEssenceList":[
@@ -1672,14 +2691,46 @@ export const GameComponents = [
       "hasStandardCollectAbility":false,
       "name":"Protection",
       "reactPowerList":[
-
+         {
+            "cost":{
+               "turn":true
+            },
+            "gain":{
+               "ignore":true
+            },
+            "type":[
+               "LIFE_LOSS"
+            ]
+         }
       ],
       "type":"magicItem"
    },
    {
       "id":"puitsCalcifere",
       "actionPowerList":[
-
+         {
+            "cost":{
+               "essenceList":[
+                  {
+                     "quantity":1,
+                     "type":"life"
+                  }
+               ],
+               "turn":true
+            },
+            "gain":{
+               "essenceList":[
+                  {
+                     "quantity":1,
+                     "type":"elan"
+                  },
+                  {
+                     "quantity":1,
+                     "type":"death"
+                  }
+               ]
+            }
+         }
       ],
       "class":"puits_calcifere",
       "costEssenceList":[
@@ -1711,7 +2762,41 @@ export const GameComponents = [
    {
       "id":"puitsSacrificiel",
       "actionPowerList":[
-
+         {
+            "cost":{
+               "essenceList":[
+                  {
+                     "quantity":3,
+                     "type":"life"
+                  }
+               ],
+               "turn":true
+            },
+            "gain":{
+               "essenceList":[
+                  {
+                     "quantity":1,
+                     "type":"death"
+                  }
+               ],
+               "onComponent":true
+            }
+         },
+         {
+            "cost":{
+               "destroyOneDragonOrCreature":true,
+               "essenceList":[
+                  {
+                     "quantity":1,
+                     "type":"death"
+                  }
+               ],
+               "turn":true
+            },
+            "gain":{
+               "placementCostAsGold":true
+            }
+         }
       ],
       "class":"puits_sacrificiel",
       "conditionalVictoryPointList":[
@@ -1743,7 +2828,20 @@ export const GameComponents = [
    {
       "id":"reanimation",
       "actionPowerList":[
-
+         {
+            "cost":{
+               "essenceList":[
+                  {
+                     "quantity":1,
+                     "type":"any"
+                  }
+               ],
+               "turn":true
+            },
+            "gain":{
+               "straightenComponent":true
+            }
+         }
       ],
       "class":"reanimation",
       "hasActionPower":true,
@@ -1757,7 +2855,20 @@ export const GameComponents = [
    {
       "id":"recherches",
       "actionPowerList":[
-
+         {
+            "cost":{
+               "essenceList":[
+                  {
+                     "quantity":1,
+                     "type":"any"
+                  }
+               ],
+               "turn":true
+            },
+            "gain":{
+               "drawOne":true
+            }
+         }
       ],
       "class":"recherches",
       "hasActionPower":true,
@@ -1771,7 +2882,29 @@ export const GameComponents = [
    {
       "id":"recifDesNaufrageurs",
       "actionPowerList":[
-
+         {
+            "cost":{
+               "essenceList":[
+                  {
+                     "quantity":2,
+                     "type":"calm"
+                  },
+                  {
+                     "quantity":1,
+                     "type":"life"
+                  }
+               ]
+            },
+            "gain":{
+               "essenceList":[
+                  {
+                     "quantity":1,
+                     "type":"calm"
+                  }
+               ],
+               "onComponent":true
+            }
+         }
       ],
       "class":"recif_des_naufrageurs",
       "conditionalVictoryPointList":[
@@ -1814,7 +2947,34 @@ export const GameComponents = [
    {
       "id":"repaireDesDragons",
       "actionPowerList":[
-
+         {
+            "cost":{
+               "turn":true
+            },
+            "gain":{
+               "essenceList":[
+                  {
+                     "quantity":2,
+                     "type":"gold"
+                  }
+               ]
+            }
+         },
+         {
+            "cost":{
+               "turn":true,
+               "turnDragon":true
+            },
+            "gain":{
+               "essenceList":[
+                  {
+                     "quantity":2,
+                     "type":"gold"
+                  }
+               ],
+               "onComponent":true
+            }
+         }
       ],
       "class":"repaire_des_dragons",
       "conditionalVictoryPointList":[
@@ -1916,7 +3076,15 @@ export const GameComponents = [
    {
       "id":"serpentDeMer",
       "actionPowerList":[
-
+         {
+            "cost":{
+               "turn":true
+            },
+            "gain":{
+               "canIgnoreWithDestroyArtefact":true,
+               "rivalsLoseLife":2
+            }
+         }
       ],
       "class":"serpent_de_mer",
       "costEssenceList":[
@@ -1945,7 +3113,29 @@ export const GameComponents = [
    {
       "id":"sirene",
       "actionPowerList":[
-
+         {
+            "cost":{
+               "essenceList":[
+                  {
+                     "quantity":1,
+                     "type":"calm"
+                  },
+                  {
+                     "quantity":1,
+                     "type":"life"
+                  },
+                  {
+                     "quantity":1,
+                     "type":"gold"
+                  }
+               ],
+               "multipleCostOptions":true,
+               "turn":true
+            },
+            "gain":{
+               "putItOnAnyComponent":true
+            }
+         }
       ],
       "class":"sirene",
       "costEssenceList":[
@@ -1981,7 +3171,20 @@ export const GameComponents = [
    {
       "id":"sorciere",
       "actionPowerList":[
-
+         {
+            "cost":{
+               "essenceList":[
+                  {
+                     "quantity":2,
+                     "type":"any"
+                  }
+               ],
+               "turn":true
+            },
+            "gain":{
+               "straightenComponent":true
+            }
+         }
       ],
       "class":"sorciere",
       "hasActionPower":true,
@@ -2035,7 +3238,22 @@ export const GameComponents = [
       "isDragon":false,
       "name":"Source Élémentaire",
       "reactPowerList":[
-
+         {
+            "cost":{
+               "essenceList":[
+                  {
+                     "quantity":1,
+                     "type":"calm"
+                  }
+               ]
+            },
+            "gain":{
+               "ignore":true
+            },
+            "type":[
+               "LIFE_LOSS"
+            ]
+         }
       ],
       "standardCollectAbility":{
          "essenceList":[
@@ -2074,7 +3292,23 @@ export const GameComponents = [
       "hasVictoryPoint":true,
       "name":"Statue Sacrée",
       "reactPowerList":[
-
+         {
+            "cost":{
+               "essenceList":[
+                  {
+                     "quantity":3,
+                     "type":"gold"
+                  }
+               ],
+               "turn":true
+            },
+            "gain":{
+               "temporaryVictoryPoints":3
+            },
+            "type":[
+               "VICTORY_CHECK"
+            ]
+         }
       ],
       "type":"monument",
       "victoryPoint":1
@@ -2082,7 +3316,43 @@ export const GameComponents = [
    {
       "id":"statuetteOrnee",
       "actionPowerList":[
-
+         {
+            "cost":{
+               "turn":true
+            },
+            "gain":{
+               "essenceList":[
+                  {
+                     "quantity":3,
+                     "type":"death"
+                  }
+               ],
+               "rivalsGain":true,
+               "rivalsGainEssenceList":[
+                  {
+                     "quantity":1,
+                     "type":"death"
+                  }
+               ]
+            }
+         },
+         {
+            "cost":{
+               "destroySelf":true
+            },
+            "gain":{
+               "essenceList":[
+                  {
+                     "quantity":2,
+                     "type":"gold"
+                  },
+                  {
+                     "quantity":1,
+                     "type":"elan"
+                  }
+               ]
+            }
+         }
       ],
       "class":"statuette_ornee",
       "costEssenceList":[
@@ -2127,7 +3397,17 @@ export const GameComponents = [
       "hasVictoryPoint":true,
       "name":"Temple",
       "reactPowerList":[
-
+         {
+            "cost":{
+               "turn":true
+            },
+            "gain":{
+               "ignore":true
+            },
+            "type":[
+               "LIFE_LOSS"
+            ]
+         }
       ],
       "standardCollectAbility":{
          "essenceList":[
@@ -2143,7 +3423,37 @@ export const GameComponents = [
    {
       "id":"tourDeLAlchimiste",
       "actionPowerList":[
-
+         {
+            "cost":{
+               "essenceList":[
+                  {
+                     "quantity":1,
+                     "type":"death"
+                  },
+                  {
+                     "quantity":1,
+                     "type":"elan"
+                  },
+                  {
+                     "quantity":1,
+                     "type":"calm"
+                  },
+                  {
+                     "quantity":1,
+                     "type":"life"
+                  }
+               ]
+            },
+            "gain":{
+               "essenceList":[
+                  {
+                     "quantity":1,
+                     "type":"gold"
+                  }
+               ],
+               "onComponent":true
+            }
+         }
       ],
       "class":"tour_de_l_alchimiste",
       "conditionalVictoryPointList":[
@@ -2166,7 +3476,17 @@ export const GameComponents = [
       "hasVictoryPoint":false,
       "name":"Tour de l'Alchimiste",
       "reactPowerList":[
-
+         {
+            "cost":{
+               "turn":true
+            },
+            "gain":{
+               "ignore":true
+            },
+            "type":[
+               "LIFE_LOSS"
+            ]
+         }
       ],
       "specificCollectAbility":{
          "essenceList":[
@@ -2182,7 +3502,25 @@ export const GameComponents = [
    {
       "id":"transmutation",
       "actionPowerList":[
-
+         {
+            "cost":{
+               "essenceList":[
+                  {
+                     "quantity":3,
+                     "type":"any"
+                  }
+               ],
+               "turn":true
+            },
+            "gain":{
+               "essenceList":[
+                  {
+                     "quantity":3,
+                     "type":"any-but-gold"
+                  }
+               ]
+            }
+         }
       ],
       "class":"transmutation",
       "hasActionPower":true,
@@ -2196,7 +3534,25 @@ export const GameComponents = [
    {
       "id":"transmutatrice",
       "actionPowerList":[
-
+         {
+            "cost":{
+               "essenceList":[
+                  {
+                     "quantity":2,
+                     "type":"any"
+                  }
+               ],
+               "turn":true
+            },
+            "gain":{
+               "essenceList":[
+                  {
+                     "quantity":3,
+                     "type":"any-but-gold"
+                  }
+               ]
+            }
+         }
       ],
       "class":"transmutatrice",
       "hasActionPower":true,
@@ -2212,7 +3568,14 @@ export const GameComponents = [
    {
       "id":"treant",
       "actionPowerList":[
-
+         {
+            "cost":{
+               "turn":true
+            },
+            "gain":{
+               "asManyElanThanRivalsDeath":true
+            }
+         }
       ],
       "class":"treant",
       "costEssenceList":[
@@ -2248,7 +3611,14 @@ export const GameComponents = [
    {
       "id":"voyante",
       "actionPowerList":[
-
+         {
+            "cost":{
+               "turn":true
+            },
+            "gain":{
+               "reorderThree":true
+            }
+         }
       ],
       "class":"voyante",
       "hasActionPower":true,

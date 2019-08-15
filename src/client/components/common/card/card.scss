@@ -28,10 +28,6 @@
   position: absolute;
   user-select: none;
 }
-.card-zoom-frame, .card-zoom-frame > img {
-  height: 400px;
-  width: 297px;
-}
 
 $card-base: 1;
 $magic-item-base: 0.764;
@@ -47,6 +43,7 @@ $normal: 151px;
 $large: 181px;
 $x-large: 211px;
 $xx-large: 241px;
+$zoom: 320px;
 
 @mixin aspect-ratio($height, $ratio) {
   height: $height;
@@ -91,6 +88,30 @@ $xx-large: 241px;
 }
 .place-of-power {
   @include sizing($place-of-power-ratio, $place-of-power-base);
+}
+
+.card {
+  &.card-zoom-frame, &.card-zoom-frame > img {
+    @include aspect-ratio($zoom * $card-base, $card-ratio);
+  }
+}
+.magic-item {
+  &.card-zoom-frame, &.card-zoom-frame > img {
+    @include aspect-ratio($zoom * $magic-item-base, $magic-item-ratio);
+  }
+}
+.place-of-power {
+  &.card-zoom-frame, &.card-zoom-frame > img {
+    @include aspect-ratio($zoom * $place-of-power-base, $place-of-power-ratio);
+  }
+}
+
+@media (max-width: 768px) {
+  .card, .magic-item, .place-of-power {
+    &.card-zoom-frame, &.card-zoom-frame > img {
+      @include aspect-ratio($xx-large * $place-of-power-base, $card-ratio);
+    }
+  }
 }
 
 /* Card row */

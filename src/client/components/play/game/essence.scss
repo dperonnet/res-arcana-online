@@ -75,14 +75,25 @@
     padding-left: 12px;
     text-align: left;
   }
+  
+  .qm {
+    display: block;
+    height: 16px;
+    width: 10px;
+    margin: 10px auto;
+    background-image: url("../../../assets/image/game_icons.png");
+    background-size: 780px 100px;
+    background-position: -518px -55px;
+    background-repeat: no-repeat;
+  }
 }
 
 .essence.sm {
   @extend .game-icon;
-  background-size: 566px 75px;
+  background-size: 585px 77px;
   line-height: 2.2;
   height: 32px;
-  width: 30px;
+  width: 32px;
   margin: 0;
   font-size: initial;
   
@@ -93,26 +104,25 @@
     background-position: -25px 0;
   }
   &.calm {
-    background-position: -54px 0;
+    background-position: -55px 0;
   }
   &.death {
-    background-position: -83px 0;
+    background-position: -85px 0;
   }
   &.gold {
-    background-position: -112px 0;
+    background-position: -115px 0;
   }
   &.any {
-    background-position: -143px 0;
+    background-position: -148px 0;
   }
   &.any-but-gold {
-    background-size: 566px 77px;
-    background-position: -178px 0;
+    background-position: -184px 0;
     padding-left: 10px;
     text-align: left;
     width: 56px;
     
     &.modifier {
-      padding-left: 6px;
+      padding-left: 5px;
     }
   }
   &.any-but-death-gold {
@@ -122,21 +132,22 @@
     width: 77px;
   }
   &.any-but-life-gold {
-    background-position: -313px 0;
+    background-position: -325px 0;
     padding-left: 10px;
     text-align: left;
     width: 77px;
   }
   &.any-same-type {
-    background-position: -391px 0;
+    background-position: -404px 0;
   }
   &.any-same-type-but-gold {
-    background-position: -423px 0;
+    background-position: -438px 0;
     width: 55px;
   }
   &.life-loss {
-    background-position: -481px 0;
+    background-position: -497px 0;
     width: 34px;
+    padding-left: 5px;
   }
   
   &.zero-essence {

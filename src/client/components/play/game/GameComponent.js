@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import Card from '../../common/card/Card'
 import { connect } from 'react-redux';
 
-const COMPONENTS_STYLES = {
+export const COMPONENTS_STYLES = {
   artefact: 'card',
   backArtefact: 'card',
   backMonument: 'card',
