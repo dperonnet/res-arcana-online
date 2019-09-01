@@ -6,8 +6,13 @@ import { compose } from 'redux'
 import { connect } from 'react-redux'
 import { firestoreConnect } from 'react-redux-firebase'
 import { leaveGame } from '../../../store/actions/gameActions'
-import { signOut } from '../../../store/actions/authActions'
+import { saveProfile, signOut } from '../../../store/actions/authActions'
 import { toggleChat } from '../../../store/actions/chatActions'
+import { toggleCommonBoard } from '../../../store/actions/gameActions'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faArchway, faComments, faSearchMinus, faSearchPlus } from '@fortawesome/free-solid-svg-icons';
+
+const cardSizeList = ['small','normal','large','x-large']
 
 class SignedInNav extends Component {
 
@@ -21,8 +26,38 @@ class SignedInNav extends Component {
     this.props.toggleChat()
   }
 
+  toggleCommonBoard = () => {
+    this.props.toggleCommonBoard()
+  }
+
+  setCardSize = (size) => {
+    const { profile } = this.props;
+    let newProfile = {...profile}
+    newProfile.cardSize = size
+    this.props.saveProfile(newProfile);
+  }
+
+  setCardSizeMinus = () => {
+    console.log('setCardSizeMinus');
+    const { profile } = this.props;
+    let index = cardSizeList.findIndex(size => size === profile.cardSize)
+    if (index > 0) {
+      this.setCardSize(cardSizeList[index - 1])
+    }
+  }
+
+  setCardSizePlus = () => {
+    console.log('setCardSizePlus');
+    const { profile } = this.props;
+    let size = profile.cardSize
+    let index = cardSizeList.findIndex(size => size === profile.cardSize)
+    if (index < cardSizeList.length - 1) {
+      this.setCardSize(cardSizeList[index + 1])
+    }
+  }
+
   render() {
-    const { chatDisplay, currentGames, games, profile, signOut } = this.props
+    const { chatDisplay, commonBoardDisplay, currentGames, games, profile, signOut } = this.props
     return (
       <Navbar collapseOnSelect expand="md" variant="dark" fixed="top">
         <LinkContainer to="/"><Navbar.Brand>Res Arcana Online</Navbar.Brand></LinkContainer>
@@ -41,11 +76,26 @@ class SignedInNav extends Component {
             {currentGames && currentGames.gameId != null && <Nav.Link onClick={this.leaveGame}>Leave game</Nav.Link>}
           </Nav>
           <Nav>
-            {currentGames && currentGames.gameId != null && <Nav.Link onClick={this.toggleChat}>{chatDisplay ? 'Hide' : 'Show'} chat</Nav.Link>}
-            <Navbar.Text> [CardSize] {profile.cardSize}
-            </Navbar.Text>
-            <Navbar.Text> {games ? Object.keys(games).length : 0} games
-            </Navbar.Text>
+            {currentGames && currentGames.gameId != null && 
+              <Nav.Link onClick={this.toggleCommonBoard} active={commonBoardDisplay}><FontAwesomeIcon icon={faArchway} /></Nav.Link>}
+            {currentGames && currentGames.gameId != null && 
+              <Nav.Link onClick={this.toggleChat} active={chatDisplay}><FontAwesomeIcon icon={faComments} /></Nav.Link>}
+            {currentGames && currentGames.gameId != null && 
+              <Nav.Link onClick={this.setCardSizeMinus} 
+                active={profile.cardSize !== cardSizeList[0]}
+                disabled={profile.cardSize === cardSizeList[0]}>
+                <FontAwesomeIcon icon={faSearchMinus} />
+              </Nav.Link>
+            }
+            {currentGames && currentGames.gameId != null && 
+              <Nav.Link onClick={this.setCardSizePlus} 
+                active={profile.cardSize !== cardSizeList[cardSizeList.length - 1]}
+                disabled={profile.cardSize === cardSizeList[cardSizeList.length - 1]}>
+                  <FontAwesomeIcon icon={faSearchPlus} />
+              </Nav.Link>
+            }
+            {/*<Navbar.Text> {games ? Object.keys(games).length : 0} games
+            </Navbar.Text>*/}
             <NavDropdown alignRight title={profile.login} id="collasible-nav-dropdown">
               <LinkContainer to="/profile" active={false}><NavDropdown.Item>Profile</NavDropdown.Item></LinkContainer>
               <LinkContainer to="/logout" active={false}><NavDropdown.Item onClick={signOut}>Logout</NavDropdown.Item></LinkContainer>
@@ -61,6 +111,7 @@ const mapStateToProps = (state) =>{
   return {
     auth: state.firebase.auth,
     chatDisplay: state.chat.chatDisplay,
+    commonBoardDisplay: state.game.commonBoardDisplay,
     currentGames: state.firestore.data.currentGames,
     games: state.firestore.ordered.games,
     profile: state.firebase.profile
@@ -70,9 +121,11 @@ const mapStateToProps = (state) =>{
 const mapDispatchToProps = (dispatch) =>{
   return {
     leaveGame: (gameId, baseUrl) => dispatch(leaveGame(gameId, baseUrl)),
-    signOut: () => dispatch(signOut()),
+    saveProfile: (profile) => dispatch(saveProfile(profile)),
     setLoading: (value) => dispatch({type: 'LOADING', loading: value}),
-    toggleChat: () => dispatch(toggleChat())
+    signOut: () => dispatch(signOut()),
+    toggleChat: () => dispatch(toggleChat()),
+    toggleCommonBoard: () => dispatch(toggleCommonBoard()),
   }
 }
 

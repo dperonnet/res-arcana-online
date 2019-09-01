@@ -96,3 +96,7 @@ body {
   -ms-transform: rotate(80deg);
   transform: rotate(80deg);
 }
+.navbar-collapse {
+  max-height: 280px;
+  overflow-y: auto;
+}

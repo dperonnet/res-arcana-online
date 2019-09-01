@@ -1,5 +1,6 @@
 const initState = {
   cardToZoom: undefined,
+  commonBoardDisplay: true,
   games: [],
   selectedComponent: undefined,
   selectedAction: undefined,
@@ -124,6 +125,11 @@ const gameReducer = (state = initState, action) => {
       return Object.assign({}, state, {
         canPayCost: action.info
       });
+    case 'TOGGLE_COMMON_BOARD':
+      return {
+        ...state,
+        commonBoardDisplay: !state.commonBoardDisplay
+      }
     default:
       return state;
   }

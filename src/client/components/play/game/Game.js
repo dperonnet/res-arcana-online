@@ -445,6 +445,10 @@ const getTurnOrderFromLastPlayer = (G, ctx) => {
 const initCollectPhase = (G, ctx) => {
   console.log('[initCollectPhase] Call to initCollectPhase()')
   if (G.phase !== "COLLECT_PHASE") {
+    G.passOrder = []
+    G.allPassed = false
+    computeVictoryPoints(G, ctx)
+    
     G.phase = "COLLECT_PHASE"
     
     for (let i= 0; i < ctx.numPlayers; i++) {
@@ -584,8 +588,8 @@ const getCollectTurnOrder = (G, ctx) => {
 }
 
 // ########## ACTION PHASE ##########
-const initActionPhase = (G, ctx) => {
-  console.log('[initActionPhase] Call to initActionPhase()')
+const initActionPhase = (G, ctx, source) => {
+  console.log('[initActionPhase] Call to initActionPhase() by', source)
   G.phase = 'PLAY_PHASE'
   return G
 }
@@ -624,10 +628,12 @@ const discardArtefact = (G, ctx, cardId, essenceList) => {
  * @param {*} magicItemId magic item id to swap for.
  */
 const pass = (G, ctx, magicItemId) => {
+  console.log('[MOVE PASS]');
   const playerID = ctx.currentPlayer
   
   G.passOrder.push(playerID)
   G.allPassed = G.passOrder.length >= ctx.numPlayers
+  G.publicData.players[playerID].status = 'PASSED'
 
   getFirstPlayerToken(G, ctx)
   pickMagicItem(G, ctx, magicItemId)
@@ -782,23 +788,37 @@ function copy(value) {
 // ########## VICTORY CHECK PHASE ##########
 const initVictoryCheckPhase = (G, ctx) => {
   console.log('[initVictoryCheckPhase] Call to initVictoryCheckPhase()')
-  G.phase = 'VICTORY_CHECK_PHASE'
-  if (getCheckVictoryTurnOrder(G, ctx, 'by initVictoryCheckPhase').length === 0) {
-    console.log('[initVictoryCheckPhase] No one have react power, compute victory points and endPhase.')
-    computeVictoryPoints(G, ctx)
-    ctx.events.endPhase()
+  if (G.phase !== "VICTORY_CHECK_PHASE") {
+    G.phase = 'VICTORY_CHECK_PHASE'
+    G.passOrder = []
+    let turnOrder = getCheckVictoryTurnOrder(G, ctx, 'by initVictoryCheckPhase')
+    if (turnOrder.length === 0) {
+      console.log('[initVictoryCheckPhase] No one have react power, compute victory points and endPhase.')
+      G.allPassed = true
+    }
   }
   return G
 }
 
 const activateVictoryCheckReactPower = (G, ctx, action) => {
-
+  console.log('[MOVE activateVictoryCheckReactPower]');
+  const playerID = ctx.currentPlayer
+  
+  G.passOrder.push(playerID)
+  G.allPassed = G.passOrder.length >= ctx.numPlayers
+  G.publicData.players[playerID].status = 'PASSED'
 }
 
-const endVictoryCheckPhase = (G, ctx) => {
+/**
+ * Role: endPhaseIf
+ * This function check if all players have done their check victory phase
+ * and define the next phase.
+ */
+const checkAllPlayerReacted = (G, ctx) => {
+  console.log('[endVictoryCheckPhase] Call to endVictoryCheckPhase()')
   if (G.allPassed) {
-    computeVictoryPoints(G, ctx)
-    ctx.events.endPhase()
+    console.log('[endVictoryCheckPhase] All players passed, end VictoryCheck Phase')
+    return {next: 'collectPhase' }
   }
   return G
 }
@@ -819,7 +839,6 @@ const getCheckVictoryTurnOrder = (G, ctx, source) => {
       order.push((nextPlayerId).toString())
     }
   }
-  console.log('order',order)
   return order
 }
 
@@ -956,10 +975,11 @@ export const ResArcanaGame = Game({
           first: (G, ctx) => 0,
           next: (G, ctx) => (ctx.playOrderPos + 1) % ctx.numPlayers,
         },
-        endPhaseIf: (G, ctx) => checkAllCollectsReady(G, ctx)
+        endPhaseIf: (G, ctx) => checkAllCollectsReady(G, ctx),
+        endGameIf: (G, ctx) => endGameIf(G, ctx),
       },
       actionPhase: {
-        onPhaseBegin: (G, ctx) => initActionPhase(G, ctx),
+        onPhaseBegin: (G, ctx) => initActionPhase(G, ctx, 'flow.phases.actionPhase.onPhaseBegin'),
         allowedMoves: ['placeComponent','discardArtefact','activatePower','pass'],
         turnOrder: {
           playOrder: (G, ctx) => getTurnOrder(G, ctx),
@@ -972,7 +992,7 @@ export const ResArcanaGame = Game({
         onPhaseBegin: (G, ctx) => initVictoryCheckPhase(G, ctx),
         allowedMoves: ['activateVictoryCheckReactPower'],
         turnOrder: {
-          playOrder: (G, ctx) => getCheckVictoryTurnOrder(G, ctx),
+          playOrder: (G, ctx) => getCheckVictoryTurnOrder(G, ctx, 'flow.phases.checkVictoryPhase.turnOrder'),
           first: (G, ctx) => 0,
           next: (G, ctx) => {
             if (ctx.playOrderPos < ctx.playOrder.length - 1) {
@@ -980,9 +1000,7 @@ export const ResArcanaGame = Game({
             }
           }
         },
-        onPhaseEnd: (G, ctx) => endVictoryCheckPhase(G, ctx),
-        endGameIf: (G, ctx) => endGameIf(G, ctx),
-        next: 'collectPhase'
+        endPhaseIf: (G, ctx) => checkAllPlayerReacted(G, ctx),
       }
     },
   },

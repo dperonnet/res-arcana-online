@@ -157,13 +157,13 @@
     }
 
     &.action-row.small {
-      min-height: $normal + 52;
+      min-height: $normal + 65;
     }
     &.action-row.normal {
-      min-height: $large + 52;
+      min-height: $large + 55;
     }
     &.action-row.large {
-      min-height: $x-large + 62;
+      min-height: $x-large + 65;
     }
     &.action-row.x-large {
       min-height: $xx-large + 70;
@@ -174,7 +174,7 @@
       display: flex;
       justify-content: center;
 
-      .card.active, .place-of-power.active {
+      .card.active, .place-of-power.active, .in-hand .magic-item.active {
         box-shadow: none;
       }
       .action-row {
@@ -202,12 +202,59 @@
     }
   }
 
+  .action-list, .button-list {
+    display: flex;
+
+    .action-button {
+      display: flex;
+      min-height: 45px;
+      padding: 2px;
+      width: 190px;
+
+      background-color: rgba(244, 189, 115, 0.38);
+      border: 2px solid rgb(114, 72, 9);
+      border-radius: 4px;
+
+      color: #444;
+      font-weight: bold;
+      font-size: medium;
+      
+      background-blend-mode: color-burn;
+      background-image: url("../../../assets/image/background_action.png");
+      background-repeat: repeat-x;
+      background-size: 400px 400px;
+      background-position: -42px;
+
+      align-items: center;
+      text-align: center;
+      justify-content: center;
+      cursor: pointer;
+      
+      .inline-text {
+        vertical-align: -webkit-baseline-middle;
+        vertical-align: -moz-middle-with-baseline;
+      }
+      &:hover:not(.disabled), &.valid:hover {
+        background-color: rgba(252, 209, 122, 0.7);
+      }
+
+      &.disabled {
+        cursor: not-allowed;
+        background-color: rgba(0, 0,0 ,0.3);
+      }
+
+      &.invalid {
+        border: 1px solid darkred;
+        color: darkred;
+      }
+    }
+  }
+
   .button-list {
     flex-direction: row;
     justify-content: center;
   
     .action-button {
-      width: 120px;
       text-align: center;
       margin: 0 5px;
       user-select: none;
@@ -230,10 +277,17 @@
     .action-button {
       height: 43px;
       text-align: left;
+      margin: 8px;
+      padding: 2px 2px 2px 10px;
+      justify-content: left;
       
       .inline-icons {
         margin-left: 4px;
         margin-top: -2px;
+      }
+      
+      @media (max-width: 768px) {
+        margin: 2px;
       }
     }
 
@@ -242,43 +296,6 @@
     }
   }
   
-  .action-list, .button-list {
-    display: flex;
-
-    .action-button {
-      width: 190px;
-      min-height: 35px;
-      background-color: rgb(75, 56, 27);
-      padding: 3px 10px;
-      border-radius: 4px;
-      margin-bottom: 6px;
-      border: 1px solid rgba(245,176,65,0.7);
-      cursor: pointer;
-      
-      .inline-text {
-        vertical-align: -webkit-baseline-middle;
-        vertical-align: -moz-middle-with-baseline;
-      }
-      &:hover:not(.disabled), &.valid:hover {
-        background-color: rgb(201, 144, 53);
-        border: 1px solid rgb(201, 144, 53);
-      }
-
-      &.disabled {
-        cursor: not-allowed;
-      }
-
-      &.valid {
-        background-color: rgb(133, 96, 36);
-        border: 1px solid rgb(201, 144, 53);
-      }
-
-      &.invalid {
-        border: 1px solid rgba(245, 0, 0, 0.7);
-        color: red;
-      }
-    }
-  }
 }
 
 .inline-text {
@@ -417,8 +434,6 @@
 
 .close-chat {
   position: absolute;
-  right: 4px;
-  top: 42px;
 }
 
 .in-play {
@@ -431,10 +446,11 @@
 }
 
 .directive {
-  margin-bottom: 8px;
-  margin-top: 8px;
+  margin-bottom: 4px;
+  margin-top: 4px;
   height: 38px;
   font-size: 1.15rem;
+  line-height: 2;
 
   .operator, .operator {
     font-size: 0.875em;
@@ -445,7 +461,9 @@
     margin-top: -11px;
   }
 }
-
+.component-cost {
+  padding: 0 15px;
+}
 .cost-frame {
   display: flex;
   background-image: url("../../../assets/image/cost-frame-content.png");

@@ -442,3 +442,9 @@ export function canPayCost(info) {
     info
   }
 }
+
+export function toggleCommonBoard() {
+  return {
+      type: 'TOGGLE_COMMON_BOARD'
+  };
+}

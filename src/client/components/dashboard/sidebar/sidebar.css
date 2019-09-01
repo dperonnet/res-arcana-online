@@ -42,6 +42,8 @@
   font-size: 1rem;
   color: white;
   opacity: .75;
+  right: 4px;
+  margin: 3px 5px;
 }
 .close:hover {
   color: white;
