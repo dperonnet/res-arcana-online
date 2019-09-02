@@ -7,7 +7,7 @@ import './essence.scss'
 import { compose } from 'redux'
 import { connect } from 'react-redux'
 import { firestoreConnect, isLoaded } from 'react-redux-firebase'
-import { addToEssencePickerSelection, canPayCost, clearZoom, resetCollect, resetEssencePickerSelection, selectAction, 
+import { addToEssencePickerSelection, canPayCost, clearZoom, resetCollect, resetEssencePickerSelection, selectAction, selectActionPower,
   selectComponent, setFocusZoom, zoomCard, setCollectAction, setEssencePickerSelection, toggleCommonBoard } from '../../../../store/actions/gameActions'
 import { toggleChat } from '../../../../store/actions/chatActions'
 import ActionPower from '../../common/power/ActionPower'
@@ -61,7 +61,15 @@ class ResArcanaBoard extends Component {
   }
 
   componentDidMount = () => {
+    console.log('componentDidMount');
     this.props.resetCollect()
+  }
+
+  componentDidUpdate = (prevProps) => {
+    if (prevProps.G.phase !== this.props.G.phase) {
+      this.clearSelection()
+      console.log('componentDidUpdate clearSelection');
+    }
   }
 
   /**
@@ -128,7 +136,7 @@ class ResArcanaBoard extends Component {
   handleClick = (e, component) => {
     const { board } = this.refs
     e.stopPropagation();
-    board.scrollTop = 0
+    //board.scrollTop = 0
     this.props.selectComponent(component)
 
     if (component) {
@@ -256,38 +264,42 @@ class ResArcanaBoard extends Component {
     if (isActive) {
       this.props.moves.discardArtefact(cardId, essenceList)
     }
-    this.props.selectComponent(undefined)
-    this.props.setCanPayCost({})
-    this.handleBoardClick()
-    selectAction(undefined)
+    this.clearSelection()
   }
 
   /**
    * Trigger the place component move.
    */
   placeComponent = (type, id,essenceList) => {
-    const { isActive, selectAction } = this.props
+    const { isActive } = this.props
     if (isActive) {
       this.props.moves.placeComponent(type, id, essenceList)
     }
-    this.props.selectComponent(undefined)
-    this.props.setCanPayCost({})
-    this.handleBoardClick()
-    selectAction(undefined)
+    this.clearSelection()
   }
 
   /**
    * Trigger the pass move.
    */
   pass = (magicItemId) => {
-    const { isActive, selectAction } = this.props
+    const { isActive } = this.props
     if (isActive) {
       this.props.moves.pass(magicItemId)
     }
+    this.clearSelection()
+  }
+
+  clearSelection = () => {
     this.props.selectComponent(undefined)
+    this.props.selectAction(undefined)
     this.props.setCanPayCost({})
+    this.props.resetCollect()
     this.handleBoardClick()
-    selectAction(undefined)
+  }
+
+  isActionAvailable = (action) => {
+    // TODO, check if the action cost can be paid
+    return true
   }
 
   /**
@@ -529,7 +541,7 @@ class ResArcanaBoard extends Component {
    * This board is player specific and is not available for spectators during draft phase.
    */
   renderPlayerBoard = (id) => {
-    const { G, playerID, profile, selectAction } = this.props
+    const { G, playerID, profile, selectAction, selectActionPower } = this.props
     if (!Number.isInteger(parseInt(id))) return null
 
     let cards = null
@@ -557,6 +569,11 @@ class ResArcanaBoard extends Component {
             onClick: (event) => {
               this.handleClick(event, component)
               selectAction('PLAY')
+              if (component.hasActionPower && component.actionPowerList.length === 1) {
+                selectActionPower(0)
+              } else {
+                selectActionPower()
+              }
             }
           } : null
         }
@@ -927,21 +944,35 @@ class ResArcanaBoard extends Component {
   }
 
   renderInPlayActions = () => {
-    const { selectedComponent } = this.props
+    const { selectActionPower, selectedComponent, selectedActionPower } = this.props
     let directive = selectedComponent.hasActionPower ? 
+      selectedComponent.actionPowerList.length > 1 ?
       <h5 className="directive">Choose an action for {selectedComponent.name}</h5>
+      :
+      <h5 className="directive">Pay the action cost and confirm your action for {selectedComponent.name}</h5>
       : 
       <h5 className="directive">There is no action available for {selectedComponent.name}</h5>
 
-    let actionPanel = selectedComponent.hasActionPower && selectedComponent.actionPowerList.map((action, index) => {
-      return <ActionPower key={index} component={selectedComponent} action={action} index={index}></ActionPower>
-    })
+      let actionPanel
+    if (selectedActionPower >= 0) {
+      const action = selectedComponent.actionPowerList[0]
+      actionPanel = <>
+        <ActionPower key={0} component={selectedComponent} action={action} index={0}></ActionPower>
+        <h5>YOLO</h5>
+      </>
+    } else {
+      actionPanel = selectedComponent.hasActionPower && selectedComponent.actionPowerList.map((action, index) => {
+        let onClick = this.isActionAvailable(action) ? () => selectActionPower(index) : null
+        return <ActionPower key={index} component={selectedComponent} action={action} index={index} onClick={onClick}></ActionPower>
+      })
+    }
     return <>
       <div className="action-container">
         <div className="action-component in-hand">
           {this.renderGameComponent(selectedComponent)}
           {actionPanel && 
             <div className="action-list">
+              <h5>selectedActionPower : {selectedActionPower}</h5>
               {actionPanel}
             </div>
           }
@@ -1566,7 +1597,7 @@ class ResArcanaBoard extends Component {
   }
 
   renderCurrentAction = () => {
-    const { essencePickerSelection, profile, selectAction, selectedAction, selectedComponent } = this.props
+    const { essencePickerSelection, profile, selectAction, selectActionPower, selectedAction, selectedActionPower, selectedComponent } = this.props
 
     let availableActions
     let costValid
@@ -1605,11 +1636,14 @@ class ResArcanaBoard extends Component {
         break
       case 'PLAY':
         availableActions = this.renderInPlayActions()
+        if (selectedComponent.hasActionPower && selectedComponent.actionPowerList.length > 1 && selectedActionPower >= 0) {
+          handleCancel = () => selectActionPower()
+        }
         break
       case 'CLAIM':
         availableActions = this.renderClaimAction()
         costValid = this.costSelectionValidator()
-        handleConfirm = costValid.isValid ?() => this.placeComponent(selectedComponent.type, selectedComponent.id, essencePickerSelection) : null
+        handleConfirm = costValid.isValid ? () => this.placeComponent(selectedComponent.type, selectedComponent.id, essencePickerSelection) : null
         break
       default:
     }
@@ -1741,20 +1775,22 @@ class ResArcanaBoard extends Component {
 const mapStateToProps = (state) => {
   return {
     auth: state.firebase.auth,
-    canPayCost: state.game.canPayCost,
     chat : state.firestore.ordered.chat && state.firestore.ordered.chat[0],
     chatDisplay: state.chat.chatDisplay,
+    currentGame: state.firestore.data.currentGame,
+    game: state.firestore.ordered.game && state.firestore.ordered.game[0],
+    profile: state.firebase.profile,
+
+    canPayCost: state.game.canPayCost,
     commonBoardDisplay: state.game.commonBoardDisplay,
     cardToZoom: state.game.zoomCard,
     collectActions: state.game.collectActions,
     collectOnComponentActions: state.game.collectOnComponentActions,
-    currentGame: state.firestore.data.currentGame,
     essencePickerSelection: state.game.essencePickerSelection,
     focusZoom: state.game.focusZoom,
-    game: state.firestore.ordered.game && state.firestore.ordered.game[0],
-    profile: state.firebase.profile,
     selectedComponent: state.game.selectedComponent,
-    selectedAction: state.game.selectedAction
+    selectedAction: state.game.selectedAction,
+    selectedActionPower: state.game.selectedActionPower
   }
 }
 
@@ -1768,6 +1804,7 @@ const mapDispatchToProps = (dispatch) => {
     setCollectAction: (action) => dispatch(setCollectAction(action)),
     setFocusZoom: (flag) => dispatch(setFocusZoom(flag)),
     selectAction: (action) => dispatch(selectAction(action)),
+    selectActionPower: (index) => dispatch(selectActionPower(index)),
     selectComponent: (card) => dispatch(selectComponent(card)),
     setEssencePickerSelection: (essenceSelection) => dispatch(setEssencePickerSelection(essenceSelection)),
     toggleChat: () => dispatch(toggleChat()),

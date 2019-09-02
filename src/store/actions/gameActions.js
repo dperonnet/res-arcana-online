@@ -416,6 +416,13 @@ export function selectAction(action) {
   }
 }
 
+export function selectActionPower(index) {
+  return {
+    type: 'SET_ACTION_POWER',
+    actionPowerIndex: index
+  }
+}
+
 export function resetEssencePickerSelection() {
   return {
     type: 'RESET_ESSENCE_PICKER'

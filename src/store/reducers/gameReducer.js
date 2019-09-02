@@ -4,6 +4,7 @@ const initState = {
   games: [],
   selectedComponent: undefined,
   selectedAction: undefined,
+  selectedActionPower: undefined,
   turnedComponents: [],
   collectActions: {},
   collectOnComponentActions: {},
@@ -105,6 +106,10 @@ const gameReducer = (state = initState, action) => {
     case 'SET_ACTION':
       return Object.assign({}, state, {
         selectedAction: action.action
+      })
+    case 'SET_ACTION_POWER':
+      return Object.assign({}, state, {
+        selectedActionPower: action.actionPowerIndex
       })
     case 'RESET_ESSENCE_PICKER':
       return Object.assign({}, state, {
