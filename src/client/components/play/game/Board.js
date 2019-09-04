@@ -477,11 +477,11 @@ class ResArcanaBoard extends Component {
     const monumentsStack = renderGameComponents([copy(CARD_BACK_MONUMENT)])
     const monuments = renderGameComponents(G.publicData.monumentsRevealed)
     return <>
+      <div className="close" onClick={this.handleToggleCommonBoard}>
+        <FontAwesomeIcon icon={faTimes} size="lg" />
+      </div>
       <div className={'components' + (canPayCost.valid ? '' : ' invalid')}>
         <h5>Places of power ({G.publicData.placesOfPowerInGame.length} left)
-          <div className="close" onClick={this.handleToggleCommonBoard}>
-            <FontAwesomeIcon icon={faTimes} size="lg" />
-          </div>
         </h5>
         <div className="place-of-power-container">
           {placesOfPower}

@@ -37,6 +37,10 @@
   text-align: center;
   flex-shrink: 0;
   margin-left: -15px;
+
+  .components {
+    position: relative;
+  }
 }
 
 @media (max-width: 768px) {
