@@ -146,12 +146,14 @@ export default class ActionPower extends Component {
   }
 
   render() {
-    let { component, action, index, onClick } = this.props
+    let { component, action, disabled, index, onClick, selected } = this.props
     let cost = this.renderActionCost(action)
     let gain = this.renderActionGain(action)
-    let color = component.type === 'placeOfPower' ? ' place-of-power-action': ''
+    let color = component.type === 'placeOfPower' ? ' place-of-power-action' : ''
+    let disable = disabled ? ' disabled' : ''
+    let select = selected ? ' selected' : ''
 
-    return <div className={'component-action position-'+index + color} onClick={onClick}>
+    return <div className={'component-action position-'+index + color + disable + select} onClick={onClick}>
       <div className="action-cost-part">{cost}</div>
       <div className="icon gain-icon"></div>
       <div className="action-gain-part">{gain}</div>

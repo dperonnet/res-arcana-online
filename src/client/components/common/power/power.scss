@@ -25,13 +25,16 @@
   justify-content: center;
   cursor: pointer;
 
-  &:hover:not(.disabled), &.valid:hover {
-    background-color: rgba(252, 209, 122, 0.7);
-  }
-
   &.place-of-power-action {
     background-color: rgba(255, 255, 255, 0.4);
     width: 320px;
+  }
+
+  &:hover:not(.disabled), &.valid:hover, &.selected {
+    background-color: rgba(252, 209, 122, 0.7);
+  }
+  &.selected {
+    cursor: default;
   }
 
   &.position-1 {
@@ -96,9 +99,8 @@
     margin: 0 2px 0 -5px;
   }
   
-  &.invalid {
+  &.disabled {
     border: 1px solid darkred;
-    color: darkred;
     cursor: not-allowed;
     background-color: rgba(0, 0,0 ,0.3);
   }

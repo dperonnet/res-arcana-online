@@ -13,13 +13,13 @@ class EssencePicker extends Component {
   }
 
   handleAddEssence = (essenceType) => {
-    const { addToEssencePickerSelection, asCost, essencesPool, essencePickerSelection, setEssencePickerSelection } = this.props
+    const { addToEssencePickerSelection, asCost, defaultSelection, essencesPool, essencePickerSelection, setEssencePickerSelection } = this.props
     const currentQtty = essencePickerSelection[essenceType] ? essencePickerSelection[essenceType] : 0
     if (!asCost || essencesPool[essenceType] > currentQtty) {
       addToEssencePickerSelection(essenceType)
     } else {
       let selection = copy(essencePickerSelection)
-      selection[essenceType] = 0
+      selection[essenceType] = (defaultSelection && defaultSelection[essenceType]) || 0
       setEssencePickerSelection(selection)
     }
   }

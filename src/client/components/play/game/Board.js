@@ -297,10 +297,80 @@ class ResArcanaBoard extends Component {
     this.handleBoardClick()
   }
 
-  isActionAvailable = (action) => {
+  isActionAvailable = (action, component) => {
     // TODO, check if the action cost can be paid
-    return true
+    const { G, playerID } = this.props
+    let isValid = true;
+    const turnedComponents = G.publicData.turnedComponents
+    if (!!turnedComponents[component.id] && !action.cost.onlyWhenTurned) {
+      return false
+    }
+    if (!turnedComponents[component.id] && action.cost.onlyWhenTurned) {
+      return false
+    }
+    if (action.cost.turnDragon) {
+      let dragons = G.publicData.players[playerID].inPlay.filter((component) => component.isDragon)
+      let dragonAvailable = false
+      dragons.forEach((dragon) => {
+        if (!turnedComponents[dragon.id]) {
+          dragonAvailable = true
+        }
+      })
+      if (!dragonAvailable) {
+        return false
+      }
+    }
+    if (action.cost.turnCreature) {
+      let creatures = G.publicData.players[playerID].inPlay.filter((component) => component.isCreature)
+      let creatureAvailable = false
+      creatures.forEach((creature) => {
+        if (!turnedComponents[creature.id]) {
+          creatureAvailable = true
+        }
+      })
+      if (!creatureAvailable) {
+        return false
+      }
+    }
+    if (!!action.cost.essenceList) {
+      let fixedEssences = action.cost.essenceList.filter((essence) => !essence.type.startsWith('any'))
+      let availableEssences = {}
+      // if the essenceList to pay is on component, check essencesOnComponent instead of player's essences pool
+      if (action.cost.onComponent) {
+        if (G.publicData.players[playerID].essencesOnComponent[component.id]) {
+          G.publicData.players[playerID].essencesOnComponent[component.id].map((essence) => availableEssences[essence.type] = essence.quantity)
+        } else {
+          return false
+        }
+      } else {
+        availableEssences = G.publicData.players[playerID].essencesPool
+      }
+
+      if (action.cost.multipleCostOptions) {
+        fixedEssences.forEach((essence) => {
+          isValid = isValid || (availableEssences[essence.type] >= essence.quantity)
+        })
+      } else {
+        fixedEssences.forEach((essence) => {
+          isValid = isValid && availableEssences[essence.type] >= essence.quantity
+        })
+      }
+      
+      let anyEssences = action.cost.essenceList.filter((essence) => essence.type.startsWith('any'))
+      let sumInPool = Object.values(G.publicData.players[playerID].essencesPool).reduce((a,b) => {return a + b}, 0)
+      anyEssences.forEach((essence) => {
+        isValid = isValid && sumInPool >= essence.quantity
+      })
+    }
+    if (action.cost.destroyAnotherArtefact) {
+      let artefacts = G.publicData.players[playerID].inPlay.filter((component) => {return component.type === 'artefact' && component.id !== component.id})
+      if (artefacts.length === 0) {
+        return false
+      }
+    }
+    return isValid
   }
+
 
   /**
    * Render the component to Zoom.
@@ -569,7 +639,7 @@ class ResArcanaBoard extends Component {
             onClick: (event) => {
               this.handleClick(event, component)
               selectAction('PLAY')
-              if (component.hasActionPower && component.actionPowerList.length === 1) {
+              if (component.hasActionPower && component.actionPowerList.length === 1 && this.isActionAvailable(component.actionPowerList[0], component)) {
                 selectActionPower(0)
               } else {
                 selectActionPower()
@@ -945,34 +1015,49 @@ class ResArcanaBoard extends Component {
 
   renderInPlayActions = () => {
     const { selectActionPower, selectedComponent, selectedActionPower } = this.props
-    let directive = selectedComponent.hasActionPower ? 
-      selectedComponent.actionPowerList.length > 1 ?
-      <h5 className="directive">Choose an action for {selectedComponent.name}</h5>
-      :
-      <h5 className="directive">Pay the action cost and confirm your action for {selectedComponent.name}</h5>
-      : 
-      <h5 className="directive">There is no action available for {selectedComponent.name}</h5>
 
-      let actionPanel
+    const noActionAvailable = <h5 className="directive">There is no action available for {selectedComponent.name}</h5>
+    const chooseAction = <h5 className="directive">Choose an action for {selectedComponent.name}</h5>
+    const payActionCost = <h5 className="directive">Pay the action cost and confirm your action for {selectedComponent.name}</h5>
+    
+    let actionPanel
+    let directive
+
+    // if an action power is selected render action dialog components
     if (selectedActionPower >= 0) {
       const action = selectedComponent.actionPowerList[0]
       actionPanel = <>
-        <ActionPower key={0} component={selectedComponent} action={action} index={0}></ActionPower>
-        <h5>YOLO</h5>
+        <ActionPower key={0} component={selectedComponent} selected={true} action={action} index={0}></ActionPower>
+        <h5>Pay with : ...</h5>
+        <h5>Gain : ...</h5>
       </>
-    } else {
+      directive = payActionCost
+
+    // else if the component has action power, render the action power list
+    } else if (selectedComponent.hasActionPower) {
       actionPanel = selectedComponent.hasActionPower && selectedComponent.actionPowerList.map((action, index) => {
-        let onClick = this.isActionAvailable(action) ? () => selectActionPower(index) : null
-        return <ActionPower key={index} component={selectedComponent} action={action} index={index} onClick={onClick}></ActionPower>
+        let isActionAvailable = this.isActionAvailable(action, selectedComponent)
+        let onClick = isActionAvailable ? () => selectActionPower(index) : null
+        return <ActionPower key={index} component={selectedComponent} action={action} disabled={!isActionAvailable} index={index} onClick={onClick}></ActionPower>
       })
+
+      let hasActionAvailable = false
+      selectedComponent.actionPowerList.map((action) => {
+        hasActionAvailable = hasActionAvailable || this.isActionAvailable(action, selectedComponent)
+      })
+      directive = hasActionAvailable ? chooseAction : noActionAvailable
+
+    // else render the no action available directive
+    } else {
+      directive = noActionAvailable
     }
+
     return <>
       <div className="action-container">
         <div className="action-component in-hand">
           {this.renderGameComponent(selectedComponent)}
           {actionPanel && 
             <div className="action-list">
-              <h5>selectedActionPower : {selectedActionPower}</h5>
               {actionPanel}
             </div>
           }
