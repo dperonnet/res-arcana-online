@@ -423,22 +423,25 @@ export function selectActionPower(index) {
   }
 }
 
-export function resetEssencePickerSelection() {
+export function resetEssencePickerSelection(selectionType) {
   return {
-    type: 'RESET_ESSENCE_PICKER'
+    type: 'RESET_ESSENCE_PICKER',
+    selectionType
   }
 }
 
-export function addToEssencePickerSelection(essenceType) {
+export function addToEssencePickerSelection(selectionType, essenceType) {
   return {
     type: 'ADD_ESSENCE_TO_SELECTION',
+    selectionType,
     essenceType
   }
 }
 
-export function setEssencePickerSelection(essenceSelection) {
+export function setEssencePickerSelection(selectionType, essenceSelection) {
   return {
     type: 'SET_ESSENCE_SELECTION',
+    selectionType,
     essenceSelection
   }
 }

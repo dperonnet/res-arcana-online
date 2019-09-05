@@ -6,50 +6,57 @@ import { faPlus } from '@fortawesome/free-solid-svg-icons';
 
 class EssencePicker extends Component {
   componentDidMount() {
-    const { asCost } = this.props
+    const { asCost, selectionType } = this.props
     if(!asCost) {
-      this.props.resetEssencePickerSelection()
+      this.props.resetSelection(selectionType)
     }
   }
 
   handleAddEssence = (essenceType) => {
-    const { addToEssencePickerSelection, asCost, defaultSelection, essencesPool, essencePickerSelection, setEssencePickerSelection } = this.props
-    const currentQtty = essencePickerSelection[essenceType] ? essencePickerSelection[essenceType] : 0
+    const { addToSelection, asCost, defaultSelection, essencesPool, essencePickerSelection, setSelection, selectionType } = this.props
+    let selection = essencePickerSelection[selectionType]
+    const currentQtty = selection[essenceType] ? selection[essenceType] : 0
     if (!asCost || essencesPool[essenceType] > currentQtty) {
-      addToEssencePickerSelection(essenceType)
+      console.log('essencesPool[essenceType]',essencesPool, essenceType, currentQtty);
+      addToSelection(selectionType, essenceType)
     } else {
-      let selection = copy(essencePickerSelection)
-      selection[essenceType] = (defaultSelection && defaultSelection[essenceType]) || 0
-      setEssencePickerSelection(selection)
+      let newSelection = copy(selection)
+      newSelection[essenceType] = (defaultSelection && defaultSelection[essenceType]) || 0
+      setSelection(selectionType, newSelection)
     }
   }
 
   handleReset = () => {
-    const { defaultSelection, resetEssencePickerSelection, setEssencePickerSelection } = this.props
+    const { defaultSelection, resetSelection, setSelection, selectionType } = this.props
     if (defaultSelection) {
-      setEssencePickerSelection(defaultSelection)
+      setSelection(selectionType, defaultSelection)
     } else {
-      resetEssencePickerSelection()
+      resetSelection(selectionType)
     }
   }
 
   renderEssencePicker = () => {
-    const { essenceListType, essenceNumber, essencePickerSelection, enabledEssencesList, asCost, sumDiscount, validCost, lock } = this.props
+    const { pickerType, selectionType, essencePickerSelection, pickQuantity, enabledEssencesList, asCost, sumDiscount, validCost, lock } = this.props
+    console.log('essencePickerSelection',essencePickerSelection);
+    let selection = essencePickerSelection[selectionType]
     let count = 0
-    Object.values(essencePickerSelection).forEach((value) => count = count + value)
-    let isValid = asCost ? validCost : essenceNumber === count + (asCost ? sumDiscount : 0)
-    let picker
 
-    const essenceList = ['elan', 'life', 'calm', 'death', 'gold']
-    switch (essenceListType) {
-      case 'anyButGold':
-        essenceList.pop()
+    Object.values(selection).forEach((value) => count = count + value)
+    let isValid = asCost ? validCost : pickQuantity === count + (asCost ? sumDiscount : 0)
+
+    let essenceList
+    switch (pickerType) {
+      case 'any-but-gold':
+        essenceList = ['elan', 'life', 'calm', 'death']
         break
-      case 'anyButDeathGold':
-        essenceList.pop()
-        essenceList.pop()
+      case 'any-but-death-gold':
+        essenceList = ['elan', 'life', 'calm']
+        break
+      case 'any-but-life-gold':
+        essenceList = ['elan', 'calm', 'death']
         break
       default:
+        essenceList = ['elan', 'life', 'calm', 'death', 'gold']
     }
 
     let handleOnClick
@@ -65,16 +72,17 @@ class EssencePicker extends Component {
     let hidePlus
     let renderedCount = 0
     let enabledEssences = !!enabledEssencesList ? enabledEssencesList : essenceList
-    picker = essenceList.map((type, index) => {
+    
+    let picker = essenceList.map((type, index) => {
       let enabled = enabledEssences && enabledEssences.includes(type)
-      let fade = (isValid && !essencePickerSelection[type]) || !enabled ? ' fade-option' : ''
+      let fade = (isValid && !selection[type]) || !enabled ? ' fade-option' : ''
       let pointer = !lock && enabled ? isValid ? ' delete-cursor' : ' pointer-cursor' : ''
       let isLast =  index === essenceList.length -1
       let pointerLock = lock ? ' not-allowed-cursor' : ''
 
       if (isValid) {
-        renderedCount = essencePickerSelection[type] ? renderedCount + 1 : renderedCount
-        let refListLength = Object.values(essencePickerSelection).filter((value) => value > 0).length
+        renderedCount = selection[type] ? renderedCount + 1 : renderedCount
+        let refListLength = Object.values(selection).filter((value) => value > 0).length
         hidePlus = enabled && !fade && renderedCount === refListLength ? ' fade-option' : ''
       } else {
         if (index < essenceList.length - 1) {
@@ -85,7 +93,7 @@ class EssencePicker extends Component {
       
       return <div key={type} className={'collect-option ' + fade + pointerLock} onClick={ () => isValid && !lock ? handleOnClick(type) : null}>
           <div className={'essence ' + type + pointer} onClick={ () => !isValid && enabled && !lock ? handleOnClick(type) : null}>
-          {essencePickerSelection[type] || 0}
+          {selection[type] || 0}
         </div>
         {!isLast && <div className={'operator ' + hidePlus}>
           <FontAwesomeIcon icon={faPlus} size="sm" />
@@ -116,9 +124,9 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    addToEssencePickerSelection: (essenceType) => dispatch(addToEssencePickerSelection(essenceType)),
-    resetEssencePickerSelection: () => dispatch(resetEssencePickerSelection()),
-    setEssencePickerSelection: (selection) => dispatch(setEssencePickerSelection(selection)),
+    addToSelection: (selectionType, essenceType) => dispatch(addToEssencePickerSelection(selectionType, essenceType)),
+    resetSelection: (selectionType) => dispatch(resetEssencePickerSelection(selectionType)),
+    setSelection: (selectionType, selection) => dispatch(setEssencePickerSelection(selectionType, selection)),
   }
 }
 

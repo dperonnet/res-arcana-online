@@ -177,6 +177,7 @@
       flex: 1;
       display: flex;
       justify-content: center;
+      z-index: 1;
 
       .card.active, .place-of-power.active, .in-hand .magic-item.active {
         box-shadow: none;
@@ -455,6 +456,7 @@
   height: 38px;
   font-size: 1.15rem;
   line-height: 2;
+  z-index: 2;
 
   .operator, .operator {
     font-size: 0.875em;

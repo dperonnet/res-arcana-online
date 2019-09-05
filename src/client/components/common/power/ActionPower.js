@@ -16,7 +16,7 @@ export default class ActionPower extends Component {
         {signModifier}{(essence.quantity > 1) || (essence.quantity < 0) ? essence.quantity : ''}</div>
         {plus && !isLast && <div className="operator mt-n2 mr-0 ml-0">+</div>}
         {slash && !isLast && <div className="operator mt-n2">
-          <FontAwesomeIcon icon={faSlash} size="xs" rotation={80} />
+          <FontAwesomeIcon icon={faSlash} size="xs" rotation={90} />
         </div>}
       </div>
     })

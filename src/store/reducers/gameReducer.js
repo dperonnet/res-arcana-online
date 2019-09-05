@@ -8,7 +8,12 @@ const initState = {
   turnedComponents: [],
   collectActions: {},
   collectOnComponentActions: {},
-  essencePickerSelection: {},
+  essencePickerSelection: {
+    actionCost: {},
+    actionGain: {},
+    discardGain: {},
+    placementCost : {}
+  },
   focusZoom: true,
   canPayCost: {
     valid: false
@@ -112,17 +117,32 @@ const gameReducer = (state = initState, action) => {
         selectedActionPower: action.actionPowerIndex
       })
     case 'RESET_ESSENCE_PICKER':
+      if (action.selectionType) {
+        essencePickerSelection = JSON.parse(JSON.stringify(state.essencePickerSelection))
+        essencePickerSelection[action.selectionType] = {}
+      } else {
+        essencePickerSelection = {
+          actionCost: {},
+          actionGain: {},
+          discardGain: {},
+          placementCost : {}
+        }
+      }
+      console.log('RESET_ESSENCE_PICKER essencePickerSelection',essencePickerSelection,'action.selectionType',action.selectionType,essencePickerSelection[action.selectionType]);
       return Object.assign({}, state, {
-        essencePickerSelection: {}
+        essencePickerSelection
       });
     case 'ADD_ESSENCE_TO_SELECTION':
       essencePickerSelection = JSON.parse(JSON.stringify(state.essencePickerSelection))
-      essencePickerSelection[action.essenceType] = essencePickerSelection[action.essenceType] ? essencePickerSelection[action.essenceType] + 1 : 1
+      essencePickerSelection[action.selectionType][action.essenceType] = essencePickerSelection[action.selectionType][action.essenceType] ?
+        essencePickerSelection[action.selectionType][action.essenceType] + 1 : 1
       return Object.assign({}, state, {
         essencePickerSelection
       });
     case 'SET_ESSENCE_SELECTION':
-      essencePickerSelection = JSON.parse(JSON.stringify(action.essenceSelection))
+      essencePickerSelection = JSON.parse(JSON.stringify(state.essencePickerSelection))
+      essencePickerSelection[action.selectionType] = JSON.parse(JSON.stringify(action.essenceSelection))
+      console.log('selectionType',action.selectionType,'essenceType',action.essenceSelection,'essencePickerSelection',essencePickerSelection);
       return Object.assign({}, state, {
         essencePickerSelection
       });

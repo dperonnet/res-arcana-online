@@ -144,7 +144,7 @@ class ResArcanaBoard extends Component {
       if (component.hasCost) {
         canPayCost = this.canPayCost(component)
         const preSelection = !!canPayCost.fixedCost ? canPayCost.fixedCost: canPayCost.minEssencePayList
-        this.props.setEssencePickerSelection(preSelection)
+        this.props.setSelection('placementCost', preSelection)
       }
       this.props.setCanPayCost(component.hasCost ? canPayCost : {valid: true})
     }
@@ -260,7 +260,7 @@ class ResArcanaBoard extends Component {
    * Trigger the discard artefact move.
    */
   discardArtefact = (cardId, essenceList) => {
-    const { isActive, selectAction } = this.props
+    const { isActive } = this.props
     if (isActive) {
       this.props.moves.discardArtefact(cardId, essenceList)
     }
@@ -292,13 +292,16 @@ class ResArcanaBoard extends Component {
   clearSelection = () => {
     this.props.selectComponent(undefined)
     this.props.selectAction(undefined)
+    this.props.selectActionPower(undefined)
     this.props.setCanPayCost({})
     this.props.resetCollect()
     this.handleBoardClick()
   }
 
+  /**
+   * Check the action cost requirements to define if an action is available
+   */
   isActionAvailable = (action, component) => {
-    // TODO, check if the action cost can be paid
     const { G, playerID } = this.props
     let isValid = true;
     const turnedComponents = G.publicData.turnedComponents
@@ -365,6 +368,17 @@ class ResArcanaBoard extends Component {
     if (action.cost.destroyAnotherArtefact) {
       let artefacts = G.publicData.players[playerID].inPlay.filter((component) => {return component.type === 'artefact' && component.id !== component.id})
       if (artefacts.length === 0) {
+        return false
+      }
+    }
+    if (action.cost.destroyOneDragonOrCreature) {
+      let artefacts = G.publicData.players[playerID].inPlay.filter((component) => {return component.type === 'artefact' && (component.isDragon || component.isCreature)})
+      if (artefacts.length === 0) {
+        return false
+      }
+    }
+    if (action.cost.discardArtefact) {
+      if (G.publicData.players[playerID].handSize === 0) {
         return false
       }
     }
@@ -1013,6 +1027,43 @@ class ResArcanaBoard extends Component {
     </>
   }
 
+  renderActionPower = (action, component) => {
+    const { G, playerID, essencePickerSelection } = this.props
+    const selectedPower = <ActionPower key={0} component={component} selected={true} action={action} index={0}></ActionPower>
+    let cost, gain
+    const costAnyEssence = (action.cost.essenceList && action.cost.essenceList.filter(essence => essence.type.startsWith('any'))) || []
+    const gainAnyEssence = (action.gain.essenceList && action.gain.essenceList.filter(essence => essence.type.startsWith('any'))) || []
+    const essencesPool = G.publicData.players[playerID].essencesPool
+    let enabledEssencesList = []
+    Object.entries(essencesPool).forEach(essence => {
+      if (essence[1] > 0) {
+        enabledEssencesList.push(essence[0])
+      }
+    })
+    
+    if (costAnyEssence.length > 0) {
+      let count = 0
+      Object.values(essencePickerSelection.actionCost).forEach((value) => count = count + value)
+      let isValid = costAnyEssence[0].quantity === count
+      cost = <>
+        <h5>Pay with : </h5>
+        <EssencePicker selectionType={'actionCost'} pickerType={costAnyEssence[0].type} pickQuantity={costAnyEssence[0].quantity} 
+          asCost={true} validCost={isValid} essencesPool={essencesPool} enabledEssencesList={enabledEssencesList}/>
+      </>
+    }
+    if (gainAnyEssence.length > 0) {
+      gain = <>
+        <h5>Gain : </h5>
+        <EssencePicker selectionType={'actionGain'} pickerType={gainAnyEssence[0].type} pickQuantity={gainAnyEssence[0].quantity} />
+      </>
+    }
+    return <>
+      {selectedPower}
+      {cost}
+      {gain}
+    </>
+  }
+
   renderInPlayActions = () => {
     const { selectActionPower, selectedComponent, selectedActionPower } = this.props
 
@@ -1025,12 +1076,9 @@ class ResArcanaBoard extends Component {
 
     // if an action power is selected render action dialog components
     if (selectedActionPower >= 0) {
-      const action = selectedComponent.actionPowerList[0]
-      actionPanel = <>
-        <ActionPower key={0} component={selectedComponent} selected={true} action={action} index={0}></ActionPower>
-        <h5>Pay with : ...</h5>
-        <h5>Gain : ...</h5>
-      </>
+      const action = selectedComponent.actionPowerList[selectedActionPower]
+      actionPanel = this.renderActionPower(action, selectedComponent)
+
       directive = payActionCost
 
     // else if the component has action power, render the action power list
@@ -1067,14 +1115,14 @@ class ResArcanaBoard extends Component {
     </>
   }
   
-  renderClaimAction = () => {
+  renderClaimAction = (costValid) => {
     const { canPayCost, selectedComponent } = this.props
-
     let costEssenceList = selectedComponent.costEssenceList ? selectedComponent.costEssenceList : [{type: 'gold', quantity: 4}]
 
     let costFrameEssenceList = costEssenceList.map((essence) => {
       let singleEssence = costEssenceList.length === 1 ? ' single-essence' : ''
-      return <div key={essence.type} className={'essence ' + (essence.type) + singleEssence}>{essence.quantity}</div>
+      let payOk = costValid[essence.type] || costValid.isValid ? <div className="pay-ok"></div> : null
+      return <div key={essence.type} className={'essence ' + (essence.type) + singleEssence}>{payOk}{essence.quantity}</div>
     });
     let componentCost = <div className="cost-frame">
       <div className="cost-frame-content">
@@ -1084,7 +1132,7 @@ class ResArcanaBoard extends Component {
 
     let directiveEssenceList = costEssenceList.map((essence, index) => {
       let isLast = index === costEssenceList.length -1
-      return <div key={essence.type} className={'icon '}>
+      return <div key={essence.type} className={'icons '}>
         <div className={'type essence ' + essence.type}>{essence.quantity}</div>
         {!isLast && <div className="operator">
           <FontAwesomeIcon icon={faPlus} size="sm" />
@@ -1133,14 +1181,14 @@ class ResArcanaBoard extends Component {
   }
   
   renderInHandActions = (costValid) => {
-    const { addToEssencePickerSelection, canPayCost, essencePickerSelection, resetEssencePickerSelection,
-      selectAction, selectedAction, selectedComponent, setEssencePickerSelection } = this.props
+    const { addToSelection, canPayCost, essencePickerSelection, resetSelection,
+      selectAction, selectedAction, selectedComponent, setSelection } = this.props
 
     let actionPanel = null
     let directive = selectedComponent &&<h5 className="directive">Choose an action for {selectedComponent.name}</h5>
 
-    let essenceList = Object.entries(essencePickerSelection).map((essence, index) => {
-      let isLast = index === Object.entries(essencePickerSelection).length -1
+    let essenceList = Object.entries(essencePickerSelection.discardGain).map((essence, index) => {
+      let isLast = index === Object.entries(essencePickerSelection.discardGain).length -1
       return <div key={essence[0]} className={'icons '}>
         <div className={'type essence ' + essence[0]}>{essence[1] || 0}</div>
         {!isLast && <div className="operator">
@@ -1152,7 +1200,7 @@ class ResArcanaBoard extends Component {
     switch (selectedAction) {
       case 'DISCARD_FOR_2E':
         let count = 0
-        Object.values(essencePickerSelection).forEach((value) => count = count + value)
+        Object.values(essencePickerSelection.discardGain).forEach((value) => count = count + value)
         let isValid = count === 2
         directive =  isValid ?
           <h5 className="directive">
@@ -1171,7 +1219,7 @@ class ResArcanaBoard extends Component {
           </h5>
         actionPanel = <div>
           <h5>Discard for:</h5>
-          <EssencePicker essenceListType={'anyButGold'} essenceNumber={2} />
+          <EssencePicker selectionType={'discardGain'} pickerType={'any-but-gold'} pickQuantity={2} />
         </div>
         break
       case 'DISCARD_FOR_1G':
@@ -1184,7 +1232,7 @@ class ResArcanaBoard extends Component {
         break
       case 'PLACE_ARTEFACT':
         actionPanel = this.renderCostHandler()
-        const selection = Object.entries(essencePickerSelection).filter((item) =>  item[1] > 0)
+        const selection = Object.entries(essencePickerSelection.placementCost).filter((item) =>  item[1] > 0)
         console.log('selection',selection)
         essenceList = selection.length > 0 ? selection.map((essence, index) => {
           console.log('essence',essence,', index',index)
@@ -1214,7 +1262,7 @@ class ResArcanaBoard extends Component {
       case 'HAND':
         const handlePlaceAction = () => {
           const preSelection = !!canPayCost.fixedCost ? canPayCost.fixedCost: canPayCost.minEssencePayList
-          setEssencePickerSelection(preSelection)
+          setSelection('placementCost', preSelection)
           selectAction('PLACE_ARTEFACT')
         }
         
@@ -1230,7 +1278,7 @@ class ResArcanaBoard extends Component {
               </div>
             </div>
           </div>
-          <div className="action-button" size="sm" onClick={() => {resetEssencePickerSelection(); addToEssencePickerSelection('gold'); selectAction('DISCARD_FOR_1G')}}>
+          <div className="action-button" size="sm" onClick={() => {resetSelection(); addToSelection('discardGain', 'gold'); selectAction('DISCARD_FOR_1G')}}>
             <div className="inline-text">Discard for </div>
             <div className="inline-icons">
               <div className="icons">
@@ -1259,7 +1307,7 @@ class ResArcanaBoard extends Component {
   }
   
   renderCostHandler = () => {
-    const { G, playerID, canPayCost, selectedComponent } = this.props
+    const { G, playerID, canPayCost, essencePickerSelection, selectedComponent } = this.props
 
     // Sum discount abilities
     let sumDiscount = 0
@@ -1280,7 +1328,7 @@ class ResArcanaBoard extends Component {
     })
     let sumSelection = Object.values(selectedComponent.costEssenceList).reduce((a,b) => {return a.quantity + b.quantity}, 0)
 
-    const costValid = this.costSelectionValidator(sumDiscount)
+    const costValid = this.costSelectionValidator(essencePickerSelection.placementCost)
     let essences 
     if (selectedComponent.costEssenceList.length > 0) {
       essences = selectedComponent.costEssenceList.map((essence, index) => {
@@ -1302,8 +1350,8 @@ class ResArcanaBoard extends Component {
         <h5 className="pb-2">Pay with:</h5>
         {discounts}
         <div className="">
-          <EssencePicker enabledEssencesList={canPayCost.enabledEssencesList} defaultSelection={canPayCost.minEssencePayList} essencesPool={essencesPool}
-            essenceNumber={sumSelection} discount={sumDiscount} asCost={true} validCost={costValid.isValid} lock={!!canPayCost.fixedCost}/>
+          <EssencePicker selectionType={'placementCost'} enabledEssencesList={canPayCost.enabledEssencesList} defaultSelection={canPayCost.minEssencePayList} essencesPool={essencesPool}
+            pickQuantity={sumSelection} discount={sumDiscount} asCost={true} validCost={costValid.isValid} lock={!!canPayCost.fixedCost}/>
         </div>
       </div>
       <div className="cost-frame">
@@ -1563,21 +1611,23 @@ class ResArcanaBoard extends Component {
    * Validate the placement cost of a component. According to the current discounts available,
    * determines, for each essence type of the cost, if it is valid or not .
    */
-  costSelectionValidator = () => {
-    const { G, playerID, essencePickerSelection, selectedComponent } = this.props
+  costSelectionValidator = (essenceList) => {
+    const { G, playerID, selectedComponent } = this.props
     const costList = copy(selectedComponent.costEssenceList)
-    let selectionList = copy(essencePickerSelection)
+    let selectionList = copy(essenceList)
         
     let maxDiscount = 0
     // compute the sum of valid discounts
-    const componentsWithDiscount = G.publicData.players[playerID].inPlay.filter((component) => component.hasDiscountAbility)
-    componentsWithDiscount.forEach((component) => {
-      this.getValidDiscounts(component, selectedComponent).forEach((ability, index) => 
-        ability.discountList.forEach((discount) => {
-          maxDiscount = maxDiscount + discount.quantity
-        })
-      )
-    })
+    if (selectedComponent.type === 'artefact') {
+      const componentsWithDiscount = G.publicData.players[playerID].inPlay.filter((component) => component.hasDiscountAbility)
+      componentsWithDiscount.forEach((component) => {
+        this.getValidDiscounts(component, selectedComponent).forEach((ability, index) => 
+          ability.discountList.forEach((discount) => {
+            maxDiscount = maxDiscount + discount.quantity
+          })
+        )
+      })
+    }
 
     let sumDiscount = maxDiscount
 
@@ -1657,12 +1707,13 @@ class ResArcanaBoard extends Component {
       if (!isValid) {
         Object.entries(typeValidators).filter((item) => item[0] !== 'gold').forEach((item) => {
           let costEssence = costList.filter(essence => essence.type === item[0])[0]
-          typeValidators[item[0]] = costEssence.quantity <= essencePickerSelection[item[0]]
+          typeValidators[item[0]] = costEssence.quantity <= essenceList[item[0]]
         })
       }
 
     } else {
       costList.forEach((costEssence) => {
+        console.log('costSelectionValidator', costList, costEssence, selectionList);
         if (costEssence.type === 'any') {
           typeValidators[costEssence.type] = costEssence.quantity === essencesAsAny
         } else if (Object.keys(selectionList).length > 0) {
@@ -1671,7 +1722,6 @@ class ResArcanaBoard extends Component {
           isValid = false
         }
       })
-      
       Object.entries(typeValidators).forEach((item) => {
         isValid = isValid && item[1]
       })
@@ -1703,20 +1753,20 @@ class ResArcanaBoard extends Component {
         showConfirmButton = false
         break
       case 'PLACE_ARTEFACT':
-        costValid = this.costSelectionValidator()
+        costValid = this.costSelectionValidator(essencePickerSelection.placementCost)
         availableActions = this.renderInHandActions(costValid)
-        handleConfirm = costValid.isValid ? () => this.placeComponent(selectedComponent.type, selectedComponent.id, essencePickerSelection) : null
+        handleConfirm = costValid.isValid ? () => this.placeComponent(selectedComponent.type, selectedComponent.id, essencePickerSelection.placementCost) : null
         handleCancel = () => selectAction('HAND')
         break
       case 'DISCARD_FOR_2E':
         availableActions = this.renderInHandActions()
-        handleConfirm = Object.values(essencePickerSelection).reduce((a,b) => {return a + b}, 0) === 2 ? 
-          () => this.discardArtefact(selectedComponent.id, essencePickerSelection) : null
+        handleConfirm = Object.values(essencePickerSelection.discardGain).reduce((a,b) => {return a + b}, 0) === 2 ? 
+          () => this.discardArtefact(selectedComponent.id, essencePickerSelection.discardGain) : null
         handleCancel = () => selectAction('HAND')
         break
       case 'DISCARD_FOR_1G':
         availableActions = this.renderInHandActions()
-        handleConfirm = () => this.discardArtefact(selectedComponent.id, essencePickerSelection)
+        handleConfirm = () => this.discardArtefact(selectedComponent.id, essencePickerSelection.discardGain)
         handleCancel = () => selectAction('HAND')
         break
       case 'PLAY':
@@ -1726,9 +1776,9 @@ class ResArcanaBoard extends Component {
         }
         break
       case 'CLAIM':
-        availableActions = this.renderClaimAction()
-        costValid = this.costSelectionValidator()
-        handleConfirm = costValid.isValid ? () => this.placeComponent(selectedComponent.type, selectedComponent.id, essencePickerSelection) : null
+        costValid = this.costSelectionValidator(essencePickerSelection.placementCost)
+        availableActions = this.renderClaimAction(costValid)
+        handleConfirm = costValid.isValid ? () => this.placeComponent(selectedComponent.type, selectedComponent.id, essencePickerSelection.placementCost) : null
         break
       default:
     }
@@ -1881,17 +1931,17 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    addToEssencePickerSelection: (essenceType) => dispatch(addToEssencePickerSelection(essenceType)),
+    addToSelection: (selectionType, essenceType) => dispatch(addToEssencePickerSelection(selectionType, essenceType)),
     setCanPayCost: (info) => dispatch(canPayCost(info)),
     clearZoom: () => dispatch(clearZoom()),
     resetCollect: () => dispatch(resetCollect()),
-    resetEssencePickerSelection: () => dispatch(resetEssencePickerSelection()),
+    resetSelection: (selectionType) => dispatch(resetEssencePickerSelection(selectionType)),
     setCollectAction: (action) => dispatch(setCollectAction(action)),
     setFocusZoom: (flag) => dispatch(setFocusZoom(flag)),
     selectAction: (action) => dispatch(selectAction(action)),
     selectActionPower: (index) => dispatch(selectActionPower(index)),
     selectComponent: (card) => dispatch(selectComponent(card)),
-    setEssencePickerSelection: (essenceSelection) => dispatch(setEssencePickerSelection(essenceSelection)),
+    setSelection: (selectionType, essenceSelection) => dispatch(setEssencePickerSelection(selectionType, essenceSelection)),
     toggleChat: () => dispatch(toggleChat()),
     toggleCommonBoard: () => dispatch(toggleCommonBoard()),
     zoomCard: (card) => dispatch(zoomCard(card)),
