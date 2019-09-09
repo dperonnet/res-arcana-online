@@ -49,7 +49,6 @@ class SignedInNav extends Component {
   setCardSizePlus = () => {
     console.log('setCardSizePlus');
     const { profile } = this.props;
-    let size = profile.cardSize
     let index = cardSizeList.findIndex(size => size === profile.cardSize)
     if (index < cardSizeList.length - 1) {
       this.setCardSize(cardSizeList[index + 1])
@@ -57,7 +56,7 @@ class SignedInNav extends Component {
   }
 
   render() {
-    const { chatDisplay, commonBoardDisplay, currentGames, games, profile, signOut } = this.props
+    const { chatDisplay, commonBoardDisplay, currentGames, profile, signOut } = this.props
     return (
       <Navbar collapseOnSelect expand="md" variant="dark" fixed="top">
         <LinkContainer to="/"><Navbar.Brand>Res Arcana Online</Navbar.Brand></LinkContainer>

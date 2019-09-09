@@ -7,7 +7,7 @@ import Register from './components/common/auth/Register';
 import Play from './components/play/Play';
 import Navigation from './components/navigation/Navigation';
 import { BrowserRouter as Router, Route } from "react-router-dom";
-import './assets/style/index.css';
+import './assets/style/index.scss';
 
 const gameServerUrl = "http://localhost:8000"
 

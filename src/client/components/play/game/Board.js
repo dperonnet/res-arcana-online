@@ -134,7 +134,7 @@ class ResArcanaBoard extends Component {
    * Select the clicked component.
    */
   handleClick = (e, component) => {
-    const { board } = this.refs
+    //const { board } = this.refs
     e.stopPropagation();
     //board.scrollTop = 0
     this.props.selectComponent(component)
@@ -142,7 +142,7 @@ class ResArcanaBoard extends Component {
     if (component) {
       let canPayCost
       if (component.hasCost) {
-        canPayCost = this.canPayCost(component)
+        canPayCost = this.canPayPlacementCost(component)
         const preSelection = !!canPayCost.fixedCost ? canPayCost.fixedCost: canPayCost.minEssencePayList
         this.props.setSelection('placementCost', preSelection)
       }
@@ -270,7 +270,7 @@ class ResArcanaBoard extends Component {
   /**
    * Trigger the place component move.
    */
-  placeComponent = (type, id,essenceList) => {
+  placeComponent = (type, id, essenceList) => {
     const { isActive } = this.props
     if (isActive) {
       this.props.moves.placeComponent(type, id, essenceList)
@@ -366,13 +366,13 @@ class ResArcanaBoard extends Component {
       })
     }
     if (action.cost.destroyAnotherArtefact) {
-      let artefacts = G.publicData.players[playerID].inPlay.filter((component) => {return component.type === 'artefact' && component.id !== component.id})
+      let artefacts = G.publicData.players[playerID].inPlay.filter((componentInPlay) => {return componentInPlay.type === 'artefact' && componentInPlay.id !== component.id})
       if (artefacts.length === 0) {
         return false
       }
     }
     if (action.cost.destroyOneDragonOrCreature) {
-      let artefacts = G.publicData.players[playerID].inPlay.filter((component) => {return component.type === 'artefact' && (component.isDragon || component.isCreature)})
+      let artefacts = G.publicData.players[playerID].inPlay.filter((componentInPlay) => {return componentInPlay.type === 'artefact' && (componentInPlay.isDragon || componentInPlay.isCreature)})
       if (artefacts.length === 0) {
         return false
       }
@@ -830,7 +830,7 @@ class ResArcanaBoard extends Component {
 
     const confirmButton = <div className={'action-button' + (selectedComponent ? ' valid' : ' disabled')}
       onClick={selectedComponent && handleConfirm}>Confirm</div>
-    const cancelButton = !lastDraftCard && <div className="action-button" onClick={selectedComponent && ((event) => this.handleClick(event))}>Cancel</div>
+    const cancelButton = !lastDraftCard && <div className="action-button pending-border" onClick={selectedComponent && ((event) => this.handleClick(event))}>Cancel</div>
     
     return <>
       <div className='dialog-panel'>
@@ -1090,7 +1090,7 @@ class ResArcanaBoard extends Component {
       })
 
       let hasActionAvailable = false
-      selectedComponent.actionPowerList.map((action) => {
+      selectedComponent.actionPowerList.forEach((action) => {
         hasActionAvailable = hasActionAvailable || this.isActionAvailable(action, selectedComponent)
       })
       directive = hasActionAvailable ? chooseAction : noActionAvailable
@@ -1180,6 +1180,9 @@ class ResArcanaBoard extends Component {
     </>
   }
   
+  /**
+   * Render the available actions of in hand components.
+   */
   renderInHandActions = (costValid) => {
     const { addToSelection, canPayCost, essencePickerSelection, resetSelection,
       selectAction, selectedAction, selectedComponent, setSelection } = this.props
@@ -1306,6 +1309,10 @@ class ResArcanaBoard extends Component {
     </>
   }
   
+  /**
+   * Render the placement cost handler.
+   * Used to place or claim a component.
+   */
   renderCostHandler = () => {
     const { G, playerID, canPayCost, essencePickerSelection, selectedComponent } = this.props
 
@@ -1328,7 +1335,7 @@ class ResArcanaBoard extends Component {
     })
     let sumSelection = Object.values(selectedComponent.costEssenceList).reduce((a,b) => {return a.quantity + b.quantity}, 0)
 
-    const costValid = this.costSelectionValidator(essencePickerSelection.placementCost)
+    const costValid = this.placementCostComparator(essencePickerSelection.placementCost, selectedComponent.costEssenceList)
     let essences 
     if (selectedComponent.costEssenceList.length > 0) {
       essences = selectedComponent.costEssenceList.map((essence, index) => {
@@ -1371,9 +1378,9 @@ class ResArcanaBoard extends Component {
    * -enabledEssencesList : array containing the list of essences types allowed to pay the component placement cost.
    * -fixedCost : object containing the list of essences to pay if there is only one way to pay the component placement cost
    */
-  canPayCost = (selectedComponent) => {
+  canPayPlacementCost = (selectedComponent) => {
     const { G, playerID } = this.props
-    let sumDiscount = 0
+    let sumDiscount = this.getDiscount(selectedComponent)
     let anyEssencePool
     let valid = true
     let fixedCost
@@ -1388,15 +1395,6 @@ class ResArcanaBoard extends Component {
 
     // List of essence types the player can use to pay the cost.
     let enabledEssencesList = []
-    
-    // Sum discount abilities
-    G.publicData.players[playerID].inPlay.filter((component) => component.hasDiscountAbility).forEach((component) => {
-      return this.getValidDiscounts(component, selectedComponent).forEach(discount => {
-        discount.discountList.forEach((essence) => {
-          sumDiscount = sumDiscount + essence.quantity
-        })
-      })
-    })
     
     // essences of type elan/life/calm/death
     const essencesRequired = costEssenceList.filter((essence) => essence.type !== 'gold' && essence.type !== 'any')
@@ -1577,6 +1575,28 @@ class ResArcanaBoard extends Component {
     return {valid, minEssencePayList, enabledEssencesList, fixedCost}
   }
 
+
+  /**
+   * Return the sum of discounts value.
+   * Discounts are only of type any-but-gold so far.
+   * So the discount is just the sum of all available discounts.
+   */
+  getDiscount = (selectedComponent) => {
+    const { G, playerID } = this.props
+    
+    let sumDiscount = 0
+    // compute the sum of valid discounts
+    const componentsWithDiscount = G.publicData.players[playerID].inPlay.filter((component) => component.hasDiscountAbility)
+    componentsWithDiscount.forEach((component) => {
+      this.getValidDiscounts(component, selectedComponent).forEach((ability) => 
+        ability.discountList.forEach((discount) => {
+          sumDiscount = sumDiscount + discount.quantity
+        })
+      )
+    })
+    return sumDiscount
+  }
+
   /**
    * Return all the valid discounts available from a component for a selected component.
    * 
@@ -1611,26 +1631,13 @@ class ResArcanaBoard extends Component {
    * Validate the placement cost of a component. According to the current discounts available,
    * determines, for each essence type of the cost, if it is valid or not .
    */
-  costSelectionValidator = (essenceList) => {
-    const { G, playerID, selectedComponent } = this.props
-    const costList = copy(selectedComponent.costEssenceList)
-    let selectionList = copy(essenceList)
-        
-    let maxDiscount = 0
-    // compute the sum of valid discounts
-    if (selectedComponent.type === 'artefact') {
-      const componentsWithDiscount = G.publicData.players[playerID].inPlay.filter((component) => component.hasDiscountAbility)
-      componentsWithDiscount.forEach((component) => {
-        this.getValidDiscounts(component, selectedComponent).forEach((ability, index) => 
-          ability.discountList.forEach((discount) => {
-            maxDiscount = maxDiscount + discount.quantity
-          })
-        )
-      })
-    }
+  placementCostComparator = (selectionEssenceList, costEssenceList, discount = 0) => {
+    const costList = copy(costEssenceList)
+    const maxDiscount = discount
 
+    // selectionList will be adjusted
+    let selectionList = copy(selectionEssenceList)
     let sumDiscount = maxDiscount
-
     let essencesAsAny = 0
     let isValid = true
     
@@ -1644,7 +1651,6 @@ class ResArcanaBoard extends Component {
       let qttRequired = essenceRequired.length > 0 ? essenceRequired[0].quantity : 0
       let qttSelected = selectionList[essence] ? selectionList[essence] : 0
 
-      
       if (qttRequired > 0 && qttRequired > qttSelected + (essence === 'gold' ? 0 : sumDiscount)) {
         isValid = false
 
@@ -1707,13 +1713,12 @@ class ResArcanaBoard extends Component {
       if (!isValid) {
         Object.entries(typeValidators).filter((item) => item[0] !== 'gold').forEach((item) => {
           let costEssence = costList.filter(essence => essence.type === item[0])[0]
-          typeValidators[item[0]] = costEssence.quantity <= essenceList[item[0]]
+          typeValidators[item[0]] = costEssence.quantity <= selectionEssenceList[item[0]]
         })
       }
 
     } else {
       costList.forEach((costEssence) => {
-        console.log('costSelectionValidator', costList, costEssence, selectionList);
         if (costEssence.type === 'any') {
           typeValidators[costEssence.type] = costEssence.quantity === essencesAsAny
         } else if (Object.keys(selectionList).length > 0) {
@@ -1753,7 +1758,7 @@ class ResArcanaBoard extends Component {
         showConfirmButton = false
         break
       case 'PLACE_ARTEFACT':
-        costValid = this.costSelectionValidator(essencePickerSelection.placementCost)
+        costValid = this.placementCostComparator(essencePickerSelection.placementCost, selectedComponent.costEssenceList, this.getDiscount(selectedComponent))
         availableActions = this.renderInHandActions(costValid)
         handleConfirm = costValid.isValid ? () => this.placeComponent(selectedComponent.type, selectedComponent.id, essencePickerSelection.placementCost) : null
         handleCancel = () => selectAction('HAND')
@@ -1770,13 +1775,14 @@ class ResArcanaBoard extends Component {
         handleCancel = () => selectAction('HAND')
         break
       case 'PLAY':
+        //costValid = this.actionCostComparator(essencePickerSelection.placementCost)
         availableActions = this.renderInPlayActions()
         if (selectedComponent.hasActionPower && selectedComponent.actionPowerList.length > 1 && selectedActionPower >= 0) {
           handleCancel = () => selectActionPower()
         }
         break
       case 'CLAIM':
-        costValid = this.costSelectionValidator(essencePickerSelection.placementCost)
+        costValid = this.placementCostComparator(essencePickerSelection.placementCost, selectedComponent.costEssenceList)
         availableActions = this.renderClaimAction(costValid)
         handleConfirm = costValid.isValid ? () => this.placeComponent(selectedComponent.type, selectedComponent.id, essencePickerSelection.placementCost) : null
         break
@@ -1791,7 +1797,9 @@ class ResArcanaBoard extends Component {
         {availableActions}
       </div>
       <div className="button-list">
-        {confirmButton} {cancelButton}
+        <div className="p-absolute">
+          {confirmButton} {cancelButton}
+        </div>
       </div>
     </>
   }
@@ -1815,9 +1823,10 @@ class ResArcanaBoard extends Component {
     let currentAction = (selectedComponent || selectedAction) && this.renderCurrentAction()
     let directive = null
 
-    const passButton = <div className="action-button" onClick={() => selectAction('PASS')}>
-      Pass
-    </div>
+    const passButton = 
+      <div className="action-button pending-border" onClick={() => selectAction('PASS')}>
+        Pass
+      </div>
 
     return <>
       <div className='dialog-panel'>
@@ -1825,7 +1834,9 @@ class ResArcanaBoard extends Component {
         {waiting ? <h5 className="directive">{waitingFor}</h5> : <>{directive}</>}
         {(selectedComponent || selectedAction) ? currentAction : hand}
         {!(selectedComponent || selectedAction) && <div className="button-list">
-          {passButton}
+          <div className="p-absolute">
+            {passButton}
+          </div>
         </div>}
       </div>
     </>

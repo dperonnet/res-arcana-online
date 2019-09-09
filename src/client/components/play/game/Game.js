@@ -594,6 +594,13 @@ const initActionPhase = (G, ctx, source) => {
   return G
 }
 
+const initActionTurn = (G, ctx) => {
+  console.log('[initActionTurn] Call to initActionTurn()')
+  const playerID = ctx.currentPlayer
+  G.publicData.players[playerID].status = 'TAKING_ACTION'
+  return G
+}
+
 /**
  * Role: Move
  * Discard a card to gain essences.
@@ -681,6 +688,7 @@ const activatePower = (G, ctx) => {
 const placeComponent = (G, ctx, type, id, essenceList) => {
   const playerID = ctx.currentPlayer
   let selectedComponent
+  let newStatus
 
   if (type === 'artefact') {
     selectedComponent = copy(G.players[playerID].hand.filter((component) => {
@@ -733,6 +741,15 @@ const placeComponent = (G, ctx, type, id, essenceList) => {
     console.log('add',essence[0],essence[1])
     G.publicData.players[playerID].essencesPool[essence[0]] = G.publicData.players[playerID].essencesPool[essence[0]] - essence[1]
   })
+  
+  if (type === 'monument' || selectedComponent.hasPlacementPower) {
+    newStatus = "ACTION_PLACEMENT_POWER"
+  } else {
+    newStatus = "ACTION_COMPLETED"
+  }
+
+  G.publicData.players[playerID].status = newStatus
+  console.log('status : ',newStatus);
   return G
 }
 
@@ -744,6 +761,21 @@ const getTurnOrder = (G, ctx) => {
     order.push((nextPlayerId).toString())
   }
   return order
+}
+
+/**
+ * Role: endTurnIf
+ * Check if the player's move is completed.
+ * Some moves require 2 steps (draw then discard/reorder, claim monument face down then draw essences, ...)
+ */
+const checkMoveCompleted = (G, ctx) => {
+  const playerID = ctx.currentPlayer
+  if (G.publicData.players[playerID].status === 'ACTION_COMPLETED') {
+    console.log('[Call to checkMoveCompleted] return true')
+    return true
+  } else {
+    console.log('[Call to checkMoveCompleted] no returned value')
+  }
 }
 
 /**
@@ -980,12 +1012,14 @@ export const ResArcanaGame = Game({
       },
       actionPhase: {
         onPhaseBegin: (G, ctx) => initActionPhase(G, ctx, 'flow.phases.actionPhase.onPhaseBegin'),
+        onTurnBegin: (G, ctx) => initActionTurn(G, ctx),
         allowedMoves: ['placeComponent','discardArtefact','activatePower','pass'],
         turnOrder: {
           playOrder: (G, ctx) => getTurnOrder(G, ctx),
           first: (G, ctx) => 0,
           next: (G, ctx) => getNextPlayerActionPhase(G, ctx),
         },
+        endTurnIf: (G, ctx) => checkMoveCompleted(G, ctx),
         endPhaseIf: (G, ctx) => checkAllPlayersPassed(G, ctx)
       },
       checkVictoryPhase: {
