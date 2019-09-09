@@ -830,7 +830,7 @@ class ResArcanaBoard extends Component {
 
     const confirmButton = <div className={'action-button' + (selectedComponent ? ' valid' : ' disabled')}
       onClick={selectedComponent && handleConfirm}>Confirm</div>
-    const cancelButton = !lastDraftCard && <div className="action-button pending-border" onClick={selectedComponent && ((event) => this.handleClick(event))}>Cancel</div>
+      const cancelButton = !lastDraftCard && <div className="action-button" onClick={selectedComponent && ((event) => this.handleClick(event))}>Cancel</div>
     
     return <>
       <div className='dialog-panel'>
@@ -1797,9 +1797,7 @@ class ResArcanaBoard extends Component {
         {availableActions}
       </div>
       <div className="button-list">
-        <div className="p-absolute">
-          {confirmButton} {cancelButton}
-        </div>
+        {confirmButton} {cancelButton}
       </div>
     </>
   }
@@ -1824,7 +1822,7 @@ class ResArcanaBoard extends Component {
     let directive = null
 
     const passButton = 
-      <div className="action-button pending-border" onClick={() => selectAction('PASS')}>
+      <div className="action-button" onClick={() => selectAction('PASS')}>
         Pass
       </div>
 
@@ -1834,9 +1832,7 @@ class ResArcanaBoard extends Component {
         {waiting ? <h5 className="directive">{waitingFor}</h5> : <>{directive}</>}
         {(selectedComponent || selectedAction) ? currentAction : hand}
         {!(selectedComponent || selectedAction) && <div className="button-list">
-          <div className="p-absolute">
-            {passButton}
-          </div>
+          {passButton}
         </div>}
       </div>
     </>

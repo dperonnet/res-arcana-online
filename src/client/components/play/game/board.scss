@@ -178,14 +178,14 @@
       display: flex;
       justify-content: center;
       z-index: 1;
-      
+
       .card.active, .place-of-power.active, .in-hand .magic-item.active {
         box-shadow: none;
       }
       .action-row {
         display: inline-grid;
         grid-template-columns: 1fr;
-        
+
         &.double {
           grid-template-columns: 1fr 1fr;
         }
@@ -194,7 +194,6 @@
         display: inline-block;
         align-self: center;
         flex: 1;
-        min-width: 545px;
 
         > div {
           display: inline-block;
@@ -259,12 +258,10 @@
   .button-list {
     flex-direction: row;
     justify-content: center;
-    position: relative;
-    height: 45px;
   
     .action-button {
       text-align: center;
-      margin: auto;
+      margin: 0 5px;
       user-select: none;
     }
   }
