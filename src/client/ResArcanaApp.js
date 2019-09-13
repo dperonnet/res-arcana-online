@@ -9,10 +9,11 @@ import Navigation from './components/navigation/Navigation';
 import { BrowserRouter as Router, Route } from "react-router-dom";
 import './assets/style/index.scss';
 
-const gameServerUrl = `https://${process.env.REACT_APP_GAME_SERVER_URL}`
 
 class ResArcanaApp extends Component {
   render() {
+    const gameServerUrl = `http://${process.env.REACT_APP_GAME_SERVER_URL}`
+
     return (
       <Router>
         <div className="bg">

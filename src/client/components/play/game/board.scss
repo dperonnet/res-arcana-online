@@ -41,6 +41,10 @@
   .components {
     position: relative;
   }
+
+  .close {
+    position: absolute;
+  }
 }
 
 @media (max-width: 768px) {

@@ -39,7 +39,6 @@
 }
 
 .close {
-  position: absolute;
   font-size: 1rem;
   color: white;
   opacity: .75;

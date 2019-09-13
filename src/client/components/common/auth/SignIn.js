@@ -43,8 +43,8 @@ class SignIn extends Component {
   }
 
   render() {
-    const { authError, forgotPassword } = this.state;
-    const { auth, currentGame } = this.props;
+    const { forgotPassword } = this.state;
+    const { auth, authError, currentGame } = this.props;
     if(auth.uid) {
        let path = currentGame && currentGame.gameId ? '/play' : '/';
        return <Redirect to={path}/>
@@ -56,7 +56,7 @@ class SignIn extends Component {
           <h2>Sign In</h2>
           <Form onSubmit={this.handleSubmit}>
             <Form.Group as={Row} controlId="email">
-              <Form.Label column xs="3">Magename</Form.Label>
+              <Form.Label column xs="3">Magic email</Form.Label>
               <Col xs="8">
                 <Form.Control
                   size="sm"
@@ -88,14 +88,10 @@ class SignIn extends Component {
                 >
                   Login
                 </Button>
-                <span className="ml-3 forgot-password" onClick={() => {this.setState({forgotPassword:true})}}>{ forgotPassword ? "Well, that sucks !" : "Forgot your password?"}</span>
+                <span className="ml-3 forgot-password" onClick={() => {this.setState({forgotPassword:true})}}>{ forgotPassword ? "Well, that sucks ! (not implemented yet)" : "Forgot your password?"}</span>
               </div>
-            </Row>
-            <Row>
               <div className="offset-3 col-9">
-              <div className="error">
-                { authError ? <p>{authError}</p> : null }
-              </div>
+                <div className="error mt-2">{ authError ? authError : null }</div>
               </div>
             </Row>
           </Form>

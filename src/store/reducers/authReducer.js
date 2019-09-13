@@ -5,10 +5,10 @@ const initState = {
 const authReducer = (state = initState, action) => {
   switch(action.type) {
     case 'LOGIN_ERROR':
-      console.log('login error')
+      console.log('login error', action.err.message)
       return {
         ...state,
-        authError: 'Login failed'
+        authError: action.err.message
       }
     case 'LOGIN_SUCCESS':
       console.log('login success')
@@ -18,7 +18,10 @@ const authReducer = (state = initState, action) => {
       }
     case 'SIGNOUT_SUCCESS':
       console.log('signout success')
-      return state;
+      return {
+        ...state,
+        authError: null
+      }
     case 'REGISTER_SUCCESS':
       console.log('register success')
       return {
@@ -51,6 +54,19 @@ const authReducer = (state = initState, action) => {
       }
     case 'GET_ONLINE_USERS_ERROR':
       console.log('Get online users list error')
+      return {
+        ...state,
+        authError: action.err.message
+      }
+    case 'GET_USER_SUCCESS': 
+      console.log('Get user success')
+      let error = (action.user && action.user.size > 0) ? "Mage name is not available" : null
+      return {
+        ...state,
+        authError: error
+      }
+    case 'GET_USER_FAIL': 
+      console.log('Get user error')
       return {
         ...state,
         authError: action.err.message

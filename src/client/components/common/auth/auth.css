@@ -17,10 +17,10 @@
 }
 
 .auth .btn-primary:disabled, .auth .btn-primary:disabled:hover {
-    color: #fff;
-    background-color: #6c757d;
-    border-color: #6c757d;
-  }
+  color: #fff;
+  background-color: #6c757d;
+  border-color: #6c757d;
+}
 .forgot-password {
   cursor: pointer;
 }
@@ -28,7 +28,7 @@
   width: 120px;
 }
 .auth .btn.disabled, .auth .btn:disabled {
-    opacity: 1;
+  opacity: 1;
 }
 
 .auth .btn-primary {
@@ -46,8 +46,7 @@ label {
   text-align: right;
 }
 .auth .error {
-  margin-top: 12px;
-  font-size: large;
+  font-size: small;
   color: red;
 }
 

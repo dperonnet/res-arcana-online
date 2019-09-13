@@ -39,7 +39,8 @@ export const register = (newUser) => {
       firestore.collection('users').doc(resp.user.uid).set({
         login: newUser.login,
         layout: 'vertical',
-        cardSize: 'normal'
+        cardSize: 'normal',
+        createdAt: new Date()
       });
       const initGame = {
         gameId: null,
@@ -128,6 +129,19 @@ export const saveProfile = (profile) => {
       dispatch({ type: 'SAVE_PROFILE_SUCCESS' })
     }).catch((err)=>{
       dispatch({ type: 'SAVE_PROFIE_FAIL', err})
+    })
+  }
+}
+
+export const getUserByName = (name) => {
+  return (dispatch, getState, {getFirebase, getFirestore}) => {
+    const firestore = getFirestore();
+
+    firestore.collection('users').where("login", "==", name).get()
+    .then((res)=>{
+      dispatch({ type: 'GET_USER_SUCCESS', user: res })
+    }).catch((err)=>{
+      dispatch({ type: 'GET_USER_FAIL', err})
     })
   }
 }

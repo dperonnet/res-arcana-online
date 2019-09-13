@@ -3,22 +3,90 @@ import { Button, Col, Container, Form, Row } from 'react-bootstrap'
 import './auth.css';
 import { connect } from 'react-redux'
 import { Redirect } from 'react-router-dom';
-import { register } from '../../../../store/actions/authActions';
+import { getUserByName, register } from '../../../../store/actions/authActions';
 
 class Register extends Component {
   constructor(props){
     super(props);
     this.state = {
-      email:"",
-      login:"",
-      password:"",
-      error:""
+      email: '',
+      login: '',
+      password: '',
+      passwordConfirm: '',
+      error: []
     }
   }
 
-  validateForm() {
-    //return this.state.login.length > 0 && this.state.password.length > 0;
-    return this.state.login.length > 0;
+  /**
+   * When focusing a field, remove the errors about that field.
+   */
+  setCurrentFocus = (field) => {
+    let { error } = this.state
+    error = error.filter((error) => error.field !== field)
+    this.setState({
+      error
+    });
+  }
+
+  updateError = (newError) => {
+    const { error } = this.state
+    error.push(newError)
+    this.setState({
+      error
+    });
+    return false
+  }
+
+  validateField = (field) => {
+    const { email, login, password, passwordConfirm } = this.state
+    if (field === 'login' && login.length > 0) {
+      if (login.length < 3) {
+        return this.updateError({field: 'login', message: 'Your Magename is too short (min 3 characters)'})
+      } else if (login.length > 25) {
+        return this.updateError({field: 'login', message: 'Your Magename is too long (max 25 characters)'})
+      } else {
+        return true
+      }
+    } else if (field === 'email' && email.length > 0) {
+      if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(email)) {
+        return this.updateError({field: 'email', message: 'Invalid email address'})
+      }
+    } else if (field === 'password' && password.length > 0) {
+      if (password.length <= 3) {
+        return this.updateError({field: 'password', message: 'Your password is too short (min 4 characters)'})
+      } else if (login.length > 128) {
+        return this.updateError({field: 'password', message: 'Your password is too long (max 128 characters)'})
+      }
+    } else if (field === 'passwordConfirm' && password.length > 0) {
+      if (password !== passwordConfirm) {
+        return this.updateError({field: 'passwordConfirm', message: 'Your confirmation password does not match your password'})
+      }
+    }
+
+    return true
+  }
+
+  /**
+   * Return true when at least one field length is 0.
+   */
+  disableSubmit() {
+    return this.state.login.length === 0 ||  this.state.email.length === 0 || this.state.password.length === 0 || this.state.passwordConfirm.length === 0;
+  }
+
+  /**
+   * Check if datas of the field are valid.
+   */
+  isAccountValid = () => {
+    const { error, login } = this.state
+    const { getUserByName } = this.props
+    error.length = 0
+    
+    let isValid = getUserByName(login)
+    console.log('isValid : ',isValid)
+    this.setState({
+      error
+    });
+    return false
   }
 
   handleChange = (event)=>{
@@ -29,20 +97,16 @@ class Register extends Component {
 
   handleSubmit = (event)=>{
     event.preventDefault();
-    this.props.register(this.state);
-  }
-
-  setError = (error)=>{
-    this.setState({error});
-  }
-
-  setUser = ({user, isUser})=>{
-    if(isUser){
-      this.setError("User name taken");
-    }else{
-      this.setError("");
-      this.props.setUser(user);
+    if (this.isAccountValid()) {
+      this.props.register(this.state);
     }
+  }
+
+  renderError = (field) => {
+    const { error } = this.state
+    return error.filter((err) => err.field === field).map((err, index) => {
+      return <div key={index} className="error">{err.message}</div>
+    })
   }
 
   render() {
@@ -55,7 +119,7 @@ class Register extends Component {
           <h2>Register</h2>
           <Form onSubmit={this.handleSubmit}>
             <Form.Group as={Row} controlId="login">
-              <Form.Label column xs="3">Magename</Form.Label>
+              <Form.Label column xs="3">Mage name</Form.Label>
               <Col xs="8">
                 <Form.Control
                   size="sm"
@@ -63,8 +127,26 @@ class Register extends Component {
                   placeholder="Enter your mage name"
                   type="text"
                   value={this.state.login}
+                  onBlur={() => this.validateField('login')}
                   onChange={this.handleChange}
+                  onFocus={() => this.setCurrentFocus('login')}
                 />
+                {this.renderError('login')}
+              </Col>
+            </Form.Group>
+            <Form.Group as={Row} controlId="email">
+              <Form.Label column xs="3">Magic email</Form.Label>
+              <Col xs="8">
+                <Form.Control
+                  size="sm"
+                  placeholder="Enter your magic email"
+                  type="email"
+                  value={this.state.email}
+                  onBlur={() => this.validateField('email')}
+                  onChange={this.handleChange}
+                  onFocus={() => this.setCurrentFocus('email')}
+                />
+                {this.renderError('email')}
               </Col>
             </Form.Group>
             <Form.Group as={Row} controlId="password">
@@ -75,51 +157,40 @@ class Register extends Component {
                   placeholder="Enter your magic password"
                   type="password"
                   value={this.state.password}
+                  onBlur={() => this.validateField('password')}
                   onChange={this.handleChange}
+                  onFocus={() => this.setCurrentFocus('password')}
                 />
+                {this.renderError('password')}
               </Col>
             </Form.Group>
-            <Form.Group as={Row} controlId="passwordConfirmation">
+            <Form.Group as={Row} controlId="passwordConfirm">
               <Form.Label column xs="3">Password (again)</Form.Label>
               <Col xs="8">
                 <Form.Control
                   size="sm"
-                  disabled
                   placeholder="Confirm your magic password"
                   type="password"
-                  value={this.state.password}
+                  value={this.state.passwordConfirm}
+                  onBlur={() => this.validateField('passwordConfirm')}
                   onChange={this.handleChange}
+                  onFocus={() => this.setCurrentFocus('passwordConfirm')}
                 />
-              </Col>
-            </Form.Group>
-            <Form.Group as={Row} controlId="email">
-              <Form.Label column xs="3">Magic Email</Form.Label>
-              <Col xs="8">
-                <Form.Control
-                  size="sm"
-                  placeholder="Enter your magic email"
-                  type="email"
-                  value={this.state.email}
-                  onChange={this.handleChange}
-                />
+                {this.renderError('passwordConfirm')}
               </Col>
             </Form.Group>
             <Row>
               <div className="offset-3 col-9">
                 <Button
                   size="sm"
-                  disabled={!this.validateForm()}
+                  disabled={this.disableSubmit()}
                   type="submit"
                 >
                 Register
                 </Button>
-              </div>
-            </Row>
-            <Row>
-              <div className="offset-3 col-9">
-              <div className="error">
-                { authError ? <p>{authError}</p> : null }
-              </div>
+                <div className="error mt-2">
+                  { authError ? authError : null }
+                </div>
               </div>
             </Row>
           </Form>
@@ -139,6 +210,7 @@ const mapStateToProps = (state) =>{
 
 const mapDispatchToProps = (dispatch) =>{
   return {
+    getUserByName: (name) => dispatch(getUserByName(name)),
     register: (newUser) => dispatch(register(newUser))
   }
 }
