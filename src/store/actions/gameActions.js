@@ -293,7 +293,7 @@ export const leaveServerInstance = async (gameServerUrl, gameName, gameCredentia
           method: 'POST',
           body: JSON.stringify({
             playerID: gameCredentials[gameID].playerId,
-            playerCredentials: gameCredentials[gameID].credentials,
+            credentials: gameCredentials[gameID].credentials,
           }),
           headers: { 'Content-Type': 'application/json' },
         }

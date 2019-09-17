@@ -22,10 +22,12 @@ class Register extends Component {
    */
   setCurrentFocus = (field) => {
     let { error } = this.state
+    let { clearAuthError } = this.props
     error = error.filter((error) => error.field !== field)
     this.setState({
       error
     });
+    clearAuthError()
   }
 
   updateError = (newError) => {
@@ -39,12 +41,14 @@ class Register extends Component {
 
   validateField = (field) => {
     const { email, login, password, passwordConfirm } = this.state
+    const { getUserByName } = this.props
     if (field === 'login' && login.length > 0) {
       if (login.length < 3) {
         return this.updateError({field: 'login', message: 'Your Magename is too short (min 3 characters)'})
       } else if (login.length > 25) {
         return this.updateError({field: 'login', message: 'Your Magename is too long (max 25 characters)'})
       } else {
+        getUserByName(login)
         return true
       }
     } else if (field === 'email' && email.length > 0) {
@@ -53,7 +57,7 @@ class Register extends Component {
       }
     } else if (field === 'password' && password.length > 0) {
       if (password.length <= 3) {
-        return this.updateError({field: 'password', message: 'Your password is too short (min 4 characters)'})
+        return this.updateError({field: 'password', message: 'Your password is too short (min 6 characters)'})
       } else if (login.length > 128) {
         return this.updateError({field: 'password', message: 'Your password is too long (max 128 characters)'})
       }
@@ -70,23 +74,8 @@ class Register extends Component {
    * Return true when at least one field length is 0.
    */
   disableSubmit() {
-    return this.state.login.length === 0 ||  this.state.email.length === 0 || this.state.password.length === 0 || this.state.passwordConfirm.length === 0;
-  }
-
-  /**
-   * Check if datas of the field are valid.
-   */
-  isAccountValid = () => {
-    const { error, login } = this.state
-    const { getUserByName } = this.props
-    error.length = 0
-    
-    let isValid = getUserByName(login)
-    console.log('isValid : ',isValid)
-    this.setState({
-      error
-    });
-    return false
+    const { authError } = this.props
+    return this.state.login.length === 0 ||  this.state.email.length === 0 || this.state.password.length === 0 || this.state.passwordConfirm.length === 0 || authError;
   }
 
   handleChange = (event)=>{
@@ -97,21 +86,27 @@ class Register extends Component {
 
   handleSubmit = (event)=>{
     event.preventDefault();
-    if (this.isAccountValid()) {
-      this.props.register(this.state);
-    }
+    this.props.register(this.state);
   }
 
   renderError = (field) => {
     const { error } = this.state
-    return error.filter((err) => err.field === field).map((err, index) => {
+    const { authError } = this.props
+    let errors = authError ? error.concat(authError) : error
+    return errors.filter((err) => err.field === field).map((err, index) => {
       return <div key={index} className="error">{err.message}</div>
     })
   }
 
   render() {
     const { auth, authError } = this.props;
+    
     if(auth.uid) return <Redirect to='/'/>
+    
+    let error
+    if ( typeof authError === "string") {
+      error = authError
+    }
 
     return (
       <Container>
@@ -189,7 +184,7 @@ class Register extends Component {
                 Register
                 </Button>
                 <div className="error mt-2">
-                  { authError ? authError : null }
+                  { error ? error : null }
                 </div>
               </div>
             </Row>
@@ -201,7 +196,6 @@ class Register extends Component {
 }
 
 const mapStateToProps = (state) =>{
-  console.log(state);
   return {
     authError: state.auth.authError,
     auth: state.firebase.auth
@@ -211,7 +205,8 @@ const mapStateToProps = (state) =>{
 const mapDispatchToProps = (dispatch) =>{
   return {
     getUserByName: (name) => dispatch(getUserByName(name)),
-    register: (newUser) => dispatch(register(newUser))
+    register: (newUser) => dispatch(register(newUser)),
+    clearAuthError: () => dispatch({ type: 'CLEAR_AUTH_ERROR' })
   }
 }
 

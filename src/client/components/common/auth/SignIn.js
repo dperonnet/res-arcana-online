@@ -13,7 +13,7 @@ class SignIn extends Component {
     this.state = {
       credentials: {
         email:"",
-        login:"",
+        name:"",
         password:"",
       },
       error:"",
@@ -23,12 +23,22 @@ class SignIn extends Component {
 
   validateForm() {
     const { credentials } = this.state;
-    return credentials.email.length > 0 && credentials.password.length > 0;
+    return (credentials.name.length > 0 || credentials.email.length > 0) && credentials.password.length > 0;
   }
 
   handleChange = (event) => {
     const { credentials } = this.state;
-    credentials[event.target.id] = event.target.value
+    if (event.target.id === 'login') {
+      if (/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(event.target.value)) {
+        credentials['email'] = event.target.value
+        credentials['name'] = ''
+      } else {
+        credentials['name'] = event.target.value
+        credentials['email'] = ''
+      }
+    } else {
+      credentials[event.target.id] = event.target.value
+    }
     this.setState({credentials});
   }
 
@@ -55,13 +65,13 @@ class SignIn extends Component {
         <div className="auth col-md-8 col-offset-2">
           <h2>Sign In</h2>
           <Form onSubmit={this.handleSubmit}>
-            <Form.Group as={Row} controlId="email">
-              <Form.Label column xs="3">Magic email</Form.Label>
+            <Form.Group as={Row} controlId="login">
+              <Form.Label column xs="3">Magic login</Form.Label>
               <Col xs="8">
                 <Form.Control
                   size="sm"
                   autoFocus
-                  placeholder="Enter your mage name"
+                  placeholder="Enter your mage name or magic email"
                   type="text"
                   onChange={this.handleChange}
                 />

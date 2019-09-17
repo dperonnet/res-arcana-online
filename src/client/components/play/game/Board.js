@@ -523,8 +523,13 @@ class ResArcanaBoard extends Component {
    */
   renderBoard = (dialogBoard) => {
     const { playerID } = this.props
-    const playerRuban = this.renderPlayerRuban(playerID)
-    const playerBoard = this.renderPlayerBoard(playerID)
+    let playerRuban
+    let playerBoard
+    
+    if (playerID !== 'undefined') {
+      playerRuban = this.renderPlayerRuban(playerID)
+      playerBoard = this.renderPlayerBoard(playerID)
+    }
     const othersBoard = this.renderOthersBoard()
     return <>
       <div className="board-container">
@@ -633,7 +638,8 @@ class ResArcanaBoard extends Component {
     let drawPileAndDiscard = this.renderPlayerDrawPileAndDiscard(id)
     let essencesOnComponent = null
     let turnedComponents = G.publicData.turnedComponents
-    switch (G.publicData.players[playerID].status) {
+    let status = playerID !== 'undefined' ? G.publicData.players[playerID].status : 'READY'
+    switch (status) {
       case 'DRAFTING_ARTEFACTS':
         const mages = G.players[playerID].mages.map((card) => {
           return this.renderGameComponent(card)
@@ -700,7 +706,8 @@ class ResArcanaBoard extends Component {
     
     let boards = null;
     let drawPileAndDiscard = (id) => this.renderPlayerDrawPileAndDiscard(id)
-    switch (G.publicData.players[playerID].status) {
+    let status = playerID !== 'undefined' ? G.publicData.players[playerID].status : 'READY'
+    switch (status) {
       case 'DRAFTING_ARTEFACTS':
       case 'SELECTING_MAGE':
         boards = othersId.map((id) => {
@@ -752,11 +759,27 @@ class ResArcanaBoard extends Component {
    */
   renderDraftDialog = () => {
     const { G, playerID, profile, selectedComponent } = this.props
-    if (!Number.isInteger(parseInt(playerID))) return null
-
+    
+    const playersName = this.getPlayersName()
     let title = 'Draft Phase'
     let waiting = false
     let waitingFor = 'Waiting for '
+
+    if (playerID === 'undefined') {
+      G.publicData.waitingFor.forEach((id, index) => {
+        let isLastPlayer = index === G.publicData.waitingFor.length - 1
+        let waitingAtLeastTwoPlayers = G.publicData.waitingFor.length > 1
+        let beforeLastPlayer = index === G.publicData.waitingFor.length - 2
+        waitingFor += playersName[parseInt(id)]
+        waitingFor += isLastPlayer ? '.' :  waitingAtLeastTwoPlayers && beforeLastPlayer ? ' and ' : ', '
+      })
+
+      return <div className='dialog-panel'>
+        <h5><div className="cards-in-hand-icon small"></div>{title}</h5>
+        {<h5 className="directive">{waitingFor}</h5>}
+      </div>
+    }
+    
     let showCards = true
     let showButtons = true
     let draftCards = null
@@ -765,7 +788,6 @@ class ResArcanaBoard extends Component {
     let handleConfirm = null;
     const lastDraftCard = G.players[playerID].draftCards.length && G.players[playerID].draftCards[0].length === 1
     const nextPlayer = this.getNextPlayer()
-    const playersName = this.getPlayersName()
 
     switch (G.publicData.players[playerID].status) {
       case 'DRAFTING_ARTEFACTS':
@@ -834,7 +856,7 @@ class ResArcanaBoard extends Component {
     
     return <>
       <div className='dialog-panel'>
-        <h5>{title}</h5>
+        <h5><div className="cards-in-hand-icon small"></div>{title}</h5>
         {showCards && <div className={'card-row ' + profile.cardSize}>
           {draftCards}
         </div>}
@@ -854,20 +876,29 @@ class ResArcanaBoard extends Component {
    */
   renderMagicItemDialog = () => {
     const { G, ctx, playerID, profile, selectedComponent } = this.props
-    if (!Number.isInteger(parseInt(playerID))) return null
-    const playersName = this.getPlayersName()
 
-    let title = 'Magic Item Selection Phase'
+    const playersName = this.getPlayersName()
+    let title = 'Magic Item Selection Phase - ' + playersName[parseInt(ctx.currentPlayer)] + '\'s turn.'
     let waiting = playerID !== ctx.currentPlayer
-    let waitingFor = 'Waiting for ' + playersName[parseInt(ctx.currentPlayer)] + ' to pick a Magic Item.'
-    let hand = this.renderPlayerHand()
     let magicItems = G.publicData.magicItems.map((magicItem) => {
       return waiting ?
         this.renderGameComponent(magicItem)
       :
       this.renderGameComponent(magicItem, {onClick: (event) => this.handleClick(event, magicItem), onDoubleClick: () => this.pickMagicItem(magicItem.id)})
     })
-  
+
+    if (playerID === 'undefined') {
+      return <div className='dialog-panel'>
+        <h5>{title}</h5>
+        <div className={'card-row ' + profile.cardSize}>
+          {magicItems}
+        </div>
+      </div>
+    }
+
+    let waitingFor = 'Waiting for ' + playersName[parseInt(ctx.currentPlayer)] + ' to pick a Magic Item.'
+
+    let hand = this.renderPlayerHand()
     let directive = null
     let handleConfirm = null
     let showButtons = true
@@ -908,15 +939,22 @@ class ResArcanaBoard extends Component {
    */
   renderCollectDialog = () => {
     const { G, ctx, playerID, profile, collectActions, collectOnComponentActions } = this.props
-    if (!Number.isInteger(parseInt(playerID))) return null
-
+    
     const playersName = this.getPlayersName()
-    const essencesOnComponent = G.publicData.players[playerID].essencesOnComponent
-    // essencesOnComponentRef is used to maintain the display of the component once his essences have been removed by collect.
-    const essencesOnComponentRef = G.players[playerID].uiTemp.essencesOnComponent
     let title = 'Collect Phase'
     let waiting = playerID !== ctx.currentPlayer
     let waitingFor = ' - ' + playersName[parseInt(ctx.currentPlayer)] + '\'s turn.'
+
+    if (playerID === 'undefined') {
+      return <div className='dialog-panel'>
+        <h5><div className="collect-icon"></div>{title}{waitingFor}</h5>
+      </div>
+    }
+
+    const essencesOnComponent = G.publicData.players[playerID].essencesOnComponent
+    // essencesOnComponentRef is used to maintain the display of the component once his essences have been removed by collect.
+    const essencesOnComponentRef = G.players[playerID].uiTemp.essencesOnComponent
+    
     let hand = this.renderPlayerHand()
     let showButtons = true
     let directive = null
@@ -987,10 +1025,7 @@ class ResArcanaBoard extends Component {
     })
 
     switch (G.publicData.players[playerID].status) {
-      case 'COLLECT_ACTION_AVAILABLE':
-        directive = <h5 className="directive">You may collect essence.</h5>
-        handleConfirm = () => this.collectEssences()
-        break
+      case 'COLLECT_ACTION_FIXED':
       case 'COLLECT_ACTION_REQUIRED':
         directive = collectValid && costValid ?
             <h5 className="directive">Confirm your collect option(s).</h5>
@@ -1003,23 +1038,28 @@ class ResArcanaBoard extends Component {
             </div>})} more essence(s) for your collect to be valid.</h5>
         handleConfirm = () => this.collectEssences()
         break
+      case 'NOTHING_TO_COLLECT':
+        directive = <h5 className="directive">You have no collect option.</h5>
+        showButtons = false
+        break
       case 'READY':
       default:
-          showButtons = false
+        showButtons = false
     }
 
     const confirmButton = <div className={'action-button' + ((collectValid && costValid) ? ' valid' : ' disabled')}
       onClick={collectValid && costValid ? handleConfirm : null}>Confirm</div>
     const resetButton = <div className="action-button" onClick={() => this.handleResetCollect()}>Reset</div>
 
+    console.log('collectComponents',collectComponents);
     return <>
       <div className='dialog-panel'>
         <h5><div className="collect-icon"></div>{title}{waitingFor}</h5>
-        <div className={'card-row ' + profile.cardSize}>
+        {collectComponents.length > 0 && <div className={'card-row ' + profile.cardSize}>
           {collectComponents}
-        </div>
+        </div>}
         {directive}
-        {showButtons && <div className={waiting ? 'button-list hidden': 'button-list'}>
+        {showButtons && <div className="button-list">
           {confirmButton} {resetButton}
         </div>}
         {hand}
@@ -1804,36 +1844,38 @@ class ResArcanaBoard extends Component {
 
   /**
    * Render the board during Action Phase.
-   * This board is player specific and will not be available for spectators.
+   * This board is player specific and will only show title for spectators.
    * The board show the actions available for the player.
    * When a component is selected the board show the selected component and the actions available for this component.
    */
   renderActionDialog = () => {
     const { ctx, playerID, selectedComponent, selectAction, selectedAction } = this.props
-    if (!Number.isInteger(parseInt(playerID))) return null
-
+    
     const playersName = this.getPlayersName()
-
+    
     let title = 'Play Phase'
-    let waiting = false
     let waitingFor = ' - ' + playersName[parseInt(ctx.currentPlayer)] + '\'s turn.'
-    let hand = this.renderPlayerHand(false)
-    let currentAction = (selectedComponent || selectedAction) && this.renderCurrentAction()
-    let directive = null
-
-    const passButton = 
+    let playerView
+    
+    if (playerID !== 'undefined') {
+      let hand = this.renderPlayerHand(false)
+      let currentAction = (selectedComponent || selectedAction) && this.renderCurrentAction()
+      const passButton = 
       <div className="action-button" onClick={() => selectAction('PASS')}>
         Pass
       </div>
 
-    return <>
-      <div className='dialog-panel'>
-        <h5><div className="dragon-icon"></div>{title}{waitingFor}</h5>
-        {waiting ? <h5 className="directive">{waitingFor}</h5> : <>{directive}</>}
+      playerView = <>
         {(selectedComponent || selectedAction) ? currentAction : hand}
         {!(selectedComponent || selectedAction) && <div className="button-list">
           {passButton}
         </div>}
+      </>
+    }
+    return <>
+      <div className='dialog-panel'>
+        <h5><div className="dragon-icon"></div>{title}{waitingFor}</h5>
+        {playerView}
       </div>
     </>
   }

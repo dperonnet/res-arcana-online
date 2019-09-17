@@ -1,17 +1,39 @@
 import { disjoinCurrentGame } from './gameActions';
 
 export const signIn = (credentials) => {
+  return (dispatch, getState, {getFirebase, getFirestore}) => {
+    const firestore = getFirestore();
+
+    if (credentials.name) {
+      firestore.collection('users').where("login", "==", credentials.name).get()
+        .then((users) => {
+          let newCredentials = {...credentials}
+          users.forEach(function(doc) {
+            newCredentials.email = doc.data().email;
+          });
+          dispatch(signInWithEmailAndPassword(newCredentials))
+        }).catch((err)=>{
+          console.log('err',err);
+          dispatch({ type: 'GET_USER_FAIL', err})
+        })
+    } else {
+      dispatch(signInWithEmailAndPassword(credentials))
+    }
+  }
+}
+
+export const signInWithEmailAndPassword = (credentials) => {
   return (dispatch, getState, {getFirebase}) =>{
     const firebase = getFirebase();
     firebase.auth().signInWithEmailAndPassword(
       credentials.email,
       credentials.password
     ).then(()=>{
-      dispatch(setUserStatus());
-      dispatch(disjoinCurrentGame())
+      dispatch(setUserStatus())
     }).then(()=>{
       dispatch({ type: 'LOGIN_SUCCESS' });
     }).catch((err)=>{
+      console.log('error', err)
       dispatch({ type: 'LOGIN_ERROR', err});
     })
   }
@@ -37,6 +59,7 @@ export const register = (newUser) => {
       newUser.password
     ).then((resp)=>{
       firestore.collection('users').doc(resp.user.uid).set({
+        email: newUser.email,
         login: newUser.login,
         layout: 'vertical',
         cardSize: 'normal',
