@@ -1,7 +1,6 @@
 const { Server, Firebase } = require('boardgame.io/server');
 const admin = require('firebase-admin');
 const ResArcanaGame = require('../client/components/play/game/Game').ResArcanaGame;
-const serviceAccount = require('./serviceAccountKey.json');
 
 const server = Server({
   games: [ResArcanaGame],
@@ -16,4 +15,4 @@ const server = Server({
   }),*/
 });
 
-server.run(8000);
+server.run(process.env.PORT || 8000);

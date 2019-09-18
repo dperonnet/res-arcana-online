@@ -12,7 +12,7 @@ import './assets/style/index.scss';
 
 class ResArcanaApp extends Component {
   render() {
-    const gameServerUrl = `http://${process.env.REACT_APP_GAME_SERVER_URL}`
+    const gameServerUrl = `https://${process.env.REACT_APP_GAME_SERVER_URL}`
 
     return (
       <Router>
