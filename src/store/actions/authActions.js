@@ -1,5 +1,3 @@
-import { disjoinCurrentGame } from './gameActions';
-
 export const signIn = (credentials) => {
   return (dispatch, getState, {getFirebase, getFirestore}) => {
     const firestore = getFirestore();

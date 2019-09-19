@@ -348,6 +348,13 @@ export function selectComponent(component) {
   };
 }
 
+export function targetComponent(component) {
+  return {
+      type: 'TARGET_COMPONENT',
+      component
+  };
+}
+
 export function zoomCard(card) {
   return {
       type: 'ZOOM_CARD',

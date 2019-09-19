@@ -8,7 +8,7 @@ import { compose } from 'redux'
 import { connect } from 'react-redux'
 import { firestoreConnect, isLoaded } from 'react-redux-firebase'
 import { addToEssencePickerSelection, canPayCost, clearZoom, resetCollect, resetEssencePickerSelection, selectAction, selectActionPower,
-  selectComponent, setFocusZoom, zoomCard, setCollectAction, setEssencePickerSelection, toggleCommonBoard } from '../../../../store/actions/gameActions'
+  selectComponent, setFocusZoom, zoomCard, setCollectAction, setEssencePickerSelection, targetComponent, toggleCommonBoard } from '../../../../store/actions/gameActions'
 import { toggleChat } from '../../../../store/actions/chatActions'
 import ActionPower from '../../common/power/ActionPower'
 import CardZoom from '../../common/card/CardZoom.js'
@@ -289,12 +289,22 @@ class ResArcanaBoard extends Component {
     this.clearSelection()
   }
 
+  activatePower = () => {
+    const { isActive, selectedComponent, selectedActionPower, essencePickerSelection, targetedComponent } = this.props
+    if (isActive) {
+      this.props.moves.activatePower(selectedComponent, selectedActionPower, essencePickerSelection, targetedComponent)
+    }
+    this.clearSelection()
+  }
+
   clearSelection = () => {
     this.props.selectComponent(undefined)
     this.props.selectAction(undefined)
     this.props.selectActionPower(undefined)
     this.props.setCanPayCost({})
     this.props.resetCollect()
+    this.props.resetSelection()
+    this.props.targetComponent(undefined)
     this.handleBoardClick()
   }
 
@@ -942,7 +952,6 @@ class ResArcanaBoard extends Component {
     
     const playersName = this.getPlayersName()
     let title = 'Collect Phase'
-    let waiting = playerID !== ctx.currentPlayer
     let waitingFor = ' - ' + playersName[parseInt(ctx.currentPlayer)] + '\'s turn.'
 
     if (playerID === 'undefined') {
@@ -1051,7 +1060,6 @@ class ResArcanaBoard extends Component {
       onClick={collectValid && costValid ? handleConfirm : null}>Confirm</div>
     const resetButton = <div className="action-button" onClick={() => this.handleResetCollect()}>Reset</div>
 
-    console.log('collectComponents',collectComponents);
     return <>
       <div className='dialog-panel'>
         <h5><div className="collect-icon"></div>{title}{waitingFor}</h5>
@@ -1067,6 +1075,45 @@ class ResArcanaBoard extends Component {
     </>
   }
 
+  actionPowerValidator = () => {
+    const { G, selectedComponent, selectedActionPower, essencePickerSelection } = this.props
+    const action = selectedComponent.actionPowerList && selectedComponent.actionPowerList[selectedActionPower]
+    const component = selectedComponent
+    let isValid = true
+    if (!action) {
+      return false
+    }
+
+    const costAnyEssence = (action.cost.essenceList && action.cost.essenceList.filter(essence => essence.type.startsWith('any'))) || []
+    const gainAnyEssence = (action.gain.essenceList && action.gain.essenceList.filter(essence => essence.type.startsWith('any'))) || []
+    if (costAnyEssence.length > 0) {
+      let count = 0
+      Object.values(essencePickerSelection.actionCost).forEach((value) => count = count + value)
+       isValid = isValid && costAnyEssence[0].quantity === count
+    }
+    if (gainAnyEssence.length > 0) {
+      let count = 0
+      Object.values(essencePickerSelection.actionGain).forEach((value) => count = count + value)
+      isValid = isValid && gainAnyEssence[0].quantity === count
+    }
+
+    if (action.cost.turn) {
+      isValid = isValid && !G.publicData.turnedComponents[component.id]
+    }
+    if (action.cost.turnDragon) {
+      isValid = isValid && !G.publicData.turnedComponents[targetComponent.id]
+    }
+    if (action.cost.turnCreature) {
+      isValid = isValid && !G.publicData.turnedComponents[targetComponent.id]
+    }
+    console.log('action',selectedComponent, selectedActionPower, action, isValid);
+    return isValid
+  }
+
+  /**
+   * Renderer for action power.
+   * Display essence pickers when an action power require to select essence as cost or gain.
+   */
   renderActionPower = (action, component) => {
     const { G, playerID, essencePickerSelection } = this.props
     const selectedPower = <ActionPower key={0} component={component} selected={true} action={action} index={0}></ActionPower>
@@ -1104,6 +1151,11 @@ class ResArcanaBoard extends Component {
     </>
   }
 
+  /**
+   * Renderer for the in play actions.
+   * Display the available actions when a component in play is selected.
+   * Also display the selected action once the player has selected one of the available actions.
+   */
   renderInPlayActions = () => {
     const { selectActionPower, selectedComponent, selectedActionPower } = this.props
 
@@ -1155,6 +1207,14 @@ class ResArcanaBoard extends Component {
     </>
   }
   
+  /**
+   * Renderer for the claim action.
+   * Display the selected component and the cost of this component when an available monument
+   * or place of power is selected. For each essence type required as placement cost, display
+   * if the player have enought of this essence type.
+   * 
+   * @param {*} costValid Object with booleans for each essence type.
+   */
   renderClaimAction = (costValid) => {
     const { canPayCost, selectedComponent } = this.props
     let costEssenceList = selectedComponent.costEssenceList ? selectedComponent.costEssenceList : [{type: 'gold', quantity: 4}]
@@ -1204,6 +1264,10 @@ class ResArcanaBoard extends Component {
     </>
   }
 
+  /**
+   * Renderer for the pass action.
+   * Display the magic items when the pass action or a magic item is selected.
+   */
   renderPassAction = () => {
     const { G, selectedComponent } = this.props
     let directive = selectedComponent ? <h5 className="directive">Pass and Swap your magic item for {selectedComponent.name} ?</h5>: <h5 className="directive">Select a magic item to swap for</h5>
@@ -1221,7 +1285,9 @@ class ResArcanaBoard extends Component {
   }
   
   /**
-   * Render the available actions of in hand components.
+   * Renderer for the in hand action.
+   * Display the available actions when a card in hand is selected.
+   * Also display the selected action once the player has selected one of the available actions.
    */
   renderInHandActions = (costValid) => {
     const { addToSelection, canPayCost, essencePickerSelection, resetSelection,
@@ -1274,11 +1340,9 @@ class ResArcanaBoard extends Component {
           </h5>
         break
       case 'PLACE_ARTEFACT':
-        actionPanel = this.renderCostHandler()
+        actionPanel = this.renderCostHandler(costValid)
         const selection = Object.entries(essencePickerSelection.placementCost).filter((item) =>  item[1] > 0)
-        console.log('selection',selection)
         essenceList = selection.length > 0 ? selection.map((essence, index) => {
-          console.log('essence',essence,', index',index)
           let isLast = index === selection.length -1
           return <div key={essence[0]} className={'icons '}>
             <div className={'type essence ' + essence[0]}>{essence[1] || 0}</div>
@@ -1353,7 +1417,7 @@ class ResArcanaBoard extends Component {
    * Render the placement cost handler.
    * Used to place or claim a component.
    */
-  renderCostHandler = () => {
+  renderCostHandler = (costValid) => {
     const { G, playerID, canPayCost, essencePickerSelection, selectedComponent } = this.props
 
     // Sum discount abilities
@@ -1373,13 +1437,14 @@ class ResArcanaBoard extends Component {
         </h5>
       )
     })
-    let sumSelection = Object.values(selectedComponent.costEssenceList).reduce((a,b) => {return a.quantity + b.quantity}, 0)
+    let sumSelection = 0
+    Object.values(selectedComponent.costEssenceList).forEach((essence) => sumSelection = sumSelection + essence.quantity)
 
-    const costValid = this.placementCostComparator(essencePickerSelection.placementCost, selectedComponent.costEssenceList)
     let essences 
     if (selectedComponent.costEssenceList.length > 0) {
       essences = selectedComponent.costEssenceList.map((essence, index) => {
         let singleEssence = selectedComponent.costEssenceList.length === 1 ? ' single-essence' : ''
+        console.log('costValid[essence.type]',costValid[essence.type], costValid.isValid, costValid[essence.type] || costValid.isValid);
         let payOk = costValid[essence.type] || costValid.isValid ? <div className="pay-ok"></div> : null
         return <div key={index} className={'essence ' + (essence.type) + singleEssence}>
           {payOk}{essence.quantity}
@@ -1524,7 +1589,7 @@ class ResArcanaBoard extends Component {
     // Determines the fixedCost if possible
     const noAnyNoDiscount = anyEssenceRequired.quantity === 0 && maxDiscount === 0
     const discountGTCost = maxDiscount >= (nbEssenceRequired + anyEssenceRequired.quantity)
-    const costEQAvailable = (nbEssenceRequired + anyEssenceRequired.quantity) === (maxDiscount + essenceCountInPool + availableEssencePool['gold'])
+    const costEQAvailable = (nbEssenceRequired + anyEssenceRequired.quantity + goldRequired.quantity) === (maxDiscount + essenceCountInPool + availableEssencePool['gold'])
     const onlyOneCostTypeRequired = anyEssencesRequired.length === 0 && costEssenceList.filter((essence) => essence.type !== 'any').length === 1
     const zeroDiscountLeft = anyEssencesRequired.length === 0 && sumDiscount === 0
     
@@ -1776,11 +1841,16 @@ class ResArcanaBoard extends Component {
     return typeValidators
   }
 
+  /**
+   * Global action rendering method.
+   * Call the action renderer corresponding to the selected action.
+   */
   renderCurrentAction = () => {
     const { essencePickerSelection, profile, selectAction, selectActionPower, selectedAction, selectedActionPower, selectedComponent } = this.props
 
     let availableActions
     let costValid
+    let actionValid
     let showConfirmButton = true
     let handleConfirm
     let handleCancel = (event) => {
@@ -1815,11 +1885,12 @@ class ResArcanaBoard extends Component {
         handleCancel = () => selectAction('HAND')
         break
       case 'PLAY':
-        //costValid = this.actionCostComparator(essencePickerSelection.placementCost)
+        actionValid = this.actionPowerValidator()
         availableActions = this.renderInPlayActions()
         if (selectedComponent.hasActionPower && selectedComponent.actionPowerList.length > 1 && selectedActionPower >= 0) {
           handleCancel = () => selectActionPower()
         }
+        handleConfirm = actionValid ? () => this.activatePower() : null
         break
       case 'CLAIM':
         costValid = this.placementCostComparator(essencePickerSelection.placementCost, selectedComponent.costEssenceList)
@@ -1974,7 +2045,8 @@ const mapStateToProps = (state) => {
     focusZoom: state.game.focusZoom,
     selectedComponent: state.game.selectedComponent,
     selectedAction: state.game.selectedAction,
-    selectedActionPower: state.game.selectedActionPower
+    selectedActionPower: state.game.selectedActionPower,
+    targetedComponent: state.game.targetedComponent
   }
 }
 
@@ -1991,6 +2063,7 @@ const mapDispatchToProps = (dispatch) => {
     selectActionPower: (index) => dispatch(selectActionPower(index)),
     selectComponent: (card) => dispatch(selectComponent(card)),
     setSelection: (selectionType, essenceSelection) => dispatch(setEssencePickerSelection(selectionType, essenceSelection)),
+    targetComponent: (card) => dispatch(targetComponent(card)),
     toggleChat: () => dispatch(toggleChat()),
     toggleCommonBoard: () => dispatch(toggleCommonBoard()),
     zoomCard: (card) => dispatch(zoomCard(card)),

@@ -17,7 +17,8 @@ const initState = {
   focusZoom: true,
   canPayCost: {
     valid: false
-  }
+  },
+  targetedComponent: undefined
 }
 
 const gameReducer = (state = initState, action) => {
@@ -54,6 +55,10 @@ const gameReducer = (state = initState, action) => {
     case 'SELECT_COMPONENT':
       return Object.assign({}, state, {
         selectedComponent: action.component
+      });
+    case 'TARGET_COMPONENT':
+      return Object.assign({}, state, {
+        targetedComponent: action.component
       });
     case 'ZOOM_CARD':
       return Object.assign({}, state, {
@@ -128,7 +133,6 @@ const gameReducer = (state = initState, action) => {
           placementCost : {}
         }
       }
-      console.log('RESET_ESSENCE_PICKER essencePickerSelection',essencePickerSelection,'action.selectionType',action.selectionType,essencePickerSelection[action.selectionType]);
       return Object.assign({}, state, {
         essencePickerSelection
       });
@@ -142,7 +146,7 @@ const gameReducer = (state = initState, action) => {
     case 'SET_ESSENCE_SELECTION':
       essencePickerSelection = JSON.parse(JSON.stringify(state.essencePickerSelection))
       essencePickerSelection[action.selectionType] = JSON.parse(JSON.stringify(action.essenceSelection))
-      console.log('selectionType',action.selectionType,'essenceType',action.essenceSelection,'essencePickerSelection',essencePickerSelection);
+      
       return Object.assign({}, state, {
         essencePickerSelection
       });

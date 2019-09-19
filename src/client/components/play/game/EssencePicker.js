@@ -17,7 +17,6 @@ class EssencePicker extends Component {
     let selection = essencePickerSelection[selectionType]
     const currentQtty = selection[essenceType] ? selection[essenceType] : 0
     if (!asCost || essencesPool[essenceType] > currentQtty) {
-      console.log('essencesPool[essenceType]',essencesPool, essenceType, currentQtty);
       addToSelection(selectionType, essenceType)
     } else {
       let newSelection = copy(selection)
@@ -37,7 +36,6 @@ class EssencePicker extends Component {
 
   renderEssencePicker = () => {
     const { pickerType, selectionType, essencePickerSelection, pickQuantity, enabledEssencesList, asCost, sumDiscount, validCost, lock } = this.props
-    console.log('essencePickerSelection',essencePickerSelection);
     let selection = essencePickerSelection[selectionType]
     let count = 0
 

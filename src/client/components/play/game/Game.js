@@ -119,7 +119,7 @@ const getInitialState = (ctx, setupData) => {
       for (let j= 0; j < G.publicData.players[i].inPlay.length; j++) {
         if (G.publicData.players[i].inPlay[j].type === 'artefact') {
           for (let k = 0; k < ctx.random.Die(essencesTypeNumber); k++) {
-            addEssenceOnComponent(G, i, G.publicData.players[i].inPlay[j].id, essencesTypes[ctx.random.Die(essencesTypeNumber)-1], ctx.random.Die(5))
+            updateEssenceOnComponent(G, i, G.publicData.players[i].inPlay[j].id, essencesTypes[ctx.random.Die(essencesTypeNumber)-1], ctx.random.Die(5))
           }
         }
       }
@@ -265,7 +265,7 @@ const pickArtefact = (G, ctx, playerID, cardId) => {
  * @param {*} essenceType type of essence to place on component.
  * @param {*} essenceNumber number of essence to place on component.
  */
-const addEssenceOnComponent = (G, playerID, componentId, essenceType, essenceNumber) => {
+const updateEssenceOnComponent = (G, playerID, componentId, essenceType, essenceNumber, factor = 1) => {
   let componentPool = G.publicData.players[playerID].essencesOnComponent[componentId]
   if (!componentPool) {
     G.publicData.players[playerID].essencesOnComponent[componentId] = []
@@ -273,9 +273,9 @@ const addEssenceOnComponent = (G, playerID, componentId, essenceType, essenceNum
   }
   let index = componentPool.findIndex((essence) => essence.type === essenceType)
   if (index > -1) {
-    componentPool[index].quantity += essenceNumber
+    componentPool[index].quantity += factor * essenceNumber
   } else {
-    componentPool.push({type: essenceType, quantity: essenceNumber})
+    componentPool.push({type: essenceType, quantity: factor * essenceNumber})
   }
 }
 
@@ -452,6 +452,7 @@ const initCollectPhase = (G, ctx) => {
     G.passOrder = []
     G.allPassed = false
     computeVictoryPoints(G, ctx)
+    G.publicData.turnedComponents = {}
     
     G.phase = "COLLECT_PHASE"
     
@@ -558,7 +559,7 @@ const collectEssences = (G, ctx, collectActions, collectOnComponentActions) => {
     if (!Object.keys(collectOnComponentActions).includes('automate')) {
       if (G.publicData.players[playerID].essencesOnComponent['automate']) {
         G.publicData.players[playerID].essencesOnComponent['automate'].forEach((essence) => {
-          addEssenceOnComponent(G, playerID, 'automate', essence.type, 2)
+          updateEssenceOnComponent(G, playerID, 'automate', essence.type, 2)
         })
       }
     }
@@ -734,7 +735,84 @@ const drawCard = (G, ctx) => {
  * Role: Move
  * Activate the power of a component.
  */
-const activatePower = (G, ctx) => {
+const activatePower = (G, ctx, component, actionId, selection, target) => {
+  const playerID = ctx.currentPlayer
+  const action = component.actionPowerList[actionId]
+  console.log('[MOVE activatePower] The player', playerID, 'play action', actionId, 'of component', component.id)
+
+  if (action.cost.turn) {
+    G.publicData.turnedComponents[component.id] = true
+  }
+  if (action.cost.turnDragon) {
+    G.publicData.turnedComponents[target.id] = true
+  }
+  if (action.cost.turnCreature) {
+    G.publicData.turnedComponents[target.id] = true
+  }
+  
+  if (action.cost.essenceList) {
+    action.cost.essenceList.filter(essence => !essence.type.startsWith('any')).forEach((essence) => {
+      if (action.cost.onComponent) {
+        console.log('remove from', essence.type, essence.quantity)
+        updateEssenceOnComponent(G, playerID, component.id, essence.type, essence.quantity, -1)
+      } else {
+        console.log('remove', essence.type, essence.quantity)
+        G.publicData.players[playerID].essencesPool[essence.type] = G.publicData.players[playerID].essencesPool[essence.type] - essence.quantity
+      }
+    })
+    selection && selection.actionCost && Object.entries(selection.actionCost).forEach((essence) => {
+      if (action.cost.onComponent) {
+        console.log('remove from', component.id, essence[0], essence[1])
+        updateEssenceOnComponent(G, playerID, component.id, essence[0], essence[1], -1)
+      } else {
+        console.log('remove', essence[0], essence[1])
+        G.publicData.players[playerID].essencesPool[essence[0]] = G.publicData.players[playerID].essencesPool[essence[0]] - essence[1]
+      }
+    })
+  }
+
+  if (action.gain.essenceList) {
+    action.gain.essenceList.filter(essence => !essence.type.startsWith('any')).forEach((essence) => {
+      if (action.gain.onComponent) {
+        console.log('add to', essence.type, essence.quantity)
+        updateEssenceOnComponent(G, playerID, component.id, essence.type, essence.quantity)
+      } else {
+        console.log('add', essence.type, essence.quantity)
+        G.publicData.players[playerID].essencesPool[essence.type] = G.publicData.players[playerID].essencesPool[essence.type] + essence.quantity
+      }
+    })
+    selection && selection.actionGain && Object.entries(selection.actionGain).forEach((essence) => {
+      if (action.gain.onComponent) {
+        console.log('add to', component.id, essence[0], essence[1])
+        updateEssenceOnComponent(G, playerID, component.id, essence[0], essence[1])
+      } else {
+        console.log('add', essence[0], essence[1])
+        G.publicData.players[playerID].essencesPool[essence[0]] = G.publicData.players[playerID].essencesPool[essence[0]] + essence[1]
+      }
+    })
+  }
+
+  // put essence from cost on component
+  if (action.gain.putItOnComponent) {
+    action.cost.essenceList.filter(essence => !essence.type.startsWith('any')).forEach((essence) => {
+      console.log('add to', essence.type, essence.quantity)
+      updateEssenceOnComponent(G, playerID, component.id, essence.type, essence.quantity)
+    })
+  }
+
+  if (action.gain.drawOne) {
+    drawCard(G, ctx)
+  }
+
+  if (action.gain.rivalsGain) {
+    action.gain.rivalsGainEssenceList.filter(essence => !essence.type.startsWith('any')).forEach((essence) => {
+      Object.keys(G.publicData.players).filter(id => id !== playerID).forEach((id) => {
+        console.log('player',id,'gain', essence.type, essence.quantity)
+        G.publicData.players[id].essencesPool[essence.type] = G.publicData.players[id].essencesPool[essence.type] + essence.quantity
+      })
+    })
+  }
+
   return G
 }
 
@@ -878,7 +956,7 @@ const checkAllPlayersPassed = (G, ctx) => {
     console.log('[checkAllPlayersPassed] All players passed')
     return {next: 'checkVictoryPhase' }
   }
-  console.log('[checkAllPlayersPassed] One player at least is sill playing, return undefined')
+  console.log('[checkAllPlayersPassed] One player at least is still playing, return undefined')
 }
 
 function copy(value) {
@@ -993,7 +1071,7 @@ const checkWinner = (G, ctx) => {
     console.log('[checkAllPlayersPassed] All players passed')
     return {next: 'collectPhase' }
   }
-  console.log('[checkAllPlayersPassed] One player at least is sill playing, return "actionPhase"')
+  console.log('[checkAllPlayersPassed] One player at least is still playing, return "actionPhase"')
 }
 */
 
