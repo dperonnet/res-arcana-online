@@ -1,0 +1,93 @@
+
+.auth-container {
+  width: 100%;
+  max-width: 1170px;
+  margin: 20px auto;
+  padding: 20px;
+  height: 100%;
+  justify-content:center;
+  align-items:center;
+  color: white;
+
+  
+  .auth-panel {
+    background-color: rgba(34,34,34,.8);
+    width: 100%;
+    max-width: 700px;
+    margin: 0 auto 20px;
+    padding: 12px;
+    border : 1px solid #F5B041;
+  }
+
+  h2 {
+    text-align: center;
+    color: white;
+  }
+
+  .btn-primary:disabled, .btn-primary:disabled:hover {
+    color: #fff;
+    background-color: #6c757d;
+    border-color: #6c757d;
+  }
+
+  .btn {
+    width: 120px;
+    &.disabled, &:disabled {
+      opacity: 1;
+    }
+  }
+
+  .btn-primary {
+    background-color: #F5B041;
+    border-color: #F5B041;
+    color: #000;
+    
+    &:hover {
+      background-color: #F5D061;
+      border-color: #F5D061;
+      color: #000;
+    }
+  }
+  
+}
+
+
+.forgot-password {
+  cursor: pointer;
+}
+
+label {
+  text-align: right;
+}
+.error {
+  font-size: small;
+  color: red;
+}
+
+.card-size-selector {
+  display: inline-block;
+}
+.card-settings {
+  display: inline-block;
+  margin-left: 5px;
+  margin-right: 5px;
+}
+.card-size-selector>.preview-card>.card {
+  display: block;
+}
+.label-card-size {
+  display: block;
+  text-align: center;
+}
+.card-size-selector>.preview-card>.card, .card-size-selector>.preview-card>.card-image {
+  align-self: flex-end;
+  margin-left: 10px;
+}
+
+.card.active {
+  box-shadow: 0 0 2pt 2pt #F5B041;
+}
+
+.align-radio {
+  padding-top: calc(.375rem + 1px);
+}

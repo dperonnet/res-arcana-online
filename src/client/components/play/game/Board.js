@@ -1418,7 +1418,7 @@ class ResArcanaBoard extends Component {
    * Used to place or claim a component.
    */
   renderCostHandler = (costValid) => {
-    const { G, playerID, canPayCost, essencePickerSelection, selectedComponent } = this.props
+    const { G, playerID, canPayCost, selectedComponent } = this.props
 
     // Sum discount abilities
     let sumDiscount = 0

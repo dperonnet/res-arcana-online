@@ -60,7 +60,7 @@ const authReducer = (state = initState, action) => {
       }
     case 'GET_USER_SUCCESS': 
       console.log('Get user success')
-      let error = (action.user && action.user.size > 0) ? [{field: 'login', message: "Mage name is not available"}] : null
+      let error = (action.user && action.user.size > 0) ? [{field: 'login', message: "Mage name not available"}] : null
       return {
         ...state,
         authError: error
@@ -72,9 +72,16 @@ const authReducer = (state = initState, action) => {
         authError: action.err.message
       }
     case 'CLEAR_AUTH_ERROR':
+      let authError = state.authError
+      if (action.err && action.err.field && Array.isArray(authError)) {
+        let errorIndex = authError.findIndex(error => action.err.field === error.field)
+        authError.splice(errorIndex, 1)
+      } else {
+        authError = null
+      }
       return {
         ...state,
-        authError: null
+        authError: authError
       }
     default:
       return state;

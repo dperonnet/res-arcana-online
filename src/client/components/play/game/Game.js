@@ -798,6 +798,10 @@ const activatePower = (G, ctx, component, actionId, selection, target) => {
       console.log('add to', essence.type, essence.quantity)
       updateEssenceOnComponent(G, playerID, component.id, essence.type, essence.quantity)
     })
+    selection && selection.actionCost && Object.entries(selection.actionCost).forEach((essence) => {
+      console.log('add to', component.id, essence[0], essence[1])
+      updateEssenceOnComponent(G, playerID, component.id, essence[0], essence[1])
+    })
   }
 
   if (action.gain.drawOne) {

@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
 import { Button, Col, Container, Form, Row } from 'react-bootstrap'
-import './auth.css';
+import './auth.scss';
 import { connect } from 'react-redux'
 import { Redirect } from 'react-router-dom';
-import { getUserByName, register } from '../../../../store/actions/authActions';
+import { validateAndRegister } from '../../../../store/actions/authActions';
+import * as ERROR from './AuthConstants';
 
 class Register extends Component {
   constructor(props){
@@ -24,67 +25,80 @@ class Register extends Component {
     let { error } = this.state
     let { clearAuthError } = this.props
     error = error.filter((error) => error.field !== field)
-    this.setState({
-      error
-    });
-    clearAuthError()
+    this.setState({ error})
+    clearAuthError(field)
   }
 
-  updateError = (newError) => {
+  updateError = (field, message) => {
     const { error } = this.state
-    error.push(newError)
-    this.setState({
-      error
-    });
-    return false
-  }
-
-  validateField = (field) => {
-    const { email, login, password, passwordConfirm } = this.state
-    const { getUserByName } = this.props
-    if (field === 'login' && login.length > 0) {
-      if (login.length < 3) {
-        return this.updateError({field: 'login', message: 'Your Magename is too short (min 3 characters)'})
-      } else if (login.length > 25) {
-        return this.updateError({field: 'login', message: 'Your Magename is too long (max 25 characters)'})
-      } else {
-        getUserByName(login)
-        return true
-      }
-    } else if (field === 'email' && email.length > 0) {
-      if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(email)) {
-        return this.updateError({field: 'email', message: 'Invalid email address'})
-      }
-    } else if (field === 'password' && password.length > 0) {
-      if (password.length <= 3) {
-        return this.updateError({field: 'password', message: 'Your password is too short (min 6 characters)'})
-      } else if (login.length > 128) {
-        return this.updateError({field: 'password', message: 'Your password is too long (max 128 characters)'})
-      }
-    } else if (field === 'passwordConfirm' && password.length > 0) {
-      if (password !== passwordConfirm) {
-        return this.updateError({field: 'passwordConfirm', message: 'Your confirmation password does not match your password'})
-      }
+    let errorList = error.filter(error => error.field !== field)
+    if (message) {
+      let newError = { field, message }
+      errorList.push(newError)
     }
-
-    return true
+    this.setState({ error: errorList})
   }
 
   /**
-   * Return true when at least one field length is 0.
+   * Validate field on change/blur
+   */
+  validateField = (field, fieldValue) => {
+    const { password } = this.state
+    let error
+    let value = fieldValue ? fieldValue : this.state[field]
+    
+    if (value.length > 0) {
+      switch (field) {
+        case 'login':
+          if (value.length < 3) {
+            error = ERROR.LOGIN_TOO_SHORT
+          } else if (value.length > 25) {
+            error = ERROR.LOGIN_TOO_LONG
+          } 
+          break
+        case 'email':
+          if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(value)) {
+            error = ERROR.EMAIL_INVALID
+          }
+          break
+        case 'password':
+          if (value.length < 6) {
+            error = ERROR.PASSWORD_TOO_SHORT
+          } else if (value.length > 128) {
+            error = ERROR.PASSWORD_TOO_LONG
+          }
+          break
+        case 'passwordConfirm':
+          if (password !== value) {
+            error = ERROR.PASSWORD_CONFIRM_INVALID
+          }
+          break
+        default:
+      }
+    }
+    this.updateError(field, error)
+  }
+
+  /**
+   * Disable the submit button if the form is not valid.
    */
   disableSubmit() {
     const { authError } = this.props
-    return this.state.login.length === 0 ||  this.state.email.length === 0 || this.state.password.length === 0 || this.state.passwordConfirm.length === 0 || authError;
+    const { error, email, login, password, passwordConfirm } = this.state
+    let formNotCompleted = login.length === 0 ||  email.length === 0 || password.length === 0 || passwordConfirm.length === 0
+    let formNotValid = (authError && authError.length !== 0) || error.length !== 0
+    let wrongPassword = password !== passwordConfirm
+    return formNotCompleted || formNotValid || wrongPassword
   }
 
-  handleChange = (event)=>{
+  handleChange = (event) => {
     this.setState({
       [event.target.id]: event.target.value
     });
+    this.validateField(event.target.id, event.target.value)
   }
 
-  handleSubmit = (event)=>{
+  handleSubmit = (event) => {
     event.preventDefault();
     this.props.register(this.state);
   }
@@ -109,8 +123,8 @@ class Register extends Component {
     }
 
     return (
-      <Container>
-        <div className="auth col-md-8 col-offset-2">
+      <Container className="auth-container">
+        <div className="auth-panel col-md-8 col-offset-2">
           <h2>Register</h2>
           <Form onSubmit={this.handleSubmit}>
             <Form.Group as={Row} controlId="login">
@@ -204,9 +218,8 @@ const mapStateToProps = (state) =>{
 
 const mapDispatchToProps = (dispatch) =>{
   return {
-    getUserByName: (name) => dispatch(getUserByName(name)),
-    register: (newUser) => dispatch(register(newUser)),
-    clearAuthError: () => dispatch({ type: 'CLEAR_AUTH_ERROR' })
+    register: (newUser) => dispatch(validateAndRegister(newUser)),
+    clearAuthError: (field) => dispatch({ type: 'CLEAR_AUTH_ERROR', err: {field} })
   }
 }
 

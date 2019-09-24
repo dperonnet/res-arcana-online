@@ -47,6 +47,23 @@ export const signOut = () => {
   })
 }
 
+export const validateAndRegister = (newUser) => {
+  return (dispatch, getState, {getFirebase, getFirestore}) => {
+    const firestore = getFirestore();
+
+    firestore.collection('users').where("login", "==", newUser.login).get()
+    .then((res)=>{
+      if(!res || res.size === 0) {
+        dispatch(register(newUser))
+      } else {
+        dispatch({ type: 'GET_USER_SUCCESS', user: res })
+      }
+    }).catch((err)=>{
+      dispatch({ type: 'GET_USER_FAIL', err})
+    })
+  }
+}
+
 export const register = (newUser) => {
   return (dispatch, getState, {getFirebase, getFirestore}) => {
     const firebase = getFirebase();
@@ -56,6 +73,10 @@ export const register = (newUser) => {
       newUser.email,
       newUser.password
     ).then((resp)=>{
+      var user = firebase.auth().currentUser;
+      user.updateProfile({
+        displayName: newUser.login
+      })
       firestore.collection('users').doc(resp.user.uid).set({
         email: newUser.email,
         login: newUser.login,
@@ -140,6 +161,41 @@ export const setUserStatus = () => {
 
 export const saveProfile = (profile) => {
   return (dispatch, getState, {getFirebase, getFirestore}) => {
+    var user = getFirebase().auth().currentUser;
+
+    if (profile.email) {
+      user.updateEmail(profile.email).then(()=>{
+        getFirestore().collection('users').doc(user.uid).update({
+          email: profile.email
+        }).then(()=>{
+          dispatch({ type: 'SAVE_PROFILE_SUCCESS' })
+        })        
+      }).catch((err)=>{
+        dispatch({ type: 'SAVE_PROFILE_FAIL', err})
+      });
+    }
+
+    if (profile.password) {
+      user.updatePassword(profile.password).then(()=>{
+        dispatch({ type: 'SAVE_PROFILE_SUCCESS' })
+      }).catch((err)=>{
+        dispatch({ type: 'SAVE_PROFILE_FAIL', err})
+      });
+    }
+
+    if (profile.photoURL) {
+      user.updateProfile(profile).then(()=>{
+        dispatch({ type: 'SAVE_PROFILE_SUCCESS' })
+      }).catch((err)=>{
+        dispatch({ type: 'SAVE_PROFILE_FAIL', err})
+      });
+
+    }
+  }
+}
+
+export const saveOptions = (profile) => {
+  return (dispatch, getState, {getFirebase, getFirestore}) => {
     const firestore = getFirestore();
     const userId = getState().firebase.auth.uid;
 
@@ -149,7 +205,7 @@ export const saveProfile = (profile) => {
     }).then(()=>{
       dispatch({ type: 'SAVE_PROFILE_SUCCESS' })
     }).catch((err)=>{
-      dispatch({ type: 'SAVE_PROFIE_FAIL', err})
+      dispatch({ type: 'SAVE_PROFILE_FAIL', err})
     })
   }
 }

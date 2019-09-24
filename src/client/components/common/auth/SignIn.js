@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Button, Col, Container, Form, Row } from 'react-bootstrap'
-import './auth.css';
+import './auth.scss';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
 import { firestoreConnect } from 'react-redux-firebase';
@@ -61,8 +61,8 @@ class SignIn extends Component {
     }
 
     return (
-      <Container>
-        <div className="auth col-md-8 col-offset-2">
+      <Container className="auth-container">
+        <div className="auth-panel col-md-8 col-offset-2">
           <h2>Sign In</h2>
           <Form onSubmit={this.handleSubmit}>
             <Form.Group as={Row} controlId="login">

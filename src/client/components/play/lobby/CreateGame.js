@@ -94,7 +94,7 @@ class CreateGame extends Component {
                     </Col>
                   </Form.Group>
                   <Form.Group as={Row}>
-                    <Form.Label as="legend" column xs={4}>Number of mages</Form.Label>
+                    <Form.Label column xs={4}>Number of mages</Form.Label>
                     <Col xs={8} className="mt-2">
                       {numberOfPlayers.map((number) => (
                         <Form.Check inline type="radio" name="numberOfPlayers"
@@ -106,7 +106,7 @@ class CreateGame extends Component {
                     </Col>
                   </Form.Group>
                   <Form.Group as={Row}>
-                    <Form.Label as="legend" column xs={4}>
+                    <Form.Label column xs={4}>
                       Draft Options
                     </Form.Label>
                     <Col xs={8} className="mt-2">
