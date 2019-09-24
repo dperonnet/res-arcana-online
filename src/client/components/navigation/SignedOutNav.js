@@ -8,6 +8,7 @@ import { firestoreConnect } from 'react-redux-firebase';
 
 class SignedOutNav extends Component {
   render() {
+    const { profile } = this.props
     return (
       <Navbar collapseOnSelect expand="md" variant="dark" fixed="top">
         <LinkContainer to="/"><Navbar.Brand>Res Arcana Online</Navbar.Brand></LinkContainer>
@@ -15,7 +16,7 @@ class SignedOutNav extends Component {
         <Navbar.Collapse id="responsive-navbar-nav">
           <Nav className="mr-auto">
             <LinkContainer to="/play" active={false}><Nav.Link>Play</Nav.Link></LinkContainer>
-            <LinkContainer to="/editor" active={false}><Nav.Link>Editor</Nav.Link></LinkContainer>
+            {profile.role === 'admin' && <LinkContainer to="/editor" active={false}><Nav.Link>Editor</Nav.Link></LinkContainer>}
             <NavDropdown title="Help" id="collasible-nav-dropdown">
               <LinkContainer to="/howToPlay" active={false}><NavDropdown.Item>How To Play</NavDropdown.Item></LinkContainer>
               <LinkContainer to="/about" active={false}><NavDropdown.Item>About</NavDropdown.Item></LinkContainer>
@@ -37,7 +38,8 @@ class SignedOutNav extends Component {
 const mapStateToProps = (state) => {
   return {
     games: state.firestore.ordered.games,
-    auth: state.firebase.auth
+    auth: state.firebase.auth,
+    profile: state.firebase.profile
   }
 }
 

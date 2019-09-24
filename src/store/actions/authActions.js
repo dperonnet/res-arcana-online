@@ -169,7 +169,7 @@ export const saveProfile = (profile) => {
           email: profile.email
         }).then(()=>{
           dispatch({ type: 'SAVE_PROFILE_SUCCESS' })
-        })        
+        })
       }).catch((err)=>{
         dispatch({ type: 'SAVE_PROFILE_FAIL', err})
       });
@@ -189,7 +189,10 @@ export const saveProfile = (profile) => {
       }).catch((err)=>{
         dispatch({ type: 'SAVE_PROFILE_FAIL', err})
       });
+    }
 
+    if (profile.cardSize) {
+      
     }
   }
 }
@@ -199,14 +202,21 @@ export const saveOptions = (profile) => {
     const firestore = getFirestore();
     const userId = getState().firebase.auth.uid;
 
-    firestore.collection('users').doc(userId).update({
-      cardSize: profile.cardSize || 'normal',
-      layout: profile.layout || 'vertical'
-    }).then(()=>{
-      dispatch({ type: 'SAVE_PROFILE_SUCCESS' })
-    }).catch((err)=>{
-      dispatch({ type: 'SAVE_PROFILE_FAIL', err})
-    })
+    let options = {}
+    if (profile.cardSize) {
+      options.cardSize = profile.cardSize
+    }
+    if (profile.layout) {
+      options.layout = profile.layout
+    }
+    
+    if (Object.keys(options).length > 0 ) {
+      firestore.collection('users').doc(userId).update(options).then(()=>{
+        dispatch({ type: 'SAVE_PROFILE_SUCCESS' })
+      }).catch((err)=>{
+        dispatch({ type: 'SAVE_PROFILE_FAIL', err})
+      })
+    }
   }
 }
 

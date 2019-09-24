@@ -1,6 +1,6 @@
 const initState = {
   chat: null,
-  chatDisplay: false
+  chatDisplay: true
 }
 
 const chatReducer = (state = initState, action) => {

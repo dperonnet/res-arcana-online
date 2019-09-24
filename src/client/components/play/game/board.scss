@@ -17,12 +17,52 @@
 .debug-ui {
   z-index: 999;
 }
+
+.board-horizontal {
+  display: flex;
+  height: 100%;
+  width: 100%;
+
+  .components {
+    display: inline-block;
+    vertical-align: top;
+    &:nth-child(2) {
+      width: 40%
+    }
+    &:nth-child(3) {
+      width: 25%
+    }
+    &:nth-child(4) {
+      width: 35%
+    }
+
+  }
+  .common-board {
+    display: flex;
+    max-width: unset;
+    margin-left: auto;
+    border-right: none;
+    border-bottom: 1px solid #F5B041;
+    resize: none;
+    
+    &.small, &.normal, &.large, &.x-large {
+      width: 100%;
+    }
+  }
+
+  .place-of-power-container, .monument-container, .monuments-revealed, .magic-item-container {
+    display: flex;
+    justify-content: center;
+  }
+}
+
 .board-vertical {
   display: flex;
   flex-direction: row;
   height: 100%;
   width: 100%;
 }
+
 
 .common-board {
   display: inline-block;
@@ -117,7 +157,7 @@
   background: #555; 
 }
 
-.common-board.x-small, .common-board.small {
+.common-board.small {
   width: 296px;
 }
 .common-board.normal {
@@ -439,6 +479,7 @@
 
 .close-chat {
   position: absolute;
+  margin-right: 12px;
 }
 
 .in-play {

@@ -2012,18 +2012,36 @@ class ResArcanaBoard extends Component {
     }
     const sizeSetting = profile && profile.cardSize ? profile.cardSize : 'normal'
     const layoutSetting = profile && profile.layout ? profile.layout : 'vertical'
-    return <div className={'board-'+layoutSetting} onClick={() => this.handleBoardClick()}>
-      {commonBoardDisplay && <div className={'common-board ' + sizeSetting}>
-        {this.renderCommonBoard()}
-      </div>}
-      <div className="board" ref='board'>
-        {board}
-      </div>
-      <div className="right-panel">
-        {cardToZoom && this.renderCardZoom()}
-        {chatDisplay && this.renderChat()}
-      </div>
-    </div>
+    return <>
+      {layoutSetting === 'vertical' && 
+        <div className={'board-'+layoutSetting} onClick={() => this.handleBoardClick()}>
+          {commonBoardDisplay && <div className={'common-board ' + sizeSetting}>
+            {this.renderCommonBoard()}
+          </div>}
+          <div className="board" ref='board'>
+            {board}
+          </div>
+          <div className="right-panel">
+            {cardToZoom && this.renderCardZoom()}
+            {chatDisplay && this.renderChat()}
+          </div>
+        </div> 
+      }
+      {layoutSetting === 'horizontal' && 
+        <div className={'board-'+layoutSetting} onClick={() => this.handleBoardClick()}>
+          <div className="board" ref='board'>
+            {commonBoardDisplay && <div className={'common-board ' + sizeSetting}>
+              {this.renderCommonBoard()}
+            </div>}
+            {board}
+          </div>
+          <div className="right-panel">
+            {cardToZoom && this.renderCardZoom()}
+            {chatDisplay && this.renderChat()}
+          </div>
+        </div> 
+      }
+    </>
   }
 }
 

@@ -6,7 +6,7 @@ import { compose } from 'redux'
 import { connect } from 'react-redux'
 import { firestoreConnect } from 'react-redux-firebase'
 import { leaveGame } from '../../../store/actions/gameActions'
-import { saveProfile, signOut } from '../../../store/actions/authActions'
+import { saveOptions, signOut } from '../../../store/actions/authActions'
 import { toggleChat } from '../../../store/actions/chatActions'
 import { toggleCommonBoard } from '../../../store/actions/gameActions'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -31,10 +31,10 @@ class SignedInNav extends Component {
   }
 
   setCardSize = (size) => {
-    const { profile } = this.props;
+    const { profile, saveOptions } = this.props;
     let newProfile = {...profile}
     newProfile.cardSize = size
-    this.props.saveProfile(newProfile);
+    saveOptions(newProfile);
   }
 
   setCardSizeMinus = () => {
@@ -64,7 +64,7 @@ class SignedInNav extends Component {
         <Navbar.Collapse id="responsive-navbar-nav">
           <Nav className="mr-auto">
             <LinkContainer to="/play" active={false}><Nav.Link>Play</Nav.Link></LinkContainer>
-            <LinkContainer to="/editor" active={false}><Nav.Link>Editor</Nav.Link></LinkContainer>
+            {profile.role === 'admin' && <LinkContainer to="/editor" active={false}><Nav.Link>Editor</Nav.Link></LinkContainer>}
             <NavDropdown title="Help" id="collasible-nav-dropdown">
               <LinkContainer to="/howToPlay" active={false}><NavDropdown.Item>How To Play</NavDropdown.Item></LinkContainer>
               <LinkContainer to="/about" active={false}><NavDropdown.Item>About</NavDropdown.Item></LinkContainer>
@@ -120,7 +120,7 @@ const mapStateToProps = (state) =>{
 const mapDispatchToProps = (dispatch) =>{
   return {
     leaveGame: (gameId, baseUrl) => dispatch(leaveGame(gameId, baseUrl)),
-    saveProfile: (profile) => dispatch(saveProfile(profile)),
+    saveOptions: (profile) => dispatch(saveOptions(profile)),
     setLoading: (value) => dispatch({type: 'LOADING', loading: value}),
     signOut: () => dispatch(signOut()),
     toggleChat: () => dispatch(toggleChat()),

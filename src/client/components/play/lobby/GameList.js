@@ -24,16 +24,16 @@ class GameList extends Component {
   }
 
   render() {
-    const { games } = this.props;
+    const { games,profile  } = this.props;
     return (
       <div className='game-list-panel align-center'>
         {
           games && games.map((game, index) => 
             <div className='game' key={game.id}>
               <div className='game-header'>{game.name}
-                <div className="pull-right close" onClick={(event) => this.handleDeleteById(event, game.id)}>
+                {profile.role === 'admin' && <div className="pull-right close" onClick={(event) => this.handleDeleteById(event, game.id)}>
                   <FontAwesomeIcon icon={faTrash} />
-                </div>
+                </div>}
               </div>
               <Row>
                 {this.renderPlayers(game)}
@@ -53,7 +53,8 @@ class GameList extends Component {
 
 const mapStateToProps = (state) => {
   return {
-    games: state.firestore.ordered.games
+    games: state.firestore.ordered.games,
+    profile: state.firebase.profile
   }
 }
 

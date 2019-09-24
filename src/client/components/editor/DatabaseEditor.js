@@ -54,10 +54,10 @@ class DatabaseEditor extends Component {
 
 
   render() {
-    const { auth, component, pristineComponent } = this.props;
+    const { auth, component, pristineComponent, profile } = this.props;
     const jsonComponent = this.getJsonFromObject(component);
     
-    if(!auth.uid) return <Redirect to='/signIn'/>
+    if(!auth.uid || profile.role !== 'admin') return <Redirect to='/signIn'/>
 
     let card;
     if (pristineComponent && pristineComponent.class) {
@@ -120,7 +120,8 @@ const mapStateToProps = (state) => {
     components: state.firestore.data.components,
     component: state.editor.component,
     filter: state.editor.filter,
-    pristineComponent: state.editor.pristineComponent
+    pristineComponent: state.editor.pristineComponent,
+    profile: state.firebase.profile
   }
 }
 
