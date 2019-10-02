@@ -8,6 +8,7 @@
     "@fortawesome/react-fontawesome": "^0.1.4",
     "boardgame.io": "^0.32.1",
     "bootstrap": "^4.3.1",
+    "eslint-config-prettier": "^6.3.0",
     "esm": "^3.2.22",
     "express": "^4.15.2",
     "firebase": "^5.9.4",
@@ -39,7 +40,8 @@
     "eject": "react-scripts eject",
     "dev": "concurrently --kill-others \"npm run client\" \"npm run server\"",
     "client": "react-scripts start",
-    "server": "node -r esm src/server/gameserver.js"
+    "server": "node -r esm src/server/gameserver.js",
+    "lint": "eslint --fix src/**/*.js"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -52,7 +54,11 @@
   ],
   "devDependencies": {
     "concurrently": "^4.1.0",
-    "nodemon": "^1.18.10"
+    "eslint": "^6.5.1",
+    "eslint-plugin-prettier": "^3.1.1",
+    "eslint-plugin-react": "^7.15.1",
+    "nodemon": "^1.18.10",
+    "prettier-eslint": "^9.0.0"
   },
   "engines": {
     "node": "10.11.0"

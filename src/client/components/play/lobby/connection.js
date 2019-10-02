@@ -8,169 +8,158 @@
 
 class _LobbyConnectionImpl {
   constructor({ server, gameComponents, playerName, playerCredentials }) {
-    this.gameComponents = gameComponents;
-    this.playerName = playerName || 'Visitor';
-    this.playerCredentials = playerCredentials;
-    this.server = server;
-    this.gameInstances = [];
+    this.gameComponents = gameComponents
+    this.playerName = playerName || 'Visitor'
+    this.playerCredentials = playerCredentials
+    this.server = server
+    this.gameInstances = []
   }
 
   _baseUrl() {
-    return `${this.server || ''}/games`;
+    return `${this.server || ''}/games`
   }
 
   async refresh() {
     try {
-      this.gameInstances.length = 0;
-      const resp = await fetch(this._baseUrl());
+      this.gameInstances.length = 0
+      const resp = await fetch(this._baseUrl())
       if (resp.status !== 200) {
-        throw new Error('HTTP status ' + resp.status);
+        throw new Error('HTTP status ' + resp.status)
       }
-      const json = await resp.json();
+      const json = await resp.json()
       for (let gameName of json) {
-        if (!this._getGameComponents(gameName)) continue;
-        const gameResp = await fetch(this._baseUrl() + '/' + gameName);
-        const gameJson = await gameResp.json();
+        if (!this._getGameComponents(gameName)) continue
+        const gameResp = await fetch(this._baseUrl() + '/' + gameName)
+        const gameJson = await gameResp.json()
         for (let inst of gameJson.rooms) {
-          inst.gameName = gameName;
+          inst.gameName = gameName
         }
-        this.gameInstances = this.gameInstances.concat(gameJson.rooms);
+        this.gameInstances = this.gameInstances.concat(gameJson.rooms)
       }
     } catch (error) {
-      throw new Error('failed to retrieve list of games (' + error + ')');
+      throw new Error('failed to retrieve list of games (' + error + ')')
     }
   }
 
   async getGameInstance(gameName, gameID) {
     try {
-      const resp = await fetch(this._baseUrl() + '/' + gameName + '/' + gameID);
+      const resp = await fetch(this._baseUrl() + '/' + gameName + '/' + gameID)
       if (resp.status !== 200) {
-        throw new Error('HTTP status ' + resp.status);
+        throw new Error('HTTP status ' + resp.status)
       }
-      const json = await resp.json();
-      return json;
+      const json = await resp.json()
+      return json
     } catch (error) {
-      console.log('game instance ' + gameID + ' not found');
+      console.log('game instance ' + gameID + ' not found')
     }
   }
 
   _getGameInstance(gameID) {
     for (let inst of this.gameInstances) {
-      if (inst['gameID'] === gameID) return inst;
+      if (inst['gameID'] === gameID) return inst
     }
   }
 
   _getGameComponents(gameName) {
     for (let comp of this.gameComponents) {
-      if (comp.game.name === gameName) return comp;
+      if (comp.game.name === gameName) return comp
     }
   }
 
   _findPlayer(playerName) {
     for (let inst of this.gameInstances) {
-      if (inst.players.some(player => player.name === playerName)) return inst;
+      if (inst.players.some(player => player.name === playerName)) return inst
     }
   }
 
   async join(gameName, gameID, playerID) {
     try {
-      let inst = this._findPlayer(this.playerName);
+      let inst = this._findPlayer(this.playerName)
       if (inst) {
-        console.log('player has already joined ' + inst.gameID);
+        console.log('player has already joined ' + inst.gameID)
       }
 
-      inst = this._getGameInstance(gameID);
+      inst = this._getGameInstance(gameID)
       if (!inst) {
-        inst = await fetch(this._baseUrl() + '/' + gameName + '/' + gameID);
+        inst = await fetch(this._baseUrl() + '/' + gameName + '/' + gameID)
         if (!inst) {
-          throw new Error('game instance ' + gameID + ' not found');
+          throw new Error('game instance ' + gameID + ' not found')
         }
-        inst = await inst.json();
-        this.gameInstances = this.gameInstances.concat(inst);
+        inst = await inst.json()
+        this.gameInstances = this.gameInstances.concat(inst)
       }
-      const resp = await fetch(
-        this._baseUrl() + '/' + gameName + '/' + gameID + '/join',
-        {
-          method: 'POST',
-          body: JSON.stringify({
-            playerID: playerID,
-            playerName: this.playerName,
-          }),
-          headers: { 'Content-Type': 'application/json' },
-        }
-      );
-      if (resp.status !== 200) throw new Error('HTTP status ' + resp.status);
-      const json = await resp.json();
-      inst.players[Number.parseInt(playerID)].name = this.playerName;
-      this.playerCredentials = json.playerCredentials;
+      const resp = await fetch(this._baseUrl() + '/' + gameName + '/' + gameID + '/join', {
+        method: 'POST',
+        body: JSON.stringify({
+          playerID: playerID,
+          playerName: this.playerName,
+        }),
+        headers: { 'Content-Type': 'application/json' },
+      })
+      if (resp.status !== 200) throw new Error('HTTP status ' + resp.status)
+      const json = await resp.json()
+      inst.players[Number.parseInt(playerID)].name = this.playerName
+      this.playerCredentials = json.playerCredentials
     } catch (error) {
-      throw new Error('failed to join room ' + gameID + ' (' + error + ')');
+      throw new Error('failed to join room ' + gameID + ' (' + error + ')')
     }
   }
 
   async leave(gameName, gameID, credentials) {
     try {
-      let inst = this._getGameInstance(gameID);
-      if (!inst) throw new Error('game instance not found');
+      let inst = this._getGameInstance(gameID)
+      if (!inst) throw new Error('game instance not found')
       for (let player of inst.players) {
         if (player.name === this.playerName) {
-          const resp = await fetch(
-            this._baseUrl() + '/' + gameName + '/' + gameID + '/leave',
-            {
-              method: 'POST',
-              body: JSON.stringify({
-                playerID: player.id,
-                credentials: this.playerCredentials,
-              }),
-              headers: { 'Content-Type': 'application/json' },
-            }
-          );
+          const resp = await fetch(this._baseUrl() + '/' + gameName + '/' + gameID + '/leave', {
+            method: 'POST',
+            body: JSON.stringify({
+              playerID: player.id,
+              credentials: this.playerCredentials,
+            }),
+            headers: { 'Content-Type': 'application/json' },
+          })
           if (resp.status !== 200) {
-            throw new Error('HTTP status ' + resp.status);
+            throw new Error('HTTP status ' + resp.status)
           }
-          delete player.name;
-          delete this.playerCredentials;
+          delete player.name
+          delete this.playerCredentials
         }
       }
-      console.log('player not found in room');
+      console.log('player not found in room')
     } catch (error) {
-      throw new Error('failed to leave room ' + gameID + ' (' + error + ')');
+      throw new Error('failed to leave room ' + gameID + ' (' + error + ')')
     }
   }
 
   async disconnect() {
-    let inst = this._findPlayer(this.playerName);
+    let inst = this._findPlayer(this.playerName)
     if (inst) {
-      await this.leave(inst.gameName, inst.gameID);
+      await this.leave(inst.gameName, inst.gameID)
     }
-    this.gameInstances = [];
-    this.playerName = 'Visitor';
+    this.gameInstances = []
+    this.playerName = 'Visitor'
   }
 
   async create(gameName, numPlayers, setupData) {
     try {
-      const comp = this._getGameComponents(gameName);
-      if (!comp) throw new Error('game not found');
-      if (
-        numPlayers < comp.game.minPlayers ||
-        numPlayers > comp.game.maxPlayers
-      )
-        throw new Error('invalid number of players ' + numPlayers);
+      const comp = this._getGameComponents(gameName)
+      if (!comp) throw new Error('game not found')
+      if (numPlayers < comp.game.minPlayers || numPlayers > comp.game.maxPlayers)
+        throw new Error('invalid number of players ' + numPlayers)
       const resp = await fetch(this._baseUrl() + '/' + gameName + '/create', {
         method: 'POST',
         body: JSON.stringify({
           numPlayers: numPlayers,
-          setupData: setupData
+          setupData: setupData,
         }),
         headers: { 'Content-Type': 'application/json' },
-      });
-      if (resp.status !== 200) throw new Error('HTTP status ' + resp.status);
-      const json = await resp.json();
+      })
+      if (resp.status !== 200) throw new Error('HTTP status ' + resp.status)
+      const json = await resp.json()
       return json
     } catch (error) {
-      throw new Error(
-        'failed to create room for ' + gameName + ' (' + error + ')'
-      );
+      throw new Error('failed to create room for ' + gameName + ' (' + error + ')')
     }
   }
 }
@@ -189,5 +178,5 @@ class _LobbyConnectionImpl {
  *   A JS object that synchronizes the list of running game instances with the server and provides an API to create/join/start instances.
  */
 export function LobbyConnection(opts) {
-  return new _LobbyConnectionImpl(opts);
+  return new _LobbyConnectionImpl(opts)
 }

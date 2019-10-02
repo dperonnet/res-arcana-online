@@ -1,353 +1,380 @@
-import { createChat, deleteChat } from './chatActions';
+import { createChat, deleteChat } from './chatActions'
 
 export const createAndJoinGame = (game, createServerGame, joinServerGame, gameServerUrl) => {
-  return (dispatch, getState, {getFirestore}) => {
+  return (dispatch, getState, { getFirestore }) => {
     // make asynch call to database
-    const fireStore = getFirestore();
-    const profile = getState().firebase.profile;
-    const creatorId = getState().firebase.auth.uid;
-    fireStore.collection('games').add({
-      ...game,
-      gameCreator: profile.login,
-      creatorId: creatorId,
-      createdAt: new Date(),
-      status: 'PENDING'
-    }).then((docRef) => {
-      fireStore.collection('games').doc(docRef.uid).get().then(doc => {
-        dispatch({ type: 'CREATE_GAME', doc});
-        //dispatch(joinGame(doc.id, joinServerGame, gameServerUrl));
+    const fireStore = getFirestore()
+    const profile = getState().firebase.profile
+    const creatorId = getState().firebase.auth.uid
+    fireStore
+      .collection('games')
+      .add({
+        ...game,
+        gameCreator: profile.login,
+        creatorId: creatorId,
+        createdAt: new Date(),
+        status: 'PENDING',
       })
-    }).catch((err) => {
-      dispatch({type: 'CREATE_GAME_ERROR', err});
-    })
+      .then(docRef => {
+        fireStore
+          .collection('games')
+          .doc(docRef.uid)
+          .get()
+          .then(doc => {
+            dispatch({ type: 'CREATE_GAME', doc })
+            //dispatch(joinGame(doc.id, joinServerGame, gameServerUrl));
+          })
+      })
+      .catch(err => {
+        dispatch({ type: 'CREATE_GAME_ERROR', err })
+      })
   }
 }
 
-
 export const leaveGame = (gameId, gameServerUrl) => {
-  return (dispatch, getState, {getFirestore}) => {
-    const fireStore = getFirestore();
-    const playerId = getState().firebase.auth.uid;
-    const gameRef = fireStore.collection('games').doc(gameId);
+  return (dispatch, getState, { getFirestore }) => {
+    const fireStore = getFirestore()
+    const playerId = getState().firebase.auth.uid
+    const gameRef = fireStore.collection('games').doc(gameId)
 
-    gameRef.get().then((document) => {
-      let status = document.exists ? document.data().status : null;
+    gameRef.get().then(document => {
+      let status = document.exists ? document.data().status : null
       switch (status) {
-        // leave before game Start
-        case 'PENDING':
-          dispatch(leaveWhilePending(gameId, playerId, document, fireStore, gameServerUrl));
-          break;
+      // leave before game Start
+      case 'PENDING':
+        dispatch(leaveWhilePending(gameId, playerId, document, fireStore, gameServerUrl))
+        break
         // leave while game is still running
-        case 'STARTED':
-          dispatch(leaveWhileStarted(gameId, playerId, document, fireStore, gameServerUrl));
-          break;
+      case 'STARTED':
+        dispatch(leaveWhileStarted(gameId, playerId, document, fireStore, gameServerUrl))
+        break
         // leave when game is over
-        case 'OVER':
-          dispatch(leaveWhileOver(gameId, playerId, document, fireStore, gameServerUrl));
-          break;
-        default:
+      case 'OVER':
+        dispatch(leaveWhileOver(gameId, playerId, document, fireStore, gameServerUrl))
+        break
+      default:
       }
-      dispatch(disjoinCurrentGame());
-    });
+      dispatch(disjoinCurrentGame())
+    })
   }
 }
 
 export const getCurrentGameId = () => {
-  return (dispatch, getState, {getFirestore}) => {
-    const playerId = getState().firebase.auth.uid;
-    const fireStore = getFirestore();
-    fireStore.collection('currentGames').doc(playerId).get().then((docRef) => {
-      const gameId = docRef ? docRef.id : null;
-      dispatch({type: 'GET_CURRENT_GAME', gameId})
-    }).catch((err) => {
-      dispatch({type: 'GET_CURRENT_GAME_ERROR', err});
-    })
+  return (dispatch, getState, { getFirestore }) => {
+    const playerId = getState().firebase.auth.uid
+    const fireStore = getFirestore()
+    fireStore
+      .collection('currentGames')
+      .doc(playerId)
+      .get()
+      .then(docRef => {
+        const gameId = docRef ? docRef.id : null
+        dispatch({ type: 'GET_CURRENT_GAME', gameId })
+      })
+      .catch(err => {
+        dispatch({ type: 'GET_CURRENT_GAME_ERROR', err })
+      })
   }
 }
 
 const leaveWhilePending = (gameId, playerId, document, fireStore, gameServerUrl) => {
-  return (dispatch, getState, {getFirestore}) => {
-    const gameRef = fireStore.collection('games').doc(gameId);
-    const game = document.data();
+  return (dispatch, getState, { getFirestore }) => {
+    const gameRef = fireStore.collection('games').doc(gameId)
+    const game = document.data()
     let players = game.players
 
-    fireStore.collection('currentGames').doc(playerId).get().then((cgDoc) => {
-      const currentGameDatas = cgDoc.data()
-      leaveServerInstance(gameServerUrl, 'res-arcana', currentGameDatas.gameCredentials).then(() => {
-        
-        // if game creator or the only left player in game, kick all players and delete game.
-        const isGameCreator = (playerId === game.creatorId);
-        const isTheOnlyPlayer = (Object.keys(players).length === 1 && Object.keys(players)[0] === playerId);
-        if (isGameCreator || isTheOnlyPlayer) {
-          let kicks = Object.keys(players).map((key) => {
-            const playerCurrentGameRef = fireStore.collection('currentGames').doc(key);
-            // check if player is synch with the game before kick
-            return playerCurrentGameRef.get().then((currentGame) => {
-              const cgDatas = currentGame.data()
-              if(cgDatas.gameId === gameId) {
-                let datas = {
-                  gameId: null
+    fireStore
+      .collection('currentGames')
+      .doc(playerId)
+      .get()
+      .then(cgDoc => {
+        const currentGameDatas = cgDoc.data()
+        leaveServerInstance(gameServerUrl, 'res-arcana', currentGameDatas.gameCredentials).then(() => {
+          // if game creator or the only left player in game, kick all players and delete game.
+          const isGameCreator = playerId === game.creatorId
+          const isTheOnlyPlayer = Object.keys(players).length === 1 && Object.keys(players)[0] === playerId
+          if (isGameCreator || isTheOnlyPlayer) {
+            let kicks = Object.keys(players).map(key => {
+              const playerCurrentGameRef = fireStore.collection('currentGames').doc(key)
+              // check if player is synch with the game before kick
+              return playerCurrentGameRef.get().then(currentGame => {
+                const cgDatas = currentGame.data()
+                if (cgDatas.gameId === gameId) {
+                  let datas = {
+                    gameId: null,
+                  }
+                  if (key === game.creatorId) {
+                    datas.gameCredentials = {}
+                  }
+                  playerCurrentGameRef.update(datas)
                 }
-                if (key === game.creatorId) {
-                  datas.gameCredentials = {}
-                }
-                playerCurrentGameRef.update(datas)
-              }
+              })
             })
-          })
-          Promise.all(kicks).then(() => {
-            dispatch(deleteGame(gameId));
-          });
-        // else just leave game
-        } else {
-          delete players[playerId];
-          fireStore.collection('currentGames').doc(playerId).update({
-            gameId: null,
-            gameCredentials: {}
-          })
-          gameRef.update({players});
-        }
+            Promise.all(kicks).then(() => {
+              dispatch(deleteGame(gameId))
+            })
+            // else just leave game
+          } else {
+            delete players[playerId]
+            fireStore
+              .collection('currentGames')
+              .doc(playerId)
+              .update({
+                gameId: null,
+                gameCredentials: {},
+              })
+            gameRef.update({ players })
+          }
+        })
       })
-    })
   }
 }
 
 const leaveWhileStarted = (gameId, playerId, document, fireStore, gameServerUrl) => {
-  return (dispatch, getState, {getFirestore}) => {
+  return (dispatch, getState, { getFirestore }) => {
     // Todo
-    dispatch(leaveWhilePending(gameId, playerId, document, fireStore, gameServerUrl));
+    dispatch(leaveWhilePending(gameId, playerId, document, fireStore, gameServerUrl))
   }
 }
 
 const leaveWhileOver = (gameId, playerId, document, fireStore, gameServerUrl) => {
-  return (dispatch, getState, {getFirestore}) => {
+  return (dispatch, getState, { getFirestore }) => {
     // Todo
-    dispatch(leaveWhilePending(gameId, playerId, document, fireStore, gameServerUrl));
+    dispatch(leaveWhilePending(gameId, playerId, document, fireStore, gameServerUrl))
   }
 }
 
-const deleteGame = (gameId) => {
-  return (dispatch, getState, {getFirestore}) => {
-    const fireStore = getFirestore();
-    const gameRef = fireStore.collection('games').doc(gameId);
-    gameRef.delete().then(
-      dispatch(deleteChat(gameId))
-    ).catch(function(error) {
-      console.error("Error deleting game: ", gameId, error);
-    });
+const deleteGame = gameId => {
+  return (dispatch, getState, { getFirestore }) => {
+    const fireStore = getFirestore()
+    const gameRef = fireStore.collection('games').doc(gameId)
+    gameRef
+      .delete()
+      .then(dispatch(deleteChat(gameId)))
+      .catch(function(error) {
+        console.error('Error deleting game: ', gameId, error)
+      })
   }
 }
 
-export const deleteGameById = (gameId) => {
-  return (dispatch, getState, {getFirestore}) => {
-    const fireStore = getFirestore();
-    const gameRef = fireStore.collection('games').doc(gameId);
-    gameRef.get().then((document) => {
+export const deleteGameById = gameId => {
+  return (dispatch, getState, { getFirestore }) => {
+    const fireStore = getFirestore()
+    const gameRef = fireStore.collection('games').doc(gameId)
+    gameRef.get().then(document => {
       let players = document.data().players
-      let kicks = Object.keys(players).map((key) => {
-        const playerCurrentGameRef = fireStore.collection('currentGames').doc(key);
+      let kicks = Object.keys(players).map(key => {
+        const playerCurrentGameRef = fireStore.collection('currentGames').doc(key)
         // check if player is synch with the game before kick
-        return playerCurrentGameRef.get().then((currentGame) => {
-          if(currentGame.data().gameId === gameId) {
+        return playerCurrentGameRef.get().then(currentGame => {
+          if (currentGame.data().gameId === gameId) {
             playerCurrentGameRef.update({
-              gameId: null
+              gameId: null,
             })
           }
         })
       })
-      Promise.all(kicks).then(dispatch(deleteGame(gameId)));
-    });
+      Promise.all(kicks).then(dispatch(deleteGame(gameId)))
+    })
   }
 }
 
-export const startGame = (gameId)  => {
-  return (dispatch, getState, {getFirestore}) => {
-    const fireStore = getFirestore();
-    fireStore.collection('games').doc(gameId).update({status: 'STARTED'})
-      .then(()=>{
-        dispatch({type: 'GAME_STARTED', gameId})
+export const startGame = gameId => {
+  return (dispatch, getState, { getFirestore }) => {
+    const fireStore = getFirestore()
+    fireStore
+      .collection('games')
+      .doc(gameId)
+      .update({ status: 'STARTED' })
+      .then(() => {
+        dispatch({ type: 'GAME_STARTED', gameId })
       })
   }
 }
 
-export const endGame = (gameId) => {
-  return (dispatch, getState, { getFirestore}) => {
-    const fireStore = getFirestore();
-    fireStore.collection('games').doc(gameId).update({status: 'OVER'})
-      .then(()=>{
-        dispatch({type: 'GAME_OVER', gameId})
+export const endGame = gameId => {
+  return (dispatch, getState, { getFirestore }) => {
+    const fireStore = getFirestore()
+    fireStore
+      .collection('games')
+      .doc(gameId)
+      .update({ status: 'OVER' })
+      .then(() => {
+        dispatch({ type: 'GAME_OVER', gameId })
       })
   }
 }
 
 export const disjoinCurrentGame = () => {
-  return (dispatch, getState, {getFirestore}) => {
-    const fireStore = getFirestore();
-    const creatorId = getState().firebase.auth.uid;
+  return (dispatch, getState, { getFirestore }) => {
+    const fireStore = getFirestore()
+    const creatorId = getState().firebase.auth.uid
     // Set the current game for player
     const currentGameRef = fireStore.collection('currentGames').doc(creatorId)
-    currentGameRef.get().then((document) => {
-      const datas = document.data();
-      datas.gameId = null;
-      currentGameRef.set(datas);
-      dispatch({type: 'LEAVE_CURRENT_GAME'})
-    }).catch((err) => {
-      dispatch({type: 'LEAVE_CURRENT_GAME_ERROR', err});
-    })
+    currentGameRef
+      .get()
+      .then(document => {
+        const datas = document.data()
+        datas.gameId = null
+        currentGameRef.set(datas)
+        dispatch({ type: 'LEAVE_CURRENT_GAME' })
+      })
+      .catch(err => {
+        dispatch({ type: 'LEAVE_CURRENT_GAME_ERROR', err })
+      })
   }
 }
 
 export const leaveServerInstance = async (gameServerUrl, gameName, gameCredentials) => {
-  if(gameCredentials) {
-    const promises = [];
-    Object.keys(gameCredentials).forEach( (gameID) => {
-      const resp = fetch(
-        `${gameServerUrl || ''}/games/${gameName}/${gameID}/leave`,
-        {
-          method: 'POST',
-          body: JSON.stringify({
-            playerID: gameCredentials[gameID].playerId,
-            credentials: gameCredentials[gameID].credentials,
-          }),
-          headers: { 'Content-Type': 'application/json' },
-        }
-      );
-      promises.push(resp);
-    });
-    const ready = Promise.all(promises);
+  if (gameCredentials) {
+    const promises = []
+    Object.keys(gameCredentials).forEach(gameID => {
+      const resp = fetch(`${gameServerUrl || ''}/games/${gameName}/${gameID}/leave`, {
+        method: 'POST',
+        body: JSON.stringify({
+          playerID: gameCredentials[gameID].playerId,
+          credentials: gameCredentials[gameID].credentials,
+        }),
+        headers: { 'Content-Type': 'application/json' },
+      })
+      promises.push(resp)
+    })
+    const ready = Promise.all(promises)
     ready.then(() => {
-      return;
+      return
     })
   }
 }
 
-
 export const saveCredentials = (gameID, playerID, credentials) => {
-  return (dispatch, getState, { getFirestore}) => {
-    const fireStore = getFirestore();
-    const playerId = getState().firebase.auth.uid;
-    
+  return (dispatch, getState, { getFirestore }) => {
+    const fireStore = getFirestore()
+    const playerId = getState().firebase.auth.uid
+
     const currentGameRef = fireStore.collection('currentGames').doc(playerId)
-    currentGameRef.get().then((document) => {
-      const datas = document.data();
-      let gameCredentials = datas.gameCredentials || {};
+    currentGameRef.get().then(document => {
+      const datas = document.data()
+      let gameCredentials = datas.gameCredentials || {}
       gameCredentials[gameID] = {
         playerId: playerID,
-        credentials: credentials
-      };
-      datas.gameCredentials = gameCredentials;
-      currentGameRef.set(datas);
-    });
+        credentials: credentials,
+      }
+      datas.gameCredentials = gameCredentials
+      currentGameRef.set(datas)
+    })
   }
-};
+}
 
 export const getComponents = () => {
-  return (dispatch, getState, { getFirestore}) => {
-    const fireStore = getFirestore();
-    const components = {};
-    
-    fireStore.collection('components').get().then((snapshot) => {  
-      snapshot.forEach(function(doc) {
-        components[doc.id] = doc.data();
+  return (dispatch, getState, { getFirestore }) => {
+    const fireStore = getFirestore()
+    const components = {}
+
+    fireStore
+      .collection('components')
+      .get()
+      .then(snapshot => {
+        snapshot.forEach(function(doc) {
+          components[doc.id] = doc.data()
+        })
       })
-    });
-    return components;
+    return components
   }
 }
 
 export function selectComponent(component) {
   return {
-      type: 'SELECT_COMPONENT',
-      component
-  };
+    type: 'SELECT_COMPONENT',
+    component,
+  }
 }
 
 export function targetComponent(component) {
   return {
-      type: 'TARGET_COMPONENT',
-      component
-  };
+    type: 'TARGET_COMPONENT',
+    component,
+  }
 }
 
 export function zoomCard(card) {
   return {
-      type: 'ZOOM_CARD',
-      card
-  };
+    type: 'ZOOM_CARD',
+    card,
+  }
 }
 
 export function clearZoom() {
   return {
-      type: 'CLEAR_ZOOM'
-  };
+    type: 'CLEAR_ZOOM',
+  }
 }
 
 export function tapComponent(card) {
   return {
     type: 'TAP_COMPONENT',
-    card
+    card,
   }
 }
 
 export function resetCollect() {
   return {
-    type: 'RESET_COLLECT'
+    type: 'RESET_COLLECT',
   }
 }
 
 export function resetCollectAction(id) {
-  console.log('reset',id)
+  console.log('reset', id)
   return {
     type: 'RESET_COLLECT_ACTION',
-    id
+    id,
   }
 }
 
 export function setCollectAction(action) {
   return {
     type: 'SET_COLLECT_ACTION',
-    action
+    action,
   }
 }
 
 export function resetCollectOnComponentAction(id) {
   return {
     type: 'RESET_COLLECT_ON_COMPONENT_ACTION',
-    id
+    id,
   }
 }
 export function setCollectOnComponentAction(action) {
   return {
     type: 'SET_COLLECT_ON_COMPONENT_ACTION',
-    action
+    action,
   }
 }
 
 export function setFocusZoom(flag) {
   return {
     type: 'SET_FOCUS_ZOOM',
-    flag
+    flag,
   }
 }
 
 export function selectAction(action) {
   return {
     type: 'SET_ACTION',
-    action
+    action,
   }
 }
 
 export function selectActionPower(index) {
   return {
     type: 'SET_ACTION_POWER',
-    actionPowerIndex: index
+    actionPowerIndex: index,
   }
 }
 
 export function resetEssencePickerSelection(selectionType) {
   return {
     type: 'RESET_ESSENCE_PICKER',
-    selectionType
+    selectionType,
   }
 }
 
@@ -355,7 +382,7 @@ export function addToEssencePickerSelection(selectionType, essenceType) {
   return {
     type: 'ADD_ESSENCE_TO_SELECTION',
     selectionType,
-    essenceType
+    essenceType,
   }
 }
 
@@ -363,19 +390,19 @@ export function setEssencePickerSelection(selectionType, essenceSelection) {
   return {
     type: 'SET_ESSENCE_SELECTION',
     selectionType,
-    essenceSelection
+    essenceSelection,
   }
 }
 
 export function canPayCost(info) {
   return {
     type: 'CAN_PAY_COST',
-    info
+    info,
   }
 }
 
 export function toggleCommonBoard() {
   return {
-      type: 'TOGGLE_COMMON_BOARD'
-  };
+    type: 'TOGGLE_COMMON_BOARD',
+  }
 }

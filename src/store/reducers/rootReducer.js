@@ -1,12 +1,12 @@
-import authReducer from './authReducer';
-import chatReducer from './chatReducer';
-import editorReducer from './editorReducer';
-import gameReducer from './gameReducer';
-import lobbyReducer from './lobbyReducer';
-import uiReducer from './uiReducer';
-import { combineReducers } from 'redux';
-import { firestoreReducer } from 'redux-firestore';
-import { firebaseReducer } from 'react-redux-firebase';
+import authReducer from './authReducer'
+import chatReducer from './chatReducer'
+import editorReducer from './editorReducer'
+import gameReducer from './gameReducer'
+import lobbyReducer from './lobbyReducer'
+import uiReducer from './uiReducer'
+import { combineReducers } from 'redux'
+import { firestoreReducer } from 'redux-firestore'
+import { firebaseReducer } from 'react-redux-firebase'
 
 const rootReducer = combineReducers({
   auth: authReducer,
@@ -16,8 +16,8 @@ const rootReducer = combineReducers({
   firestore: firestoreReducer,
   firebase: firebaseReducer,
   lobby: lobbyReducer,
-  ui: uiReducer
-});
+  ui: uiReducer,
+})
 
 export default rootReducer
 

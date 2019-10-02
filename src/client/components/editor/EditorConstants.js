@@ -7,13 +7,13 @@ export const COMPONENTS_TYPE = [
   { id: 'mage', name: 'Mage' },
   { id: 'magicItem', name: 'Magic Item' },
   { id: 'monument', name: 'Monument' },
-  { id: 'placeOfPower', name: 'Place of Power' }
+  { id: 'placeOfPower', name: 'Place of Power' },
 ]
 
 export const STANDARD_COLLECT_ABILITY = {}
 
 export const SPECIFIC_COLLECT_ABILITY = {
-  multipleCollectOptions: false
+  multipleCollectOptions: false,
 }
 
 export const DEFAULT_COMPONENT = {
@@ -29,20 +29,20 @@ export const DEFAULT_COMPONENT = {
   hasSpecificCollectAbility: false,
   hasVictoryPoint: false,
   isDragon: false,
-  isCreature: false
+  isCreature: false,
 }
 
 export const DISCOUNT = {
-  type: ['artefact']
+  type: ['artefact'],
 }
 
 export const REACT_POWER = {
   type: [],
   cost: {},
-  gain: {}
+  gain: {},
 }
 
 export const ACTION_POWER = {
   cost: {},
-  gain: {}
+  gain: {},
 }
