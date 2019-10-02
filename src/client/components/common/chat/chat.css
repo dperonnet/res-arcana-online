@@ -11,6 +11,7 @@
   position: relative;
   font-size: 12px;
   background-color: rgba(34,34,34,.8);
+  min-height: 128px;
   height: 100%;
   width: 100%;
   padding: 12px;
@@ -22,6 +23,7 @@
 }
 
 .chat-name {
+  flex: 0;
   text-align: center;
   color: #fff;
 }
@@ -36,15 +38,12 @@
 }
 
 .chat-area {
-  position: absolute;
-  top: 45px;
-  bottom: 50px;
-  left: 20px;
-  right: 25px;
+  flex: 1;
   font-size: 11px;
   overflow-y: auto;
   margin-left: -10px;
   margin-right: -10px;
+  margin-bottom: 5px;
 }
 
 .username {
@@ -61,8 +60,7 @@
 }
 
 .send-form {
-  position: absolute;
-  bottom: 10px;
-  left: 15px;
-  right: 15px;
+  display: contents;
+  flex: 0;
+  width: 100%;
 }

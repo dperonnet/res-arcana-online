@@ -1,16 +1,17 @@
-import React, { Component } from 'react';
-import { Button, Col, Form, InputGroup, Row } from 'react-bootstrap';
-import { withRouter } from 'react-router-dom';
-import { compose } from 'redux';
-import { connect } from 'react-redux';
-import { createAndJoinGame } from '../../../../store/actions/gameActions';
+import React, { Component } from 'react'
+import { Button, Col, Form, InputGroup, Row } from 'react-bootstrap'
+import { withRouter } from 'react-router-dom'
+import { compose } from 'redux'
+import { connect } from 'react-redux'
+import { createGameLobby } from '../../../../store/actions/lobbyActions'
 
-class CreateGame extends Component {
+class CreateLobby extends Component {
   constructor(props) {
     super(props);
+    
     this.state = {
       isCreatingGame: false,
-      game: {
+      gameOptions: {
         name: null,
         password: '',
         numberOfPlayers: '2',
@@ -21,60 +22,50 @@ class CreateGame extends Component {
   }
 
   static getDerivedStateFromProps(props, state) {
-    let { game } = state;
-    if (game.name === null) {
+    let { gameOptions } = state;
+
+    if (gameOptions.name === null && props.profile.login) {
       return {
-        game: {
-          ...game,
+        gameOptions: {
+          ...gameOptions,
           name: props.profile.login + '\'s game',
         }
       }
     }
-    return state;
+    return state
   }
 
   handleClose = () => {
-    const { setLoading } = this.props
-    setLoading(false);
-    this.setState({ isCreatingGame: false });
+    this.setState({ isCreatingGame: false })
   }
 
   handleShow = () => {
     this.setState({
       isCreatingGame: true
-    });
+    })
   }
 
   handleChange = (e) => {
-    const { checked, name, value, type } = e.target;
-    const { game } = this.state;
-    const valueToUpdate = type === 'checkbox' ? checked : value;
-    game[name] = valueToUpdate;
-    this.setState({game});
+    const { checked, name, value, type } = e.target
+    const { gameOptions } = this.state
+    const valueToUpdate = type === 'checkbox' ? checked : value
+    gameOptions[name] = valueToUpdate
+    this.setState({gameOptions})
   }
 
   handleSubmit = (e) => {
     e.preventDefault();
-    const { createGame, joinGame, gameServer, setLoading } = this.props
-    const { game } = this.state;
-    setLoading(true);
-    const setupData = {
-      skipDraftPhase: game.skipDraftPhase
-    }
-    createGame('res-arcana', this.state.game.numberOfPlayers, setupData).then((resp) => {
-      game.boardGameId = resp.gameID
-      this.props.createAndJoinGame(game, joinGame, gameServer);
-    })
+    const { gameOptions } = this.state
+    this.props.createGameLobby(gameOptions)
   }
 
   render() {
-    const { isCreatingGame, game } = this.state;
-    const numberOfPlayers = ["1","2","3","4"];
+    const { isCreatingGame, gameOptions } = this.state
+    const numberOfPlayers = ["1","2","3","4"]
 
     return (
       <div className='create-game-panel'>
-        {
-          isCreatingGame ?
+        { isCreatingGame ?
             <div className='game'>
               <div className="game-header"><h5>Create new game</h5></div>
               <div className="game-options">
@@ -88,7 +79,7 @@ class CreateGame extends Component {
                         placeholder="Game name"
                         type="text"
                         name="name"
-                        value={game.name}
+                        value={gameOptions.name}
                         onChange={this.handleChange}
                       />
                     </Col>
@@ -99,7 +90,7 @@ class CreateGame extends Component {
                       {numberOfPlayers.map((number) => (
                         <Form.Check inline type="radio" name="numberOfPlayers"
                           key={number} id={number} value={number} label={number}
-                          checked={game.numberOfPlayers === number}
+                          checked={gameOptions.numberOfPlayers === number}
                           onChange={this.handleChange}
                         />
                       ))}
@@ -113,8 +104,8 @@ class CreateGame extends Component {
                       <InputGroup className="mb-3">
                         <Form.Check inline type="checkbox" name="skipDraftPhase"
                           id="skipDraftPhase" label="Skip draft phase ?"
-                          value={game.skipDraftPhase}
-                          checked={game.skipDraftPhase}
+                          value={gameOptions.skipDraftPhase}
+                          checked={gameOptions.skipDraftPhase}
                           onChange={this.handleChange}/>
                       </InputGroup>
                     </Col>
@@ -127,13 +118,13 @@ class CreateGame extends Component {
               </div>
             </div>
           :
-          <div className='game-button'>
-            <Button variant="secondary" size="sm"
-              onClick={this.handleShow}>New Game</Button>
-          </div>
+            <div className='game-button'>
+              <Button variant="secondary" size="sm"
+                onClick={this.handleShow}>New Game</Button>
+            </div>
         }
       </div>
-    );
+    )
   }
 }
 
@@ -146,12 +137,11 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = dispatch => {
   return {
-    createAndJoinGame: (game, callback, gameServer) => dispatch(createAndJoinGame(game, callback, gameServer)),
-    setLoading: (value) => dispatch({type: 'LOADING', loading: value})
+    createGameLobby: (gameOptions) => dispatch(createGameLobby(gameOptions)),
   }
 }
 
 export default compose(
-  withRouter,
+  withRouter,//TODO REMOVE ?
   connect(mapStateToProps, mapDispatchToProps)
-)(CreateGame);
+)(CreateLobby)

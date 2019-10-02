@@ -165,3 +165,8 @@ $main-color: #FF0000;
   50% {clip: rect($box-height - $path-width, $box-width, $box-height, 0px); }
   75% {clip: rect(0px, $path-width, $box-height, 0px); }
 }
+
+@font-face {
+  font-family: 'FlourishBoldSpecial';
+  src: local('FlourishBoldSpecial'), url(../fonts/flourishboldspecial.otf) format('otf');
+}

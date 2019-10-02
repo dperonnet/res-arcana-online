@@ -67,7 +67,7 @@ class DashBoard extends Component {
 const mapStateToProps = (state) => {
   return {
     mainChat : state.firestore.ordered.mainChat && state.firestore.ordered.mainChat[0],
-    games: state.firestore.ordered.games,
+    gameLobbys: state.firestore.ordered.gameLobbys,
     users: state.firestore.ordered.users,
     auth: state.firebase.auth
   }
@@ -76,7 +76,7 @@ const mapStateToProps = (state) => {
 export default compose(
   connect(mapStateToProps),
   firestoreConnect((props) => [
-    { collection: 'games'},
+    { collection: 'gameLobbys'},
     { collection: 'users',
 		  where: ['state', '==', 'online'],},
     { collection: 'chats',

@@ -1,41 +1,48 @@
-import React, { Component } from 'react';
-import { Container } from 'react-bootstrap';
-import { Redirect } from 'react-router-dom';
-import Lobby from "./lobby/Lobby";
-import './play.css';
+import React, { Component } from 'react'
+import { Container } from 'react-bootstrap'
+import { Redirect } from 'react-router-dom'
+import { compose } from 'redux';
 import { connect } from 'react-redux';
-import { ResArcanaGame } from './game/Game';
-import ResArcanaBoard from './game/Board';
+import { firestoreConnect } from 'react-redux-firebase';
+import './play.css'
+import CreateLobby from './lobby/CreateLobby'
+import GameLobby from './lobby/GameLobby'
+import LobbyList from './lobby/LobbyList'
 
-ResArcanaGame.minPlayers = 1;
-ResArcanaGame.maxPlayers = 4;
-
-const importedGames = [
-  { game: ResArcanaGame, board: ResArcanaBoard }
-];
-  
 class Play extends Component {
   render() {
-    const { auth, gameServerUrl } = this.props;
+    const { auth, currentLobby  } = this.props
 
     if(!auth.uid) return <Redirect to='/signIn'/>
 
     return (
       <Container className="play-container">
-        <Lobby 
-          gameServer={gameServerUrl}
-          lobbyServer={gameServerUrl}
-          gameComponents={importedGames}
-          debug={false}/>
+        {currentLobby && currentLobby.lobbyId ?
+            <GameLobby />
+          : 
+            <div className="lobby-container">
+              <CreateLobby />
+              <LobbyList />
+            </div>
+        }
       </Container>
-    );
+    )
   }
 }
 
 const mapStateToProps = (state) => {
   return {
     auth: state.firebase.auth,
+    currentLobby: state.firestore.data.currentLobby,
   }
 }
 
-export default connect(mapStateToProps)(Play)
+export default compose(
+  connect(mapStateToProps),
+  firestoreConnect(props => [
+    { collection: 'currentLobbys',
+        doc: props.auth.uid,
+        storeAs: 'currentLobby'
+    }
+  ]
+))(Play)

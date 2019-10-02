@@ -288,7 +288,7 @@ class Profile extends Component {
         <div className="auth-panel">
           <h2>Game options</h2>
           <Form onSubmit={this.handleSubmitOptions}>
-            {this.renderLayout()}
+            {false && this.renderLayout()}
             <div className="align-center">
               <div className="card-size-selector">
                 {this.renderCard('small')}

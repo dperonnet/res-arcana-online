@@ -39,6 +39,57 @@ exports.onUserStatusChanged = functions.database.ref('/status/{uid}')
     })
   });
 
+exports.deleteLobby = functions.https.onCall((data, context) => {
+  console.log('1) call to deleteLobby cloud function',data);
+  if (!context.auth) {
+    throw new functions.https.HttpsError('failed-precondition', 'The function must be called while authenticated.');
+  }
+
+  const lobbyId = data.lobbyId
+  const userId = context.auth.uid
+
+  let lobbyRef = firestore.doc(`gameLobbys/${lobbyId}`)
+  let lobbyTransaction = firestore.runTransaction(t => {
+    return t.get(lobbyRef).then(lobbyDoc => {
+      let lobby = lobbyDoc.data()
+      console.log('2) userId',userId, 'lobby', lobby);
+
+      if (lobby.creatorId !== userId) {
+        throw new functions.https.HttpsError('invalid-argument', 'Only the lobby\'s creator or an admin can delete this lobby.');
+      }
+
+      // For each player and visitor connected to the lobby, update their currentLobby to null
+      let kicks = Object.keys(lobby.players).map((playerId) => {
+        let currentLobbyRef = firestore.doc(`currentLobbys/${playerId}`)
+
+        return t.get(currentLobbyRef).then((currentLobbyDoc) => {
+          let currentLobby = currentLobbyDoc.data()
+          console.log('3a)try to kick', playerId, 'currentLobby', currentLobby);
+
+          // Check first if the user is connected to the lobby
+          if (currentLobby.lobbyId === lobbyId) {
+            return t.update(currentLobbyRef, {lobbyId: null})
+          } else {
+            return Promise.reject('The player is not synchronised with this lobby')
+          }
+        }).catch(err => {
+          console.log('3b) Error updating currentLoby of player', playerId, err);
+        })
+      })
+      
+      console.log('4) kicks',kicks);
+      Promise.all(kicks).then(() => {
+        console.log('5) delete lobbyRef',lobbyRef);
+        t.delete(lobbyRef);
+      });
+    });
+  }).then(result => {
+    console.log('Transaction success!');
+  }).catch(err => {
+    console.log('Transaction failure:', err);
+  });
+});
+
 
 /*
 const functions = require('firebase-functions');

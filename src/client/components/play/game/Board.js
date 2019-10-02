@@ -471,7 +471,9 @@ class ResArcanaBoard extends Component {
    * Places of Power, Magic Items and Monuments.
    */
   renderCommonBoard = () => {
-    const { G, canPayCost, selectAction} = this.props
+    const { G, canPayCost, profile, selectAction} = this.props
+    const layout = profile && profile.layout ? profile.layout : 'vertical'
+
     const handleClick = (component) => {
       return G.phase === 'PLAY_PHASE' ? {
         onClick: (event) => {
@@ -513,10 +515,14 @@ class ResArcanaBoard extends Component {
       </div>
       <div className={'components' + (canPayCost.valid ? '' : ' invalid')}>
         <h5>Monuments ({G.publicData.monumentsStack.length + G.publicData.monumentsRevealed.length} left)</h5>
-        <div className="monument-container">
+        {layout === 'horizontal' && <div className="monument-container">
+          {G.publicData.monumentsStack.length > 0 && monumentsStack}
+          {monuments}
+        </div>}
+        {layout === 'vertical' && <div className="monument-container">
           {G.publicData.monumentsStack.length > 0 && monumentsStack}
           <div className="monuments-revealed">{monuments}</div>
-        </div>
+        </div>}
       </div>
       <div className="components">
         <h5>Magic Items</h5>
@@ -796,7 +802,7 @@ class ResArcanaBoard extends Component {
     let hand = null
     let directive = null
     let handleConfirm = null;
-    const lastDraftCard = G.players[playerID].draftCards.length && G.players[playerID].draftCards[0].length === 1
+    const lastDraftCard = G.players[playerID].draftCards.length && Object.values(G.players[playerID].draftCards[0]).length === 1
     const nextPlayer = this.getNextPlayer()
 
     switch (G.publicData.players[playerID].status) {
@@ -806,7 +812,7 @@ class ResArcanaBoard extends Component {
         const emptyHand = G.players[playerID].draftCards.length === 0
         waiting = emptyHand
         
-        draftCards = G.players[playerID].draftCards.length > 0 && G.players[playerID].draftCards[0].map((card) => {
+        draftCards = G.players[playerID].draftCards.length > 0 && Object.values(G.players[playerID].draftCards[0]).map((card) => {
           return this.renderGameComponent(card, {onClick: (event) => this.handleClick(event, card), onDoubleClick: () => this.pickArtefact(card.id)})
         })
       
@@ -1988,7 +1994,7 @@ class ResArcanaBoard extends Component {
    */
   render() {
     const { G, chatDisplay, commonBoardDisplay, game, cardToZoom, profile } = this.props
-    
+
     if (!isLoaded(game)) {
       return <div className="loading-panel align-center"><img className="loader" alt="Loading..."/>Loading...</div>
     }

@@ -26,6 +26,7 @@
   .components {
     display: inline-block;
     vertical-align: top;
+    
     &:nth-child(2) {
       width: 40%
     }
@@ -48,11 +49,22 @@
     &.small, &.normal, &.large, &.x-large {
       width: 100%;
     }
+    
+    div.magic-item, div.card, div.place-of-power {
+      margin: 0;
+      border-radius: 8px 0 0 8px;
+      flex: 1 0;
+    }
   }
 
   .place-of-power-container, .monument-container, .monuments-revealed, .magic-item-container {
     display: flex;
     justify-content: center;
+    
+    div:last-child {
+      flex: 1 0 85px;
+      border-radius: 8px;
+    }
   }
 }
 

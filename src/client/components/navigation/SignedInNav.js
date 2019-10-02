@@ -5,7 +5,7 @@ import './navigation.css'
 import { compose } from 'redux'
 import { connect } from 'react-redux'
 import { firestoreConnect } from 'react-redux-firebase'
-import { leaveGame } from '../../../store/actions/gameActions'
+import { deleteLobby, leaveLobby } from '../../../store/actions/lobbyActions'
 import { saveOptions, signOut } from '../../../store/actions/authActions'
 import { toggleChat } from '../../../store/actions/chatActions'
 import { toggleCommonBoard } from '../../../store/actions/gameActions'
@@ -16,10 +16,22 @@ const cardSizeList = ['small','normal','large','x-large']
 
 class SignedInNav extends Component {
 
-  leaveGame = () => {
-    const { currentGames, leaveGame, gameServerUrl, setLoading } = this.props
+  handleLeaveGame = () => {
+    const { currentLobby, deleteLobby, setLoading } = this.props
     setLoading(false)
-    leaveGame(currentGames.gameId, gameServerUrl)
+    deleteLobby(currentLobby.lobbyId)
+  }
+  
+  deleteLobby = () => {
+    const { currentLobby, deleteLobby, setLoading } = this.props
+    setLoading(false)
+    deleteLobby(currentLobby.lobbyId)
+  }
+
+  leaveLobby = () => {
+    const { currentLobby, leaveLobby, setLoading } = this.props
+    setLoading(false)
+    leaveLobby(currentLobby.lobbyId)
   }
 
   toggleChat = () => {
@@ -56,7 +68,8 @@ class SignedInNav extends Component {
   }
 
   render() {
-    const { chatDisplay, commonBoardDisplay, currentGames, profile, signOut } = this.props
+    const { chatDisplay, commonBoardDisplay, currentLobby, profile, signOut } = this.props
+    
     return (
       <Navbar collapseOnSelect expand="md" variant="dark" fixed="top">
         <LinkContainer to="/"><Navbar.Brand>Res Arcana Online</Navbar.Brand></LinkContainer>
@@ -72,21 +85,21 @@ class SignedInNav extends Component {
               <NavDropdown.Divider />
               <LinkContainer to="/privatePolicy" active={false}><NavDropdown.Item>Privacy Policy</NavDropdown.Item></LinkContainer>
             </NavDropdown>
-            {currentGames && currentGames.gameId != null && <Nav.Link onClick={this.leaveGame}>Leave game</Nav.Link>}
+            {currentLobby && currentLobby.lobbyId != null && <Nav.Link onClick={this.handleLeaveGame}>Leave game</Nav.Link>}
           </Nav>
           <Nav>
-            {currentGames && currentGames.gameId != null && 
+            {currentLobby && currentLobby.lobbyId != null && 
               <Nav.Link onClick={this.toggleCommonBoard} active={commonBoardDisplay}><FontAwesomeIcon icon={faArchway} /></Nav.Link>}
-            {currentGames && currentGames.gameId != null && 
+            {currentLobby && currentLobby.lobbyId != null && 
               <Nav.Link onClick={this.toggleChat} active={chatDisplay}><FontAwesomeIcon icon={faComments} /></Nav.Link>}
-            {currentGames && currentGames.gameId != null && 
+            {currentLobby && currentLobby.lobbyId != null && 
               <Nav.Link onClick={this.setCardSizeMinus} 
                 active={profile.cardSize !== cardSizeList[0]}
                 disabled={profile.cardSize === cardSizeList[0]}>
                 <FontAwesomeIcon icon={faSearchMinus} />
               </Nav.Link>
             }
-            {currentGames && currentGames.gameId != null && 
+            {currentLobby && currentLobby.lobbyId != null && 
               <Nav.Link onClick={this.setCardSizePlus} 
                 active={profile.cardSize !== cardSizeList[cardSizeList.length - 1]}
                 disabled={profile.cardSize === cardSizeList[cardSizeList.length - 1]}>
@@ -111,15 +124,15 @@ const mapStateToProps = (state) =>{
     auth: state.firebase.auth,
     chatDisplay: state.chat.chatDisplay,
     commonBoardDisplay: state.game.commonBoardDisplay,
-    currentGames: state.firestore.data.currentGames,
-    games: state.firestore.ordered.games,
+    currentLobby: state.firestore.data.currentLobby,
     profile: state.firebase.profile
   }
 }
 
 const mapDispatchToProps = (dispatch) =>{
   return {
-    leaveGame: (gameId, baseUrl) => dispatch(leaveGame(gameId, baseUrl)),
+    deleteLobby: (lobbyId) => dispatch(deleteLobby(lobbyId)),
+    leaveLobby: (gameId, baseUrl) => dispatch(leaveLobby(gameId, baseUrl)),
     saveOptions: (profile) => dispatch(saveOptions(profile)),
     setLoading: (value) => dispatch({type: 'LOADING', loading: value}),
     signOut: () => dispatch(signOut()),
@@ -131,10 +144,10 @@ const mapDispatchToProps = (dispatch) =>{
 export default compose(
   connect(mapStateToProps, mapDispatchToProps),
   firestoreConnect((props) => [
-    { collection: 'games'},
-    { collection: 'currentGames',
+    { collection: 'gameLobbys'},
+    { collection: 'currentLobbys',
       doc: props.auth.uid,
-      storeAs: 'currentGames'
+      storeAs: 'currentLobby'
     }
   ]
 ))(SignedInNav)

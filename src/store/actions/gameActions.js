@@ -1,28 +1,6 @@
 import { createChat, deleteChat } from './chatActions';
 
-export const createGame = (game) => {
-  return (dispatch, getState, {getFirebase, getFirestore}) => {
-    // make asynch call to database
-    const fireStore = getFirestore();
-    const profile = getState().firebase.profile;
-    const creatorId = getState().firebase.auth.uid;
-    fireStore.collection('games').add({
-      ...game,
-      gameCreator: profile.login,
-      creatorId: creatorId,
-      createdAt: new Date(),
-      status: 'PENDING'
-    }).then((docRef) => {
-      docRef.get().then(doc => {
-        dispatch({ type: 'CREATE_GAME', doc});
-      })
-    }).catch((err) => {
-      dispatch({type: 'CREATE_GAME_ERROR', err});
-    })
-  }
-};
-
-export const createAndJoinGame = (game, callBack, gameServerUrl) => {
+export const createAndJoinGame = (game, createServerGame, joinServerGame, gameServerUrl) => {
   return (dispatch, getState, {getFirestore}) => {
     // make asynch call to database
     const fireStore = getFirestore();
@@ -35,80 +13,16 @@ export const createAndJoinGame = (game, callBack, gameServerUrl) => {
       createdAt: new Date(),
       status: 'PENDING'
     }).then((docRef) => {
-      docRef.get().then(doc => {
+      fireStore.collection('games').doc(docRef.uid).get().then(doc => {
         dispatch({ type: 'CREATE_GAME', doc});
-        dispatch(createChat(doc.id, doc.data().name + ' Chat'));
+        //dispatch(joinGame(doc.id, joinServerGame, gameServerUrl));
       })
-      dispatch(joinGame(docRef.id, callBack, gameServerUrl));
     }).catch((err) => {
       dispatch({type: 'CREATE_GAME_ERROR', err});
     })
   }
 }
 
-export const joinGame = (gameId, callBack, gameServerUrl) => {
-  return (dispatch, getState, { getFirestore}) => {
-    const fireStore = getFirestore();
-    const profile = getState().firebase.profile;
-    const playerId = getState().firebase.auth.uid;
-    const gameRef = fireStore.collection('games').doc(gameId);
-    const currentGameRef = fireStore.collection('currentGames').doc(playerId);
-    currentGameRef.get().then((cgDoc) => {
-      const currentGameDatas = cgDoc.data();
-      leaveServerInstance(gameServerUrl, 'res-arcana', currentGameDatas.gameCredentials).then(() => {      
-        fireStore.runTransaction(function(transaction) {
-          return transaction.get(gameRef).then(function(gameDoc) {
-            if (!gameDoc.exists) {
-                throw new Error("Document does not exist!");;
-            }
-            if (gameDoc.data().status === 'PENDING') {
-              // Add player to game players list
-              let players = gameDoc.data().players ? gameDoc.data().players : {}
-              let playersInGame = Object.keys(players).length;
-              if (players[playerId]) {
-                transaction.update(gameRef, {players});
-                return gameId;
-              } else if (playersInGame < 4) {
-                players[playerId] = {
-                  id: playersInGame,
-                  name: profile.login
-                };
-                transaction.update(gameRef, {players});
-                return gameId;
-              } else {
-                return Promise.reject("Sorry! Game is full.");
-              }
-            } else {
-              transaction.update(gameRef, gameDoc.data());
-            }
-          });
-        }).then(() => {
-          gameRef.get().then((gameDoc) => {
-            currentGameRef.get().then((cGame) => {
-              // Set the current game for player
-              const datas = {
-                gameId: gameId,
-                createdAt: new Date(),
-                gameCredentials: {}
-              }
-              currentGameRef.set(datas).then(() => {
-                // If player in game players, process join server game with callback
-                if (Object.keys(gameDoc.data().players).includes(playerId)) {
-                  const boardGameId = gameDoc.data().boardGameId
-                  const playerIdInGame = gameDoc.data().players[playerId].id;
-                  callBack('res-arcana', boardGameId, playerIdInGame);
-                }
-              });
-            });
-            dispatch({ type: 'JOIN_GAME', gameId});
-          })
-        }).catch((err) => {
-          dispatch({type: 'JOIN_GAME_ERROR', err});
-        });
-      });
-    });
-  }
-};
 
 export const leaveGame = (gameId, gameServerUrl) => {
   return (dispatch, getState, {getFirestore}) => {

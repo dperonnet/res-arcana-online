@@ -61,3 +61,15 @@ color: #000;
   background-color: #333;
   border-color: #333;
 }
+
+.seat {
+  display: inline-block;
+  height: 40px;
+  width: 250px;
+  box-shadow: 0 0 3pt 2pt #F5B041;
+  border-radius: 2px;
+  margin: 10px;
+  font-family: FlourishBoldSpecial;
+  font-size: larger;
+  text-align: center;
+}

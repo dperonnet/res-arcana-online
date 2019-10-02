@@ -66,10 +66,9 @@ class Chat extends Component {
       <div className="chat-container">
           <div className="chat-panel">
             <h5 className="chat-name">{chatName}</h5>
-            <div>
             <div className="chat-area" ref='chatArea'>
               {messages}
-            </div></div>
+            </div>
             <div className="send-form">
               <Form onSubmit={this.handleSubmit} autoComplete="off">
                 <InputGroup>

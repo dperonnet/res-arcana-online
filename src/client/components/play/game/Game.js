@@ -2,6 +2,7 @@ import { Game, PlayerView, TurnOrder   } from 'boardgame.io/core'
 import { GameComponents } from '../../../../database'
 import logger from 'redux-logger'
 import { applyMiddleware } from 'redux'
+import { sendMessage } from '../../../../store/actions/chatActions'
 
 /**
  * Role: setup
@@ -24,12 +25,13 @@ const getInitialState = (ctx, setupData) => {
       turnedComponents: {},
       waitingFor: []
     },
+    chatID: +setupData.chatID
   }
   for (let i=0; i < ctx.numPlayers; i++) {
     G.players[i]= {
       deck: [],
       draftCards: [],
-      deniedCards: [],
+      deniedCards: {},
       hand: [],
       mages: [],
       reminder: [],
@@ -52,13 +54,13 @@ const getInitialState = (ctx, setupData) => {
     }
     G.secret.victoryPoints.push(0)
   }
-
+  console.log('setupData.chatID',setupData.chatID);
   const components = getComponentsByType(GameComponents)
 
   // Randomly get artefacts from components.
   const nbArtefacts = ctx.numPlayers * 8
   const artefactsInGameStack = ctx.random.Shuffle(components.artefact)
-  G.secret.artefactsInGameStack = artefactsInGameStack.slice(0, nbArtefacts)
+  G.secret.artefactsInGameStack = artefactsInGameStack
 
   // Get places of power excluding those on back side
   let placesOfPower = ctx.random.Shuffle(components.placeOfPower)
@@ -161,7 +163,7 @@ const initDraftPhase = (G, ctx) => {
   console.log('[initDraftPhase] Call to initDraftPhase()')
   let dealNewCards = true
   for (let i= 0; i < ctx.numPlayers; i++) {
-    dealNewCards = dealNewCards && G.players[i].deniedCards.length === 0 && G.players[i].draftCards.length === 0
+    dealNewCards = dealNewCards && Object.keys(G.players[i].deniedCards).length === 0 && G.players[i].draftCards.length === 0
   }
   let getStartingCards = false
   for (let i= 0; i < ctx.numPlayers; i++) {
@@ -184,8 +186,11 @@ const initDraftPhase = (G, ctx) => {
 const dealDraftCards = (G, ctx) => {
   console.log('[dealDraftCards] Call to dealDraftCards()')
   for (let i= 0; i < ctx.numPlayers; i++) {
-    G.players[i].draftCards.push(G.secret.artefactsInGameStack.slice(0, 4)) // deal 4 cards to player
+    let newDraftHand = {}
+    G.secret.artefactsInGameStack.slice(0, 4).forEach(artefact => newDraftHand[artefact.id] = artefact)
+
     G.secret.artefactsInGameStack.splice(0, 4) // remove 4 cards from pile
+    G.players[i].draftCards.push(newDraftHand) // deal 4 cards to player
     G.publicData.waitingFor.push(i)
   }
   return G
@@ -197,14 +202,14 @@ const dealDraftCards = (G, ctx) => {
 const getNextCards = (G, ctx) => {
     console.log('[getNextCards] Call to getNextCards()')
   for (let i= 0; i < ctx.numPlayers; i++) {
-    if(G.players[i].deniedCards.length > 0) {
+    if(Object.keys(G.players[i].deniedCards).length > 0) {
       const nextPlayerID = ((G.draftWay === 'toLeftPlayer' ? 1 : ctx.numPlayers - 1) + parseInt(i)) % ctx.numPlayers
       G.players[nextPlayerID].draftCards.push(copy(G.players[i].deniedCards))
-      G.players[i].deniedCards = []
+      G.players[i].deniedCards = {}
     }
   }
   for (let i= 0; i < ctx.numPlayers; i++) {
-    if (G.players[i].draftCards.length > 0 && G.publicData.waitingFor.indexOf(parseInt(i)) < 0) {
+    if (Object.keys(G.players[i].deniedCards).length > 0 && G.publicData.waitingFor.indexOf(parseInt(i)) < 0) {
       G.publicData.waitingFor.push(i)
     }
   }
@@ -239,14 +244,20 @@ const drawStartingCards = (G, ctx) => {
  * @param {*} cardId id of the selected artefact.
  */
 const pickArtefact = (G, ctx, playerID, cardId) => {
+  sendMessage('player', playerID, ' picked', cardId)
   console.log('[pickArtefact] The player', playerID, 'picked artefact', cardId)
-  const selectedCard = copy(G.players[playerID].draftCards[0].filter((card) => {
-    return card.id === cardId
-  })[0])
+  let selectedCards = Object.entries(G.players[playerID].draftCards[0]).filter((card) => {
+    return card[0] === cardId
+  })
+  let selectedCard = copy(selectedCards[0][1])
   G.players[playerID].hand.push(selectedCard)
-  const deniedCards = copy(G.players[playerID].draftCards[0].filter((card) => {
-    return card.id !== cardId
-  }))
+  let newDeniedCard = {}
+  Object.entries(G.players[playerID].draftCards[0]).forEach((card) => {
+    if (card[0] !== cardId) {
+      newDeniedCard[card[0]] = card[1]
+    }
+  })
+  let deniedCards = copy(newDeniedCard)
   G.players[playerID].deniedCards = deniedCards
   G.players[playerID].draftCards.splice(0,1)
   G.publicData.players[playerID].deckSize = G.players[playerID].hand.length
@@ -315,7 +326,7 @@ const checkAllCardsDrafted = (G, ctx) => {
   let playersReady = true
   let needStartingCards = false
   for (let i= 0; i < ctx.numPlayers; i++) {
-    hasCardsToPass = hasCardsToPass || G.players[i].deniedCards.length > 0
+    hasCardsToPass = hasCardsToPass || Object.keys(G.players[i].deniedCards).length > 0
     needDealCards = needDealCards && G.players[i].hand.length === 4 && G.players[i].draftCards.length === 0
     playersReady = playersReady && G.publicData.players[i].status === 'READY'
     needStartingCards = needStartingCards || (G.players[i].hand.length === 8 && G.publicData.players[i].status === 'DRAFTING_ARTEFACTS')

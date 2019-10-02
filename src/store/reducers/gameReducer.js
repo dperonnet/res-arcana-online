@@ -28,10 +28,10 @@ const gameReducer = (state = initState, action) => {
   let essencePickerSelection
   switch (action.type) {
     case 'CREATE_GAME':
-      debug && console.log('create game', action.doc.id);
+      debug && console.log('create game lobby', action.gameLobby.id);
       return state;
-    case 'CREATE_GAME_ERROR':
-      debug && console.log('create game error', action.err);
+    case 'CREATE_GAME_LOBBY_ERROR':
+      debug && console.log('create game lobby error', action.err);
       return state;
     case 'JOIN_GAME':
       debug && console.log('join game', action.gameId);
