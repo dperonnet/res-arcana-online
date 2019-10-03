@@ -40,19 +40,19 @@ export const leaveGame = (gameId, gameServerUrl) => {
     gameRef.get().then(document => {
       let status = document.exists ? document.data().status : null
       switch (status) {
-      // leave before game Start
-      case 'PENDING':
-        dispatch(leaveWhilePending(gameId, playerId, document, fireStore, gameServerUrl))
-        break
+        // leave before game Start
+        case 'PENDING':
+          dispatch(leaveWhilePending(gameId, playerId, document, fireStore, gameServerUrl))
+          break
         // leave while game is still running
-      case 'STARTED':
-        dispatch(leaveWhileStarted(gameId, playerId, document, fireStore, gameServerUrl))
-        break
+        case 'STARTED':
+          dispatch(leaveWhileStarted(gameId, playerId, document, fireStore, gameServerUrl))
+          break
         // leave when game is over
-      case 'OVER':
-        dispatch(leaveWhileOver(gameId, playerId, document, fireStore, gameServerUrl))
-        break
-      default:
+        case 'OVER':
+          dispatch(leaveWhileOver(gameId, playerId, document, fireStore, gameServerUrl))
+          break
+        default:
       }
       dispatch(disjoinCurrentGame())
     })

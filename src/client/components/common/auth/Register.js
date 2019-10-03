@@ -1,31 +1,31 @@
-import React, { Component } from 'react';
+import React, { Component } from 'react'
 import { Button, Col, Container, Form, Row } from 'react-bootstrap'
-import './auth.scss';
+import './auth.scss'
 import { connect } from 'react-redux'
-import { Redirect } from 'react-router-dom';
-import { validateAndRegister } from '../../../../store/actions/authActions';
-import * as ERROR from './AuthConstants';
+import { Redirect } from 'react-router-dom'
+import { validateAndRegister } from '../../../../store/actions/authActions'
+import * as ERROR from './AuthConstants'
 
 class Register extends Component {
-  constructor(props){
-    super(props);
+  constructor(props) {
+    super(props)
     this.state = {
       email: '',
       login: '',
       password: '',
       passwordConfirm: '',
-      error: []
+      error: [],
     }
   }
 
   /**
    * When focusing a field, remove the errors about that field.
    */
-  setCurrentFocus = (field) => {
+  setCurrentFocus = field => {
     let { error } = this.state
     let { clearAuthError } = this.props
-    error = error.filter((error) => error.field !== field)
-    this.setState({ error})
+    error = error.filter(error => error.field !== field)
+    this.setState({ error })
     clearAuthError(field)
   }
 
@@ -36,7 +36,7 @@ class Register extends Component {
       let newError = { field, message }
       errorList.push(newError)
     }
-    this.setState({ error: errorList})
+    this.setState({ error: errorList })
   }
 
   /**
@@ -46,7 +46,7 @@ class Register extends Component {
     const { password } = this.state
     let error
     let value = fieldValue ? fieldValue : this.state[field]
-    
+
     if (value.length > 0) {
       switch (field) {
         case 'login':
@@ -54,7 +54,7 @@ class Register extends Component {
             error = ERROR.LOGIN_TOO_SHORT
           } else if (value.length > 25) {
             error = ERROR.LOGIN_TOO_LONG
-          } 
+          }
           break
         case 'email':
           if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(value)) {
@@ -85,40 +85,47 @@ class Register extends Component {
   disableSubmit() {
     const { authError } = this.props
     const { error, email, login, password, passwordConfirm } = this.state
-    let formNotCompleted = login.length === 0 ||  email.length === 0 || password.length === 0 || passwordConfirm.length === 0
+    let formNotCompleted =
+      login.length === 0 || email.length === 0 || password.length === 0 || passwordConfirm.length === 0
     let formNotValid = (authError && authError.length !== 0) || error.length !== 0
     let wrongPassword = password !== passwordConfirm
     return formNotCompleted || formNotValid || wrongPassword
   }
 
-  handleChange = (event) => {
+  handleChange = event => {
     this.setState({
-      [event.target.id]: event.target.value
-    });
+      [event.target.id]: event.target.value,
+    })
     this.validateField(event.target.id, event.target.value)
   }
 
-  handleSubmit = (event) => {
-    event.preventDefault();
-    this.props.register(this.state);
+  handleSubmit = event => {
+    event.preventDefault()
+    this.props.register(this.state)
   }
 
-  renderError = (field) => {
+  renderError = field => {
     const { error } = this.state
     const { authError } = this.props
     let errors = authError ? error.concat(authError) : error
-    return errors.filter((err) => err.field === field).map((err, index) => {
-      return <div key={index} className="error">{err.message}</div>
-    })
+    return errors
+      .filter(err => err.field === field)
+      .map((err, index) => {
+        return (
+          <div key={index} className="error">
+            {err.message}
+          </div>
+        )
+      })
   }
 
   render() {
-    const { auth, authError } = this.props;
-    
-    if(auth.uid) return <Redirect to='/'/>
-    
+    const { auth, authError } = this.props
+
+    if (auth.uid) return <Redirect to="/" />
+
     let error
-    if ( typeof authError === "string") {
+    if (typeof authError === 'string') {
       error = authError
     }
 
@@ -128,7 +135,9 @@ class Register extends Component {
           <h2>Register</h2>
           <Form onSubmit={this.handleSubmit}>
             <Form.Group as={Row} controlId="login">
-              <Form.Label column xs="3">Mage name</Form.Label>
+              <Form.Label column xs="3">
+                Mage name
+              </Form.Label>
               <Col xs="8">
                 <Form.Control
                   size="sm"
@@ -144,7 +153,9 @@ class Register extends Component {
               </Col>
             </Form.Group>
             <Form.Group as={Row} controlId="email">
-              <Form.Label column xs="3">Magic email</Form.Label>
+              <Form.Label column xs="3">
+                Magic email
+              </Form.Label>
               <Col xs="8">
                 <Form.Control
                   size="sm"
@@ -159,7 +170,9 @@ class Register extends Component {
               </Col>
             </Form.Group>
             <Form.Group as={Row} controlId="password">
-              <Form.Label column xs="3">Password</Form.Label>
+              <Form.Label column xs="3">
+                Password
+              </Form.Label>
               <Col xs="8">
                 <Form.Control
                   size="sm"
@@ -174,7 +187,9 @@ class Register extends Component {
               </Col>
             </Form.Group>
             <Form.Group as={Row} controlId="passwordConfirm">
-              <Form.Label column xs="3">Password (again)</Form.Label>
+              <Form.Label column xs="3">
+                Password (again)
+              </Form.Label>
               <Col xs="8">
                 <Form.Control
                   size="sm"
@@ -190,37 +205,34 @@ class Register extends Component {
             </Form.Group>
             <Row>
               <div className="offset-3 col-9">
-                <Button
-                  size="sm"
-                  disabled={this.disableSubmit()}
-                  type="submit"
-                >
-                Register
+                <Button size="sm" disabled={this.disableSubmit()} type="submit">
+                  Register
                 </Button>
-                <div className="error mt-2">
-                  { error ? error : null }
-                </div>
+                <div className="error mt-2">{error ? error : null}</div>
               </div>
             </Row>
           </Form>
         </div>
       </Container>
-    );
+    )
   }
 }
 
-const mapStateToProps = (state) =>{
+const mapStateToProps = state => {
   return {
     authError: state.auth.authError,
-    auth: state.firebase.auth
+    auth: state.firebase.auth,
   }
 }
 
-const mapDispatchToProps = (dispatch) =>{
+const mapDispatchToProps = dispatch => {
   return {
-    register: (newUser) => dispatch(validateAndRegister(newUser)),
-    clearAuthError: (field) => dispatch({ type: 'CLEAR_AUTH_ERROR', err: {field} })
+    register: newUser => dispatch(validateAndRegister(newUser)),
+    clearAuthError: field => dispatch({ type: 'CLEAR_AUTH_ERROR', err: { field } }),
   }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(Register);
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(Register)

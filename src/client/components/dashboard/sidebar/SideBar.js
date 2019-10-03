@@ -1,15 +1,14 @@
-import React, { Component } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faAngleRight } from '@fortawesome/free-solid-svg-icons';
-import { faTimes } from '@fortawesome/free-solid-svg-icons';
-import './sidebar.css';
+import React, { Component } from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faAngleRight } from '@fortawesome/free-solid-svg-icons'
+import { faTimes } from '@fortawesome/free-solid-svg-icons'
+import './sidebar.css'
 
 export default class SideBar extends Component {
   render() {
-    const { expanded, collapse, expand, users } = this.props;
+    const { expanded, collapse, expand, users } = this.props
 
-    return (
-      expanded ?
+    return expanded ? (
       <div className="sidebar expanded">
         <div className="sidebar-header">
           Online Users
@@ -18,30 +17,24 @@ export default class SideBar extends Component {
           </div>
         </div>
         <div className="userlist">
-          {
-            users ?
-              users.map((user) => (
-                <div
-                  key={user.id}
-                  className="user-row">
-                  <img className="gravatar" src={`../../../../assets/image/avatar/${user.avatar}`} alt=''/>
+          {users
+            ? users.map(user => (
+                <div key={user.id} className="user-row">
+                  <img className="gravatar" src={`../../../../assets/image/avatar/${user.avatar}`} alt="" />
                   <span>{user.login}</span>
                 </div>
-              )
-              )
-            :
-            null
-          }
+              ))
+            : null}
         </div>
       </div>
-      :
+    ) : (
       <div className="sidebar">
         <div className="sidebar-header">
           <div className="pull-right close">
-            <FontAwesomeIcon icon={faAngleRight} size="lg" onClick={expand}/>
+            <FontAwesomeIcon icon={faAngleRight} size="lg" onClick={expand} />
           </div>
         </div>
       </div>
-    );
+    )
   }
 }

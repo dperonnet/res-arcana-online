@@ -512,15 +512,15 @@ const initCollectPhase = (G, ctx) => {
         if (component.hasSpecificCollectAbility) {
           let essences
           switch (component.id) {
-          case 'coffreFort':
-            essences = G.publicData.players[i].essencesOnComponent[component.id]
-            if (essences && essences.filter(essence => essence.type === 'gold').length > 0) {
+            case 'coffreFort':
+              essences = G.publicData.players[i].essencesOnComponent[component.id]
+              if (essences && essences.filter(essence => essence.type === 'gold').length > 0) {
+                status = 'COLLECT_ACTION_REQUIRED'
+              }
+              break
+            case 'forgeMaudite':
+            default:
               status = 'COLLECT_ACTION_REQUIRED'
-            }
-            break
-          case 'forgeMaudite':
-          default:
-            status = 'COLLECT_ACTION_REQUIRED'
           }
         }
       })
@@ -660,15 +660,15 @@ const getCollectPhaseTurnOrder = (G, ctx) => {
       if (component.hasSpecificCollectAbility) {
         let essences
         switch (component.id) {
-        case 'coffreFort':
-          essences = G.publicData.players[nextPlayerId].essencesOnComponent[component.id]
-          if (essences && essences.filter(essence => essence.type === 'gold').length > 0) {
+          case 'coffreFort':
+            essences = G.publicData.players[nextPlayerId].essencesOnComponent[component.id]
+            if (essences && essences.filter(essence => essence.type === 'gold').length > 0) {
+              playerCanCollect = true
+            }
+            break
+          case 'forgeMaudite':
+          default:
             playerCanCollect = true
-          }
-          break
-        case 'forgeMaudite':
-        default:
-          playerCanCollect = true
         }
       }
     })
