@@ -1,5 +1,5 @@
 export const sendMessage = (message, chatId) => {
-  return (dispatch, getState, { getFirebase, getFirestore }) => {
+  return (dispatch, getState, { getFirestore }) => {
     // make asynch call to database
     const fireStore = getFirestore()
     const profile = getState().firebase.profile
@@ -44,7 +44,7 @@ export const sendMessage = (message, chatId) => {
 }
 
 export const createChat = (chatId, chatName) => {
-  return (dispatch, getState, { getFirebase, getFirestore }) => {
+  return (dispatch, getState, { getFirestore }) => {
     const fireStore = getFirestore()
     const creatorId = getState().firebase.auth.uid
     fireStore
@@ -65,7 +65,7 @@ export const createChat = (chatId, chatName) => {
 }
 
 export const deleteChat = chatId => {
-  return (dispatch, getState, { getFirebase, getFirestore }) => {
+  return (dispatch, getState, { getFirestore }) => {
     const fireStore = getFirestore()
     console.log('call to deleteChat', chatId)
     fireStore

@@ -1,5 +1,5 @@
 export const signIn = credentials => {
-  return (dispatch, getState, { getFirebase, getFirestore }) => {
+  return (dispatch, getState, { getFirestore }) => {
     const firestore = getFirestore()
 
     if (credentials.name) {
@@ -57,7 +57,7 @@ export const signOut = () => {
 }
 
 export const validateAndRegister = newUser => {
-  return (dispatch, getState, { getFirebase, getFirestore }) => {
+  return (dispatch, getState, { getFirestore }) => {
     const firestore = getFirestore()
 
     firestore
@@ -134,7 +134,7 @@ export const verifyAuth = () => {
 
 // Google presence
 export const setUserStatus = () => {
-  return (dispatch, getState, { getFirebase, getFirestore }) => {
+  return (dispatch, getState, { getFirebase }) => {
     const firebase = getFirebase()
 
     var uid = firebase.auth().currentUser.uid
@@ -238,14 +238,11 @@ export const saveProfile = profile => {
           dispatch({ type: 'SAVE_PROFILE_FAIL', err })
         })
     }
-
-    if (profile.cardSize) {
-    }
   }
 }
 
 export const saveOptions = profile => {
-  return (dispatch, getState, { getFirebase, getFirestore }) => {
+  return (dispatch, getState, { getFirestore }) => {
     const firestore = getFirestore()
     const userId = getState().firebase.auth.uid
 
@@ -273,7 +270,7 @@ export const saveOptions = profile => {
 }
 
 export const getUserByName = name => {
-  return (dispatch, getState, { getFirebase, getFirestore }) => {
+  return (dispatch, getState, { getFirestore }) => {
     const firestore = getFirestore()
 
     firestore

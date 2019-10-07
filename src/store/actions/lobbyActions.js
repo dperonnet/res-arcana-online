@@ -1,11 +1,10 @@
 import { createChat, deleteChat } from './chatActions'
-import axios from 'axios'
 require('firebase/functions')
 
 const cloudFunctionsUrl = `https://${process.env.REACT_APP_CLOUD_FUNCTION}`
 
 export const createGameLobby = gameOptions => {
-  return (dispatch, getState, { getFirebase, getFirestore }) => {
+  return (dispatch, getState, { getFirestore }) => {
     const fireStore = getFirestore()
     const profile = getState().firebase.profile
     const creatorId = getState().firebase.auth.uid
@@ -39,7 +38,7 @@ export const createGameLobby = gameOptions => {
 }
 
 export const addSeat = lobbyId => {
-  return (dispatch, getState, { getFirebase, getFirestore }) => {
+  return (dispatch, getState, { getFirestore }) => {
     const fireStore = getFirestore()
     const lobbyRef = fireStore.collection('gameLobbys').doc(lobbyId)
 
@@ -66,7 +65,7 @@ export const addSeat = lobbyId => {
 }
 
 export const removeSeat = lobbyId => {
-  return (dispatch, getState, { getFirebase, getFirestore }) => {
+  return (dispatch, getState, { getFirestore }) => {
     const fireStore = getFirestore()
     const lobbyRef = fireStore.collection('gameLobbys').doc(lobbyId)
 
@@ -198,7 +197,7 @@ export const joinLobby = (lobbyId, takeSeat, seatIndex) => {
 }
 
 export const deleteLobby = lobbyId => {
-  return (dispatch, getState, { getFirebase, getFirestore }) => {
+  return (dispatch, getState, { getFirebase }) => {
     const deleteUrl = cloudFunctionsUrl + '/deleteLobby'
     console.log('call to deleteLobby', lobbyId, deleteUrl)
 
@@ -310,7 +309,7 @@ export const leaveLobby = lobbyId => {
 }
 
 export const startGame = lobbyId => {
-  return dispatch => {
+  return () => {
     console.log('Call to cloud function start game', lobbyId)
   }
 }

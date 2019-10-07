@@ -108,7 +108,10 @@ class CollectComponent extends Component {
         return (
           <div key={essence.type} className="collect-option">
             {cost ? (
-          <div className={'type essence ' + essence.type + ' cost-container'}><div className="cost"></div>{essence.quantity}</div>
+              <div className={'type essence ' + essence.type + ' cost-container'}>
+                <div className="cost"></div>
+                {essence.quantity}
+              </div>
             ) : (
               <div className={'type essence ' + essence.type}>{essence.quantity}</div>
             )}
@@ -165,14 +168,14 @@ class CollectComponent extends Component {
     if (typeIsAny.length > 0) {
       const essenceList = ['elan', 'life', 'calm', 'death', 'gold']
       switch (typeIsAny[0].type) {
-      case 'any-but-gold':
-        essenceList.pop()
-        break
-      case 'any-but-death-gold':
-        essenceList.pop()
-        essenceList.pop()
-        break
-      default:
+        case 'any-but-gold':
+          essenceList.pop()
+          break
+        case 'any-but-death-gold':
+          essenceList.pop()
+          essenceList.pop()
+          break
+        default:
       }
       return essenceList.map((type, index) => {
         let essenceIndex =
@@ -299,81 +302,80 @@ class CollectComponent extends Component {
     const ready = status === 'READY'
     if (component.hasSpecificCollectAbility) {
       switch (component.id) {
-      case 'automate':
-        // if there is at least one type of essence on the automate
-        if (essencesOnComponent && essencesOnComponent.length > 0) {
-          let essenceList = []
-          essencesOnComponent.forEach(essence => essenceList.push({ type: essence.type, quantity: 2 }))
-          collectAbilities = collectOnComponentActionsRef[component.id]
+        case 'automate':
+          // if there is at least one type of essence on the automate
+          if (essencesOnComponent && essencesOnComponent.length > 0) {
+            let essenceList = []
+            essencesOnComponent.forEach(essence => essenceList.push({ type: essence.type, quantity: 2 }))
+            collectAbilities = collectOnComponentActionsRef[component.id]
               ? null
               : this.renderCollectAbility(essenceList, null, true)
-          handleClickComponent = collectOnComponentActionsRef[component.id]
+            handleClickComponent = collectOnComponentActionsRef[component.id]
               ? null
               : () => this.handleCollectEssenceOnComponent()
-          handleClickEssenceOnComponent = () => this.handleCollectEssenceOnComponent()
-          actionValid = !(
+            handleClickEssenceOnComponent = () => this.handleCollectEssenceOnComponent()
+            actionValid = !(
               collectOnComponentActionsRef[component.id] &&
               collectOnComponentActionsRef[component.id].valid &&
               actionValid
             )
-        } else {
-          // else there is no essence on component and the action is valid
-          validSpecific = true
-        }
-        // if there is no collect on component action, the "add 2 of each essence type on component" action is done server side.
-        break
-      case 'coffreFort':
-        // if there is gold on component and there is no collect on component action
-        if (
+          } else {
+            // else there is no essence on component and the action is valid
+            validSpecific = true
+          }
+          // if there is no collect on component action, the "add 2 of each essence type on component" action is done server side.
+          break
+        case 'coffreFort':
+          // if there is gold on component and there is no collect on component action
+          if (
             essencesOnComponent &&
             essencesOnComponent.filter(essence => essence.type === 'gold').length > 0 &&
             !collectOnComponentActionsRef[component.id]
           ) {
-          if (actionValid) {
-            collectAbilities = this.renderCollectAbility(collectActionsRef[component.id].essences, () =>
+            if (actionValid) {
+              collectAbilities = this.renderCollectAbility(collectActionsRef[component.id].essences, () =>
                 resetCollectAction(component.id)
               )
+            } else {
+              collectAbilities = this.renderEssencePicker(component.specificCollectAbility.essenceList)
+            }
+            validSpecific = collectOnComponentActionsRef[component.id]
           } else {
-            collectAbilities = this.renderEssencePicker(component.specificCollectAbility.essenceList)
+            // else there is no gold on component and the action is valid
+            validSpecific = true
           }
-          validSpecific = collectOnComponentActionsRef[component.id]
-        } else {
-          // else there is no gold on component and the action is valid
-          validSpecific = true
-        }
-        // on click to collect the essences on component, reset the collect action
-        handleClickComponent = collectOnComponentActionsRef[component.id]
-            ? null
-            : () => {
-                this.handleCollectEssenceOnComponent()
-          resetCollectAction(component.id)
-        })
-        handleClickEssenceOnComponent = () => {
-          this.handleCollectEssenceOnComponent()
-          resetCollectAction(component.id)
-        }
-        break
-      case 'forgeMaudite':
-        if (actionValid) {
-          const handleClick = !ready ? () => resetCollectAction(component.id) : null
-          let essenceList = [{ type: 'death', quantity: 1 }]
-          collectAbilities =
+          // on click to collect the essences on component, reset the collect action
+          if (!collectOnComponentActionsRef[component.id]) {
+            handleClickComponent = () => {
+              this.handleCollectEssenceOnComponent()
+              resetCollectAction(component.id)
+            }
+          }
+          handleClickEssenceOnComponent = () => {
+            this.handleCollectEssenceOnComponent()
+            resetCollectAction(component.id)
+          }
+          break
+        case 'forgeMaudite':
+          if (actionValid) {
+            const handleClick = !ready ? () => resetCollectAction(component.id) : null
+            let essenceList = [{ type: 'death', quantity: 1 }]
+            collectAbilities =
               collectActionsRef[component.id].type === 'COST'
-            this.renderCollectAbility(essenceList, handleClick, false, true)
-            :
-            this.renderTapComponent(() => resetCollectAction(component.id))
-        } else {
-          collectAbilities = this.renderForgeMauditePicker()
-        }
-        break
-      default:
-        if (actionValid) {
-          collectAbilities = this.renderCollectAbility(collectActionsRef[component.id].essences, () =>
+                ? this.renderCollectAbility(essenceList, handleClick, false, true)
+                : this.renderTapComponent(() => resetCollectAction(component.id))
+          } else {
+            collectAbilities = this.renderForgeMauditePicker()
+          }
+          break
+        default:
+          if (actionValid) {
+            collectAbilities = this.renderCollectAbility(collectActionsRef[component.id].essences, () =>
               resetCollectAction(component.id)
             )
-        } else if (component.specificCollectAbility.multipleCollectOptions) {
-          collectAbilities = this.renderEssencePicker(component.specificCollectAbility.essenceList)
-        }
+          } else if (component.specificCollectAbility.multipleCollectOptions) {
+            collectAbilities = this.renderEssencePicker(component.specificCollectAbility.essenceList)
+          }
       }
     } else if (component.hasStandardCollectAbility) {
       collectAbilities = this.renderCollectAbility(component.standardCollectAbility.essenceList)
@@ -390,7 +392,7 @@ class CollectComponent extends Component {
     const flat = component.type === 'placeOfPower' ? ' no-min-height' : ''
 
     const handleOnClick = event => {
-      event.stopPropagation() 
+      event.stopPropagation()
       handleClickComponent && !ready && handleClickComponent()
     }
 
