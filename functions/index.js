@@ -1,95 +1,92 @@
-const functions = require('firebase-functions');
-const admin = require('firebase-admin');
-admin.initializeApp();
+const functions = require('firebase-functions')
+const admin = require('firebase-admin')
+admin.initializeApp()
 
 // Since this code will be running in the Cloud Functions environment
 // we call initialize Firestore without any arguments because it
 // detects authentication from the environment.
-const firestore = admin.firestore();
+const firestore = admin.firestore()
 
 // Create a new function which is triggered on changes to /status/{uid}
 // Note: This is a Realtime Database trigger, *not* Cloud Firestore.
-exports.onUserStatusChanged = functions.database.ref('/status/{uid}')
-  .onUpdate((change, context) => {
-    // Get the data written to Realtime Database
-    const eventStatus = change.after.val();
+exports.onUserStatusChanged = functions.database.ref('/status/{uid}').onUpdate((change, context) => {
+  // Get the data written to Realtime Database
+  const eventStatus = change.after.val()
 
-    // Then use other event data to create a reference to the
-    // corresponding Firestore document.
-    const userStatusFirestoreRef = firestore.doc(`users/${context.params.uid}`);
+  // Then use other event data to create a reference to the
+  // corresponding Firestore document.
+  const userStatusFirestoreRef = firestore.doc(`users/${context.params.uid}`)
 
-    // It is likely that the Realtime Database change that triggered
-    // this event has already been overwritten by a fast change in
-    // online / offline status, so we'll re-read the current data
-    // and compare the timestamps.
-    return change.after.ref.once('value').then((statusSnapshot) => {
-      const status = statusSnapshot.val();
-      console.log(status, eventStatus);
-      // If the current timestamp for this data is newer than
-      // the data that triggered this event, we exit this function.
-      if (status.last_changed > eventStatus.last_changed) {
-        return null;
-      }
+  // It is likely that the Realtime Database change that triggered
+  // this event has already been overwritten by a fast change in
+  // online / offline status, so we'll re-read the current data
+  // and compare the timestamps.
+  return change.after.ref.once('value').then(statusSnapshot => {
+    const status = statusSnapshot.val()
+    console.log(status, eventStatus)
+    // If the current timestamp for this data is newer than
+    // the data that triggered this event, we exit this function.
+    if (status.last_changed > eventStatus.last_changed) {
+      return null
+    }
 
-      // Otherwise, we convert the last_changed field to a Date
-      eventStatus.last_changed = new Date(eventStatus.last_changed);
+    // Otherwise, we convert the last_changed field to a Date
+    eventStatus.last_changed = new Date(eventStatus.last_changed)
 
-      // ... and write it to Firestore.
-      return userStatusFirestoreRef.update(eventStatus);
-    })
-  });
+    // ... and write it to Firestore.
+    return userStatusFirestoreRef.update(eventStatus)
+  })
+})
 
 exports.deleteLobby = functions.https.onCall((data, context) => {
-  console.log('1) call to deleteLobby cloud function',data);
+  console.log('1) call to deleteLobby cloud function', data)
   if (!context.auth) {
-    throw new functions.https.HttpsError('failed-precondition', 'The function must be called while authenticated.');
+    throw new functions.https.HttpsError('failed-precondition', 'The function must be called while authenticated.')
   }
 
   const lobbyId = data.lobbyId
   const userId = context.auth.uid
 
-  let lobbyRef = firestore.doc(`gameLobbys/${lobbyId}`)
-  let lobbyTransaction = firestore.runTransaction(t => {
-    return t.get(lobbyRef).then(lobbyDoc => {
-      let lobby = lobbyDoc.data()
-      console.log('2) userId',userId, 'lobby', lobby);
-
-      if (lobby.creatorId !== userId) {
-        throw new functions.https.HttpsError('invalid-argument', 'Only the lobby\'s creator or an admin can delete this lobby.');
-      }
-
-      // For each player and visitor connected to the lobby, update their currentLobby to null
-      let kicks = Object.keys(lobby.players).map((playerId) => {
-        let currentLobbyRef = firestore.doc(`currentLobbys/${playerId}`)
-
-        return t.get(currentLobbyRef).then((currentLobbyDoc) => {
-          let currentLobby = currentLobbyDoc.data()
-          console.log('3a)try to kick', playerId, 'currentLobby', currentLobby);
-
-          // Check first if the user is connected to the lobby
-          if (currentLobby.lobbyId === lobbyId) {
-            return t.update(currentLobbyRef, {lobbyId: null})
-          } else {
-            return Promise.reject('The player is not synchronised with this lobby')
-          }
-        }).catch(err => {
-          console.log('3b) Error updating currentLoby of player', playerId, err);
+  firestore.runTransaction(transaction => {
+    let lobbyRef = firestore.doc(`gameLobbys/${lobbyId}`)
+    return transaction
+      .get(lobbyRef)
+      .then(lobbyDoc => {
+        let lobby = lobbyDoc.data()
+        if (lobby.creatorId !== userId) {
+          throw new functions.https.HttpsError(
+            'invalid-argument',
+            'Only the lobby s creator or an admin can delete this lobby.'
+          )
+        }
+        console.log('2) players', lobby.players, lobby)
+        return lobby.players
+      })
+      .then(players => {
+        let reads = Object.keys(players).map(playerId => {
+          let ref = firestore.collection('currentLobbys').doc(playerId)
+          let data = {}
+          return transaction.get(ref).then(doc => {
+            if (doc.data().lobbyId === lobbyId) {
+              console.log('3) kick player', doc)
+              data = { lobbyId: null }
+            }
+            return transaction.update(ref, data)
+          })
+        })
+        return Promise.all(reads).then(() => {
+          console.log('4) delete lobby', lobbyRef)
+          return transaction.delete(lobbyRef)
         })
       })
-      
-      console.log('4) kicks',kicks);
-      Promise.all(kicks).then(() => {
-        console.log('5) delete lobbyRef',lobbyRef);
-        t.delete(lobbyRef);
-      });
-    });
-  }).then(result => {
-    console.log('Transaction success!');
-  }).catch(err => {
-    console.log('Transaction failure:', err);
-  });
-});
-
+      .then(() => {
+        console.log('Transaction successfully committed!')
+      })
+      .catch(error => {
+        console.log('Transaction failed: ', error)
+      })
+  })
+})
 
 /*
 const functions = require('firebase-functions');

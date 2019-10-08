@@ -52,7 +52,7 @@ export const addSeat = lobbyId => {
           let lobby = lobbyDoc.data()
           let seats = lobby.seats
           seats[seats.length] = -1
-          transaction.update(lobbyRef, { seats })
+          return transaction.update(lobbyRef, { seats })
         })
       })
       .then(() => {
@@ -95,7 +95,7 @@ export const removeSeat = lobbyId => {
             seats.splice(seats[seats.length], 1)
           }
 
-          transaction.update(lobbyRef, { seats })
+          return transaction.update(lobbyRef, { seats })
         })
       })
       .then(() => {
@@ -210,32 +210,55 @@ export const deleteLobby = lobbyId => {
         console.log('result', result)
         //dispatch(deleteChat(lobbyId))
       })
-      .catch(function(error) {
-        console.log('Error when calling deleteLobby', error)
+      .then(() => {
+        dispatch({ type: 'DELETE_GAME_LOBBY', lobbyId })
+        dispatch(deleteChat(lobbyId))
       })
+      .catch(err => {
+        dispatch({ type: 'DELETE_GAME_LOBBY_ERROR', err })
+      })
+  }
+}
 
-    /*
-    getFirebase().auth().currentUser.getIdToken().then(function(token) {
-      axios({
-        method: 'post',
-        url: deleteUrl,
-        headers: {
-          'content-type': 'application/json',
-          'Authorization': "bearer " + token
-        },
-        data: {
-          data: {
-            lobbyId
-          }
-        }
-      }).then((response) => {
-        console.log(response.data);
+export const deleteLobbyFront = lobbyId => {
+  return (dispatch, getState, { getFirestore }) => {
+    console.log('1) call to deleteLobby', lobbyId)
+    const db = getFirestore()
+
+    const lobbyRef = db.collection('gameLobbys').doc(lobbyId)
+    return db
+      .runTransaction(transaction => {
+        return transaction
+          .get(lobbyRef)
+          .then(lobbyDoc => {
+            let lobby = lobbyDoc.data()
+            return lobby.players
+          })
+          .then(players => {
+            let reads = Object.keys(players).map(playerId => {
+              let ref = db.collection('currentLobbys').doc(playerId)
+              let data = {}
+              return transaction.get(ref).then(doc => {
+                console.log('doc.data().lobbyId === lobbyId', doc.data().lobbyId, lobbyId)
+                if (doc.data().lobbyId === lobbyId) {
+                  data = { lobbyId: null }
+                }
+                return transaction.update(ref, data)
+              })
+            })
+            return Promise.all(reads)
+              .then(() => {
+                return transaction.delete(lobbyRef)
+              })
+              .then(dispatch(deleteChat(lobbyId)))
+          })
       })
-      .catch((error) => {
-        console.log(error);
-      });
-    })
-    */
+      .then(() => {
+        console.log('Transaction successfully committed!')
+      })
+      .catch(error => {
+        console.log('Transaction failed: ', error)
+      })
   }
 }
 
@@ -266,7 +289,7 @@ export const leaveLobby = lobbyId => {
             }
           }
           console.log('transaction', lobbyRef, { players, seats })
-          transaction.update(lobbyRef, { players, seats })
+          return transaction.update(lobbyRef, { players, seats })
         })
       })
       .then(() => {
@@ -280,10 +303,10 @@ export const leaveLobby = lobbyId => {
           .collection('currentLobbys')
           .doc(playerId)
           .set(datas)
-        dispatch({ type: 'JOIN_GAME_LOBBY', lobbyId })
+        dispatch({ type: 'LEAVE_GAME_LOBBY', lobbyId })
       })
       .catch(err => {
-        dispatch({ type: 'JOIN_GAME_LOBBY_ERROR', err })
+        dispatch({ type: 'LEAVE_GAME_LOBBY_ERROR', err })
       })
 
     /*

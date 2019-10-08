@@ -40,7 +40,6 @@ class LobbyList extends Component {
 
   render() {
     const { gameLobbys, profile } = this.props
-    console.log('gameLobbys', gameLobbys)
     return (
       <div className="game-list-panel align-center">
         {gameLobbys &&
