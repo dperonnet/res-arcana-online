@@ -4,7 +4,7 @@ import { connect } from 'react-redux'
 import { deleteLobby, takeSeat, watchGame } from '../../../../store/actions/lobbyActions'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTrash } from '@fortawesome/free-solid-svg-icons'
-import './lobby.css'
+import './lobby.scss'
 
 class LobbyList extends Component {
   handleJoin = (event, gameId) => {

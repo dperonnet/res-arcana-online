@@ -78,9 +78,7 @@ export const removeSeat = lobbyId => {
 
           let lobby = lobbyDoc.data()
           let seats = lobby.seats
-          for (let i = seats.length; i > 0; i--) {
-            seats[seats.length] = -1
-          }
+
           var indices = []
           var idx = seats.indexOf(-1)
           while (idx !== -1) {
@@ -202,7 +200,8 @@ export const deleteLobby = lobbyId => {
     console.log('call to deleteLobby', lobbyId, deleteUrl)
 
     let deleteLobby = getFirebase()
-      .functions()
+      .app()
+      .functions('europe-west1')
       .httpsCallable('deleteLobby')
 
     deleteLobby({ lobbyId })

@@ -1,9 +1,17 @@
 import React, { Component } from 'react'
-import { Button } from 'react-bootstrap'
+import { Button, Form, Row } from 'react-bootstrap'
 import { compose } from 'redux'
 import { connect } from 'react-redux'
 import { firestoreConnect, isEmpty, isLoaded } from 'react-redux-firebase'
-import { deleteLobby, leaveLobby, startGame, takeSeat, watchGame } from '../../../../store/actions/lobbyActions'
+import {
+  addSeat,
+  removeSeat,
+  deleteLobby,
+  leaveLobby,
+  startGame,
+  takeSeat,
+  watchGame,
+} from '../../../../store/actions/lobbyActions'
 import Chat from '../../common/chat/Chat'
 import GameBoard from '../game/GameBoard'
 
@@ -29,6 +37,18 @@ class GameLobby extends Component {
     leaveLobby(currentLobby.lobbyId)
   }
 
+  handleAddSeat = event => {
+    const { currentLobby, addSeat } = this.props
+    event.preventDefault()
+    addSeat(currentLobby.lobbyId)
+  }
+
+  handleRemoveSeat = event => {
+    const { currentLobby, removeSeat } = this.props
+    event.preventDefault()
+    removeSeat(currentLobby.lobbyId)
+  }
+
   renderChat = () => {
     const { chat, game } = this.props
     return <Chat chat={chat} chatId={game.id} chatName={game.name + ' Chat'} />
@@ -37,11 +57,30 @@ class GameLobby extends Component {
   renderPendingLobby = () => {
     const { auth, game } = this.props
 
+    const options = (
+      <div>
+        <div></div>
+        <Form.Group as={Row}>
+          <Form.Label column xs="6">
+            Number of mages :
+          </Form.Label>
+          <Form.Label column xs="6" className="align-left">
+            <div className="d-inline-block square-button" onClick={event => this.handleRemoveSeat(event)}>
+              -
+            </div>
+            <div className="d-inline-block">{game.numberOfPlayers}</div>
+            <div className="d-inline-block square-button" onClick={event => this.handleAddSeat(event)}>
+              +
+            </div>
+          </Form.Label>
+        </Form.Group>
+      </div>
+    )
     const seats =
       game.seats &&
       game.seats.map((playerId, index) => {
         return playerId === -1 ? (
-          <div key={index} onClick={event => this.handleTakeSeat(event, index)}>
+          <div className="seat empty" key={index} onClick={event => this.handleTakeSeat(event, index)}>
             Take seat
           </div>
         ) : playerId === 0 ? (
@@ -70,6 +109,8 @@ class GameLobby extends Component {
           <div className="game">
             <div className="game-header">
               <h5>You are in game {game.name}</h5>
+              {options}
+              <div className="separator" />
               {seats}
               <div className="separator" />
               <h5>
@@ -132,6 +173,8 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
   return {
+    addSeat: lobbyId => dispatch(addSeat(lobbyId)),
+    removeSeat: lobbyId => dispatch(removeSeat(lobbyId)),
     deleteLobby: lobbyId => dispatch(deleteLobby(lobbyId)),
     leaveLobby: lobbyId => dispatch(leaveLobby(lobbyId)),
     startGame: gameId => dispatch(startGame(gameId)),

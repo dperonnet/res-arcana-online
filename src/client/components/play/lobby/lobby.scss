@@ -1,0 +1,115 @@
+.lobby-container,
+.game-lobby-container {
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 20px;
+}
+.game-lobby-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.create-game-panel,
+.game-list-panel,
+.game-lobby-panel,
+.loading-panel {
+  background-color: rgba(34, 34, 34, 0.8);
+  width: 100%;
+  max-width: 700px;
+  margin-bottom: 20px;
+  padding: 12px;
+  border: 1px solid #f5b041;
+}
+
+.game-button {
+  text-align: center;
+}
+
+.game-button .btn {
+  width: 120px;
+  margin: 4px 8px;
+}
+
+.game-header {
+  text-align: center;
+  font-size: larger;
+}
+
+.player-name {
+  text-align: center;
+}
+.separator {
+  border-bottom: 1px solid #f5b041;
+  margin: 10px auto;
+  text-align: center;
+  width: 90%;
+}
+
+.game-button .btn-primary {
+  background-color: #f5b041;
+  border-color: #f5b041;
+  color: #000;
+}
+.game-button .btn-primary:hover {
+  background-color: #f5d061;
+  border-color: #f5d061;
+  color: #000;
+}
+.game-button .btn.disabled,
+.game-button .btn:disabled {
+  opacity: 1;
+}
+.game-button .btn-primary:disabled,
+.game-button .btn-primary:disabled:hover {
+  color: #fff;
+  background-color: #333;
+  border-color: #333;
+}
+
+.seat {
+  display: inline-block;
+  height: 40px;
+  width: 250px;
+  border-radius: 2px;
+  margin: 20px 10px;
+  color: #484545;
+  font-family: FlourishBoldSpecial;
+  font-size: larger;
+  text-align: center;
+
+  box-shadow: 0 0 3pt 1pt rgb(190, 123, 69);
+  background-color: rgba(190, 123, 69, 0.4);
+  background-blend-mode: color-burn;
+  background-image: url('../../../assets/image/background_action.png');
+  background-repeat: repeat-x;
+  background-size: 400px 400px;
+  background-position: -42px;
+
+  &.empty {
+    color: white;
+    box-shadow: 0 0 3pt 1pt grey;
+    background-color: rgba(63, 90, 115, 0.8);
+    cursor: pointer;
+    &:hover {
+      box-shadow: 0 0 3pt 1pt lightgray;
+    }
+  }
+}
+
+.square-button {
+  height: 20px;
+  width: 20px;
+  background-color: grey;
+  border-radius: 3px;
+  cursor: pointer;
+  line-height: 1;
+  margin: -4px 6px 0 6px;
+  text-align: center;
+  vertical-align: middle;
+
+  &:hover {
+    background-color: lightgray;
+  }
+}
