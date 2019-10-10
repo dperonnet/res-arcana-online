@@ -8,6 +8,7 @@ import {
   removeSeat,
   deleteLobby,
   leaveLobby,
+  setReady,
   startGame,
   takeSeat,
   watchGame,
@@ -20,6 +21,16 @@ class GameLobby extends Component {
     const { currentLobby, takeSeat } = this.props
     event.preventDefault()
     takeSeat(currentLobby.lobbyId, seatId)
+  }
+
+  handleWatchGame = () => {
+    const { currentLobby, watchGame } = this.props
+    watchGame(currentLobby.lobbyId)
+  }
+
+  handleSetReady = () => {
+    const { currentLobby, setReady } = this.props
+    setReady(currentLobby.lobbyId)
   }
 
   handleStartGame = () => {
@@ -37,15 +48,13 @@ class GameLobby extends Component {
     leaveLobby(currentLobby.lobbyId)
   }
 
-  handleAddSeat = event => {
+  handleAddSeat = () => {
     const { currentLobby, addSeat } = this.props
-    event.preventDefault()
     addSeat(currentLobby.lobbyId)
   }
 
-  handleRemoveSeat = event => {
+  handleRemoveSeat = () => {
     const { currentLobby, removeSeat } = this.props
-    event.preventDefault()
     removeSeat(currentLobby.lobbyId)
   }
 
@@ -65,13 +74,17 @@ class GameLobby extends Component {
             Number of mages :
           </Form.Label>
           <Form.Label column xs="6" className="align-left">
-            <div className="d-inline-block square-button" onClick={event => this.handleRemoveSeat(event)}>
-              -
-            </div>
+            {game.creatorId === auth.uid && (
+              <div className="d-inline-block square-button" onClick={this.handleRemoveSeat}>
+                -
+              </div>
+            )}
             <div className="d-inline-block">{game.numberOfPlayers}</div>
-            <div className="d-inline-block square-button" onClick={event => this.handleAddSeat(event)}>
-              +
-            </div>
+            {game.creatorId === auth.uid && (
+              <div className="d-inline-block square-button" onClick={this.handleAddSeat}>
+                +
+              </div>
+            )}
           </Form.Label>
         </Form.Group>
       </div>
@@ -79,6 +92,7 @@ class GameLobby extends Component {
     const seats =
       game.seats &&
       game.seats.map((playerId, index) => {
+        let ready = playerId !== -1 && game.players[playerId].ready ? ' ready' : ''
         return playerId === -1 ? (
           <div className="seat empty" key={index} onClick={event => this.handleTakeSeat(event, index)}>
             Take seat
@@ -86,7 +100,7 @@ class GameLobby extends Component {
         ) : playerId === 0 ? (
           <div key={index}>Lock({index})</div>
         ) : (
-          <div className="seat" key={index}>
+          <div className={'seat' + ready} key={index}>
             {game.players[playerId].name}
           </div>
         )
@@ -100,8 +114,15 @@ class GameLobby extends Component {
       )
     })
 
-    const missingPlayer = game.seats.includes(-1)
+    let allplayersReady = true
+    game.seats
+      .filter(seatId => seatId !== -1)
+      .forEach(playerId => {
+        allplayersReady &= game.players[playerId].ready
+      })
+    const ready = game.seats.includes(auth.uid) && allplayersReady
     const numberOfSpectators = Object.keys(spectators).length
+    const isSpectator = !game.seats.includes(auth.uid)
 
     return (
       <div className="game-lobby-container">
@@ -109,17 +130,24 @@ class GameLobby extends Component {
           <div className="game">
             <div className="game-header">
               <h5>You are in game {game.name}</h5>
-              {options}
-              <div className="separator" />
+              {auth && auth.uid === game.creatorId && options}
               {seats}
+              {game.players[auth.uid] && (
+                <div className="game-button">
+                  <Button variant="secondary" size="sm" onClick={this.handleSetReady} disabled={isSpectator}>
+                    {game.players[auth.uid].ready ? 'Cancel' : 'Ready'}
+                  </Button>
+                </div>
+              )}
               <div className="separator" />
               <h5>
                 Spectators ({numberOfSpectators}) {numberOfSpectators > 0 && <>: {spectatorList}</>}
               </h5>
+              <div className="separator" />
               <div className="game-button">
                 {auth && auth.uid === game.creatorId ? (
                   <>
-                    <Button variant="primary" size="sm" onClick={this.handleStartGame} disabled={missingPlayer}>
+                    <Button variant="primary" size="sm" onClick={this.handleStartGame} disabled={!ready}>
                       Start
                     </Button>
                     <Button variant="secondary" size="sm" onClick={this.handleDeleteLobby}>
@@ -127,9 +155,14 @@ class GameLobby extends Component {
                     </Button>
                   </>
                 ) : (
-                  <Button variant="secondary" size="sm" onClick={this.handleLeaveLobby}>
-                    Leave
-                  </Button>
+                  <>
+                    <Button variant="secondary" size="sm" onClick={this.handleWatchGame}>
+                      Watch
+                    </Button>
+                    <Button variant="secondary" size="sm" onClick={this.handleLeaveLobby}>
+                      Leave
+                    </Button>
+                  </>
                 )}
               </div>
             </div>
@@ -177,6 +210,7 @@ const mapDispatchToProps = dispatch => {
     removeSeat: lobbyId => dispatch(removeSeat(lobbyId)),
     deleteLobby: lobbyId => dispatch(deleteLobby(lobbyId)),
     leaveLobby: lobbyId => dispatch(leaveLobby(lobbyId)),
+    setReady: lobbyId => dispatch(setReady(lobbyId)),
     startGame: gameId => dispatch(startGame(gameId)),
     takeSeat: (gameId, seatId) => dispatch(takeSeat(gameId, seatId)),
     watchGame: gameId => dispatch(watchGame(gameId)),

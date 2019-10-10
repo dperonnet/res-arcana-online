@@ -52,7 +52,8 @@ export const addSeat = lobbyId => {
           let lobby = lobbyDoc.data()
           let seats = lobby.seats
           seats[seats.length] = -1
-          return transaction.update(lobbyRef, { seats })
+          let numberOfPlayers = seats.length
+          return transaction.update(lobbyRef, { seats, numberOfPlayers })
         })
       })
       .then(() => {
@@ -88,12 +89,13 @@ export const removeSeat = lobbyId => {
 
           // remove the last free seat if possible, else kick the last player
           if (indices.length > 0) {
-            seats.splice(indices[indices.length], 1)
+            seats.splice(indices[indices.length - 1], 1)
           } else {
             seats.splice(seats[seats.length], 1)
           }
 
-          return transaction.update(lobbyRef, { seats })
+          let numberOfPlayers = seats.length
+          return transaction.update(lobbyRef, { seats, numberOfPlayers })
         })
       })
       .then(() => {
@@ -148,9 +150,9 @@ export const joinLobby = (lobbyId, takeSeat, seatIndex) => {
           // Add the player to the players list
           players[playerId] = {
             name: profile.login,
+            ready: false,
           }
 
-          console.log('Can Player take seat ?', gameNotStarted, gameIsNotFull, takeSeat)
           canTakeSeat = gameNotStarted && gameIsNotFull && takeSeat
 
           // remove the player from seats
@@ -171,7 +173,6 @@ export const joinLobby = (lobbyId, takeSeat, seatIndex) => {
             }
           }
 
-          console.log('transaction', lobbyRef, { players, seats })
           transaction.update(lobbyRef, { players, seats })
         })
       })
@@ -287,7 +288,7 @@ export const leaveLobby = lobbyId => {
               seats[i] = -1
             }
           }
-          console.log('transaction', lobbyRef, { players, seats })
+
           return transaction.update(lobbyRef, { players, seats })
         })
       })
@@ -333,5 +334,37 @@ export const leaveLobby = lobbyId => {
 export const startGame = lobbyId => {
   return () => {
     console.log('Call to cloud function start game', lobbyId)
+  }
+}
+
+export const setReady = lobbyId => {
+  return (dispatch, getState, { getFirestore }) => {
+    const fireStore = getFirestore()
+    const playerId = getState().firebase.auth.uid
+
+    const lobbyRef = fireStore.collection('gameLobbys').doc(lobbyId)
+
+    fireStore
+      .runTransaction(transaction => {
+        return transaction.get(lobbyRef).then(lobbyDoc => {
+          if (!lobbyDoc.exists) {
+            throw new Error('Document does not exist!')
+          }
+          let lobby = lobbyDoc.data()
+
+          let gameNotStarted = lobby.status === 'PENDING'
+          let players = lobby.players
+          if (gameNotStarted) {
+            players[playerId].ready = !players[playerId].ready
+          }
+          transaction.update(lobbyRef, { players })
+        })
+      })
+      .then(() => {
+        dispatch({ type: 'SET_READY', lobbyId })
+      })
+      .catch(err => {
+        dispatch({ type: 'SET_READY_ERROR', err })
+      })
   }
 }

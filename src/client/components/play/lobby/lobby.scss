@@ -47,25 +47,28 @@
   width: 90%;
 }
 
-.game-button .btn-primary {
-  background-color: #f5b041;
-  border-color: #f5b041;
-  color: #000;
-}
-.game-button .btn-primary:hover {
-  background-color: #f5d061;
-  border-color: #f5d061;
-  color: #000;
-}
-.game-button .btn.disabled,
-.game-button .btn:disabled {
-  opacity: 1;
-}
-.game-button .btn-primary:disabled,
-.game-button .btn-primary:disabled:hover {
-  color: #fff;
-  background-color: #333;
-  border-color: #333;
+.game-button {
+  .btn-primary {
+    background-color: #f5b041;
+    border-color: #f5b041;
+    color: #000;
+  }
+  .btn-primary:hover {
+    background-color: #f5d061;
+    border-color: #f5d061;
+    color: #000;
+  }
+  .btn.disabled,
+  .btn:disabled {
+    opacity: 1;
+  }
+  .btn-primary, .btn-secondary {
+    &:disabled, &:disabled:hover {
+      color: #fff;
+      background-color: #333;
+      border-color: #333;
+    }
+  }
 }
 
 .seat {
@@ -73,7 +76,7 @@
   height: 40px;
   width: 250px;
   border-radius: 2px;
-  margin: 20px 10px;
+  margin: 15px 10px;
   color: #484545;
   font-family: FlourishBoldSpecial;
   font-size: larger;
@@ -89,12 +92,15 @@
 
   &.empty {
     color: white;
-    box-shadow: 0 0 3pt 1pt grey;
-    background-color: rgba(63, 90, 115, 0.8);
+    box-shadow: 0 0 3pt 1pt rgb(88, 88, 88);
+    background-color: rgba(53, 52, 52, 0.73);
     cursor: pointer;
     &:hover {
       box-shadow: 0 0 3pt 1pt lightgray;
     }
+  }
+  &.ready {
+    box-shadow: 0 0 3pt 1pt #58be45bf;
   }
 }
 
