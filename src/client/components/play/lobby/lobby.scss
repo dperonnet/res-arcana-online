@@ -72,17 +72,17 @@
 }
 
 .seat {
+  position: relative;
   display: inline-block;
   height: 40px;
-  width: 250px;
+  width: 230px;
   border-radius: 2px;
-  margin: 15px 10px;
+  margin: 15px;
   color: #484545;
-  font-family: FlourishBoldSpecial;
-  font-size: larger;
+  line-height: 2;
   text-align: center;
 
-  box-shadow: 0 0 3pt 1pt rgb(190, 123, 69);
+  box-shadow: 0 0 3pt 1pt #be7b4578;
   background-color: rgba(190, 123, 69, 0.4);
   background-blend-mode: color-burn;
   background-image: url('../../../assets/image/background_action.png');
@@ -92,22 +92,48 @@
 
   &.empty {
     color: white;
-    box-shadow: 0 0 3pt 1pt rgb(88, 88, 88);
+    box-shadow: 0 0 3pt 1pt #be7b4578;
     background-color: rgba(53, 52, 52, 0.73);
+    background-color: rgba(55, 45, 17, 0.73);
     cursor: pointer;
     &:hover {
-      box-shadow: 0 0 3pt 1pt lightgray;
+      box-shadow: 0 0 3pt 1pt rgb(190, 123, 69);
     }
   }
   &.ready {
-    box-shadow: 0 0 3pt 1pt #58be45bf;
+    box-shadow: 0 0 3pt 2pt rgb(190, 123, 69);
   }
+}
+
+.tick {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 25px;
+  width: 30px;
+  margin: 2px;
+  background-image: url("../../../assets/image/game_icons.png");
+  background-size: 566px 75px;
+  background-position: -317px -38px;
+  background-repeat: no-repeat;
+
+}
+
+.tick-sm {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  height: 15px;
+  width: 21px;
+  background-image: url("../../../assets/image/game_icons.png");
+  background-size: 400px 45px;
+  background-position: -224px -23px;
 }
 
 .square-button {
   height: 20px;
   width: 20px;
-  background-color: grey;
+  background-color: #6c757d;
   border-radius: 3px;
   cursor: pointer;
   line-height: 1;

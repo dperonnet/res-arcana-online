@@ -116,47 +116,47 @@ class ResArcanaBoard extends Component {
     const { G, ctx, playerID, selectedComponent } = this.props
 
     switch (selectedComponent.type) {
-    case 'artefact':
-      if (
+      case 'artefact':
+        if (
           G.players[playerID].hand.filter(component => {
             return component.id === selectedComponent.id
           }).length > 0
         ) {
-        return { location: 'HAND', playerId: playerID }
-      } else {
-        for (let id = 0; id < ctx.numPlayers; id++) {
-          if (
+          return { location: 'HAND', playerId: playerID }
+        } else {
+          for (let id = 0; id < ctx.numPlayers; id++) {
+            if (
               G.publicData.players[id].discard.filter(component => {
                 return component.id === selectedComponent.id
               }).length > 0
             ) {
-            return { location: 'DISCARD', playerId: id }
-          } else if (
+              return { location: 'DISCARD', playerId: id }
+            } else if (
               G.publicData.players[id].inPlay.filter(component => {
                 return component.id === selectedComponent.id
               }).length > 0
             ) {
-            return { location: 'PLAY', playerId: id }
+              return { location: 'PLAY', playerId: id }
+            }
           }
+          return { location: 'COMMON_BOARD' }
         }
-        return { location: 'COMMON_BOARD' }
-      }
-    case 'mage':
-    case 'placeOfPower':
-    case 'monument':
-    case 'magicItem':
-      for (let id = 0; id < ctx.numPlayers; id++) {
-        if (
+      case 'mage':
+      case 'placeOfPower':
+      case 'monument':
+      case 'magicItem':
+        for (let id = 0; id < ctx.numPlayers; id++) {
+          if (
             G.publicData.players[playerID].inPlay.filter(component => {
               return component.id === selectedComponent.id
             }).length > 0
           ) {
-          return { location: 'PLAY', playerId: id }
+            return { location: 'PLAY', playerId: id }
+          }
         }
-      }
-      return { location: 'COMMON_BOARD' }
-    default:
-      return { location: 'COMMON_BOARD' }
+        return { location: 'COMMON_BOARD' }
+      default:
+        return { location: 'COMMON_BOARD' }
     }
   }
 
@@ -164,9 +164,8 @@ class ResArcanaBoard extends Component {
    * Select the clicked component.
    */
   handleClick = (e, component) => {
-    //const { board } = this.refs
     e.stopPropagation()
-    //board.scrollTop = 0
+    //this.board.scrollTop = 0
     this.props.selectComponent(component)
 
     if (component) {
@@ -506,7 +505,7 @@ class ResArcanaBoard extends Component {
     return (
       <>
         <Chat chat={chat} chatId={game.id} chatName={game.name + ' Chat'} />
-      <div className="close close-chat" onClick={this.handleToggleChat}>
+        <div className="close close-chat" onClick={this.handleToggleChat}>
           <FontAwesomeIcon icon={faTimes} size="lg" />
         </div>
       </>
@@ -521,25 +520,26 @@ class ResArcanaBoard extends Component {
     const { G, canPayCost, profile, selectAction } = this.props
     const layout = profile && profile.layout ? profile.layout : 'vertical'
 
-    const handleClick = component => {
-      return G.phase === 'PLAY_PHASE'
-        ? {
-            onClick: event => {
-              this.handleClick(event, component)
-              switch (component.type) {
-          case 'magicItem':
-                  selectAction('PASS')
-                  break
-                case 'monument':
-                case 'backMonument':
-                case 'placeOfPower':
-            selectAction('CLAIM')
-                  break
-                default:
-              }
-            },
-          }
-        : null
+    let handleClick = null
+    if (G.phase === 'PLAY_PHASE') {
+      handleClick = component => {
+        return {
+          onClick: event => {
+            this.handleClick(event, component)
+            switch (component.type) {
+              case 'magicItem':
+                selectAction('PASS')
+                break
+              case 'monument':
+              case 'backMonument':
+              case 'placeOfPower':
+                selectAction('CLAIM')
+                break
+              default:
+            }
+          },
+        }
+      }
     }
     const renderGameComponents = components => {
       return (
@@ -672,22 +672,22 @@ class ResArcanaBoard extends Component {
     let hand
     let fixedHeight
     switch (G.phase) {
-    case 'PLAY_PHASE':
-      hand = G.players[playerID].hand.map(card => {
-        return this.renderGameComponent(card, {
-          onClick: event => {
-            this.handleClick(event, card)
-            clearInterval(interval)
-            selectAction('HAND')
-          },
+      case 'PLAY_PHASE':
+        hand = G.players[playerID].hand.map(card => {
+          return this.renderGameComponent(card, {
+            onClick: event => {
+              this.handleClick(event, card)
+              clearInterval(interval)
+              selectAction('HAND')
+            },
+          })
         })
-      })
-      fixedHeight = !separator ? ' action-row' : ''
-      break
-    default:
-      hand = G.players[playerID].hand.map(card => {
-        return this.renderGameComponent(card)
-      })
+        fixedHeight = !separator ? ' action-row' : ''
+        break
+      default:
+        hand = G.players[playerID].hand.map(card => {
+          return this.renderGameComponent(card)
+        })
     }
     return (
       <div className={'card-row flex-col ' + profile.cardSize + fixedHeight}>
@@ -715,55 +715,63 @@ class ResArcanaBoard extends Component {
     let turnedComponents = G.publicData.turnedComponents
     let status = playerID !== 'undefined' ? G.publicData.players[playerID].status : 'READY'
     switch (status) {
-    case 'DRAFTING_ARTEFACTS':
-      const mages = G.players[playerID].mages.map(card => {
-        return this.renderGameComponent(card)
-      })
-      const deck = G.players[playerID].hand.map(card => {
-        return this.renderGameComponent(card)
-      })
-      cards = (
+      case 'DRAFTING_ARTEFACTS': {
+        const mages = G.players[playerID].mages.map(card => {
+          return this.renderGameComponent(card)
+        })
+        const deck = G.players[playerID].hand.map(card => {
+          return this.renderGameComponent(card)
+        })
+        cards = (
           <>
             {mages}
             {deck}
           </>
         )
-      break
-    case 'SELECTING_MAGE':
-      break
-    case 'READY':
-    default:
-        const handleClick = component => {
-        return G.phase === 'PLAY_PHASE' && playerID === id
-            ? {
-          onClick: (event) => {
-            this.handleClick(event, component)
-            selectAction('PLAY')
-            if (component.hasActionPower && component.actionPowerList.length === 1 && this.isActionAvailable(component.actionPowerList[0], component)) {
-              selectActionPower(0)
-            } else {
-              selectActionPower()
+        break
+      }
+      case 'SELECTING_MAGE':
+        break
+      case 'READY':
+      default: {
+        let handleClick = null
+        if (G.phase === 'PLAY_PHASE' && playerID === id) {
+          component => {
+            return {
+              onClick: event => {
+                this.handleClick(event, component)
+                selectAction('PLAY')
+                if (
+                  component.hasActionPower &&
+                  component.actionPowerList.length === 1 &&
+                  this.isActionAvailable(component.actionPowerList[0], component)
+                ) {
+                  selectActionPower(0)
+                } else {
+                  selectActionPower()
+                }
+              },
             }
           }
-        } : null
-      }
+        }
 
-      essencesOnComponent = G.publicData.players[id].essencesOnComponent
-      magicItem = G.publicData.players[id].inPlay
+        essencesOnComponent = G.publicData.players[id].essencesOnComponent
+        magicItem = G.publicData.players[id].inPlay
           .filter(component => component.type === 'magicItem')
           .map(card => {
-        let args = {essencesOnComponent: essencesOnComponent[card.id], turnedComponents, ...handleClick(card)}
+            let args = { essencesOnComponent: essencesOnComponent[card.id], turnedComponents, ...handleClick(card) }
             if (card.type === 'magicItem' && G.passOrder.includes(id)) {
-          args.specificName = 'passe'
+              args.specificName = 'passe'
             }
             return this.renderGameComponent(card, args)
-      })
-      cards = G.publicData.players[id].inPlay
+          })
+        cards = G.publicData.players[id].inPlay
           .filter(component => component.type !== 'magicItem')
           .map(card => {
-        let args = {essencesOnComponent: essencesOnComponent[card.id], turnedComponents, ...handleClick(card)}
-        return this.renderGameComponent(card, args)
-      })
+            let args = { essencesOnComponent: essencesOnComponent[card.id], turnedComponents, ...handleClick(card) }
+            return this.renderGameComponent(card, args)
+          })
+      }
     }
 
     return (
@@ -794,49 +802,49 @@ class ResArcanaBoard extends Component {
     let drawPileAndDiscard = id => this.renderPlayerDrawPileAndDiscard(id)
     let status = playerID !== 'undefined' ? G.publicData.players[playerID].status : 'READY'
     switch (status) {
-    case 'DRAFTING_ARTEFACTS':
-    case 'SELECTING_MAGE':
-      boards = othersId.map(id => {
-        const playerRuban = this.renderPlayerRuban(id)
-        let cards = []
-        let cardMage = copy(CARD_BACK_MAGE)
-        cards.push(this.renderGameComponent({ ...cardMage, id: 'back_mage_1' }))
-        if (G.publicData.players[id].status !== 'READY') {
-          cards.push(this.renderGameComponent({ ...cardMage, id: '_back_mage_2' }))
-        }
-        return (
-          <div key={id}>
-            {playerRuban}
-            <div className={'card-row ' + profile.cardSize}>
-              {cards}
-              {drawPileAndDiscard(id)}
+      case 'DRAFTING_ARTEFACTS':
+      case 'SELECTING_MAGE':
+        boards = othersId.map(id => {
+          const playerRuban = this.renderPlayerRuban(id)
+          let cards = []
+          let cardMage = copy(CARD_BACK_MAGE)
+          cards.push(this.renderGameComponent({ ...cardMage, id: 'back_mage_1' }))
+          if (G.publicData.players[id].status !== 'READY') {
+            cards.push(this.renderGameComponent({ ...cardMage, id: '_back_mage_2' }))
+          }
+          return (
+            <div key={id}>
+              {playerRuban}
+              <div className={'card-row ' + profile.cardSize}>
+                {cards}
+                {drawPileAndDiscard(id)}
+              </div>
             </div>
-          </div>
-        )
-      })
-      break
-    case 'READY':
-    default:
-      boards = othersId.map(id => {
-        const playerRuban = this.renderPlayerRuban(id)
-        let cards = []
-        if (
+          )
+        })
+        break
+      case 'READY':
+      default:
+        boards = othersId.map(id => {
+          const playerRuban = this.renderPlayerRuban(id)
+          let cards = []
+          if (
             G.publicData.players[id].status === 'SELECTING_MAGE' ||
             G.publicData.players[id].status === 'DRAFTING_ARTEFACTS'
           ) {
-          let cardMage = copy(CARD_BACK_MAGE)
-          cards.push(this.renderGameComponent({ ...cardMage, id: 'back_mage_1' }))
-          cards.push(this.renderGameComponent({ ...cardMage, id: '_back_mage_2' }))
-        } else {
-          cards = this.renderPlayerBoard(id)
-        }
-        return (
-          <div key={id}>
-            {playerRuban}
-            {cards}
-          </div>
-        )
-      })
+            let cardMage = copy(CARD_BACK_MAGE)
+            cards.push(this.renderGameComponent({ ...cardMage, id: 'back_mage_1' }))
+            cards.push(this.renderGameComponent({ ...cardMage, id: '_back_mage_2' }))
+          } else {
+            cards = this.renderPlayerBoard(id)
+          }
+          return (
+            <div key={id}>
+              {playerRuban}
+              {cards}
+            </div>
+          )
+        })
     }
     return boards
   }
@@ -885,72 +893,80 @@ class ResArcanaBoard extends Component {
     const nextPlayer = this.getNextPlayer()
 
     switch (G.publicData.players[playerID].status) {
-    case 'DRAFTING_ARTEFACTS':
-      title += ` - Artefact selection ${G.publicData.players[playerID].handSize + 1}/8`
+      case 'DRAFTING_ARTEFACTS': {
+        title += ` - Artefact selection ${G.publicData.players[playerID].handSize + 1}/8`
 
-      const emptyHand = G.players[playerID].draftCards.length === 0
-      waiting = emptyHand
+        const emptyHand = G.players[playerID].draftCards.length === 0
+        waiting = emptyHand
 
-      draftCards =
+        draftCards =
           G.players[playerID].draftCards.length > 0 &&
           Object.values(G.players[playerID].draftCards[0]).map(card => {
-        return this.renderGameComponent(card, {onClick: (event) => this.handleClick(event, card), onDoubleClick: () => this.pickArtefact(card.id)})
-      })
+            return this.renderGameComponent(card, {
+              onClick: event => this.handleClick(event, card),
+              onDoubleClick: () => this.pickArtefact(card.id),
+            })
           })
 
-      directive = selectedComponent ? (
-        <h5 className="directive">
+        directive = selectedComponent ? (
+          <h5 className="directive">
             Keep {selectedComponent.name} {!lastDraftCard && 'and pass the rest to ' + nextPlayer + ' ?'}
           </h5>
         ) : (
-        <h5 className="directive">Select an artefact to add into your deck.</h5>
+          <h5 className="directive">Select an artefact to add into your deck.</h5>
         )
 
-      G.publicData.waitingFor.forEach((id, index) => {
-        let isLastPlayer = index === G.publicData.waitingFor.length - 1
-        let waitingAtLeastTwoPlayers = G.publicData.waitingFor.length > 1
-        let beforeLastPlayer = index === G.publicData.waitingFor.length - 2
-        waitingFor += playersName[parseInt(id)]
-        waitingFor += isLastPlayer ? '.' : waitingAtLeastTwoPlayers && beforeLastPlayer ? ' and ' : ', '
-      })
-      handleConfirm = () => this.pickArtefact(selectedComponent.id)
-      break
-    case 'SELECTING_MAGE':
-      title += ' - Mage selection'
+        G.publicData.waitingFor.forEach((id, index) => {
+          let isLastPlayer = index === G.publicData.waitingFor.length - 1
+          let waitingAtLeastTwoPlayers = G.publicData.waitingFor.length > 1
+          let beforeLastPlayer = index === G.publicData.waitingFor.length - 2
+          waitingFor += playersName[parseInt(id)]
+          waitingFor += isLastPlayer ? '.' : waitingAtLeastTwoPlayers && beforeLastPlayer ? ' and ' : ', '
+        })
+        handleConfirm = () => this.pickArtefact(selectedComponent.id)
+        break
+      }
+      case 'SELECTING_MAGE':
+        title += ' - Mage selection'
 
-      draftCards =
+        draftCards =
           G.players[playerID].mages.length > 0 &&
           G.players[playerID].mages.map(card => {
-        return this.renderGameComponent(card, {onClick: (event) => this.handleClick(event, card), onDoubleClick: () => this.pickMage(card.id)})
+            return this.renderGameComponent(card, {
+              onClick: event => this.handleClick(event, card),
+              onDoubleClick: () => this.pickMage(card.id),
+            })
           })
-      directive = selectedComponent ? (
-        <h5 className="directive">Keep {selectedComponent.name} ?</h5>
+        directive = selectedComponent ? (
+          <h5 className="directive">Keep {selectedComponent.name} ?</h5>
         ) : (
-        <h5 className="directive">Select your mage.</h5>
-      handleConfirm = () => this.pickMage(selectedComponent.id)
+          <h5 className="directive">Select your mage.</h5>
+        )
+        handleConfirm = () => this.pickMage(selectedComponent.id)
 
-      hand = this.renderPlayerHand()
+        hand = this.renderPlayerHand()
 
-      break
-    case 'READY':
-      title = 'Get Ready to pick your magic item'
-      showCards = false
+        break
+      case 'READY': {
+        title = 'Get Ready to pick your magic item'
+        showCards = false
 
-      const playersNotReady = Object.entries(G.publicData.players).filter(player => {
-        return player[1].status !== 'READY'
-      })
-      playersNotReady.forEach((player, index) => {
-        let isLastPlayer = index === playersNotReady.length - 1
-        let waitingAtLeastTwoPlayers = playersNotReady.length > 1
-        let beforeLastPlayer = index === playersNotReady.length - 2
-        waitingFor += playersName[parseInt(player[0])]
-        waitingFor += isLastPlayer ? '.' : waitingAtLeastTwoPlayers && beforeLastPlayer ? ' and ' : ', '
-      })
-      waiting = true
-      showButtons = false
-      hand = this.renderPlayerHand()
-      break
-    default:
+        const playersNotReady = Object.entries(G.publicData.players).filter(player => {
+          return player[1].status !== 'READY'
+        })
+        playersNotReady.forEach((player, index) => {
+          let isLastPlayer = index === playersNotReady.length - 1
+          let waitingAtLeastTwoPlayers = playersNotReady.length > 1
+          let beforeLastPlayer = index === playersNotReady.length - 2
+          waitingFor += playersName[parseInt(player[0])]
+          waitingFor += isLastPlayer ? '.' : waitingAtLeastTwoPlayers && beforeLastPlayer ? ' and ' : ', '
+        })
+        waiting = true
+        showButtons = false
+        hand = this.renderPlayerHand()
+        break
+      }
+      default:
     }
 
     const confirmButton = (
@@ -960,7 +976,11 @@ class ResArcanaBoard extends Component {
       >
         Confirm
       </div>
-    const cancelButton = !lastDraftCard && <div className="action-button" onClick={selectedComponent && ((event) => this.handleClick(event))}>Cancel</div>
+    )
+    const cancelButton = !lastDraftCard && (
+      <div className="action-button" onClick={selectedComponent && (event => this.handleClick(event))}>
+        Cancel
+      </div>
     )
 
     return (
@@ -992,13 +1012,18 @@ class ResArcanaBoard extends Component {
     const { G, ctx, playerID, profile, selectedComponent } = this.props
 
     const playersName = this.getPlayersName()
-    let title = 'Magic Item Selection Phase - ' + playersName[parseInt(ctx.currentPlayer)] + "'s turn."
+    // eslint-disable-next-line prettier/prettier
+    let title = 'Magic Item Selection Phase - ' + playersName[parseInt(ctx.currentPlayer)] + '\'s turn.'
     let waiting = playerID !== ctx.currentPlayer
     let magicItems = G.publicData.magicItems.map(magicItem => {
-      return waiting
-        ? this.renderGameComponent(magicItem)
-        :
-        this.renderGameComponent(magicItem, {onClick: (event) => this.handleClick(event, magicItem), onDoubleClick: () => this.pickMagicItem(magicItem.id)})
+      if (waiting) {
+        return this.renderGameComponent(magicItem)
+      } else {
+        return this.renderGameComponent(magicItem, {
+          onClick: event => this.handleClick(event, magicItem),
+          onDoubleClick: () => this.pickMagicItem(magicItem.id),
+        })
+      }
     })
 
     if (playerID === 'undefined') {
@@ -1018,14 +1043,14 @@ class ResArcanaBoard extends Component {
     let showButtons = true
 
     switch (G.publicData.players[playerID].status) {
-    case 'SELECTING_MAGIC_ITEM':
-      directive = <h5 className="directive">Select a Magic Item.</h5>
-      handleConfirm = () => this.pickMagicItem(selectedComponent.id)
-      break
-    case 'READY':
-    default:
-      title = 'Get Ready for the battle'
-      showButtons = false
+      case 'SELECTING_MAGIC_ITEM':
+        directive = <h5 className="directive">Select a Magic Item.</h5>
+        handleConfirm = () => this.pickMagicItem(selectedComponent.id)
+        break
+      case 'READY':
+      default:
+        title = 'Get Ready for the battle'
+        showButtons = false
     }
 
     const confirmButton = (
@@ -1067,7 +1092,8 @@ class ResArcanaBoard extends Component {
 
     const playersName = this.getPlayersName()
     let title = 'Collect Phase'
-    let waitingFor = ' - ' + playersName[parseInt(ctx.currentPlayer)] + "'s turn."
+    // eslint-disable-next-line prettier/prettier
+    let waitingFor = ' - ' + playersName[parseInt(ctx.currentPlayer)] + '\'s turn.'
 
     if (playerID === 'undefined') {
       return (
@@ -1144,53 +1170,55 @@ class ResArcanaBoard extends Component {
     components.forEach(component => {
       if (component.hasSpecificCollectAbility) {
         switch (component.id) {
-        case 'coffreFort':
-          const hasEssence = essencesOnComponent[component.id]
-          if (hasEssence && hasEssence.filter(essence => essence.type === 'gold').length > 0) {
-            collectValid =
+          case 'coffreFort': {
+            const hasEssence = essencesOnComponent[component.id]
+            if (hasEssence && hasEssence.filter(essence => essence.type === 'gold').length > 0) {
+              collectValid =
                 (collectActions[component.id] && collectActions[component.id].valid) ||
                 (collectOnComponentActions[component.id] && collectOnComponentActions[component.id].valid)
+            }
+            break
           }
-          break
-        case 'automate':
-          collectValid = true
-          break
-        case 'forgeMaudite':
-        default:
-          collectValid = collectValid && collectActions[component.id] && collectActions[component.id].valid
+          case 'automate':
+            collectValid = true
+            break
+          case 'forgeMaudite':
+          default:
+            collectValid = collectValid && collectActions[component.id] && collectActions[component.id].valid
         }
       }
     })
 
     switch (G.publicData.players[playerID].status) {
-    case 'COLLECT_ACTION_FIXED':
-    case 'COLLECT_ACTION_REQUIRED':
-      directive =
+      case 'COLLECT_ACTION_FIXED':
+      case 'COLLECT_ACTION_REQUIRED':
+        directive =
           collectValid && costValid ? (
-        <h5 className="directive">Confirm your collect option(s).</h5>
-        : costValid ?
-          <h5 className="directive">You have to select collect option(s).</h5>
+            <h5 className="directive">Confirm your collect option(s).</h5>
+          ) : costValid ? (
+            <h5 className="directive">You have to select collect option(s).</h5>
           ) : (
-          <h5 className="directive">
-              You need{' '}
+            <h5 className="directive">
+              {'You need '}
               {Object.entries(missingEssences).map(essence => {
-            return <div key={essence[0]}className="collect-options collect-info">
+                return (
+                  <div key={essence[0]} className="collect-options collect-info">
                     <div className={'type essence ' + essence[0]}>{essence[1]}</div>
                   </div>
                 )
-              })}{' '}
-              more essence(s) for your collect to be valid.
+              })}
+              {' more essence(s) for your collect to be valid.'}
             </h5>
           )
-      handleConfirm = () => this.collectEssences()
-      break
-    case 'NOTHING_TO_COLLECT':
-      directive = <h5 className="directive">You have no collect option.</h5>
-      showButtons = false
-      break
-    case 'READY':
-    default:
-      showButtons = false
+        handleConfirm = () => this.collectEssences()
+        break
+      case 'NOTHING_TO_COLLECT':
+        directive = <h5 className="directive">You have no collect option.</h5>
+        showButtons = false
+        break
+      case 'READY':
+      default:
+        showButtons = false
     }
 
     const confirmButton = (
@@ -1446,7 +1474,7 @@ class ResArcanaBoard extends Component {
       </h5>
     ) : (
       <h5 className="directive">
-        <div className="inline-text">You don't have enough essences to claim {componentName}.</div>
+        <div className="inline-text">You don`&apos;`t have enough essences to claim {componentName}.</div>
       </h5>
     )
 
@@ -1525,99 +1553,123 @@ class ResArcanaBoard extends Component {
     })
 
     switch (selectedAction) {
-    case 'DISCARD_FOR_2E':
-      let count = 0
-      Object.values(essencePickerSelection.discardGain).forEach(value => (count = count + value))
-      let isValid = count === 2
-      directive = isValid ? (
-        <h5 className="directive">
-          <div className="inline-text">Discard {selectedComponent.name} for </div>
-          <div className="inline-icons">{essenceList}</div>
-          <div className="inline-text">?</div>
-        </h5>
-        :
-        <h5 className="directive">
-          <div className="inline-text">Select </div>
-          <div className="inline-icons">
-            <div className="icons">
-              <div className="essence any-but-gold">2</div>
-            </div>
-          </div>
-        </h5>
-      actionPanel = <div>
-            <h5>Discard for:</h5>
-            <EssencePicker selectionType={'discardGain'} pickerType={'any-but-gold'} pickQuantity={2} />
-      </div>
-      break
-    case 'DISCARD_FOR_1G':
-      directive = (
+      case 'DISCARD_FOR_2E': {
+        let count = 0
+        Object.values(essencePickerSelection.discardGain).forEach(value => (count = count + value))
+        let isValid = count === 2
+        directive = isValid ? (
           <h5 className="directive">
             <div className="inline-text">Discard {selectedComponent.name} for </div>
             <div className="inline-icons">{essenceList}</div>
             <div className="inline-text">?</div>
           </h5>
-      break
-    case 'PLACE_ARTEFACT':
-      actionPanel = this.renderCostHandler(costValid)
-      const selection = Object.entries(essencePickerSelection.placementCost).filter(item => item[1] > 0)
-      essenceList =
-          selection.length > 0
-            ? selection.map((essence, index) => {
-        let isLast = index === selection.length -1
-        return <div key={essence[0]} className={'icons '}>
-                    <div className={'type essence ' + essence[0]}>{essence[1] || 0}</div>
-          {!isLast && <div className="operator">
-                        <FontAwesomeIcon icon={faPlus} size="sm" />
-          </div>}
-        </div>
-      })
-              })
-            : null
-
-      directive = costValid.isValid ? (
-        <h5 className="directive">
-          <div className="inline-text">Place {selectedComponent.name} for </div>
-          {essenceList ? <div className="inline-icons">{essenceList}</div> : <> free</>}
-          <div className="inline-text">?</div>
-        </h5>
-        :
-        <h5 className="directive">
-          <div className="inline-text">Select essences to pay {selectedComponent.name}'s placement cost.</div>
-        </h5>
-      break
-
-      // render the selected card from hand and display the differents actions available for this card.
-    case 'HAND':
-      const handlePlaceAction = () => {
-        const preSelection = canPayCost.fixedCost ? canPayCost.fixedCost : canPayCost.minEssencePayList
-        setSelection('placementCost', preSelection)
-        selectAction('PLACE_ARTEFACT')
-      }
-
-      actionPanel = (
-          <>
-        <div className={'action-button' + (canPayCost.valid ? '':' invalid disabled')} size="sm" onClick={canPayCost.valid ? handlePlaceAction : null}>
-              <div className="inline-text">Place Artefact</div>
-        </div>
-            <div className="action-button" size="sm" onClick={() => selectAction('DISCARD_FOR_2E')}>
-          <div className="inline-text">Discard for </div>
-          <div className="inline-icons">
-                <div className="icons">
-              <div className="essence any-but-gold">2</div>
-            </div>
+        ) : (
+          <h5 className="directive">
+            <div className="inline-text">Select </div>
+            <div className="inline-icons">
+              <div className="icons">
+                <div className="essence any-but-gold">2</div>
               </div>
-        </div>
-        <div className="action-button" size="sm" onClick={() => {resetSelection(); addToSelection('discardGain', 'gold'); selectAction('DISCARD_FOR_1G')}}>
+            </div>
+          </h5>
+        )
+        actionPanel = (
+          <div>
+            <h5>Discard for:</h5>
+            <EssencePicker selectionType={'discardGain'} pickerType={'any-but-gold'} pickQuantity={2} />
+          </div>
+        )
+        break
+      }
+      case 'DISCARD_FOR_1G':
+        directive = (
+          <h5 className="directive">
+            <div className="inline-text">Discard {selectedComponent.name} for </div>
+            <div className="inline-icons">{essenceList}</div>
+            <div className="inline-text">?</div>
+          </h5>
+        )
+        break
+      case 'PLACE_ARTEFACT': {
+        actionPanel = this.renderCostHandler(costValid)
+        const selection = Object.entries(essencePickerSelection.placementCost).filter(item => item[1] > 0)
+        if (selection.length > 0) {
+          essenceList = selection.map((essence, index) => {
+            let isLast = index === selection.length - 1
+            return (
+              <div key={essence[0]} className={'icons '}>
+                <div className={'type essence ' + essence[0]}>{essence[1] || 0}</div>
+                {!isLast && (
+                  <div className="operator">
+                    <FontAwesomeIcon icon={faPlus} size="sm" />
+                  </div>
+                )}
+              </div>
+            )
+          })
+        } else {
+          essenceList = null
+        }
+
+        directive = costValid.isValid ? (
+          <h5 className="directive">
+            <div className="inline-text">Place {selectedComponent.name} for </div>
+            {essenceList ? <div className="inline-icons">{essenceList}</div> : <> free</>}
+            <div className="inline-text">?</div>
+          </h5>
+        ) : (
+          <h5 className="directive">
+            <div className="inline-text">Select essences to pay {selectedComponent.name}`&apos;`s placement cost.</div>
+          </h5>
+        )
+        break
+      }
+      // render the selected card from hand and display the differents actions available for this card.
+      case 'HAND': {
+        const handlePlaceAction = () => {
+          const preSelection = canPayCost.fixedCost ? canPayCost.fixedCost : canPayCost.minEssencePayList
+          setSelection('placementCost', preSelection)
+          selectAction('PLACE_ARTEFACT')
+        }
+
+        actionPanel = (
+          <>
+            <div
+              className={'action-button' + (canPayCost.valid ? '' : ' invalid disabled')}
+              size="sm"
+              onClick={canPayCost.valid ? handlePlaceAction : null}
+            >
+              <div className="inline-text">Place Artefact</div>
+            </div>
+            <div className="action-button" size="sm" onClick={() => selectAction('DISCARD_FOR_2E')}>
               <div className="inline-text">Discard for </div>
               <div className="inline-icons">
-            <div className="icons">
-              <div className="essence gold">1</div>
-            </div>
+                <div className="icons">
+                  <div className="essence any-but-gold">2</div>
+                </div>
               </div>
-        </div>          
-      </>
-      break
-    default:
+            </div>
+            <div
+              className="action-button"
+              size="sm"
+              onClick={() => {
+                resetSelection()
+                addToSelection('discardGain', 'gold')
+                selectAction('DISCARD_FOR_1G')
+              }}
+            >
+              <div className="inline-text">Discard for </div>
+              <div className="inline-icons">
+                <div className="icons">
+                  <div className="essence gold">1</div>
+                </div>
+              </div>
+            </div>
+          </>
+        )
+        break
+      }
+      default:
     }
 
     return (
@@ -1917,7 +1969,7 @@ class ResArcanaBoard extends Component {
           preSelection.push(goldCost[0])
         }
       } else {
-        console.log("99) Can't fix the cost")
+        console.log('99) Can not fix the cost')
         fixedCost = false
       }
 
@@ -1960,18 +2012,18 @@ class ResArcanaBoard extends Component {
   getValidDiscounts = (discountComponent, component) => {
     const validate = type => {
       switch (type) {
-      case 'artefact':
-        return component.type === 'artefact'
-      case 'monument':
-        return component.type === 'monument'
-      case 'placeOfPower':
-        return component.type === 'placeOfPower'
-      case 'creature':
-        return component.isCreature
-      case 'dragon':
-        return component.isDragon
-      default:
-        return false
+        case 'artefact':
+          return component.type === 'artefact'
+        case 'monument':
+          return component.type === 'monument'
+        case 'placeOfPower':
+          return component.type === 'placeOfPower'
+        case 'creature':
+          return component.isCreature
+        case 'dragon':
+          return component.isDragon
+        default:
+          return false
       }
     }
     return discountComponent.discountAbilityList.filter(discount => {
@@ -2117,65 +2169,70 @@ class ResArcanaBoard extends Component {
     }
 
     switch (selectedAction) {
-    case 'PASS':
-      availableActions = this.renderPassAction()
-      handleConfirm = selectedComponent && (() => this.pass(selectedComponent.id))
-      break
-    case 'HAND':
-      availableActions = this.renderInHandActions()
-      showConfirmButton = false
-      break
-    case 'PLACE_ARTEFACT':
-      costValid = this.placementCostComparator(
+      case 'PASS':
+        availableActions = this.renderPassAction()
+        handleConfirm = selectedComponent && (() => this.pass(selectedComponent.id))
+        break
+      case 'HAND':
+        availableActions = this.renderInHandActions()
+        showConfirmButton = false
+        break
+      case 'PLACE_ARTEFACT':
+        costValid = this.placementCostComparator(
           essencePickerSelection.placementCost,
           selectedComponent.costEssenceList,
           this.getDiscount(selectedComponent)
         )
-      availableActions = this.renderInHandActions(costValid)
-      handleConfirm = costValid.isValid
-          ? () =>
-              this.placeComponent(selectedComponent.type, selectedComponent.id, essencePickerSelection.placementCost)
-          : null
-      handleCancel = () => selectAction('HAND')
-      break
-    case 'DISCARD_FOR_2E':
-      availableActions = this.renderInHandActions()
-      handleConfirm =
+        availableActions = this.renderInHandActions(costValid)
+        if (costValid.isValid) {
+          handleConfirm = () =>
+            this.placeComponent(selectedComponent.type, selectedComponent.id, essencePickerSelection.placementCost)
+        } else {
+          handleConfirm = null
+        }
+        handleCancel = () => selectAction('HAND')
+        break
+      case 'DISCARD_FOR_2E':
+        availableActions = this.renderInHandActions()
+        handleConfirm =
           Object.values(essencePickerSelection.discardGain).reduce((a, b) => {
             return a + b
           }, 0) === 2
-        () => this.discardArtefact(selectedComponent.id, essencePickerSelection.discardGain) : null
-      handleCancel = () => selectAction('HAND')
-      break
-    case 'DISCARD_FOR_1G':
-      availableActions = this.renderInHandActions()
-      handleConfirm = () => this.discardArtefact(selectedComponent.id, essencePickerSelection.discardGain)
-      handleCancel = () => selectAction('HAND')
-      break
-    case 'PLAY':
-      actionValid = this.actionPowerValidator()
-      availableActions = this.renderInPlayActions()
-      if (
+            ? () => this.discardArtefact(selectedComponent.id, essencePickerSelection.discardGain)
+            : null
+        handleCancel = () => selectAction('HAND')
+        break
+      case 'DISCARD_FOR_1G':
+        availableActions = this.renderInHandActions()
+        handleConfirm = () => this.discardArtefact(selectedComponent.id, essencePickerSelection.discardGain)
+        handleCancel = () => selectAction('HAND')
+        break
+      case 'PLAY':
+        actionValid = this.actionPowerValidator()
+        availableActions = this.renderInPlayActions()
+        if (
           selectedComponent.hasActionPower &&
           selectedComponent.actionPowerList.length > 1 &&
           selectedActionPower >= 0
         ) {
-        handleCancel = () => selectActionPower()
-      }
-      handleConfirm = actionValid ? () => this.activatePower() : null
-      break
-    case 'CLAIM':
-      costValid = this.placementCostComparator(
+          handleCancel = () => selectActionPower()
+        }
+        handleConfirm = actionValid ? () => this.activatePower() : null
+        break
+      case 'CLAIM':
+        costValid = this.placementCostComparator(
           essencePickerSelection.placementCost,
           selectedComponent.costEssenceList
         )
-      availableActions = this.renderClaimAction(costValid)
-      handleConfirm = costValid.isValid
-          ? () =>
-              this.placeComponent(selectedComponent.type, selectedComponent.id, essencePickerSelection.placementCost)
-          : null
-      break
-    default:
+        availableActions = this.renderClaimAction(costValid)
+        if (costValid.isValid) {
+          handleConfirm = () =>
+            this.placeComponent(selectedComponent.type, selectedComponent.id, essencePickerSelection.placementCost)
+        } else {
+          handleConfirm = null
+        }
+        break
+      default:
     }
 
     const confirmButton = showConfirmButton && (
@@ -2215,7 +2272,8 @@ class ResArcanaBoard extends Component {
     const playersName = this.getPlayersName()
 
     let title = 'Play Phase'
-    let waitingFor = ' - ' + playersName[parseInt(ctx.currentPlayer)] + "'s turn."
+    // eslint-disable-next-line prettier/prettier
+    let waitingFor = ' - ' + playersName[parseInt(ctx.currentPlayer)] + '\'s turn.'
     let playerView
 
     if (playerID !== 'undefined') {
@@ -2298,19 +2356,19 @@ class ResArcanaBoard extends Component {
     let board = null
 
     switch (G.phase) {
-    case 'DRAFT_PHASE':
-      board = this.renderDraftPhaseBoard()
-      break
-    case 'PICK_MAGIC_ITEM_PHASE':
-      board = this.renderMagicItemPhaseBoard()
-      break
-    case 'COLLECT_PHASE':
-      board = this.renderCollectPhaseBoard()
-      break
-    case 'PLAY_PHASE':
-      board = this.renderActionPhaseBoard()
-      break
-    default:
+      case 'DRAFT_PHASE':
+        board = this.renderDraftPhaseBoard()
+        break
+      case 'PICK_MAGIC_ITEM_PHASE':
+        board = this.renderMagicItemPhaseBoard()
+        break
+      case 'COLLECT_PHASE':
+        board = this.renderCollectPhaseBoard()
+        break
+      case 'PLAY_PHASE':
+        board = this.renderActionPhaseBoard()
+        break
+      default:
     }
     const sizeSetting = profile && profile.cardSize ? profile.cardSize : 'normal'
     const layoutSetting = profile && profile.layout ? profile.layout : 'vertical'
@@ -2319,7 +2377,7 @@ class ResArcanaBoard extends Component {
         {layoutSetting === 'vertical' && (
           <div className={'board-' + layoutSetting} onClick={() => this.handleBoardClick()}>
             {commonBoardDisplay && <div className={'common-board ' + sizeSetting}>{this.renderCommonBoard()}</div>}
-            <div className="board" ref="board">
+            <div className="board" ref={c => (this.board = c)}>
               {board}
             </div>
             <div className="right-panel">
@@ -2330,7 +2388,7 @@ class ResArcanaBoard extends Component {
         )}
         {layoutSetting === 'horizontal' && (
           <div className={'board-' + layoutSetting} onClick={() => this.handleBoardClick()}>
-            <div className="board" ref="board">
+            <div className="board" ref={c => (this.board = c)}>
               {commonBoardDisplay && <div className={'common-board ' + sizeSetting}>{this.renderCommonBoard()}</div>}
               {board}
             </div>

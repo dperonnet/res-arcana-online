@@ -69,7 +69,7 @@ class GameLobby extends Component {
     const options = (
       <div>
         <div></div>
-        <Form.Group as={Row}>
+        <Row>
           <Form.Label column xs="6">
             Number of mages :
           </Form.Label>
@@ -86,7 +86,7 @@ class GameLobby extends Component {
               </div>
             )}
           </Form.Label>
-        </Form.Group>
+        </Row>
       </div>
     )
     const seats =
@@ -101,7 +101,8 @@ class GameLobby extends Component {
           <div key={index}>Lock({index})</div>
         ) : (
           <div className={'seat' + ready} key={index}>
-            {game.players[playerId].name}
+            <div className="d-inline-block">{game.players[playerId].name}</div>
+            {game.players[playerId].ready && <div className="d-inline-block tick"></div>}
           </div>
         )
       })
@@ -134,8 +135,20 @@ class GameLobby extends Component {
               {seats}
               {game.players[auth.uid] && (
                 <div className="game-button">
-                  <Button variant="secondary" size="sm" onClick={this.handleSetReady} disabled={isSpectator}>
-                    {game.players[auth.uid].ready ? 'Cancel' : 'Ready'}
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={this.handleSetReady}
+                    disabled={isSpectator}
+                    className="p-relative"
+                  >
+                    {game.players[auth.uid].ready ? (
+                      'Cancel'
+                    ) : (
+                      <>
+                        I'm ready<div className="d-inline-block tick-sm"></div>
+                      </>
+                    )}
                   </Button>
                 </div>
               )}
