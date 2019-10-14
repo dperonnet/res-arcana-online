@@ -11,7 +11,7 @@ export const createGameLobby = gameOptions => {
 
     let newGameLobby = {
       ...gameOptions,
-      gameCreator: profile.login,
+      creatorName: profile.login,
       creatorId: creatorId,
       createdAt: new Date(),
       seats: [creatorId],
@@ -331,9 +331,27 @@ export const leaveLobby = lobbyId => {
   }
 }
 
-export const startGame = lobbyId => {
-  return () => {
-    console.log('Call to cloud function start game', lobbyId)
+export const startGameFunction = lobbyId => {
+  return (dispatch, getState, { getFirebase }) => {
+    const startGameUrl = cloudFunctionsUrl + '/startGame'
+    console.log('Call to cloud function start game', lobbyId, startGameUrl)
+
+    let startGame = getFirebase()
+      .app()
+      .functions()
+      .httpsCallable('startGame')
+
+    startGame({ lobbyId })
+      .then(function(result) {
+        console.log('result', result)
+        //dispatch(deleteChat(lobbyId))
+      })
+      .then(() => {
+        dispatch({ type: 'START_GAME_LOBBY', lobbyId })
+      })
+      .catch(err => {
+        dispatch({ type: 'START_GAME_LOBBY_ERROR', err })
+      })
   }
 }
 
@@ -366,5 +384,80 @@ export const setReady = lobbyId => {
       .catch(err => {
         dispatch({ type: 'SET_READY_ERROR', err })
       })
+  }
+}
+
+export const startGame = (lobbyId, serverUrl) => {
+  return (dispatch, getState, { getFirestore }) => {
+    console.log('1) call to startGame', lobbyId)
+    const db = getFirestore()
+    const userId = getState().firebase.auth.uid
+
+    return db.runTransaction(async transaction => {
+      let lobbyRef = db.doc(`gameLobbys/${lobbyId}`)
+      let lobbyDoc = await transaction.get(lobbyRef)
+      console.log('1) get lobby ref', lobbyId)
+      let lobby = lobbyDoc.data()
+      if (lobby.creatorId !== userId) {
+        throw new Error('invalid-argument', 'Only the lobby s creator or an admin can start this game.')
+      }
+
+      // check game metadata
+      let metadata = await db.doc(`games_metadata/${lobby.gameName}`).get()
+
+      console.log('2) get game metadata', metadata)
+      if (!metadata) throw new Error('game not found')
+
+      console.log('3) check game metadata validation')
+      if (lobby.numberOfPlayers < metadata.minPlayers || lobby.numberOfPlayers > metadata.maxPlayers)
+        throw new Error('invalid number of players ' + lobby.numberOfPlayers)
+
+      console.log('4) call to create')
+      let createResp = await fetch(serverUrl + '/games/' + lobby.gameName + '/create', {
+        method: 'POST',
+        body: JSON.stringify({
+          numPlayers: lobby.numberOfPlayers,
+          setupData: lobby.setupData,
+        }),
+        headers: { 'Content-Type': 'application/json' },
+      })
+      if (createResp.status !== 200) {
+        throw new Error('HTTP status ' + createResp.status)
+      } else {
+        console.log('5) resp from create', createResp)
+      }
+
+      let gameData = await createResp.json()
+      let boardGameId = gameData.gameID
+      await transaction.update(lobbyRef, { boardGameId })
+
+      let players = lobby.players
+      let seats = lobby.seats
+
+      await seats
+        .filter(playerId => playerId !== -1)
+        .forEach(async (playerId, seatId) => {
+          console.log('playerId', playerId, 'seatId', seatId)
+          let joinResp = await fetch(serverUrl + '/games/' + lobby.gameName + '/' + boardGameId + '/join', {
+            method: 'POST',
+            body: JSON.stringify({
+              playerID: seatId,
+              playerName: players[playerId].name,
+            }),
+            headers: { 'Content-Type': 'application/json' },
+          })
+          if (joinResp.status !== 200) throw new Error('HTTP status ' + joinResp.status)
+          let joinJson = await joinResp.json()
+          let currentLobbyRef = db.collection('currentLobbys').doc(playerId)
+          return transaction.get(currentLobbyRef).then(doc => {
+            let player = doc.data()
+            player.gameCredentials[lobbyId] = joinJson
+            return transaction.update(currentLobbyRef, player)
+          })
+        })
+      /**/
+      let status = 'STARTED'
+      return transaction.update(lobbyRef, { status })
+    })
   }
 }

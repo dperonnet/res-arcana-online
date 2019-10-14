@@ -91,78 +91,83 @@ exports.deleteLobby = functions.region('europe-west1').https.onCall((data, conte
   })
 })
 
-/*
-const functions = require('firebase-functions');
-const admin = require('firebase-admin');
-admin.initializeApp(functions.config().firebase);
-
-const chatRef = functions.firestore.document('chats/{chatId}');
-
-exports.incomingMessage = chatRef.onUpdate((change, context) => {
-  const before = change.before.data()
-  const after = change.after.data()
-
-  if (before.messages.length === after.messages.length)  {
-    console.log(`data messages did not change`);
-    return null;
+exports.startGame = functions.https.onCall((data, context) => {
+  console.log('1) call to startGame cloud function', data)
+  if (!context.auth) {
+    throw new functions.https.HttpsError('failed-precondition', 'The function must be called while authenticated.')
   }
 
-  let count = after.messageCount;
-  let newMessages = after.messages;
-  let newCount = count + 1
-  if (!count) {
-    newCount = 0;
-  } else if (count > 100) {
-    console.log(`Purging chat ${context.params.chatId} messages.`);
-    newMessages = newMessages.splice(0, 20);
-    newCount = after.messages.length - 20;
-  } else {
-    newCount = count + 1;
-  }
+  const lobbyId = data.lobbyId
+  const userId = context.auth.uid
 
-  return change.after.ref.set({
-    messageCount: newCount,
-    messages: newMessages}, {merge: true});
-})
+  firestore
+    .runTransaction(transaction => {
+      ;async () => {
+        try {
+          let lobbyRef = firestore.doc(`gameLobbys/${lobbyId}`)
+          let lobbyDoc = await transaction.get(lobbyRef)
+          let lobby = lobbyDoc.data()
+          if (lobby.creatorId !== userId) {
+            throw new functions.https.HttpsError(
+              'invalid-argument',
+              'Only the lobby s creator or an admin can start this game.'
+            )
+          }
 
-/*
-exports.helloWorld = functions.https.onRequest((request, response) => {
- response.send("Hello Batman!");
-});
+          // check game metadata
+          let metadataRef = firestore.doc(`games_metadata/${lobby.gameName}`)
+          let metadata = await transaction.get(metadataRef).then(doc => {
+            return doc.data()
+          })
 
-const createNotification = (notification => {
-  return admin.firestore().collection('notifications')
-    .add(notification)
-    .then(doc => console.log('notification added', doc))
-})
+          if (!metadata) throw new Error('game not found')
 
-exports.gameCreated = functions.firestore
-  .document('games/{gameId}')
-  .onCreate(doc => {
-    const game = doc.data();
-    const notification = {
-      content: 'Added a new game',
-      user: `${game.gameCreator}`,
-      time: admin.firestore.FieldValue.serverTimestamp()
-    }
+          if (lobby.numberOfPlayers < metadata.minPlayers || lobby.numberOfPlayers > metadata.maxPlayers)
+            throw new Error('invalid number of players ' + lobby.numberOfPlayers)
 
-    return createNotification(notification)
-});
+          let createResp = await fetch(this._baseUrl() + '/' + lobby.gameName + '/create', {
+            method: 'POST',
+            body: JSON.stringify({
+              numPlayers: lobby.numberOfPlayers,
+              setupData: lobby.setupData,
+            }),
+            headers: { 'Content-Type': 'application/json' },
+          })
+          if (createResp.status !== 200) throw new Error('HTTP status ' + createResp.status)
 
-exports.userJoined = functions.auth.user()
-  .onCreate(user => {
+          let gameData = await createResp.json()
+          let boardGameId = gameData.gameID
+          await transaction.update(lobbyRef, { boardGameId })
 
-    return admin.firestore().collection('users')
-      .doc(user.uid).get().then(doc => {
+          let players = lobby.players
+          let seats = lobby.seats
 
-        const newUser = doc.data();
-        const notification = {
-          content: 'joined the Res Arcana Online community,
-          user: `${newUser.login}`,
-          time: admin.firestore.FieldValue.serverTimestamp()
+          seats.forEach(async (playerId, seatId) => {
+            players[playerId].name
+
+            let joinResp = await fetch(this._baseUrl() + '/' + lobby.gameName + '/' + boardGameId + '/join', {
+              method: 'POST',
+              body: JSON.stringify({
+                playerID: seatId,
+                playerName: players[playerId].name,
+              }),
+              headers: { 'Content-Type': 'application/json' },
+            })
+            if (joinResp.status !== 200) throw new Error('HTTP status ' + joinResp.status)
+            let joinJson = await joinResp.json()
+            let currentLobbyRef = firestore.collection('currentLobbys').doc(playerId)
+            await transaction.get(currentLobbyRef).then(doc => {
+              let player = doc.data()
+              player.gameCredentials[lobbyId] = joinJson
+              return transaction.update(currentLobbyRef, player)
+            })
+          })
+        } catch (error) {
+          throw new Error('failed to start game ' + data.gameName + ' (' + error + ')')
         }
-
-        return createNotification(notification)
-      })
+      }
+    })
+    .catch(err => {
+      throw new functions.https.HttpsError('unknown', err.message, err)
+    })
 })
-*/

@@ -19,7 +19,11 @@ class GameComponent extends Component {
     let essences
     if (essencesOnComponent) {
       essences = essencesOnComponent.map(essence => {
-        return essence.quantity > 0 && <div key={essence.type} className={'essence ' + essence.type}>{essence.quantity}</div>
+        return (
+          essence.quantity > 0 && (
+            <div key={essence.type} className={'essence ' + essence.type}>
+              {essence.quantity}
+            </div>
           )
         )
       })

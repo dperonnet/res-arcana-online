@@ -12,11 +12,14 @@ class CreateLobby extends Component {
     this.state = {
       isCreatingGame: false,
       gameOptions: {
-        name: null,
-        password: '',
-        numberOfPlayers: '2',
         boardGameId: null,
-        skipDraftPhase: true,
+        gameName: 'res-arcana',
+        gameDisplayName: null,
+        numberOfPlayers: '2',
+        password: '',
+        setupData: {
+          skipDraftPhase: true,
+        },
       },
     }
   }
@@ -24,12 +27,12 @@ class CreateLobby extends Component {
   static getDerivedStateFromProps(props, state) {
     let { gameOptions } = state
 
-    if (gameOptions.name === null && props.profile.login) {
+    if (gameOptions.gameDisplayName === null && props.profile.login) {
       return {
         gameOptions: {
           ...gameOptions,
           // eslint-disable-next-line prettier/prettier
-          name: props.profile.login + '\'s game',
+          gameDisplayName: props.profile.login + '\'s game',
         },
       }
     }
@@ -54,6 +57,14 @@ class CreateLobby extends Component {
     this.setState({ gameOptions })
   }
 
+  handleChangeSetupData = e => {
+    const { checked, name, value, type } = e.target
+    const { gameOptions } = this.state
+    const valueToUpdate = type === 'checkbox' ? checked : value
+    gameOptions.setupData[name] = valueToUpdate
+    this.setState({ gameOptions })
+  }
+
   handleSubmit = e => {
     e.preventDefault()
     const { gameOptions } = this.state
@@ -73,7 +84,7 @@ class CreateLobby extends Component {
             </div>
             <div className="game-options">
               <Form onSubmit={this.handleSubmit}>
-                <Form.Group as={Row} controlId="name">
+                <Form.Group as={Row} controlId="gameDisplayName">
                   <Form.Label column xs="4">
                     Name
                   </Form.Label>
@@ -83,8 +94,8 @@ class CreateLobby extends Component {
                       autoFocus
                       placeholder="Game name"
                       type="text"
-                      name="name"
-                      value={gameOptions.name}
+                      name="gameDisplayName"
+                      value={gameOptions.gameDisplayName}
                       onChange={this.handleChange}
                     />
                   </Col>
@@ -121,9 +132,9 @@ class CreateLobby extends Component {
                         name="skipDraftPhase"
                         id="skipDraftPhase"
                         label="Skip draft phase ?"
-                        value={gameOptions.skipDraftPhase}
-                        checked={gameOptions.skipDraftPhase}
-                        onChange={this.handleChange}
+                        value={gameOptions.setupData.skipDraftPhase}
+                        checked={gameOptions.setupData.skipDraftPhase}
+                        onChange={this.handleChangeSetupData}
                       />
                     </InputGroup>
                   </Col>

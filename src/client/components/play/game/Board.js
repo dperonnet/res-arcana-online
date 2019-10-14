@@ -736,7 +736,7 @@ class ResArcanaBoard extends Component {
       default: {
         let handleClick = null
         if (G.phase === 'PLAY_PHASE' && playerID === id) {
-          component => {
+          handleClick = component => {
             return {
               onClick: event => {
                 this.handleClick(event, component)

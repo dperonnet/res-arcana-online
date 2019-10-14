@@ -35,7 +35,7 @@ class GameLobby extends Component {
 
   handleStartGame = () => {
     const { currentLobby, startGame } = this.props
-    startGame(currentLobby.lobbyId)
+    startGame(currentLobby.lobbyId, `http://${process.env.REACT_APP_GAME_SERVER_URL}`)
   }
 
   handleDeleteLobby = () => {
@@ -224,7 +224,7 @@ const mapDispatchToProps = dispatch => {
     deleteLobby: lobbyId => dispatch(deleteLobby(lobbyId)),
     leaveLobby: lobbyId => dispatch(leaveLobby(lobbyId)),
     setReady: lobbyId => dispatch(setReady(lobbyId)),
-    startGame: gameId => dispatch(startGame(gameId)),
+    startGame: (gameId, serverUrl) => dispatch(startGame(gameId, serverUrl)),
     takeSeat: (gameId, seatId) => dispatch(takeSeat(gameId, seatId)),
     watchGame: gameId => dispatch(watchGame(gameId)),
     setLoading: value => dispatch({ type: 'LOADING', loading: value }),
