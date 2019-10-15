@@ -8,21 +8,23 @@ import ResArcanaBoard from './Board'
 
 class GameBoard extends Component {
   getRunningGame = () => {
-    const { auth, currentLobby, game } = this.props
+    const { currentLobby, game } = this.props
+    const gameInfo = currentLobby.gameCredentials[game.boardGameId]
+    const gameServerUrl = `http://${process.env.REACT_APP_GAME_SERVER_URL}`
 
     const app = Client({
       game: ResArcanaGame,
       board: ResArcanaBoard,
-      debug: this.props.debug,
+      debug: false,
       numPlayers: game.numberOfPlayers,
-      multiplayer: true,
+      multiplayer: { server: gameServerUrl },
     })
 
     const runningGame = {
       app: app,
-      gameID: currentLobby.lobbyId,
-      playerID: game.seats.indexOf(auth.uid) > -1 ? game.seats.indexOf(auth.uid).toString() : 'Spectator',
-      credentials: null,
+      gameID: game.boardGameId,
+      playerID: gameInfo && gameInfo.id >= 0 ? gameInfo.id.toString() : 'Spectator',
+      credentials: gameInfo && gameInfo.playerCredentials ? gameInfo.playerCredentials : null,
     }
     console.log('runningGame', runningGame)
     return runningGame

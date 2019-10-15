@@ -56,6 +56,7 @@ exports.deleteLobby = functions.region('europe-west1').https.onCall((data, conte
       .get(lobbyRef)
       .then(lobbyDoc => {
         let lobby = lobbyDoc.data()
+        console.log('lobby.creatorId', lobby.creatorId, 'userId', userId)
         if (lobby.creatorId !== userId) {
           throw new functions.https.HttpsError(
             'invalid-argument',
@@ -68,13 +69,13 @@ exports.deleteLobby = functions.region('europe-west1').https.onCall((data, conte
       .then(players => {
         let reads = Object.keys(players).map(playerId => {
           let ref = firestore.collection('currentLobbys').doc(playerId)
-          let data = {}
           return transaction.get(ref).then(doc => {
-            if (doc.data().lobbyId === lobbyId) {
+            let currentLobbyId = doc.data().lobbyId
+            if (doc.data().lobbyId === currentLobbyId) {
               console.log('3) kick player', doc)
-              data = { lobbyId: null }
+              currentLobbyId = null
             }
-            return transaction.update(ref, data)
+            return transaction.update(ref, { lobbyId: currentLobbyId })
           })
         })
         return Promise.all(reads).then(() => {

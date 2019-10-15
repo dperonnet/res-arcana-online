@@ -91,8 +91,8 @@ class ResArcanaBoard extends Component {
   getPlayersName = () => {
     const { ctx, game } = this.props
     let playersName = [ctx.numPlayers]
-    Object.values(game.players).forEach(player => {
-      playersName[player.id] = player.name
+    Object.values(game.seats).forEach((playerId, seatId) => {
+      playersName[seatId] = game.players[playerId].name
     })
     return playersName
   }
@@ -520,7 +520,7 @@ class ResArcanaBoard extends Component {
     const { G, canPayCost, profile, selectAction } = this.props
     const layout = profile && profile.layout ? profile.layout : 'vertical'
 
-    let handleClick = null
+    let handleClick
     if (G.phase === 'PLAY_PHASE') {
       handleClick = component => {
         return {
@@ -539,6 +539,10 @@ class ResArcanaBoard extends Component {
             }
           },
         }
+      }
+    } else {
+      handleClick = () => {
+        return null
       }
     }
     const renderGameComponents = components => {
@@ -734,7 +738,7 @@ class ResArcanaBoard extends Component {
         break
       case 'READY':
       default: {
-        let handleClick = null
+        let handleClick
         if (G.phase === 'PLAY_PHASE' && playerID === id) {
           handleClick = component => {
             return {
@@ -752,6 +756,10 @@ class ResArcanaBoard extends Component {
                 }
               },
             }
+          }
+        } else {
+          handleClick = () => {
+            return null
           }
         }
 
@@ -1013,7 +1021,7 @@ class ResArcanaBoard extends Component {
 
     const playersName = this.getPlayersName()
     // eslint-disable-next-line prettier/prettier
-    let title = 'Magic Item Selection Phase - ' + playersName[parseInt(ctx.currentPlayer)] + '\'s turn.'
+    let title = 'Magic Item Selection Phase - ' + playersName[parseInt(ctx.currentPlayer)] + ' is playing.'
     let waiting = playerID !== ctx.currentPlayer
     let magicItems = G.publicData.magicItems.map(magicItem => {
       if (waiting) {
@@ -1093,7 +1101,7 @@ class ResArcanaBoard extends Component {
     const playersName = this.getPlayersName()
     let title = 'Collect Phase'
     // eslint-disable-next-line prettier/prettier
-    let waitingFor = ' - ' + playersName[parseInt(ctx.currentPlayer)] + '\'s turn.'
+    let waitingFor = ' - ' + playersName[parseInt(ctx.currentPlayer)] + ' is playing.'
 
     if (playerID === 'undefined') {
       return (
@@ -2273,7 +2281,7 @@ class ResArcanaBoard extends Component {
 
     let title = 'Play Phase'
     // eslint-disable-next-line prettier/prettier
-    let waitingFor = ' - ' + playersName[parseInt(ctx.currentPlayer)] + '\'s turn.'
+    let waitingFor = ' - ' + playersName[parseInt(ctx.currentPlayer)] + ' is playing.'
     let playerView
 
     if (playerID !== 'undefined') {
@@ -2408,7 +2416,7 @@ const mapStateToProps = state => {
     auth: state.firebase.auth,
     chat: state.firestore.ordered.chat && state.firestore.ordered.chat[0],
     chatDisplay: state.chat.chatDisplay,
-    currentGame: state.firestore.data.currentGame,
+    currentLobby: state.firestore.data.currentLobby,
     game: state.firestore.ordered.game && state.firestore.ordered.game[0],
     profile: state.firebase.profile,
 
@@ -2453,8 +2461,8 @@ export default compose(
     mapDispatchToProps
   ),
   firestoreConnect(props => [
-    { collection: 'games', doc: props.currentGame.gameId, storeAs: 'game' },
-    { collection: 'chats', doc: props.currentGame.gameId, storeAs: 'chat' },
+    { collection: 'gameLobbys', doc: props.currentLobby.lobbyId, storeAs: 'game' },
+    { collection: 'chats', doc: props.currentLobby.lobbyId, storeAs: 'chat' },
   ])
 )(ResArcanaBoard)
 

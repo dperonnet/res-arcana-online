@@ -2,6 +2,7 @@ import { createChat, deleteChat } from './chatActions'
 require('firebase/functions')
 
 const cloudFunctionsUrl = `https://${process.env.REACT_APP_CLOUD_FUNCTION}`
+const gameServerUrl = `http://${process.env.REACT_APP_GAME_SERVER_URL}`
 
 export const createGameLobby = gameOptions => {
   return (dispatch, getState, { getFirestore }) => {
@@ -149,6 +150,7 @@ export const joinLobby = (lobbyId, takeSeat, seatIndex) => {
           let gameIsNotFull = seats.includes(-1)
           // Add the player to the players list
           players[playerId] = {
+            inLobby: true,
             name: profile.login,
             ready: false,
           }
@@ -192,6 +194,13 @@ export const joinLobby = (lobbyId, takeSeat, seatIndex) => {
       .catch(err => {
         dispatch({ type: 'JOIN_GAME_LOBBY_ERROR', err })
       })
+  }
+}
+
+export const deleteLobbyCloudFunction = lobbyId => {
+  return dispatch => {
+    dispatch(deleteLobbyCloudFunction(lobbyId))
+    //dispatch(deleteLobbyFront(lobbyId))
   }
 }
 
@@ -264,93 +273,72 @@ export const deleteLobbyFront = lobbyId => {
 
 export const leaveLobby = lobbyId => {
   return (dispatch, getState, { getFirestore }) => {
-    const fireStore = getFirestore()
+    const db = getFirestore()
     const playerId = getState().firebase.auth.uid
 
-    const lobbyRef = fireStore.collection('gameLobbys').doc(lobbyId)
+    const lobbyRef = db.collection('gameLobbys').doc(lobbyId)
 
-    fireStore
-      .runTransaction(transaction => {
-        return transaction.get(lobbyRef).then(lobbyDoc => {
-          if (!lobbyDoc.exists) {
-            throw new Error('Document does not exist!')
-          }
-          let lobby = lobbyDoc.data()
+    db.runTransaction(async transaction => {
+      let lobbyDoc = await transaction.get(lobbyRef)
+      let currentLobbyRef = db.collection('currentLobbys').doc(playerId)
 
-          // remove the player from players
-          let players = lobby.players
-          delete players[playerId]
+      if (!lobbyDoc.exists) {
+        transaction.delete(lobbyRef)
+        return transaction.update(currentLobbyRef, { lobbyId: null })
+      }
+      let lobby = lobbyDoc.data()
 
-          // remove the player from seats
-          let seats = lobby.seats
-          for (let i = 0; i < seats.length; i++) {
-            if (seats[i] === playerId) {
-              seats[i] = -1
-            }
-          }
+      // remove the player from players
+      let players = lobby.players
+      players[playerId].inLobby = false
 
-          return transaction.update(lobbyRef, { players, seats })
-        })
-      })
-      .then(() => {
-        // Set the current lobby for player
-        const datas = {
-          lobbyId: null,
-          createdAt: new Date(),
-          gameCredentials: {},
+      // remove the player from seats
+      let seats = lobby.seats
+      for (let i = 0; i < seats.length; i++) {
+        if (seats[i] === playerId) {
+          seats[i] = -1
         }
-        fireStore
-          .collection('currentLobbys')
-          .doc(playerId)
-          .set(datas)
+      }
+
+      // Update the current lobby and the credetials of the player
+      let doc = await transaction.get(currentLobbyRef)
+      let currentLobby = doc.data()
+      let gameCredentials = currentLobby.gameCredentials
+
+      // If the game is
+      if (lobby.status !== 'PENDING') {
+        console.log('gameCredentials:', gameCredentials)
+        let createResp = await fetch(gameServerUrl + '/games/' + lobby.gameName + '/' + lobby.boardGameId + '/leave', {
+          method: 'POST',
+          body: JSON.stringify({
+            playerID: gameCredentials[lobby.boardGameId].id,
+            credentials: gameCredentials[lobby.boardGameId].playerCredentials,
+          }),
+          headers: { 'Content-Type': 'application/json' },
+        })
+        if (createResp.status !== 200) {
+          throw new Error('HTTP status ' + createResp.status)
+        }
+      }
+
+      delete gameCredentials[lobby.boardGameId]
+      let lobbyId = null
+      transaction.update(currentLobbyRef, { gameCredentials, lobbyId })
+
+      if (Object.values(players).filter(player => player.inLobby).length === 0) {
+        console.log('players in game:', players)
+        transaction.delete(lobbyRef)
+      } else {
+        console.log('players list is empty')
+        transaction.update(lobbyRef, { players, seats })
+      }
+      return lobby
+    })
+      .then(() => {
         dispatch({ type: 'LEAVE_GAME_LOBBY', lobbyId })
       })
       .catch(err => {
         dispatch({ type: 'LEAVE_GAME_LOBBY_ERROR', err })
-      })
-
-    /*
-    lobbyRef.get().then((document) => {
-      let status = document.exists ? document.data().status : null;
-      //dispatch(leaveCurrentLobby());
-      switch (status) {
-        // leave before game Start
-        case 'PENDING':
-          //dispatch(leaveWhilePending(lobbyId, playerId, document, fireStore, gameServerUrl));
-          break;
-        // leave while game is still running
-        case 'STARTED':
-          break;
-        // leave when game is over
-        case 'OVER':
-          //dispatch(leaveWhileOver(lobbyId, playerId, document, fireStore, gameServerUrl));
-          break;
-        default:
-      }
-    });*/
-  }
-}
-
-export const startGameFunction = lobbyId => {
-  return (dispatch, getState, { getFirebase }) => {
-    const startGameUrl = cloudFunctionsUrl + '/startGame'
-    console.log('Call to cloud function start game', lobbyId, startGameUrl)
-
-    let startGame = getFirebase()
-      .app()
-      .functions()
-      .httpsCallable('startGame')
-
-    startGame({ lobbyId })
-      .then(function(result) {
-        console.log('result', result)
-        //dispatch(deleteChat(lobbyId))
-      })
-      .then(() => {
-        dispatch({ type: 'START_GAME_LOBBY', lobbyId })
-      })
-      .catch(err => {
-        dispatch({ type: 'START_GAME_LOBBY_ERROR', err })
       })
   }
 }
@@ -363,7 +351,7 @@ export const setReady = lobbyId => {
     const lobbyRef = fireStore.collection('gameLobbys').doc(lobbyId)
 
     fireStore
-      .runTransaction(transaction => {
+      .runTransaction(async transaction => {
         return transaction.get(lobbyRef).then(lobbyDoc => {
           if (!lobbyDoc.exists) {
             throw new Error('Document does not exist!')
@@ -387,58 +375,77 @@ export const setReady = lobbyId => {
   }
 }
 
-export const startGame = (lobbyId, serverUrl) => {
+export const startGameCloudFunction = lobbyId => {
+  return (dispatch, getState, { getFirebase }) => {
+    const startGameUrl = cloudFunctionsUrl + '/startGame'
+    console.log('Call to cloud function start game', lobbyId, startGameUrl)
+
+    let startGame = getFirebase()
+      .app()
+      .functions()
+      .httpsCallable('startGame')
+
+    startGame({ lobbyId })
+      .then(function(result) {
+        console.log('result', result)
+      })
+      .then(() => {
+        dispatch({ type: 'START_GAME_LOBBY', lobbyId })
+      })
+      .catch(err => {
+        dispatch({ type: 'START_GAME_LOBBY_ERROR', err })
+      })
+  }
+}
+
+export const startGame = lobbyId => {
   return (dispatch, getState, { getFirestore }) => {
-    console.log('1) call to startGame', lobbyId)
     const db = getFirestore()
     const userId = getState().firebase.auth.uid
 
     return db.runTransaction(async transaction => {
       let lobbyRef = db.doc(`gameLobbys/${lobbyId}`)
       let lobbyDoc = await transaction.get(lobbyRef)
-      console.log('1) get lobby ref', lobbyId)
       let lobby = lobbyDoc.data()
+
       if (lobby.creatorId !== userId) {
-        throw new Error('invalid-argument', 'Only the lobby s creator or an admin can start this game.')
+        throw new Error('invalid-argument', 'Only the creator of the lobbt or an admin can start this game.')
       }
+      if (lobby.status !== 'PENDING')
+        throw new Error('This game cannot be started because game status is', lobby.status)
+
+      let players = lobby.players
+      let seats = lobby.seats
+      let numberOfPlayers = seats.filter(playerId => playerId !== -1).length
 
       // check game metadata
       let metadata = await db.doc(`games_metadata/${lobby.gameName}`).get()
 
-      console.log('2) get game metadata', metadata)
-      if (!metadata) throw new Error('game not found')
+      if (!metadata) throw new Error('This game was not found.')
 
-      console.log('3) check game metadata validation')
-      if (lobby.numberOfPlayers < metadata.minPlayers || lobby.numberOfPlayers > metadata.maxPlayers)
-        throw new Error('invalid number of players ' + lobby.numberOfPlayers)
+      if (numberOfPlayers < metadata.minPlayers || numberOfPlayers > metadata.maxPlayers)
+        throw new Error('Invalid number of players ' + numberOfPlayers)
 
-      console.log('4) call to create')
-      let createResp = await fetch(serverUrl + '/games/' + lobby.gameName + '/create', {
+      let createResp = await fetch(gameServerUrl + '/games/' + lobby.gameName + '/create', {
         method: 'POST',
         body: JSON.stringify({
-          numPlayers: lobby.numberOfPlayers,
+          numPlayers: numberOfPlayers,
           setupData: lobby.setupData,
         }),
         headers: { 'Content-Type': 'application/json' },
       })
       if (createResp.status !== 200) {
         throw new Error('HTTP status ' + createResp.status)
-      } else {
-        console.log('5) resp from create', createResp)
       }
 
       let gameData = await createResp.json()
       let boardGameId = gameData.gameID
-      await transaction.update(lobbyRef, { boardGameId })
 
-      let players = lobby.players
-      let seats = lobby.seats
-
-      await seats
+      const credentials = seats
         .filter(playerId => playerId !== -1)
-        .forEach(async (playerId, seatId) => {
+        .map(async (playerId, seatId) => {
           console.log('playerId', playerId, 'seatId', seatId)
-          let joinResp = await fetch(serverUrl + '/games/' + lobby.gameName + '/' + boardGameId + '/join', {
+          let joinResp = await fetch(gameServerUrl + '/games/' + lobby.gameName + '/' + boardGameId + '/join', {
             method: 'POST',
             body: JSON.stringify({
               playerID: seatId,
@@ -446,18 +453,26 @@ export const startGame = (lobbyId, serverUrl) => {
             }),
             headers: { 'Content-Type': 'application/json' },
           })
-          if (joinResp.status !== 200) throw new Error('HTTP status ' + joinResp.status)
+          if (joinResp.status !== 200) {
+            throw new Error('HTTP status ' + joinResp.status)
+          }
           let joinJson = await joinResp.json()
           let currentLobbyRef = db.collection('currentLobbys').doc(playerId)
           return transaction.get(currentLobbyRef).then(doc => {
-            let player = doc.data()
-            player.gameCredentials[lobbyId] = joinJson
-            return transaction.update(currentLobbyRef, player)
+            let gameCredentials = doc.data().gameCredentials
+            gameCredentials[boardGameId] = joinJson
+            gameCredentials[boardGameId].gameName = lobby.gameName
+            gameCredentials[boardGameId].gameDisplayName = lobby.gameDisplayName
+            gameCredentials[boardGameId].id = seatId
+            gameCredentials[boardGameId].name = players[playerId].name
+            return transaction.update(currentLobbyRef, { gameCredentials })
           })
         })
-      /**/
+
+      await Promise.all(credentials)
+
       let status = 'STARTED'
-      return transaction.update(lobbyRef, { status })
+      return transaction.update(lobbyRef, { boardGameId, numberOfPlayers, status })
     })
   }
 }

@@ -46,7 +46,7 @@ class LobbyList extends Component {
           gameLobbys.map((game, index) => (
             <div className="game" key={game.id}>
               <div className="game-header">
-                {game.name} ({game.seats.filter(id => id !== -1).length}/{game.seats.length})
+                {game.gameDisplayName} ({game.seats.filter(id => id !== -1).length}/{game.seats.length})
                 {profile.role === 'admin' && (
                   <div className="pull-right close" onClick={event => this.handleDeleteLobby(event, game.id)}>
                     <FontAwesomeIcon icon={faTrash} />
@@ -55,9 +55,11 @@ class LobbyList extends Component {
               </div>
               <Row>{this.renderPlayers(game)}</Row>
               <div className="game-button">
-                <Button variant="secondary" size="sm" onClick={event => this.handleJoin(event, game.id)}>
-                  Join
-                </Button>
+                {game.status === 'PENDING' && (
+                  <Button variant="secondary" size="sm" onClick={event => this.handleJoin(event, game.id)}>
+                    Join
+                  </Button>
+                )}
                 <Button variant="secondary" size="sm" onClick={event => this.handleWatch(event, game.id)}>
                   Watch
                 </Button>

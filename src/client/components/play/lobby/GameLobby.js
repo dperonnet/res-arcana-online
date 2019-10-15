@@ -60,7 +60,7 @@ class GameLobby extends Component {
 
   renderChat = () => {
     const { chat, game } = this.props
-    return <Chat chat={chat} chatId={game.id} chatName={game.name + ' Chat'} />
+    return <Chat chat={chat} chatId={game.id} chatName={game.gameDisplayName + ' Chat'} />
   }
 
   renderPendingLobby = () => {
@@ -68,7 +68,6 @@ class GameLobby extends Component {
 
     const options = (
       <div>
-        <div></div>
         <Row>
           <Form.Label column xs="6">
             Number of mages :
@@ -106,7 +105,7 @@ class GameLobby extends Component {
           </div>
         )
       })
-    const spectators = Object.entries(game.players).filter(player => !game.seats.includes(player[0]))
+    const spectators = Object.entries(game.players).filter(player => !game.seats.includes(player[0]) && player.inLobby)
     const spectatorList = spectators.map((player, index) => {
       return (
         <div className="player" key={index}>

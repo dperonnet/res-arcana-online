@@ -5,7 +5,7 @@ import './navigation.css'
 import { compose } from 'redux'
 import { connect } from 'react-redux'
 import { firestoreConnect } from 'react-redux-firebase'
-import { deleteLobby, leaveLobby } from '../../../store/actions/lobbyActions'
+import { leaveLobby } from '../../../store/actions/lobbyActions'
 import { saveOptions, signOut } from '../../../store/actions/authActions'
 import { toggleChat } from '../../../store/actions/chatActions'
 import { toggleCommonBoard } from '../../../store/actions/gameActions'
@@ -16,18 +16,6 @@ const cardSizeList = ['small', 'normal', 'large', 'x-large']
 
 class SignedInNav extends Component {
   handleLeaveGame = () => {
-    const { currentLobby, deleteLobby, setLoading } = this.props
-    setLoading(false)
-    deleteLobby(currentLobby.lobbyId)
-  }
-
-  deleteLobby = () => {
-    const { currentLobby, deleteLobby, setLoading } = this.props
-    setLoading(false)
-    deleteLobby(currentLobby.lobbyId)
-  }
-
-  leaveLobby = () => {
     const { currentLobby, leaveLobby, setLoading } = this.props
     setLoading(false)
     leaveLobby(currentLobby.lobbyId)
@@ -162,7 +150,6 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
   return {
-    deleteLobby: lobbyId => dispatch(deleteLobby(lobbyId)),
     leaveLobby: (gameId, baseUrl) => dispatch(leaveLobby(gameId, baseUrl)),
     saveOptions: profile => dispatch(saveOptions(profile)),
     setLoading: value => dispatch({ type: 'LOADING', loading: value }),
