@@ -599,7 +599,7 @@ class ResArcanaBoard extends Component {
     let playerRuban
     let playerBoard
 
-    if (playerID !== 'undefined') {
+    if (playerID !== 'Spectator') {
       playerRuban = this.renderPlayerRuban(playerID)
       playerBoard = this.renderPlayerBoard(playerID)
     }
@@ -717,7 +717,7 @@ class ResArcanaBoard extends Component {
     let drawPileAndDiscard = this.renderPlayerDrawPileAndDiscard(id)
     let essencesOnComponent = null
     let turnedComponents = G.publicData.turnedComponents
-    let status = playerID !== 'undefined' ? G.publicData.players[playerID].status : 'READY'
+    let status = playerID !== 'Spectator' ? G.publicData.players[playerID].status : 'READY'
     switch (status) {
       case 'DRAFTING_ARTEFACTS': {
         const mages = G.players[playerID].mages.map(card => {
@@ -808,7 +808,7 @@ class ResArcanaBoard extends Component {
 
     let boards = null
     let drawPileAndDiscard = id => this.renderPlayerDrawPileAndDiscard(id)
-    let status = playerID !== 'undefined' ? G.publicData.players[playerID].status : 'READY'
+    let status = playerID !== 'Spectator' ? G.publicData.players[playerID].status : 'READY'
     switch (status) {
       case 'DRAFTING_ARTEFACTS':
       case 'SELECTING_MAGE':
@@ -870,7 +870,7 @@ class ResArcanaBoard extends Component {
     let waiting = false
     let waitingFor = 'Waiting for '
 
-    if (playerID === 'undefined') {
+    if (playerID === 'Spectator') {
       G.publicData.waitingFor.forEach((id, index) => {
         let isLastPlayer = index === G.publicData.waitingFor.length - 1
         let waitingAtLeastTwoPlayers = G.publicData.waitingFor.length > 1
@@ -1034,7 +1034,7 @@ class ResArcanaBoard extends Component {
       }
     })
 
-    if (playerID === 'undefined') {
+    if (playerID === 'Spectator') {
       return (
         <div className="dialog-panel">
           <h5>{title}</h5>
@@ -1103,7 +1103,7 @@ class ResArcanaBoard extends Component {
     // eslint-disable-next-line prettier/prettier
     let waitingFor = ' - ' + playersName[parseInt(ctx.currentPlayer)] + ' is playing.'
 
-    if (playerID === 'undefined') {
+    if (playerID === 'Spectator') {
       return (
         <div className="dialog-panel">
           <h5>
@@ -2284,7 +2284,7 @@ class ResArcanaBoard extends Component {
     let waitingFor = ' - ' + playersName[parseInt(ctx.currentPlayer)] + ' is playing.'
     let playerView
 
-    if (playerID !== 'undefined') {
+    if (playerID !== 'Spectator') {
       let hand = this.renderPlayerHand(false)
       let currentAction = (selectedComponent || selectedAction) && this.renderCurrentAction()
       const passButton = (

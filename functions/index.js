@@ -1,6 +1,11 @@
 const functions = require('firebase-functions')
 const admin = require('firebase-admin')
-admin.initializeApp()
+const serviceAccount = require('./serviceAccountKey.json')
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+  databaseURL: 'https://res-arcana-project.firebaseio.com',
+})
 
 // Since this code will be running in the Cloud Functions environment
 // we call initialize Firestore without any arguments because it

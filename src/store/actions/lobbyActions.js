@@ -20,6 +20,11 @@ export const createGameLobby = gameOptions => {
       spectators: {},
       status: 'PENDING',
     }
+    newGameLobby.players[creatorId] = {
+      inLobby: true,
+      name: profile.login,
+      ready: false,
+    }
     for (let i = 1; i < gameOptions.numberOfPlayers; i++) {
       newGameLobby.seats[i] = -1
     }
@@ -29,7 +34,7 @@ export const createGameLobby = gameOptions => {
       .add(newGameLobby)
       .then(gameLobby => {
         dispatch({ type: 'CREATE_GAME_LOBBY', gameLobby })
-        dispatch(createChat(gameLobby.id, newGameLobby.name + ' Chat'))
+        dispatch(createChat(gameLobby.id, newGameLobby.gameDisplayName + ' Chat'))
         dispatch(takeSeat(gameLobby.id))
       })
       .catch(err => {
@@ -92,7 +97,12 @@ export const removeSeat = lobbyId => {
           if (indices.length > 0) {
             seats.splice(indices[indices.length - 1], 1)
           } else {
-            seats.splice(seats[seats.length], 1)
+            for (let i = seats.length - 1; i >= 0; i--) {
+              if (seats[i] !== lobby.creatorId) {
+                seats.splice(i, 1)
+                break
+              }
+            }
           }
 
           let numberOfPlayers = seats.length
@@ -157,14 +167,14 @@ export const joinLobby = (lobbyId, takeSeat, seatIndex) => {
 
           canTakeSeat = gameNotStarted && gameIsNotFull && takeSeat
 
-          // remove the player from seats
-          for (let i = 0; i < seats.length; i++) {
-            if (seats[i] === playerId) {
-              seats[i] = -1
-            }
-          }
-
           if (canTakeSeat) {
+            // remove the player from seats
+            for (let i = 0; i < seats.length; i++) {
+              if (seats[i] === playerId) {
+                seats[i] = -1
+              }
+            }
+
             // if player want an available seat
             if (seatIndex && seats[seatIndex] === -1) {
               seats[seatIndex] = playerId
@@ -205,63 +215,28 @@ export const deleteLobbyCloudFunction = lobbyId => {
 }
 
 export const deleteLobby = lobbyId => {
-  return (dispatch, getState, { getFirebase }) => {
-    const deleteUrl = cloudFunctionsUrl + '/deleteLobby'
-    console.log('call to deleteLobby', lobbyId, deleteUrl)
-
-    let deleteLobby = getFirebase()
-      .app()
-      .functions('europe-west1')
-      .httpsCallable('deleteLobby')
-
-    deleteLobby({ lobbyId })
-      .then(function(result) {
-        console.log('result', result)
-        //dispatch(deleteChat(lobbyId))
-      })
-      .then(() => {
-        dispatch({ type: 'DELETE_GAME_LOBBY', lobbyId })
-        dispatch(deleteChat(lobbyId))
-      })
-      .catch(err => {
-        dispatch({ type: 'DELETE_GAME_LOBBY_ERROR', err })
-      })
-  }
-}
-
-export const deleteLobbyFront = lobbyId => {
   return (dispatch, getState, { getFirestore }) => {
-    console.log('1) call to deleteLobby', lobbyId)
     const db = getFirestore()
 
     const lobbyRef = db.collection('gameLobbys').doc(lobbyId)
-    return db
-      .runTransaction(transaction => {
-        return transaction
-          .get(lobbyRef)
-          .then(lobbyDoc => {
-            let lobby = lobbyDoc.data()
-            return lobby.players
-          })
-          .then(players => {
-            let reads = Object.keys(players).map(playerId => {
-              let ref = db.collection('currentLobbys').doc(playerId)
-              let data = {}
-              return transaction.get(ref).then(doc => {
-                console.log('doc.data().lobbyId === lobbyId', doc.data().lobbyId, lobbyId)
-                if (doc.data().lobbyId === lobbyId) {
-                  data = { lobbyId: null }
-                }
-                return transaction.update(ref, data)
-              })
-            })
-            return Promise.all(reads)
-              .then(() => {
-                return transaction.delete(lobbyRef)
-              })
-              .then(dispatch(deleteChat(lobbyId)))
-          })
+    db.runTransaction(async transaction => {
+      let lobbyDoc = await transaction.get(lobbyRef)
+      let lobby = lobbyDoc.data()
+      let reads = Object.keys(lobby.players).map(playerId => {
+        let ref = db.collection('currentLobbys').doc(playerId)
+        let data = {}
+        return transaction.get(ref).then(doc => {
+          console.log('doc.data().lobbyId === lobbyId', doc.data().lobbyId, lobbyId)
+          if (doc.data().lobbyId === lobbyId) {
+            data = { lobbyId: null }
+          }
+          return transaction.update(ref, data)
+        })
       })
+      await Promise.all(reads)
+      transaction.delete(lobbyRef)
+      dispatch(deleteChat(lobbyId))
+    })
       .then(() => {
         console.log('Transaction successfully committed!')
       })
@@ -292,32 +267,36 @@ export const leaveLobby = lobbyId => {
       let players = lobby.players
       players[playerId].inLobby = false
 
-      // remove the player from seats
-      let seats = lobby.seats
-      for (let i = 0; i < seats.length; i++) {
-        if (seats[i] === playerId) {
-          seats[i] = -1
-        }
-      }
-
-      // Update the current lobby and the credetials of the player
+      // Update the current lobby and the credentials of the player
       let doc = await transaction.get(currentLobbyRef)
       let currentLobby = doc.data()
       let gameCredentials = currentLobby.gameCredentials
+      let seats = lobby.seats
 
-      // If the game is
+      // If the game has not started yet,
       if (lobby.status !== 'PENDING') {
-        console.log('gameCredentials:', gameCredentials)
-        let createResp = await fetch(gameServerUrl + '/games/' + lobby.gameName + '/' + lobby.boardGameId + '/leave', {
-          method: 'POST',
-          body: JSON.stringify({
-            playerID: gameCredentials[lobby.boardGameId].id,
-            credentials: gameCredentials[lobby.boardGameId].playerCredentials,
-          }),
-          headers: { 'Content-Type': 'application/json' },
-        })
-        if (createResp.status !== 200) {
-          throw new Error('HTTP status ' + createResp.status)
+        if (seats.includes(playerId) && gameCredentials[lobby.boardGameId]) {
+          let createResp = await fetch(
+            gameServerUrl + '/games/' + lobby.gameName + '/' + lobby.boardGameId + '/leave',
+            {
+              method: 'POST',
+              body: JSON.stringify({
+                playerID: gameCredentials[lobby.boardGameId].id,
+                credentials: gameCredentials[lobby.boardGameId].playerCredentials,
+              }),
+              headers: { 'Content-Type': 'application/json' },
+            }
+          )
+          if (createResp.status !== 200) {
+            throw new Error('HTTP status ' + createResp.status)
+          }
+        }
+      } else {
+        // remove the player from seats
+        for (let i = 0; i < seats.length; i++) {
+          if (seats[i] === playerId) {
+            seats[i] = -1
+          }
         }
       }
 
@@ -415,8 +394,8 @@ export const startGame = lobbyId => {
         throw new Error('This game cannot be started because game status is', lobby.status)
 
       let players = lobby.players
-      let seats = lobby.seats
-      let numberOfPlayers = seats.filter(playerId => playerId !== -1).length
+      let seats = lobby.seats.filter(playerId => playerId !== -1)
+      let numberOfPlayers = seats.length
 
       // check game metadata
       let metadata = await db.doc(`games_metadata/${lobby.gameName}`).get()
@@ -441,38 +420,36 @@ export const startGame = lobbyId => {
       let gameData = await createResp.json()
       let boardGameId = gameData.gameID
 
-      const credentials = seats
-        .filter(playerId => playerId !== -1)
-        .map(async (playerId, seatId) => {
-          console.log('playerId', playerId, 'seatId', seatId)
-          let joinResp = await fetch(gameServerUrl + '/games/' + lobby.gameName + '/' + boardGameId + '/join', {
-            method: 'POST',
-            body: JSON.stringify({
-              playerID: seatId,
-              playerName: players[playerId].name,
-            }),
-            headers: { 'Content-Type': 'application/json' },
-          })
-          if (joinResp.status !== 200) {
-            throw new Error('HTTP status ' + joinResp.status)
-          }
-          let joinJson = await joinResp.json()
-          let currentLobbyRef = db.collection('currentLobbys').doc(playerId)
-          return transaction.get(currentLobbyRef).then(doc => {
-            let gameCredentials = doc.data().gameCredentials
-            gameCredentials[boardGameId] = joinJson
-            gameCredentials[boardGameId].gameName = lobby.gameName
-            gameCredentials[boardGameId].gameDisplayName = lobby.gameDisplayName
-            gameCredentials[boardGameId].id = seatId
-            gameCredentials[boardGameId].name = players[playerId].name
-            return transaction.update(currentLobbyRef, { gameCredentials })
-          })
+      const credentials = seats.map(async (playerId, seatId) => {
+        console.log('playerId', playerId, 'seatId', seatId)
+        let joinResp = await fetch(gameServerUrl + '/games/' + lobby.gameName + '/' + boardGameId + '/join', {
+          method: 'POST',
+          body: JSON.stringify({
+            playerID: seatId,
+            playerName: players[playerId].name,
+          }),
+          headers: { 'Content-Type': 'application/json' },
         })
+        if (joinResp.status !== 200) {
+          throw new Error('HTTP status ' + joinResp.status)
+        }
+        let joinJson = await joinResp.json()
+        let currentLobbyRef = db.collection('currentLobbys').doc(playerId)
+        return transaction.get(currentLobbyRef).then(doc => {
+          let gameCredentials = doc.data().gameCredentials
+          gameCredentials[boardGameId] = joinJson
+          gameCredentials[boardGameId].gameName = lobby.gameName
+          gameCredentials[boardGameId].gameDisplayName = lobby.gameDisplayName
+          gameCredentials[boardGameId].id = seatId
+          gameCredentials[boardGameId].name = players[playerId].name
+          return transaction.update(currentLobbyRef, { gameCredentials })
+        })
+      })
 
       await Promise.all(credentials)
 
       let status = 'STARTED'
-      return transaction.update(lobbyRef, { boardGameId, numberOfPlayers, status })
+      return transaction.update(lobbyRef, { boardGameId, numberOfPlayers, seats, status })
     })
   }
 }

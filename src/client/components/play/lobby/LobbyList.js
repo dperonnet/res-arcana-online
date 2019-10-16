@@ -28,13 +28,15 @@ class LobbyList extends Component {
   renderPlayers = game => {
     return (
       game.players &&
-      Object.values(game.players).map((player, index) => {
-        return (
-          <div className="player-name col-sm-6" key={index}>
-            {player.name}
-          </div>
-        )
-      })
+      Object.entries(game.players)
+        .filter(player => game.seats.includes(player[0]))
+        .map((player, index) => {
+          return (
+            <div className="player-name col-sm-6" key={index}>
+              {player[1].name}
+            </div>
+          )
+        })
     )
   }
 
@@ -55,7 +57,7 @@ class LobbyList extends Component {
               </div>
               <Row>{this.renderPlayers(game)}</Row>
               <div className="game-button">
-                {game.status === 'PENDING' && (
+                {game.status === 'PENDING' && game.seats.includes(-1) && (
                   <Button variant="secondary" size="sm" onClick={event => this.handleJoin(event, game.id)}>
                     Join
                   </Button>

@@ -91,7 +91,8 @@ class GameLobby extends Component {
     const seats =
       game.seats &&
       game.seats.map((playerId, index) => {
-        let ready = playerId !== -1 && game.players[playerId].ready ? ' ready' : ''
+        let player = game.players && game.players[playerId]
+        let ready = playerId !== -1 && player && player.ready ? ' ready' : ''
         return playerId === -1 ? (
           <div className="seat empty" key={index} onClick={event => this.handleTakeSeat(event, index)}>
             Take seat
@@ -100,12 +101,14 @@ class GameLobby extends Component {
           <div key={index}>Lock({index})</div>
         ) : (
           <div className={'seat' + ready} key={index}>
-            <div className="d-inline-block">{game.players[playerId].name}</div>
-            {game.players[playerId].ready && <div className="d-inline-block tick"></div>}
+            <div className="d-inline-block">{player && player.name}</div>
+            {player && player.ready && <div className="d-inline-block tick"></div>}
           </div>
         )
       })
-    const spectators = Object.entries(game.players).filter(player => !game.seats.includes(player[0]) && player.inLobby)
+    const spectators = Object.entries(game.players).filter(
+      player => !game.seats.includes(player[0]) && player[1].inLobby
+    )
     const spectatorList = spectators.map((player, index) => {
       return (
         <div className="player" key={index}>
@@ -129,7 +132,7 @@ class GameLobby extends Component {
         <div className="game-lobby-panel">
           <div className="game">
             <div className="game-header">
-              <h5>You are in game {game.name}</h5>
+              <h5>{game.gameDisplayName}</h5>
               {auth && auth.uid === game.creatorId && options}
               {seats}
               {game.players[auth.uid] && (
