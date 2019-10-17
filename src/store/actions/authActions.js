@@ -285,3 +285,23 @@ export const getUserByName = name => {
       })
   }
 }
+
+export const purgeDB = () => {
+  return async (dispatch, getState, { getFirestore }) => {
+    const db = getFirestore()
+    db.collection('bgio')
+      .get()
+      .then(snapshot => {
+        snapshot.docs.forEach(doc => {
+          db.collection('bgio')
+            .doc(doc.id)
+            .delete()
+        })
+      })
+      .then(() => {
+        db.collection('bgio')
+          .doc('avoid_loading')
+          .set({ value: false })
+      })
+  }
+}

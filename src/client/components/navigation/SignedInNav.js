@@ -6,7 +6,7 @@ import { compose } from 'redux'
 import { connect } from 'react-redux'
 import { firestoreConnect } from 'react-redux-firebase'
 import { leaveLobby } from '../../../store/actions/lobbyActions'
-import { saveOptions, signOut } from '../../../store/actions/authActions'
+import { purgeDB, saveOptions, signOut } from '../../../store/actions/authActions'
 import { toggleChat } from '../../../store/actions/chatActions'
 import { toggleCommonBoard } from '../../../store/actions/gameActions'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -19,6 +19,11 @@ class SignedInNav extends Component {
     const { currentLobby, leaveLobby, setLoading } = this.props
     setLoading(false)
     leaveLobby(currentLobby.lobbyId)
+  }
+
+  handlePurgeDB = () => {
+    const { purgeDB } = this.props
+    purgeDB()
   }
 
   toggleChat = () => {
@@ -127,6 +132,7 @@ class SignedInNav extends Component {
               <LinkContainer to="/profile" active={false}>
                 <NavDropdown.Item>Profile</NavDropdown.Item>
               </LinkContainer>
+              {profile.role === 'admin' && <NavDropdown.Item onClick={this.handlePurgeDB}>Purge DB</NavDropdown.Item>}
               <LinkContainer to="/logout" active={false}>
                 <NavDropdown.Item onClick={signOut}>Logout</NavDropdown.Item>
               </LinkContainer>
@@ -151,6 +157,7 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => {
   return {
     leaveLobby: (gameId, baseUrl) => dispatch(leaveLobby(gameId, baseUrl)),
+    purgeDB: () => dispatch(purgeDB()),
     saveOptions: profile => dispatch(saveOptions(profile)),
     setLoading: value => dispatch({ type: 'LOADING', loading: value }),
     signOut: () => dispatch(signOut()),
