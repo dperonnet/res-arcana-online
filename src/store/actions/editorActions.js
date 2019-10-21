@@ -1,6 +1,9 @@
+import firebase from 'firebase/app'
+
 export const saveComponent = component => {
-  return (dispatch, getState, { getFirestore }) => {
-    const firestore = getFirestore()
+  return dispatch => {
+    const firestore = firebase.firestore()
+
     firestore
       .collection('components')
       .doc(component.id)
@@ -15,9 +18,9 @@ export const saveComponent = component => {
 }
 
 export const deleteComponent = () => {
-  return (dispatch, getState, { getFirestore }) => {
+  return (dispatch, getState) => {
     const component = getState().editor.component
-    const firestore = getFirestore()
+    const firestore = firebase.firestore()
     const componentId = component.id
     firestore
       .collection('components')

@@ -910,6 +910,7 @@ class ResArcanaBoard extends Component {
         draftCards =
           G.players[playerID].draftCards.length > 0 &&
           Object.values(G.players[playerID].draftCards[0]).map(card => {
+            card.hasCost = false
             return this.renderGameComponent(card, {
               onClick: event => this.handleClick(event, card),
               onDoubleClick: () => this.pickArtefact(card.id),
@@ -1020,7 +1021,6 @@ class ResArcanaBoard extends Component {
     const { G, ctx, playerID, profile, selectedComponent } = this.props
 
     const playersName = this.getPlayersName()
-    // eslint-disable-next-line prettier/prettier
     let title = 'Magic Item Selection Phase - ' + playersName[parseInt(ctx.currentPlayer)] + ' is playing.'
     let waiting = playerID !== ctx.currentPlayer
     let magicItems = G.publicData.magicItems.map(magicItem => {
@@ -1100,7 +1100,6 @@ class ResArcanaBoard extends Component {
 
     const playersName = this.getPlayersName()
     let title = 'Collect Phase'
-    // eslint-disable-next-line prettier/prettier
     let waitingFor = ' - ' + playersName[parseInt(ctx.currentPlayer)] + ' is playing.'
 
     if (playerID === 'Spectator') {
@@ -2280,7 +2279,6 @@ class ResArcanaBoard extends Component {
     const playersName = this.getPlayersName()
 
     let title = 'Play Phase'
-    // eslint-disable-next-line prettier/prettier
     let waitingFor = ' - ' + playersName[parseInt(ctx.currentPlayer)] + ' is playing.'
     let playerView
 

@@ -1,7 +1,9 @@
+import firebase from 'firebase/app'
+
 export const sendMessage = (message, chatId) => {
-  return (dispatch, getState, { getFirestore }) => {
+  return (dispatch, getState) => {
     // make asynch call to database
-    const fireStore = getFirestore()
+    const firestore = firebase.firestore()
     const profile = getState().firebase.profile
     const creatorId = getState().firebase.auth.uid
     const newMessage = {
@@ -12,8 +14,8 @@ export const sendMessage = (message, chatId) => {
     }
     const threshold = chatId === 'mainChat' ? 120 : 1000
 
-    const chatRef = fireStore.collection('chats').doc(chatId)
-    fireStore
+    const chatRef = firestore.collection('chats').doc(chatId)
+    firestore
       .runTransaction(transaction => {
         return transaction.get(chatRef).then(chatDoc => {
           let messages = chatDoc.data().messages
@@ -21,12 +23,12 @@ export const sendMessage = (message, chatId) => {
             if (messages.length > threshold) {
               for (let i = 0; i <= 1; i++) {
                 transaction.update(chatRef, {
-                  messages: fireStore.FieldValue.arrayRemove(messages[i]),
+                  messages: firestore.FieldValue.arrayRemove(messages[i]),
                 })
               }
             }
             transaction.update(chatRef, {
-              messages: fireStore.FieldValue.arrayUnion(newMessage),
+              messages: firestore.FieldValue.arrayUnion(newMessage),
             })
           } else {
             messages = [newMessage]
@@ -44,10 +46,10 @@ export const sendMessage = (message, chatId) => {
 }
 
 export const createChat = (chatId, chatName) => {
-  return (dispatch, getState, { getFirestore }) => {
-    const fireStore = getFirestore()
+  return (dispatch, getState) => {
+    const firestore = firebase.firestore()
     const creatorId = getState().firebase.auth.uid
-    fireStore
+    firestore
       .collection('chats')
       .doc(chatId)
       .set({
@@ -65,10 +67,10 @@ export const createChat = (chatId, chatName) => {
 }
 
 export const deleteChat = chatId => {
-  return (dispatch, getState, { getFirestore }) => {
-    const fireStore = getFirestore()
+  return () => {
+    const firestore = firebase.firestore()
     console.log('call to deleteChat', chatId)
-    fireStore
+    firestore
       .collection('chats')
       .doc(chatId)
       .delete()

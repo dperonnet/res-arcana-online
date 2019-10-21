@@ -1,12 +1,11 @@
+import firebase from 'firebase/app'
 import { createChat, deleteChat } from './chatActions'
-require('firebase/functions')
 
-const cloudFunctionsUrl = `https://${process.env.REACT_APP_CLOUD_FUNCTION}`
 const gameServerUrl = `http://${process.env.REACT_APP_GAME_SERVER_URL}`
 
 export const createGameLobby = gameOptions => {
-  return (dispatch, getState, { getFirestore }) => {
-    const fireStore = getFirestore()
+  return (dispatch, getState) => {
+    const firestore = firebase.firestore()
     const profile = getState().firebase.profile
     const creatorId = getState().firebase.auth.uid
 
@@ -29,10 +28,15 @@ export const createGameLobby = gameOptions => {
       newGameLobby.seats[i] = -1
     }
 
-    fireStore
+    firestore
       .collection('gameLobbys')
       .add(newGameLobby)
       .then(gameLobby => {
+        gameLobby.get().then(doc => {
+          let setupData = doc.data().setupData
+          setupData.chatId = gameLobby.id
+          gameLobby.update({ setupData })
+        })
         dispatch({ type: 'CREATE_GAME_LOBBY', gameLobby })
         dispatch(createChat(gameLobby.id, newGameLobby.gameDisplayName + ' Chat'))
         dispatch(takeSeat(gameLobby.id))
@@ -44,11 +48,11 @@ export const createGameLobby = gameOptions => {
 }
 
 export const addSeat = lobbyId => {
-  return (dispatch, getState, { getFirestore }) => {
-    const fireStore = getFirestore()
-    const lobbyRef = fireStore.collection('gameLobbys').doc(lobbyId)
+  return dispatch => {
+    const firestore = firebase.firestore()
+    const lobbyRef = firestore.collection('gameLobbys').doc(lobbyId)
 
-    fireStore
+    firestore
       .runTransaction(transaction => {
         return transaction.get(lobbyRef).then(lobbyDoc => {
           if (!lobbyDoc.exists) {
@@ -72,11 +76,11 @@ export const addSeat = lobbyId => {
 }
 
 export const removeSeat = lobbyId => {
-  return (dispatch, getState, { getFirestore }) => {
-    const fireStore = getFirestore()
-    const lobbyRef = fireStore.collection('gameLobbys').doc(lobbyId)
+  return dispatch => {
+    const firestore = firebase.firestore()
+    const lobbyRef = firestore.collection('gameLobbys').doc(lobbyId)
 
-    fireStore
+    firestore
       .runTransaction(transaction => {
         return transaction.get(lobbyRef).then(lobbyDoc => {
           if (!lobbyDoc.exists) {
@@ -138,15 +142,15 @@ export const watchGame = lobbyId => {
  * @param {*} seatIndex
  */
 export const joinLobby = (lobbyId, takeSeat, seatIndex) => {
-  return (dispatch, getState, { getFirestore }) => {
-    const fireStore = getFirestore()
+  return (dispatch, getState) => {
+    const firestore = firebase.firestore()
     const profile = getState().firebase.profile
     const playerId = getState().firebase.auth.uid
     let canTakeSeat = false
 
-    const lobbyRef = fireStore.collection('gameLobbys').doc(lobbyId)
+    const lobbyRef = firestore.collection('gameLobbys').doc(lobbyId)
 
-    fireStore
+    firestore
       .runTransaction(transaction => {
         return transaction.get(lobbyRef).then(lobbyDoc => {
           if (!lobbyDoc.exists) {
@@ -195,7 +199,7 @@ export const joinLobby = (lobbyId, takeSeat, seatIndex) => {
           createdAt: new Date(),
           gameCredentials: {},
         }
-        fireStore
+        firestore
           .collection('currentLobbys')
           .doc(playerId)
           .set(datas)
@@ -215,18 +219,18 @@ export const deleteLobbyCloudFunction = lobbyId => {
 }
 
 export const deleteLobby = lobbyId => {
-  return (dispatch, getState, { getFirestore }) => {
-    const db = getFirestore()
+  return dispatch => {
+    const db = firebase.firestore()
 
     const lobbyRef = db.collection('gameLobbys').doc(lobbyId)
     db.runTransaction(async transaction => {
       let lobbyDoc = await transaction.get(lobbyRef)
       let lobby = lobbyDoc.data()
+      // update the currentLobby of all players
       let reads = Object.keys(lobby.players).map(playerId => {
         let ref = db.collection('currentLobbys').doc(playerId)
         let data = {}
         return transaction.get(ref).then(doc => {
-          console.log('doc.data().lobbyId === lobbyId', doc.data().lobbyId, lobbyId)
           if (doc.data().lobbyId === lobbyId) {
             data = { lobbyId: null }
           }
@@ -234,7 +238,7 @@ export const deleteLobby = lobbyId => {
         })
       })
       await Promise.all(reads)
-      transaction.delete(lobbyRef)
+      await transaction.delete(lobbyRef)
       dispatch(deleteChat(lobbyId))
     })
       .then(() => {
@@ -247,8 +251,8 @@ export const deleteLobby = lobbyId => {
 }
 
 export const leaveLobby = lobbyId => {
-  return (dispatch, getState, { getFirestore }) => {
-    const db = getFirestore()
+  return (dispatch, getState) => {
+    const db = firebase.firestore()
     const playerId = getState().firebase.auth.uid
 
     const lobbyRef = db.collection('gameLobbys').doc(lobbyId)
@@ -323,13 +327,13 @@ export const leaveLobby = lobbyId => {
 }
 
 export const setReady = lobbyId => {
-  return (dispatch, getState, { getFirestore }) => {
-    const fireStore = getFirestore()
+  return (dispatch, getState) => {
+    const firestore = firebase.firestore()
     const playerId = getState().firebase.auth.uid
 
-    const lobbyRef = fireStore.collection('gameLobbys').doc(lobbyId)
+    const lobbyRef = firestore.collection('gameLobbys').doc(lobbyId)
 
-    fireStore
+    firestore
       .runTransaction(async transaction => {
         return transaction.get(lobbyRef).then(lobbyDoc => {
           if (!lobbyDoc.exists) {
@@ -354,32 +358,9 @@ export const setReady = lobbyId => {
   }
 }
 
-export const startGameCloudFunction = lobbyId => {
-  return (dispatch, getState, { getFirebase }) => {
-    const startGameUrl = cloudFunctionsUrl + '/startGame'
-    console.log('Call to cloud function start game', lobbyId, startGameUrl)
-
-    let startGame = getFirebase()
-      .app()
-      .functions()
-      .httpsCallable('startGame')
-
-    startGame({ lobbyId })
-      .then(function(result) {
-        console.log('result', result)
-      })
-      .then(() => {
-        dispatch({ type: 'START_GAME_LOBBY', lobbyId })
-      })
-      .catch(err => {
-        dispatch({ type: 'START_GAME_LOBBY_ERROR', err })
-      })
-  }
-}
-
 export const startGame = lobbyId => {
-  return (dispatch, getState, { getFirestore }) => {
-    const db = getFirestore()
+  return (dispatch, getState) => {
+    const db = firebase.firestore()
     const userId = getState().firebase.auth.uid
 
     return db.runTransaction(async transaction => {

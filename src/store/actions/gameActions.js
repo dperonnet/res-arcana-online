@@ -1,12 +1,13 @@
-import { createChat, deleteChat } from './chatActions'
+import firebase from 'firebase/app'
+import { deleteChat } from './chatActions'
 
-export const createAndJoinGame = (game, createServerGame, joinServerGame, gameServerUrl) => {
-  return (dispatch, getState, { getFirestore }) => {
+export const createAndJoinGame = game => {
+  return (dispatch, getState) => {
     // make asynch call to database
-    const fireStore = getFirestore()
+    const firestore = firebase.firestore()
     const profile = getState().firebase.profile
     const creatorId = getState().firebase.auth.uid
-    fireStore
+    firestore
       .collection('games')
       .add({
         ...game,
@@ -16,7 +17,7 @@ export const createAndJoinGame = (game, createServerGame, joinServerGame, gameSe
         status: 'PENDING',
       })
       .then(docRef => {
-        fireStore
+        firestore
           .collection('games')
           .doc(docRef.uid)
           .get()
@@ -32,25 +33,25 @@ export const createAndJoinGame = (game, createServerGame, joinServerGame, gameSe
 }
 
 export const leaveGame = (gameId, gameServerUrl) => {
-  return (dispatch, getState, { getFirestore }) => {
-    const fireStore = getFirestore()
+  return (dispatch, getState) => {
+    const firestore = firebase.firestore()
     const playerId = getState().firebase.auth.uid
-    const gameRef = fireStore.collection('games').doc(gameId)
+    const gameRef = firestore.collection('games').doc(gameId)
 
     gameRef.get().then(document => {
       let status = document.exists ? document.data().status : null
       switch (status) {
         // leave before game Start
         case 'PENDING':
-          dispatch(leaveWhilePending(gameId, playerId, document, fireStore, gameServerUrl))
+          dispatch(leaveWhilePending(gameId, playerId, document, gameServerUrl))
           break
         // leave while game is still running
         case 'STARTED':
-          dispatch(leaveWhileStarted(gameId, playerId, document, fireStore, gameServerUrl))
+          dispatch(leaveWhileStarted(gameId, playerId, document, gameServerUrl))
           break
         // leave when game is over
         case 'OVER':
-          dispatch(leaveWhileOver(gameId, playerId, document, fireStore, gameServerUrl))
+          dispatch(leaveWhileOver(gameId, playerId, document, gameServerUrl))
           break
         default:
       }
@@ -60,10 +61,10 @@ export const leaveGame = (gameId, gameServerUrl) => {
 }
 
 export const getCurrentGameId = () => {
-  return (dispatch, getState, { getFirestore }) => {
+  return (dispatch, getState) => {
     const playerId = getState().firebase.auth.uid
-    const fireStore = getFirestore()
-    fireStore
+    const firestore = firebase.firestore()
+    firestore
       .collection('currentGames')
       .doc(playerId)
       .get()
@@ -77,13 +78,14 @@ export const getCurrentGameId = () => {
   }
 }
 
-const leaveWhilePending = (gameId, playerId, document, fireStore, gameServerUrl) => {
-  return (dispatch, getState, { getFirestore }) => {
-    const gameRef = fireStore.collection('games').doc(gameId)
+const leaveWhilePending = (gameId, playerId, document, gameServerUrl) => {
+  return dispatch => {
+    const firestore = firebase.firestore()
+    const gameRef = firestore.collection('games').doc(gameId)
     const game = document.data()
     let players = game.players
 
-    fireStore
+    firestore
       .collection('currentGames')
       .doc(playerId)
       .get()
@@ -95,7 +97,7 @@ const leaveWhilePending = (gameId, playerId, document, fireStore, gameServerUrl)
           const isTheOnlyPlayer = Object.keys(players).length === 1 && Object.keys(players)[0] === playerId
           if (isGameCreator || isTheOnlyPlayer) {
             let kicks = Object.keys(players).map(key => {
-              const playerCurrentGameRef = fireStore.collection('currentGames').doc(key)
+              const playerCurrentGameRef = firestore.collection('currentGames').doc(key)
               // check if player is synch with the game before kick
               return playerCurrentGameRef.get().then(currentGame => {
                 const cgDatas = currentGame.data()
@@ -116,7 +118,7 @@ const leaveWhilePending = (gameId, playerId, document, fireStore, gameServerUrl)
             // else just leave game
           } else {
             delete players[playerId]
-            fireStore
+            firestore
               .collection('currentGames')
               .doc(playerId)
               .update({
@@ -130,24 +132,24 @@ const leaveWhilePending = (gameId, playerId, document, fireStore, gameServerUrl)
   }
 }
 
-const leaveWhileStarted = (gameId, playerId, document, fireStore, gameServerUrl) => {
-  return (dispatch, getState, { getFirestore }) => {
+const leaveWhileStarted = (gameId, playerId, document, gameServerUrl) => {
+  return dispatch => {
     // Todo
-    dispatch(leaveWhilePending(gameId, playerId, document, fireStore, gameServerUrl))
+    dispatch(leaveWhilePending(gameId, playerId, document, gameServerUrl))
   }
 }
 
-const leaveWhileOver = (gameId, playerId, document, fireStore, gameServerUrl) => {
-  return (dispatch, getState, { getFirestore }) => {
+const leaveWhileOver = (gameId, playerId, document, gameServerUrl) => {
+  return dispatch => {
     // Todo
-    dispatch(leaveWhilePending(gameId, playerId, document, fireStore, gameServerUrl))
+    dispatch(leaveWhilePending(gameId, playerId, document, gameServerUrl))
   }
 }
 
 const deleteGame = gameId => {
-  return (dispatch, getState, { getFirestore }) => {
-    const fireStore = getFirestore()
-    const gameRef = fireStore.collection('games').doc(gameId)
+  return dispatch => {
+    const firestore = firebase.firestore()
+    const gameRef = firestore.collection('games').doc(gameId)
     gameRef
       .delete()
       .then(dispatch(deleteChat(gameId)))
@@ -158,13 +160,13 @@ const deleteGame = gameId => {
 }
 
 export const deleteGameById = gameId => {
-  return (dispatch, getState, { getFirestore }) => {
-    const fireStore = getFirestore()
-    const gameRef = fireStore.collection('games').doc(gameId)
+  return dispatch => {
+    const firestore = firebase.firestore()
+    const gameRef = firestore.collection('games').doc(gameId)
     gameRef.get().then(document => {
       let players = document.data().players
       let kicks = Object.keys(players).map(key => {
-        const playerCurrentGameRef = fireStore.collection('currentGames').doc(key)
+        const playerCurrentGameRef = firestore.collection('currentGames').doc(key)
         // check if player is synch with the game before kick
         return playerCurrentGameRef.get().then(currentGame => {
           if (currentGame.data().gameId === gameId) {
@@ -180,9 +182,9 @@ export const deleteGameById = gameId => {
 }
 
 export const startGame = gameId => {
-  return (dispatch, getState, { getFirestore }) => {
-    const fireStore = getFirestore()
-    fireStore
+  return dispatch => {
+    const firestore = firebase.firestore()
+    firestore
       .collection('games')
       .doc(gameId)
       .update({ status: 'STARTED' })
@@ -193,9 +195,9 @@ export const startGame = gameId => {
 }
 
 export const endGame = gameId => {
-  return (dispatch, getState, { getFirestore }) => {
-    const fireStore = getFirestore()
-    fireStore
+  return dispatch => {
+    const firestore = firebase.firestore()
+    firestore
       .collection('games')
       .doc(gameId)
       .update({ status: 'OVER' })
@@ -206,11 +208,11 @@ export const endGame = gameId => {
 }
 
 export const disjoinCurrentGame = () => {
-  return (dispatch, getState, { getFirestore }) => {
-    const fireStore = getFirestore()
+  return (dispatch, getState) => {
+    const firestore = firebase.firestore()
     const creatorId = getState().firebase.auth.uid
     // Set the current game for player
-    const currentGameRef = fireStore.collection('currentGames').doc(creatorId)
+    const currentGameRef = firestore.collection('currentGames').doc(creatorId)
     currentGameRef
       .get()
       .then(document => {
@@ -247,11 +249,11 @@ export const leaveServerInstance = async (gameServerUrl, gameName, gameCredentia
 }
 
 export const saveCredentials = (gameID, playerID, credentials) => {
-  return (dispatch, getState, { getFirestore }) => {
-    const fireStore = getFirestore()
+  return (dispatch, getState) => {
+    const firestore = firebase.firestore()
     const playerId = getState().firebase.auth.uid
 
-    const currentGameRef = fireStore.collection('currentGames').doc(playerId)
+    const currentGameRef = firestore.collection('currentGames').doc(playerId)
     currentGameRef.get().then(document => {
       const datas = document.data()
       let gameCredentials = datas.gameCredentials || {}
@@ -266,11 +268,11 @@ export const saveCredentials = (gameID, playerID, credentials) => {
 }
 
 export const getComponents = () => {
-  return (dispatch, getState, { getFirestore }) => {
-    const fireStore = getFirestore()
+  return () => {
+    const firestore = firebase.firestore()
     const components = {}
 
-    fireStore
+    firestore
       .collection('components')
       .get()
       .then(snapshot => {

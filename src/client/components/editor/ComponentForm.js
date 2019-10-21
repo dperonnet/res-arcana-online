@@ -262,7 +262,7 @@ class ComponentForm extends Component {
                       id={'clearCost'}
                       size="sm"
                       className={component.hasCost ? '' : 'd-none'}
-                      onClick={e => this.clearCollectOptions('costEssenceList')}
+                      onClick={() => this.clearCollectOptions('costEssenceList')}
                     >
                       <span>Reset</span>
                     </Button>
@@ -298,7 +298,7 @@ class ComponentForm extends Component {
                   id={'clearCollectOptions'}
                   size="sm"
                   className={component.hasStandardCollectAbility ? '' : 'd-none'}
-                  onClick={e => this.clearCollectOptions('standardCollectAbility')}
+                  onClick={() => this.clearCollectOptions('standardCollectAbility')}
                 >
                   <span>Reset</span>
                 </Button>
@@ -334,7 +334,7 @@ class ComponentForm extends Component {
                   id={'clearCollectOptions'}
                   size="sm"
                   className={component.hasSpecificCollectAbility ? '' : 'd-none'}
-                  onClick={e => this.clearCollectOptions('specificCollectAbility')}
+                  onClick={() => this.clearCollectOptions('specificCollectAbility')}
                 >
                   <span>Reset</span>
                 </Button>
@@ -676,8 +676,8 @@ function DiscountPanel({ component, onChange, onChangeByName }) {
   const [abilities, setAbilities] = useState([copy(DISCOUNT)])
 
   useEffect(() => {
-    setAbilities(component.discountAbilityList || [copy(DISCOUNT)])
-  }, [component.name])
+    setAbilities((component && component.discountAbilityList) || [copy(DISCOUNT)])
+  }, [component])
 
   function addAbility() {
     abilities.push(copy(DISCOUNT))
@@ -758,7 +758,7 @@ function DiscountPanel({ component, onChange, onChangeByName }) {
                       id={index + '_type_' + discountType.id}
                       label={discountType.name}
                       checked={discount.type.includes(discountType.id)}
-                      onChange={e => setDiscountType(index, discountType.id)}
+                      onChange={() => setDiscountType(index, discountType.id)}
                     />
                   ))}
                 </div>
@@ -791,7 +791,7 @@ function ReactPowerPanel({ component, onChange, onChangeByName }) {
 
   useEffect(() => {
     setReactPowers(component.reactPowerList || [copy(REACT_POWER)])
-  }, [component.name])
+  }, [component])
 
   function addReactPower() {
     reactPowers.push(copy(REACT_POWER))
@@ -904,7 +904,7 @@ function ReactPowerPanel({ component, onChange, onChangeByName }) {
                       id={index + '_type_' + reactPowerType.id}
                       label={reactPowerType.name}
                       checked={reactPower.type.includes(reactPowerType.id)}
-                      onChange={e => setReactPowerType(index, reactPowerType.id)}
+                      onChange={() => setReactPowerType(index, reactPowerType.id)}
                     />
                   ))}
                 </div>
@@ -923,9 +923,9 @@ function ReactPowerPanel({ component, onChange, onChangeByName }) {
                     id={'costTurn_' + index}
                     className="inline-checkbox ml-2"
                     checked={reactPower.cost.turn}
-                    onChange={e => updateReactPower(index, null, 'costTurn')}
+                    onChange={() => updateReactPower(index, null, 'costTurn')}
                   />
-                  <div className="turn-component-icon" onClick={e => updateReactPower(index, null, 'costTurn')}></div>
+                  <div className="turn-component-icon" onClick={() => updateReactPower(index, null, 'costTurn')}></div>
                 </div>
                 {splitter}
                 <EssencePanel
@@ -948,7 +948,7 @@ function ReactPowerPanel({ component, onChange, onChangeByName }) {
                     id={'gainIgnore_' + index}
                     className="ml-2"
                     checked={reactPower.gain.ignore}
-                    onChange={e => updateReactPower(index, null, 'gainIgnore')}
+                    onChange={() => updateReactPower(index, null, 'gainIgnore')}
                   />
                 </div>
                 {splitter}
@@ -970,7 +970,7 @@ function ReactPowerPanel({ component, onChange, onChangeByName }) {
                     id={'gainOnComponent_' + index}
                     className="ml-2"
                     checked={reactPower.gain.onComponent}
-                    onChange={e => updateReactPower(index, null, 'gainOnComponent')}
+                    onChange={() => updateReactPower(index, null, 'gainOnComponent')}
                   />
                 </div>
                 {splitter}
@@ -1018,8 +1018,8 @@ function ActionPowerPanel({ component, onChange, onChangeByName }) {
   const [actionPowers, setActionPowers] = useState([copy(ACTION_POWER)])
 
   useEffect(() => {
-    setActionPowers(component.actionPowerList || [copy(ACTION_POWER)])
-  }, [component.name])
+    setActionPowers((component && component.actionPowerList) || [copy(ACTION_POWER)])
+  }, [component])
 
   function addActionPower() {
     actionPowers.push(copy(ACTION_POWER))
@@ -1055,7 +1055,7 @@ function ActionPowerPanel({ component, onChange, onChangeByName }) {
           name={type + target + '_' + index}
           id={type + target + '_' + index}
           checked={actionPowers[index][type][target]}
-          onChange={e => updateActionPower(index, type, target, data)}
+          onChange={() => updateActionPower(index, type, target, data)}
         />
         <label htmlFor={type + target + '_' + index} className="inline-block">
           {label}
@@ -1295,7 +1295,7 @@ function ActionPowerPanel({ component, onChange, onChangeByName }) {
                   index,
                   'placeDragonFromAnyDiscardPile',
                   <>
-                    Place <div className="icon dragon-icon"></div>from any player's discard pile at{' '}
+                    Place <div className="icon dragon-icon"></div>from any player`&apos;`s discard pile at{' '}
                     <div className="icon placement-cost-icon">
                       <div className="qm-dark"></div>
                     </div>
@@ -1365,7 +1365,7 @@ function ActionPowerPanel({ component, onChange, onChangeByName }) {
                     name={'gainrivalsLoseLife_1' + index}
                     id={'gainrivalsLoseLife_1' + index}
                     checked={actionPowers[index]['gain']['rivalsLoseLife'] === 1}
-                    onChange={e =>
+                    onChange={() =>
                       updateActionPower(
                         index,
                         'gain',
@@ -1387,7 +1387,7 @@ function ActionPowerPanel({ component, onChange, onChangeByName }) {
                     name={'gainrivalsLoseLife_2' + index}
                     id={'gainrivalsLoseLife_2' + index}
                     checked={actionPowers[index]['gain']['rivalsLoseLife'] === 2}
-                    onChange={e =>
+                    onChange={() =>
                       updateActionPower(
                         index,
                         'gain',

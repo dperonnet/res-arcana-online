@@ -1,6 +1,8 @@
+import firebase from 'firebase/app'
+
 export const signIn = credentials => {
-  return (dispatch, getState, { getFirestore }) => {
-    const firestore = getFirestore()
+  return dispatch => {
+    const firestore = firebase.firestore()
 
     if (credentials.name) {
       firestore
@@ -25,8 +27,7 @@ export const signIn = credentials => {
 }
 
 export const signInWithEmailAndPassword = credentials => {
-  return (dispatch, getState, { getFirebase }) => {
-    const firebase = getFirebase()
+  return dispatch => {
     firebase
       .auth()
       .signInWithEmailAndPassword(credentials.email, credentials.password)
@@ -44,9 +45,7 @@ export const signInWithEmailAndPassword = credentials => {
 }
 
 export const signOut = () => {
-  return (dispatch, getState, { getFirebase }) => {
-    const firebase = getFirebase()
-
+  return dispatch => {
     firebase
       .auth()
       .signOut()
@@ -57,8 +56,8 @@ export const signOut = () => {
 }
 
 export const validateAndRegister = newUser => {
-  return (dispatch, getState, { getFirestore }) => {
-    const firestore = getFirestore()
+  return dispatch => {
+    const firestore = firebase.firestore()
 
     firestore
       .collection('users')
@@ -78,9 +77,8 @@ export const validateAndRegister = newUser => {
 }
 
 export const register = newUser => {
-  return (dispatch, getState, { getFirebase, getFirestore }) => {
-    const firebase = getFirebase()
-    const firestore = getFirestore()
+  return dispatch => {
+    const firestore = firebase.firestore()
 
     firebase
       .auth()
@@ -119,24 +117,20 @@ export const register = newUser => {
 }
 
 export const verifyAuth = () => {
-  return (dispatch, getState, { getFirebase }) => {
-    getFirebase()
-      .auth()
-      .onAuthStateChanged(user => {
-        if (user) {
-          dispatch(setUserStatus())
-        } else {
-          dispatch(signOut())
-        }
-      })
+  return dispatch => {
+    firebase.auth().onAuthStateChanged(user => {
+      if (user) {
+        dispatch(setUserStatus())
+      } else {
+        dispatch(signOut())
+      }
+    })
   }
 }
 
 // Google presence
 export const setUserStatus = () => {
-  return (dispatch, getState, { getFirebase }) => {
-    const firebase = getFirebase()
-
+  return () => {
     var uid = firebase.auth().currentUser.uid
 
     var userStatusDatabaseRef = firebase.database().ref('/status/' + uid)
@@ -195,14 +189,14 @@ export const setUserStatus = () => {
 }
 
 export const saveProfile = profile => {
-  return (dispatch, getState, { getFirebase, getFirestore }) => {
-    var user = getFirebase().auth().currentUser
+  return dispatch => {
+    var user = firebase.currentUser
 
     if (profile.email) {
       user
         .updateEmail(profile.email)
         .then(() => {
-          getFirestore()
+          firebase.firestore
             .collection('users')
             .doc(user.uid)
             .update({
@@ -242,8 +236,8 @@ export const saveProfile = profile => {
 }
 
 export const saveOptions = profile => {
-  return (dispatch, getState, { getFirestore }) => {
-    const firestore = getFirestore()
+  return (dispatch, getState) => {
+    const firestore = firebase.firestore()
     const userId = getState().firebase.auth.uid
 
     let options = {}
@@ -270,8 +264,8 @@ export const saveOptions = profile => {
 }
 
 export const getUserByName = name => {
-  return (dispatch, getState, { getFirestore }) => {
-    const firestore = getFirestore()
+  return dispatch => {
+    const firestore = firebase.firestore()
 
     firestore
       .collection('users')
@@ -287,8 +281,8 @@ export const getUserByName = name => {
 }
 
 export const purgeDB = () => {
-  return async (dispatch, getState, { getFirestore }) => {
-    const db = getFirestore()
+  return async () => {
+    const db = firebase.firestore()
     db.collection('bgio')
       .get()
       .then(snapshot => {
@@ -302,6 +296,18 @@ export const purgeDB = () => {
         db.collection('bgio')
           .doc('avoid_loading')
           .set({ value: false })
+      })
+      .then(() => {
+        db.collection('chats')
+          .get()
+          .then(snapshot => {
+            snapshot.docs.forEach(doc => {
+              if (doc.id !== 'mainChat' && doc.id !== 'default')
+                db.collection('chats')
+                  .doc(doc.id)
+                  .delete()
+            })
+          })
       })
   }
 }

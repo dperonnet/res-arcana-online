@@ -1,19 +1,9 @@
-import firebase from 'firebase/app'
-import 'firebase/firestore'
-import 'firebase/auth'
-import 'firebase/database'
-
-// Initialize Firebase
-var fbConfig = {
+export const fbConfig = {
   apiKey: 'AIzaSyCfanQhV4nXpnoei8RY8tsF3c58OpYczU0',
   authDomain: 'res-arcana-project.firebaseapp.com',
   databaseURL: 'https://res-arcana-project.firebaseio.com',
   projectId: 'res-arcana-project',
   storageBucket: 'res-arcana-project.appspot.com',
   messagingSenderId: '495059282761',
+  appId: '1:495059282761:web:02911815040be4f3178898',
 }
-
-!firebase.apps.length ? firebase.initializeApp(fbConfig) : firebase.app()
-firebase.firestore().settings({})
-
-export { fbConfig, firebase }

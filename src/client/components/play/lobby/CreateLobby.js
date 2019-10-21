@@ -31,7 +31,6 @@ class CreateLobby extends Component {
       return {
         gameOptions: {
           ...gameOptions,
-          // eslint-disable-next-line prettier/prettier
           gameDisplayName: props.profile.login + '\'s game',
         },
       }
