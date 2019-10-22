@@ -39,7 +39,8 @@ class GameLobby extends Component {
   }
 
   handleDeleteLobby = () => {
-    const { currentLobby, deleteLobby } = this.props
+    const { currentLobby, deleteLobby, setLoading } = this.props
+    setLoading(false)
     deleteLobby(currentLobby.lobbyId)
   }
 
@@ -148,7 +149,7 @@ class GameLobby extends Component {
                       'Cancel'
                     ) : (
                       <>
-                        I'm ready<div className="d-inline-block tick-sm"></div>
+                        I&apos;m ready<div className="d-inline-block tick-sm"></div>
                       </>
                     )}
                   </Button>
@@ -225,11 +226,11 @@ const mapDispatchToProps = dispatch => {
     removeSeat: lobbyId => dispatch(removeSeat(lobbyId)),
     deleteLobby: lobbyId => dispatch(deleteLobby(lobbyId)),
     leaveLobby: lobbyId => dispatch(leaveLobby(lobbyId)),
+    setLoading: value => dispatch({ type: 'LOADING', loading: value }),
     setReady: lobbyId => dispatch(setReady(lobbyId)),
     startGame: (gameId, serverUrl) => dispatch(startGame(gameId, serverUrl)),
     takeSeat: (gameId, seatId) => dispatch(takeSeat(gameId, seatId)),
     watchGame: gameId => dispatch(watchGame(gameId)),
-    setLoading: value => dispatch({ type: 'LOADING', loading: value }),
   }
 }
 

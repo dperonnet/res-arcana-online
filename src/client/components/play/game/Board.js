@@ -1481,7 +1481,7 @@ class ResArcanaBoard extends Component {
       </h5>
     ) : (
       <h5 className="directive">
-        <div className="inline-text">You don`&apos;`t have enough essences to claim {componentName}.</div>
+        <div className="inline-text">You don&apos;t have enough essences to claim {componentName}.</div>
       </h5>
     )
 
@@ -1626,7 +1626,7 @@ class ResArcanaBoard extends Component {
           </h5>
         ) : (
           <h5 className="directive">
-            <div className="inline-text">Select essences to pay {selectedComponent.name}`&apos;`s placement cost.</div>
+            <div className="inline-text">Select essences to pay {selectedComponent.name}&apos;s placement cost.</div>
           </h5>
         )
         break

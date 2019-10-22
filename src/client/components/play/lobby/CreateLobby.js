@@ -66,8 +66,10 @@ class CreateLobby extends Component {
 
   handleSubmit = e => {
     e.preventDefault()
+    const { setLoading } = this.props
     const { gameOptions } = this.state
     this.props.createGameLobby(gameOptions)
+    setLoading(true)
   }
 
   render() {
@@ -171,6 +173,7 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => {
   return {
     createGameLobby: gameOptions => dispatch(createGameLobby(gameOptions)),
+    setLoading: value => dispatch({ type: 'LOADING', loading: value }),
   }
 }
 

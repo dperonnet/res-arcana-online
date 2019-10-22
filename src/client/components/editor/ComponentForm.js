@@ -1295,7 +1295,7 @@ function ActionPowerPanel({ component, onChange, onChangeByName }) {
                   index,
                   'placeDragonFromAnyDiscardPile',
                   <>
-                    Place <div className="icon dragon-icon"></div>from any player`&apos;`s discard pile at{' '}
+                    Place <div className="icon dragon-icon"></div>from any player &apos;s discard pile at{' '}
                     <div className="icon placement-cost-icon">
                       <div className="qm-dark"></div>
                     </div>

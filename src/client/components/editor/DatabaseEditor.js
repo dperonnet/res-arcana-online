@@ -1,15 +1,16 @@
 import React, { Component } from 'react'
+import { connect } from 'react-redux'
+import { isLoaded } from 'react-redux-firebase'
 import { Redirect } from 'react-router-dom'
 import { Col, Container, Row } from 'react-bootstrap'
 import { DEFAULT_COMPONENT } from './EditorConstants'
+import CardZoom from '../common/card/CardZoom.js'
+import ActionPower from '../common/power/ActionPower'
 import ComponentForm from './ComponentForm'
 import DatabaseContent from './DatabaseContent'
-import CardZoom from '../common/card/CardZoom.js'
+import { deleteComponent, saveComponent } from '../../../store/actions/editorActions'
 import './editor.scss'
 import '../play/game/essence.scss'
-import { connect } from 'react-redux'
-import { deleteComponent, saveComponent } from '../../../store/actions/editorActions'
-import ActionPower from '../common/power/ActionPower'
 
 const COMPONENTS_STYLES = {
   artefact: 'card',
@@ -56,9 +57,14 @@ class DatabaseEditor extends Component {
 
   render() {
     const { auth, component, pristineComponent, profile } = this.props
-    const jsonComponent = this.getJsonFromObject(component)
 
-    if (!auth.uid || profile.role !== 'admin') return <Redirect to="/signIn" />
+    if (!isLoaded(auth) || !isLoaded(profile)) {
+      return null
+    } else if (!auth.uid || profile.role !== 'admin') {
+      return <Redirect to="/signIn" />
+    }
+
+    const jsonComponent = this.getJsonFromObject(component)
 
     let card
     if (pristineComponent && pristineComponent.class) {

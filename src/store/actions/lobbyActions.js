@@ -280,19 +280,16 @@ export const leaveLobby = lobbyId => {
       // If the game has not started yet,
       if (lobby.status !== 'PENDING') {
         if (seats.includes(playerId) && gameCredentials[lobby.boardGameId]) {
-          let createResp = await fetch(
-            gameServerUrl + '/games/' + lobby.gameName + '/' + lobby.boardGameId + '/leave',
-            {
-              method: 'POST',
-              body: JSON.stringify({
-                playerID: gameCredentials[lobby.boardGameId].id,
-                credentials: gameCredentials[lobby.boardGameId].playerCredentials,
-              }),
-              headers: { 'Content-Type': 'application/json' },
-            }
-          )
-          if (createResp.status !== 200) {
-            throw new Error('HTTP status ' + createResp.status)
+          let leaveResp = await fetch(gameServerUrl + '/games/' + lobby.gameName + '/' + lobby.boardGameId + '/leave', {
+            method: 'POST',
+            body: JSON.stringify({
+              playerID: gameCredentials[lobby.boardGameId].id,
+              credentials: gameCredentials[lobby.boardGameId].playerCredentials,
+            }),
+            headers: { 'Content-Type': 'application/json' },
+          })
+          if (leaveResp.status !== 200 && leaveResp.status !== 404) {
+            throw new Error('HTTP status ' + leaveResp.status)
           }
         }
       } else {

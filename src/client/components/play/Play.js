@@ -11,7 +11,7 @@ import LobbyList from './lobby/LobbyList'
 
 class Play extends Component {
   render() {
-    const { auth, currentLobby } = this.props
+    const { auth, currentLobby, loading } = this.props
 
     if (!auth.uid) return <Redirect to="/signIn" />
 
@@ -22,7 +22,14 @@ class Play extends Component {
         ) : (
           <div className="lobby-container">
             <CreateLobby />
-            <LobbyList />
+            {loading ? (
+              <div className="loading-panel align-center">
+                <img className="loader" alt="Loading..." />
+                Loading...
+              </div>
+            ) : (
+              <LobbyList />
+            )}
           </div>
         )}
       </Container>
@@ -34,6 +41,7 @@ const mapStateToProps = state => {
   return {
     auth: state.firebase.auth,
     currentLobby: state.firestore.data.currentLobby,
+    loading: state.ui.loading,
   }
 }
 
