@@ -15,8 +15,7 @@ class GameBoard extends Component {
       icon,
       'Loading...'
     )
-    let gameBoard = React.createElement('div', { className: 'game-board' }, loadingPanel)
-    return gameBoard
+    return loadingPanel
   }
 
   getRunningGame = () => {
@@ -29,7 +28,7 @@ class GameBoard extends Component {
     const app = Client({
       game: ResArcanaGame,
       board: ResArcanaBoard,
-      debug: false,
+      debug: true,
       loading,
       numPlayers: game.numberOfPlayers,
       multiplayer: { server: gameServerUrl },

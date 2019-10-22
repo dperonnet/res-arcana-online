@@ -1,4 +1,4 @@
-import { PlayerView, TurnOrder } from 'boardgame.io/core'
+import { PlayerView, Stage, TurnOrder } from 'boardgame.io/core'
 import { GameComponents } from '../../../../database'
 import logger from 'redux-logger'
 import { applyMiddleware } from 'redux'
@@ -334,6 +334,7 @@ const pickMage = (G, ctx, playerID, mageId) => {
  */
 const checkAllCardsDrafted = (G, ctx) => {
   console.log('[checkAllCardsDrafted] Call to checkAllCardsDrafted()')
+  let phase = 'draftPhase'
   let hasCardsToPass = false
   let needDealCards = true
   let playersReady = true
@@ -346,22 +347,18 @@ const checkAllCardsDrafted = (G, ctx) => {
       needStartingCards || (G.players[i].hand.length === 8 && G.publicData.players[i].status === 'DRAFTING_ARTEFACTS')
   }
   if (playersReady) {
-    console.log('[checkAllCardsDrafted] All players are ready, return "pickMagicItemPhase"')
-    return { next: 'pickMagicItemPhase' }
+    console.log('[checkAllCardsDrafted] All players are ready, set phase to "pickMagicItemPhase"')
+    phase = 'pickMagicItemPhase'
+  } else if (hasCardsToPass) {
+    console.log('[checkAllCardsDrafted] One Player at least has cards to pass, set phase to "drafPhase"')
+  } else if (needDealCards) {
+    console.log('[checkAllCardsDrafted] Players need new cards, set phase to "drafPhase"')
+  } else if (needStartingCards) {
+    console.log('[checkAllCardsDrafted]] One Player at least need his starting hand, set phase to "drafPhase"')
+  } else {
+    console.log('[checkAllCardsDrafted] One player at least has to pick cards, set phase to "drafPhase"')
   }
-  if (hasCardsToPass) {
-    console.log('[checkAllCardsDrafted] One Player at least has cards to pass, return "drafPhase"')
-    return { next: 'draftPhase' }
-  }
-  if (needDealCards) {
-    console.log('[checkAllCardsDrafted] Players need new cards, return "drafPhase"')
-    return { next: 'draftPhase' }
-  }
-  if (needStartingCards) {
-    console.log('[checkAllCardsDrafted]] One Player at least need his starting hand, return "drafPhase"')
-    return { next: 'draftPhase' }
-  }
-  console.log('[checkAllCardsDrafted] One player at least has to pick cards, return undefined')
+  ctx.events.setPhase(phase)
 }
 
 // ########## PICK MAGIC ITEM PHASE ##########
@@ -1210,50 +1207,61 @@ export const ResArcanaGame = {
       moves: { pickArtefact, pickMage },
       onBegin: (G, ctx) => initDraftPhase(G, ctx),
       endIf: (G, ctx) => checkAllCardsDrafted(G, ctx),
-      turnOrder: TurnOrder.ANY,
+      turn: {
+        activePlayers: { all: Stage.NULL },
+        order: TurnOrder.ANY,
+      },
     },
     pickMagicItemPhase: {
       onBegin: (G, ctx) => initPickMagicItemPhase(G, ctx),
       moves: { pickMagicItem },
-      turnOrder: {
-        first: (G, ctx) => getFirstPlayer(G, ctx, 'pickMagicItemPhase'),
-        next: (G, ctx) => getNextPlayerPickMagicItemPhase(G, ctx),
-        playOrder: (G, ctx) => getPickMagicItemPhaseTurnOrder(G, ctx),
+      turn: {
+        order: {
+          first: (G, ctx) => getFirstPlayer(G, ctx, 'pickMagicItemPhase'),
+          next: (G, ctx) => getNextPlayerPickMagicItemPhase(G, ctx),
+          playOrder: (G, ctx) => getPickMagicItemPhaseTurnOrder(G, ctx),
+        },
       },
       endIf: (G, ctx) => checkAllMagicItemsReady(G, ctx),
     },
     collectPhase: {
       onBegin: (G, ctx) => initCollectPhase(G, ctx),
       moves: { collectEssences },
-      turnOrder: {
-        first: (G, ctx) => getFirstPlayer(G, ctx, 'collectPhase'),
-        next: (G, ctx) => getNextPlayerCollectPhase(G, ctx),
-        playOrder: (G, ctx) => getCollectPhaseTurnOrder(G, ctx),
+      turn: {
+        order: {
+          first: (G, ctx) => getFirstPlayer(G, ctx, 'collectPhase'),
+          next: (G, ctx) => getNextPlayerCollectPhase(G, ctx),
+          playOrder: (G, ctx) => getCollectPhaseTurnOrder(G, ctx),
+        },
       },
       endIf: (G, ctx) => checkAllCollectsReady(G, ctx),
     },
     actionPhase: {
       onBegin: (G, ctx) => initActionPhase(G, ctx, 'flow.phases.actionPhase.onBegin'),
       moves: { placeComponent, discardArtefact, activatePower, pass },
-      turnOrder: {
-        onBegin: (G, ctx) => initActionTurn(G, ctx),
-        first: (G, ctx) => getFirstPlayer(G, ctx, 'actionPhase'),
-        next: (G, ctx) => getNextPlayerActionPhase(G, ctx),
-        playOrder: (G, ctx) => getActionPhaseTurnOrder(G, ctx),
-        endIf: (G, ctx) => checkMoveCompleted(G, ctx),
+      turn: {
+        order: {
+          onBegin: (G, ctx) => initActionTurn(G, ctx),
+          first: (G, ctx) => getFirstPlayer(G, ctx, 'actionPhase'),
+          next: (G, ctx) => getNextPlayerActionPhase(G, ctx),
+          playOrder: (G, ctx) => getActionPhaseTurnOrder(G, ctx),
+          endIf: (G, ctx) => checkMoveCompleted(G, ctx),
+        },
       },
       endIf: (G, ctx) => checkAllPlayersPassed(G, ctx),
     },
     checkVictoryPhase: {
       onBegin: (G, ctx) => initVictoryCheckPhase(G, ctx),
       moves: { activateVictoryCheckReactPower },
-      turnOrder: {
-        playOrder: (G, ctx) => getCheckVictoryPhaseTurnOrder(G, ctx, 'flow.phases.checkVictoryPhase.turnOrder'),
-        first: () => 0,
-        next: (G, ctx) => {
-          if (ctx.playOrderPos < ctx.playOrder.length - 1) {
-            return (ctx.playOrderPos + 1) % ctx.playOrder.length
-          }
+      turn: {
+        order: {
+          playOrder: (G, ctx) => getCheckVictoryPhaseTurnOrder(G, ctx, 'flow.phases.checkVictoryPhase.turnOrder'),
+          first: () => 0,
+          next: (G, ctx) => {
+            if (ctx.playOrderPos < ctx.playOrder.length - 1) {
+              return (ctx.playOrderPos + 1) % ctx.playOrder.length
+            }
+          },
         },
       },
       endIf: (G, ctx) => checkAllPlayerReacted(G, ctx),
