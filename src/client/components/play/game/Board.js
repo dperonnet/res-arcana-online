@@ -11,6 +11,7 @@ import {
   addToEssencePickerSelection,
   canPayCost,
   clearZoom,
+  delayAction,
   resetCollect,
   resetEssencePickerSelection,
   selectAction,
@@ -74,7 +75,7 @@ class ResArcanaBoard extends Component {
   }
 
   componentDidMount = () => {
-    console.log('componentDidMount')
+    //console.log('componentDidMount')
     this.props.resetCollect()
   }
 
@@ -167,6 +168,7 @@ class ResArcanaBoard extends Component {
     e.stopPropagation()
     //this.board.scrollTop = 0
     this.props.selectComponent(component)
+    this.props.delayAction()
 
     if (component) {
       let canPayCost
@@ -285,6 +287,12 @@ class ResArcanaBoard extends Component {
     this.props.events.endTurn()
   }
 
+  delayAction = fn => {
+    const { delayAction } = this.props
+    console.log('call to delayAction')
+    delayAction(fn)
+  }
+
   /**
    * Trigger the discard artefact move.
    */
@@ -327,6 +335,7 @@ class ResArcanaBoard extends Component {
   }
 
   clearSelection = () => {
+    this.props.delayAction()
     this.props.selectComponent(undefined)
     this.props.selectAction(undefined)
     this.props.selectActionPower(undefined)
@@ -1729,12 +1738,13 @@ class ResArcanaBoard extends Component {
     if (selectedComponent.costEssenceList.length > 0) {
       essences = selectedComponent.costEssenceList.map((essence, index) => {
         let singleEssence = selectedComponent.costEssenceList.length === 1 ? ' single-essence' : ''
-        console.log(
-          'costValid[essence.type]',
-          costValid[essence.type],
-          costValid.isValid,
-          costValid[essence.type] || costValid.isValid
-        )
+        false &&
+          console.log(
+            'costValid[essence.type]',
+            costValid[essence.type],
+            costValid.isValid,
+            costValid[essence.type] || costValid.isValid
+          )
         let payOk = costValid[essence.type] || costValid.isValid ? <div className="pay-ok"></div> : null
         return (
           <div key={index} className={'essence ' + essence.type + singleEssence}>
@@ -1902,6 +1912,8 @@ class ResArcanaBoard extends Component {
       anyEssencesRequired.length === 0 && costEssenceList.filter(essence => essence.type !== 'any').length === 1
     const zeroDiscountLeft = anyEssencesRequired.length === 0 && sumDiscount === 0
 
+    let debug = false
+
     // Different ways to determine if the cost is fixed if the componant can be paid.
     if (valid) {
       let preSelection = []
@@ -1909,14 +1921,14 @@ class ResArcanaBoard extends Component {
 
       // if there is no discount and no type 'any' in cost list.
       if (noAnyNoDiscount) {
-        console.log('1) noAnyNoDiscount')
+        debug && console.log('1) noAnyNoDiscount')
         preSelection = costEssenceList
       }
 
       // if the discount is greater than the cost.
       // The player only have to pay gold if there is any gold to pay.
       else if (discountGTCost) {
-        console.log('2) discountGTCost')
+        debug && console.log('2) discountGTCost')
         preSelection = costEssenceList.filter(essence => essence.type === 'gold')
       }
 
@@ -1924,7 +1936,7 @@ class ResArcanaBoard extends Component {
       // the player have to pay with every essences available.
       else if (costEQAvailable) {
         preSelection = []
-        console.log('3) costEQAvailable')
+        debug && console.log('3) costEQAvailable')
         Object.keys(availableEssencePool).forEach(type => {
           preSelection.push({ type, quantity: availableEssencePool[type] })
         })
@@ -1932,7 +1944,7 @@ class ResArcanaBoard extends Component {
 
       // if there is only one type of essence required to pay the placement cost.
       else if (onlyOneCostTypeRequired) {
-        console.log('4) onlyOneCostTypeRequired')
+        debug && console.log('4) onlyOneCostTypeRequired')
         let essenceRequired = essencesRequired[0]
         essenceRequired.quantity = essenceRequired.quantity - maxDiscount
         preSelection = [essenceRequired]
@@ -1940,7 +1952,7 @@ class ResArcanaBoard extends Component {
 
       // if there is only one available type of essence to pay the any part of the placement cost.
       else if (anyEssenceRequired.quantity > 0 && couldPayAnyWith.length === 1) {
-        console.log('5) anyEssenceRequired.quantity > 0 && couldPayAnyWith.length === 1')
+        debug && console.log('5) anyEssenceRequired.quantity > 0 && couldPayAnyWith.length === 1')
         preSelection = payAsMuchAsPossible
         couldPayAnyWith.forEach(essence => {
           let asAnyEssence = preSelection.filter(item => item.type === essence.type)
@@ -1954,9 +1966,9 @@ class ResArcanaBoard extends Component {
 
       // if the number of essences that are available to pay the any part of the placement cost equals the amount of this any part.
       else if (anyEssenceRequired.quantity > 0 && anyEssenceRequired.quantity - sumDiscount === anyEssencePool) {
-        console.log('6) anyEssenceRequired.quantity > 0 && anyEssenceRequired.quantity === anyEssencePool')
+        debug && console.log('6) anyEssenceRequired.quantity > 0 && anyEssenceRequired.quantity === anyEssencePool')
         preSelection = payAsMuchAsPossible
-        console.log('couldPayAnyWith', couldPayAnyWith, preSelection)
+        debug && console.log('couldPayAnyWith', couldPayAnyWith, preSelection)
         couldPayAnyWith.forEach(essence => {
           let asAnyEssence = preSelection.filter(item => item.type === essence.type)
           if (asAnyEssence.length > 0) {
@@ -1969,21 +1981,21 @@ class ResArcanaBoard extends Component {
 
       // if the discount left equals 0 after paying as much essence as possible
       else if (zeroDiscountLeft) {
-        console.log('7) zeroDiscountLeft')
+        debug && console.log('7) zeroDiscountLeft')
         preSelection = payAsMuchAsPossible
         let goldCost = costEssenceList.filter(essence => essence.type === 'gold')
         if (goldCost.length > 0) {
           preSelection.push(goldCost[0])
         }
       } else {
-        console.log('99) Can not fix the cost')
+        debug && console.log('99) Can not fix the cost')
         fixedCost = false
       }
 
       preSelection.forEach(essence => (fixedCost[essence.type] = essence.quantity))
     }
 
-    console.log('res', { valid, minEssencePayList, enabledEssencesList, fixedCost })
+    debug && console.log('res', { valid, minEssencePayList, enabledEssencesList, fixedCost })
     return { valid, minEssencePayList, enabledEssencesList, fixedCost }
   }
 
@@ -2156,7 +2168,10 @@ class ResArcanaBoard extends Component {
    */
   renderCurrentAction = () => {
     const {
+      actionQueued,
+      ctx,
       essencePickerSelection,
+      playerID,
       profile,
       selectAction,
       selectActionPower,
@@ -2174,6 +2189,8 @@ class ResArcanaBoard extends Component {
       selectAction(undefined)
       this.handleClick(event, undefined)
     }
+
+    let waiting = playerID !== ctx.currentPlayer
 
     switch (selectedAction) {
       case 'PASS':
@@ -2242,7 +2259,7 @@ class ResArcanaBoard extends Component {
       default:
     }
 
-    const confirmButton = showConfirmButton && (
+    const activeButton = showConfirmButton && (
       <div
         className={'action-button' + (handleConfirm ? ' valid' : ' disabled')}
         onClick={handleConfirm}
@@ -2251,6 +2268,26 @@ class ResArcanaBoard extends Component {
         Confirm
       </div>
     )
+    const waitingButton = (
+      <div
+        className={'action-button' + (handleConfirm ? ' valid' : ' disabled')}
+        onClick={() => this.delayAction(handleConfirm)}
+        disabled={!handleConfirm}
+      >
+        <div className="p-absolute">
+          Confirm
+          {actionQueued && (
+            <p className="saving">
+              <span>.</span>
+              <span>.</span>
+              <span>.</span>
+            </p>
+          )}
+        </div>
+      </div>
+    )
+
+    const confirmButton = waiting ? waitingButton : activeButton
     const cancelButton = (
       <div className="action-button" onClick={handleCancel}>
         Cancel
@@ -2418,6 +2455,7 @@ const mapStateToProps = state => {
     game: state.firestore.ordered.game && state.firestore.ordered.game[0],
     profile: state.firebase.profile,
 
+    actionQueued: state.game.actionQueued,
     canPayCost: state.game.canPayCost,
     commonBoardDisplay: state.game.commonBoardDisplay,
     cardToZoom: state.game.zoomCard,
@@ -2435,6 +2473,7 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => {
   return {
     addToSelection: (selectionType, essenceType) => dispatch(addToEssencePickerSelection(selectionType, essenceType)),
+    delayAction: fn => dispatch(delayAction(fn)),
     setCanPayCost: info => dispatch(canPayCost(info)),
     clearZoom: () => dispatch(clearZoom()),
     resetCollect: () => dispatch(resetCollect()),

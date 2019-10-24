@@ -18,6 +18,7 @@ const initState = {
   canPayCost: {
     valid: false,
   },
+  actionQueued: null,
   targetedComponent: undefined,
 }
 
@@ -118,10 +119,12 @@ const gameReducer = (state = initState, action) => {
     case 'SET_ACTION':
       return Object.assign({}, state, {
         selectedAction: action.action,
+        actionQueued: null,
       })
     case 'SET_ACTION_POWER':
       return Object.assign({}, state, {
         selectedActionPower: action.actionPowerIndex,
+        actionQueued: null,
       })
     case 'RESET_ESSENCE_PICKER':
       if (action.selectionType) {
@@ -137,6 +140,7 @@ const gameReducer = (state = initState, action) => {
       }
       return Object.assign({}, state, {
         essencePickerSelection,
+        actionQueued: null,
       })
     case 'ADD_ESSENCE_TO_SELECTION':
       essencePickerSelection = JSON.parse(JSON.stringify(state.essencePickerSelection))
@@ -163,6 +167,11 @@ const gameReducer = (state = initState, action) => {
       return {
         ...state,
         commonBoardDisplay: !state.commonBoardDisplay,
+      }
+    case 'DELAY_ACTION':
+      return {
+        ...state,
+        actionQueued: action.fn || null,
       }
     default:
       return state

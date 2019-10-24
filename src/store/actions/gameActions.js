@@ -408,3 +408,10 @@ export function toggleCommonBoard() {
     type: 'TOGGLE_COMMON_BOARD',
   }
 }
+
+export function delayAction(fn) {
+  return {
+    type: 'DELAY_ACTION',
+    fn,
+  }
+}

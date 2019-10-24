@@ -22,7 +22,7 @@ export const createGameLobby = gameOptions => {
     newGameLobby.players[creatorId] = {
       inLobby: true,
       name: profile.login,
-      ready: false,
+      ready: true,
     }
     for (let i = 1; i < gameOptions.numberOfPlayers; i++) {
       newGameLobby.seats[i] = -1
@@ -166,19 +166,21 @@ export const joinLobby = (lobbyId, takeSeat, seatIndex) => {
           players[playerId] = {
             inLobby: true,
             name: profile.login,
-            ready: false,
+            ready: true,
           }
 
           canTakeSeat = gameNotStarted && gameIsNotFull && takeSeat
 
-          if (canTakeSeat) {
+          if (playerId !== lobby.creatorId) {
             // remove the player from seats
             for (let i = 0; i < seats.length; i++) {
               if (seats[i] === playerId) {
                 seats[i] = -1
               }
             }
+          }
 
+          if (canTakeSeat) {
             // if player want an available seat
             if (seatIndex && seats[seatIndex] === -1) {
               seats[seatIndex] = playerId
@@ -278,27 +280,35 @@ export const leaveLobby = lobbyId => {
       let seats = lobby.seats
 
       // If the game has not started yet,
-      if (lobby.status !== 'PENDING') {
-        if (seats.includes(playerId) && gameCredentials[lobby.boardGameId]) {
-          let leaveResp = await fetch(gameServerUrl + '/games/' + lobby.gameName + '/' + lobby.boardGameId + '/leave', {
-            method: 'POST',
-            body: JSON.stringify({
-              playerID: gameCredentials[lobby.boardGameId].id,
-              credentials: gameCredentials[lobby.boardGameId].playerCredentials,
-            }),
-            headers: { 'Content-Type': 'application/json' },
-          })
-          if (leaveResp.status !== 200 && leaveResp.status !== 404) {
-            throw new Error('HTTP status ' + leaveResp.status)
+      try {
+        if (lobby.status !== 'PENDING') {
+          if (seats.includes(playerId) && gameCredentials[lobby.boardGameId]) {
+            let leaveResp = await fetch_retry(
+              gameServerUrl + '/games/' + lobby.gameName + '/' + lobby.boardGameId + '/leave',
+              {
+                method: 'POST',
+                body: JSON.stringify({
+                  playerID: gameCredentials[lobby.boardGameId].id,
+                  credentials: gameCredentials[lobby.boardGameId].playerCredentials,
+                }),
+                headers: { 'Content-Type': 'application/json' },
+              },
+              4
+            )
+            if (leaveResp.status !== 200 && leaveResp.status !== 404) {
+              throw new Error('HTTP status ' + leaveResp.status)
+            }
+          }
+        } else {
+          // remove the player from seats
+          for (let i = 0; i < seats.length; i++) {
+            if (seats[i] === playerId) {
+              seats[i] = -1
+            }
           }
         }
-      } else {
-        // remove the player from seats
-        for (let i = 0; i < seats.length; i++) {
-          if (seats[i] === playerId) {
-            seats[i] = -1
-          }
-        }
+      } catch (err) {
+        console.log('Error on fetch /leave', err)
       }
 
       delete gameCredentials[lobby.boardGameId]
@@ -429,5 +439,14 @@ export const startGame = lobbyId => {
       let status = 'STARTED'
       return transaction.update(lobbyRef, { boardGameId, numberOfPlayers, seats, status })
     })
+  }
+}
+
+const fetch_retry = async (url, options, n) => {
+  try {
+    return await fetch(url, options)
+  } catch (err) {
+    if (n === 1) throw err
+    return await fetch_retry(url, options, n - 1)
   }
 }

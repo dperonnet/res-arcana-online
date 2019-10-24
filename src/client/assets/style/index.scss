@@ -120,10 +120,6 @@ $main-color: #FF0000;
 
 .p-absolute {
   position: absolute;
-  width: 410px;
-  height: 45px;
-  margin: auto;
-  display: flex;
 }
 
 .pending-border {
@@ -192,4 +188,38 @@ $main-color: #FF0000;
 
 .p-relative {
   position: relative;
+}
+
+// queued Action animation
+@keyframes blink {
+  0% {
+    opacity: .2;
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    opacity: .2;
+  }
+}
+
+.saving {
+  margin-bottom: 0;
+  margin-left: 3px;
+  position: absolute;
+  right: -15px;
+  top: 0px;
+
+  span {
+    animation-name: blink;
+    animation-duration: 1.4s;
+    animation-iteration-count: infinite;
+    animation-fill-mode: both;
+  }
+  span:nth-child(2) {
+    animation-delay: .2s;
+  }
+  span:nth-child(3) {
+    animation-delay: .4s;
+  }
 }

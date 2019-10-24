@@ -40,7 +40,7 @@ class GameBoard extends Component {
       playerID: gameInfo && gameInfo.id >= 0 ? gameInfo.id.toString() : 'Spectator',
       credentials: gameInfo && gameInfo.playerCredentials ? gameInfo.playerCredentials : null,
     }
-    console.log('runningGame', runningGame)
+
     return runningGame
   }
 

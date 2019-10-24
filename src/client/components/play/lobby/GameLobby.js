@@ -172,7 +172,7 @@ class GameLobby extends Component {
                   </>
                 ) : (
                   <>
-                    <Button variant="secondary" size="sm" onClick={this.handleWatchGame}>
+                    <Button variant="secondary" size="sm" disabled={isSpectator} onClick={this.handleWatchGame}>
                       Watch
                     </Button>
                     <Button variant="secondary" size="sm" onClick={this.handleLeaveLobby}>
