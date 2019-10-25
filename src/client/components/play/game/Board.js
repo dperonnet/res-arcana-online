@@ -272,10 +272,23 @@ class ResArcanaBoard extends Component {
     const { isActive } = this.props
     if (isActive) {
       this.props.moves.pickMagicItem(cardId)
+      this.props.events.endTurn()
     }
     this.props.selectComponent(undefined)
     this.props.setCanPayCost({})
     this.handleBoardClick()
+  }
+
+  /**
+   * Trigger the draw starting card move.
+   */
+  drawStartingCards = () => {
+    console.log('call to drawStartingCards()')
+    const { isActive, playerID } = this.props
+    if (isActive) {
+      this.props.moves.drawStartingCards(playerID)
+    }
+    this.clearSelection()
   }
 
   /**
@@ -512,12 +525,14 @@ class ResArcanaBoard extends Component {
   renderChat = () => {
     const { chat, game } = this.props
     return (
-      <>
-        <Chat chat={chat} chatId={game.id} chatName={game.name + ' Chat'} />
-        <div className="close close-chat" onClick={this.handleToggleChat}>
-          <FontAwesomeIcon icon={faTimes} size="lg" />
-        </div>
-      </>
+      false && (
+        <>
+          <Chat chat={chat} chatId={game.id} chatName={game.name + ' Chat'} />
+          <div className="close close-chat" onClick={this.handleToggleChat}>
+            <FontAwesomeIcon icon={faTimes} size="lg" />
+          </div>
+        </>
+      )
     )
   }
 
@@ -726,7 +741,7 @@ class ResArcanaBoard extends Component {
     let drawPileAndDiscard = this.renderPlayerDrawPileAndDiscard(id)
     let essencesOnComponent = null
     let turnedComponents = G.publicData.turnedComponents
-    let status = playerID !== 'Spectator' ? G.publicData.players[playerID].status : 'READY'
+    let status = playerID !== 'Spectator' ? G.publicData.players[playerID].status : 'DRAFT_READY'
     switch (status) {
       case 'DRAFTING_ARTEFACTS': {
         const mages = G.players[playerID].mages.map(card => {
@@ -745,7 +760,7 @@ class ResArcanaBoard extends Component {
       }
       case 'SELECTING_MAGE':
         break
-      case 'READY':
+      case 'DRAFT_READY':
       default: {
         let handleClick
         if (G.phase === 'PLAY_PHASE' && playerID === id) {
@@ -817,7 +832,7 @@ class ResArcanaBoard extends Component {
 
     let boards = null
     let drawPileAndDiscard = id => this.renderPlayerDrawPileAndDiscard(id)
-    let status = playerID !== 'Spectator' ? G.publicData.players[playerID].status : 'READY'
+    let status = playerID !== 'Spectator' ? G.publicData.players[playerID].status : 'DRAFT_READY'
     switch (status) {
       case 'DRAFTING_ARTEFACTS':
       case 'SELECTING_MAGE':
@@ -826,7 +841,7 @@ class ResArcanaBoard extends Component {
           let cards = []
           let cardMage = copy(CARD_BACK_MAGE)
           cards.push(this.renderGameComponent({ ...cardMage, id: 'back_mage_1' }))
-          if (G.publicData.players[id].status !== 'READY') {
+          if (G.publicData.players[id].status !== 'DRAFT_READY') {
             cards.push(this.renderGameComponent({ ...cardMage, id: '_back_mage_2' }))
           }
           return (
@@ -840,7 +855,9 @@ class ResArcanaBoard extends Component {
           )
         })
         break
-      case 'READY':
+      case 'DRAFT_READY':
+      case 'MAGIC_ITEM_READY':
+      case 'COLLECT_READY':
       default:
         boards = othersId.map(id => {
           const playerRuban = this.renderPlayerRuban(id)
@@ -880,11 +897,12 @@ class ResArcanaBoard extends Component {
     let waitingFor = 'Waiting for '
 
     if (playerID === 'Spectator') {
-      G.publicData.waitingFor.forEach((id, index) => {
-        let isLastPlayer = index === G.publicData.waitingFor.length - 1
-        let waitingAtLeastTwoPlayers = G.publicData.waitingFor.length > 1
-        let beforeLastPlayer = index === G.publicData.waitingFor.length - 2
-        waitingFor += playersName[parseInt(id)]
+      const playersNotReady = Object.entries(G.publicData.players).filter(player => player[1].status !== 'DRAFT_READY')
+      playersNotReady.forEach((player, index) => {
+        let isLastPlayer = index === playersNotReady.length - 1
+        let waitingAtLeastTwoPlayers = playersNotReady.length > 1
+        let beforeLastPlayer = index === playersNotReady.length - 2
+        waitingFor += playersName[parseInt(player[0])]
         waitingFor += isLastPlayer ? '.' : waitingAtLeastTwoPlayers && beforeLastPlayer ? ' and ' : ', '
       })
 
@@ -905,8 +923,9 @@ class ResArcanaBoard extends Component {
     let hand = null
     let directive = null
     let handleConfirm = null
-    const lastDraftCard =
-      G.players[playerID].draftCards.length && Object.values(G.players[playerID].draftCards[0]).length === 1
+    let enableConfirm = selectedComponent
+    let enableCancel = true
+
     const nextPlayer = this.getNextPlayer()
 
     switch (G.publicData.players[playerID].status) {
@@ -926,6 +945,9 @@ class ResArcanaBoard extends Component {
             })
           })
 
+        let lastDraftCard =
+          G.players[playerID].draftCards.length && Object.values(G.players[playerID].draftCards[0]).length !== 1
+
         directive = selectedComponent ? (
           <h5 className="directive">
             Keep {selectedComponent.name} {!lastDraftCard && 'and pass the rest to ' + nextPlayer + ' ?'}
@@ -941,7 +963,28 @@ class ResArcanaBoard extends Component {
           waitingFor += playersName[parseInt(id)]
           waitingFor += isLastPlayer ? '.' : waitingAtLeastTwoPlayers && beforeLastPlayer ? ' and ' : ', '
         })
+
         handleConfirm = () => this.pickArtefact(selectedComponent.id)
+        enableCancel = !lastDraftCard
+
+        break
+      }
+      case 'CARD_OVERVIEW': {
+        title += ' - Cards overview'
+
+        directive = <h5 className="directive">Are you ready to draw your starting cards ?</h5>
+        enableConfirm = true
+        handleConfirm = () => this.drawStartingCards()
+        enableCancel = false
+
+        let components = copy(G.players[playerID].mages)
+        Object.values(G.players[playerID].hand).forEach(artefact => components.push(copy(artefact)))
+
+        draftCards = components.map(card => {
+          card.hasCost = false
+          return this.renderGameComponent(card, {})
+        })
+
         break
       }
       case 'SELECTING_MAGE':
@@ -965,12 +1008,12 @@ class ResArcanaBoard extends Component {
         hand = this.renderPlayerHand()
 
         break
-      case 'READY': {
+      case 'DRAFT_READY': {
         title = 'Get Ready to pick your magic item'
         showCards = false
 
         const playersNotReady = Object.entries(G.publicData.players).filter(player => {
-          return player[1].status !== 'READY'
+          return player[1].status !== 'DRAFT_READY'
         })
         playersNotReady.forEach((player, index) => {
           let isLastPlayer = index === playersNotReady.length - 1
@@ -989,14 +1032,17 @@ class ResArcanaBoard extends Component {
 
     const confirmButton = (
       <div
-        className={'action-button' + (selectedComponent ? ' valid' : ' disabled')}
-        onClick={selectedComponent && handleConfirm}
+        className={'action-button' + (enableConfirm ? ' valid' : ' disabled')}
+        onClick={enableConfirm && handleConfirm}
       >
         Confirm
       </div>
     )
-    const cancelButton = !lastDraftCard && (
-      <div className="action-button" onClick={selectedComponent && (event => this.handleClick(event))}>
+    const cancelButton = (
+      <div
+        className={'action-button' + (enableCancel ? ' valid' : ' disabled')}
+        onClick={selectedComponent && (event => this.handleClick(event))}
+      >
         Cancel
       </div>
     )
@@ -1064,7 +1110,7 @@ class ResArcanaBoard extends Component {
         directive = <h5 className="directive">Select a Magic Item.</h5>
         handleConfirm = () => this.pickMagicItem(selectedComponent.id)
         break
-      case 'READY':
+      case 'MAGIC_ITEM_READY':
       default:
         title = 'Get Ready for the battle'
         showButtons = false
@@ -1232,7 +1278,7 @@ class ResArcanaBoard extends Component {
         directive = <h5 className="directive">You have no collect option.</h5>
         showButtons = false
         break
-      case 'READY':
+      case 'COLLECT_READY':
       default:
         showButtons = false
     }

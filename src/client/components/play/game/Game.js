@@ -17,6 +17,7 @@ colors.setTheme({
   next: 'brightCyan',
   playOrder: 'cyan',
   setup: 'brightCyan',
+  alert: 'red',
 })
 /*
 var available = [
@@ -44,6 +45,7 @@ for (var color in available) {
 }
 /**/
 
+const debug = false
 console.log('############## GAME #############'.bgMagenta.yellow.bold)
 
 /**
@@ -134,7 +136,6 @@ const getInitialState = (ctx, setupData) => {
   // Define the first player
   G.publicData.firstPlayer = (ctx.random.Die(ctx.numPlayers) - 1).toString()
 
-  const debug = false
   const skipDraft = setupData && setupData.skipDraftPhase
 
   if (debug && skipDraft) {
@@ -172,9 +173,10 @@ const skipDraftPhase = (G, ctx) => {
   for (let i = 0; i < ctx.numPlayers; i++) {
     G.players[i].reminder = G.secret.artefactsInGameStack.slice(0, 8)
     G.secret.artefactsInGameStack.splice(0, 8)
-    G.players[i].deck = ctx.random.Shuffle(G.players[i].reminder)
+    G.players[i].hand = ctx.random.Shuffle(G.players[i].reminder)
     G.publicData.players[i].deckSize = G.players[i].deck.length
     G.publicData.players[i].handSize = G.players[i].hand.length
+    G.publicData.players[i].status = 'CARD_OVERVIEW'
   }
 }
 
@@ -190,7 +192,7 @@ const debugSkipDraftPhase = (G, ctx) => {
     G.players[i].hand = G.players[i].deck.splice(0, 3)
     G.publicData.players[i].mage = G.players[i].mages[0]
     G.publicData.players[i].inPlay.push(G.players[i].mages[0])
-    G.publicData.players[i].status = 'READY'
+    G.publicData.players[i].status = 'DRAFT_READY'
     G.publicData.players[i].inPlay.push(G.players[i].deck[0])
     G.publicData.players[i].inPlay.push(G.players[i].deck[1])
     G.publicData.players[i].inPlay.push(G.players[i].deck[2])
@@ -236,22 +238,24 @@ const initDraftPhase = (G, ctx) => {
   G.phase = 'DRAFT_PHASE'
   console.log('[onPhaseBegin] initDraftPhase()'.onPhaseBegin)
   let dealNewCards = true
+  let passDeniedCards = false
   for (let i = 0; i < ctx.numPlayers; i++) {
     dealNewCards =
-      dealNewCards && Object.keys(G.players[i].deniedCards).length === 0 && G.players[i].draftCards.length === 0
+      dealNewCards &&
+      Object.keys(G.players[i].deniedCards).length === 0 &&
+      G.players[i].draftCards.length === 0 &&
+      G.publicData.players[i].status !== 'CARD_OVERVIEW'
+    if (Object.keys(G.players[i].deniedCards).length > 0) {
+      passDeniedCards = true
+    }
   }
-  let getStartingCards = false
-  for (let i = 0; i < ctx.numPlayers; i++) {
-    getStartingCards =
-      getStartingCards || (G.players[i].hand.length === 8 && G.publicData.players[i].status === 'DRAFTING_ARTEFACTS')
+
+  if (passDeniedCards) {
+    getNextCards(G, ctx)
   }
-  if (getStartingCards) {
-    drawStartingCards(G, ctx)
-  } else if (dealNewCards) {
+  if (dealNewCards) {
     G.draftWay = G.draftWay && G.draftWay === 'toLeftPlayer' ? 'toRightPlayer' : 'toLeftPlayer'
     dealDraftCards(G, ctx)
-  } else {
-    getNextCards(G, ctx)
   }
   return G
 }
@@ -268,6 +272,17 @@ const dealDraftCards = (G, ctx) => {
     G.secret.artefactsInGameStack.splice(0, 4) // remove 4 cards from pile
     G.players[i].draftCards.push(newDraftHand) // deal 4 cards to player
     G.publicData.waitingFor.push(i)
+  }
+
+  for (let i = 0; i < ctx.numPlayers; i++) {
+    G.players[i].draftCards.forEach((draftCardPile, index) => {
+      let str = '[player ' + i + '] ' + index + ') ['
+      Object.keys(draftCardPile).forEach(card => {
+        str += card + ','
+      })
+      str += ']'
+      console.log(str.alert)
+    })
   }
   return G
 }
@@ -288,25 +303,36 @@ const getNextCards = (G, ctx) => {
       }
     }
   }
+
+  for (let i = 0; i < ctx.numPlayers; i++) {
+    G.players[i].draftCards.forEach((draftCardPile, index) => {
+      let str = '[player ' + i + '] ' + index + ') ['
+      Object.keys(draftCardPile).forEach(card => {
+        str += card + ','
+      })
+      str += ']'
+      console.log(str.alert)
+    })
+  }
   return G
 }
 
 /**
+ * Role: Move
  * Shuffle player's decks then draw 3 cards and place them in players hand.
+ * The player is now ready to pick a mage.
+ *
+ * @param {*} playerID player checking card overview.
  */
-const drawStartingCards = (G, ctx) => {
-  console.log('[onPhaseBegin]'.onPhaseBegin, 'drawStartingCards()')
-  for (let i = 0; i < ctx.numPlayers; i++) {
-    if (G.players[i].hand.length === 8) {
-      G.players[i].reminder = copy(G.players[i].hand)
-      G.players[i].deck = ctx.random.Shuffle(G.players[i].hand)
-      G.players[i].hand = G.players[i].deck.slice(0, 3)
-      G.players[i].deck.splice(0, 3)
-      G.publicData.players[i].status = 'SELECTING_MAGE'
-      G.publicData.players[i].deckSize = G.players[i].deck.length
-      G.publicData.players[i].handSize = G.players[i].hand.length
-    }
-  }
+const drawStartingCards = (G, ctx, playerID) => {
+  console.log('[move] drawStartingCards()'.move, 'The player', playerID, 'draw 3 cards')
+  G.players[playerID].reminder = copy(G.players[playerID].hand)
+  G.players[playerID].deck = ctx.random.Shuffle(G.players[playerID].hand)
+  G.players[playerID].hand = G.players[playerID].deck.slice(0, 3)
+  G.players[playerID].deck.splice(0, 3)
+  G.publicData.players[playerID].status = 'SELECTING_MAGE'
+  G.publicData.players[playerID].deckSize = G.players[playerID].deck.length
+  G.publicData.players[playerID].handSize = G.players[playerID].hand.length
   return G
 }
 
@@ -342,6 +368,9 @@ const pickArtefact = (G, ctx, playerID, cardId) => {
   if (G.players[playerID].draftCards.length === 0) {
     G.publicData.waitingFor.splice(G.publicData.waitingFor.indexOf(parseInt(playerID)), 1)
   }
+  if (G.publicData.players[playerID].handSize) {
+    G.publicData.players[playerID].status = 'CARD_OVERVIEW'
+  }
   return G
 }
 
@@ -361,11 +390,11 @@ const pickMage = (G, ctx, playerID, mageId) => {
     })[0]
   )
   G.publicData.players[playerID].mage = selectedCard
-  if (G.players[playerID].draftCards.length === 0) {
+  if (G.publicData.waitingFor.indexOf(parseInt(playerID)) > -1) {
     G.publicData.waitingFor.splice(G.publicData.waitingFor.indexOf(parseInt(playerID)), 1)
   }
   G.publicData.players[playerID].inPlay.push(selectedCard)
-  G.publicData.players[playerID].status = 'READY'
+  G.publicData.players[playerID].status = 'DRAFT_READY'
   return G
 }
 
@@ -383,7 +412,7 @@ const checkAllCardsDrafted = (G, ctx) => {
   for (let i = 0; i < ctx.numPlayers; i++) {
     hasCardsToPass = hasCardsToPass || Object.keys(G.players[i].deniedCards).length > 0
     needDealCards = needDealCards && G.players[i].hand.length === 4 && G.players[i].draftCards.length === 0
-    playersReady = playersReady && G.publicData.players[i].status === 'READY'
+    playersReady = playersReady && G.publicData.players[i].status === 'DRAFT_READY'
     needStartingCards =
       needStartingCards || (G.players[i].hand.length === 8 && G.publicData.players[i].status === 'DRAFTING_ARTEFACTS')
   }
@@ -457,7 +486,7 @@ const pickMagicItem = (G, ctx, magicItemId) => {
   G.publicData.players[playerID].magicItem = selectedItem
   G.publicData.players[playerID].inPlay.push(selectedItem)
   G.publicData.magicItems.splice(selectedItemIndex, 1)
-  G.publicData.players[playerID].status = 'READY'
+  G.publicData.players[playerID].status = 'MAGIC_ITEM_READY'
   return G
 }
 
@@ -472,7 +501,7 @@ const checkAllMagicItemsReady = (G, ctx) => {
   let playersReady = true
   for (let i = 0; i < ctx.numPlayers; i++) {
     magicItemsReady = magicItemsReady && G.publicData.players[i].magicItem
-    playersReady = playersReady && G.publicData.players[i].status === 'READY'
+    playersReady = playersReady && G.publicData.players[i].status === 'MAGIC_ITEM_READY'
   }
   if (magicItemsReady && playersReady) {
     console.log('[endPhaseIf]'.endPhaseIf, ' All players are ready, got to next phase')
@@ -488,7 +517,8 @@ const checkAllMagicItemsReady = (G, ctx) => {
  */
 const getPickMagicItemPhaseTurnOrder = (G, ctx) => {
   let order = getTurnOrder(G, ctx).reverse()
-  console.log('[playOrder]'.playOrder, ' Pick Magic Item phase order :', order)
+  console.log('[playOrder] getPickMagicItemPhaseTurnOrder()'.playOrder)
+  console.log('[playOrder]'.playOrder, 'Pick Magic Item phase order :', order)
   return order
 }
 
@@ -498,7 +528,8 @@ const getPickMagicItemPhaseTurnOrder = (G, ctx) => {
  */
 const getNextPlayerPickMagicItemPhase = (G, ctx) => {
   let nextPlayerPos = (ctx.playOrderPos + 1) % ctx.numPlayers
-  console.log('[Next]'.next, ' Pick magic item next player pos :', nextPlayerPos)
+  console.log('[Next] getNextPlayerPickMagicItemPhase()'.next)
+  console.log('[Next]'.next, 'Pick magic item next player pos :', nextPlayerPos)
   return nextPlayerPos
 }
 
@@ -639,7 +670,7 @@ const collectEssences = (G, ctx, collectActions, collectOnComponentActions) => {
     }
   }
 
-  G.publicData.players[playerID].status = 'READY'
+  G.publicData.players[playerID].status = 'COLLECT_READY'
   G.players[playerID].uiTemp.collectActions = collectActions
   G.players[playerID].uiTemp.collectOnComponentActions = collectOnComponentActions
   return G
@@ -682,8 +713,9 @@ const removeAllFromComponent = (G, playerID, componentId) => {
  * During collect phase, return the next player's id.
  */
 const getNextPlayerCollectPhase = (G, ctx) => {
+  console.log('[Next] getNextPlayerCollectPhase()'.next)
   let nextPlayerPos = (ctx.playOrderPos + 1) % ctx.playOrder.length
-  console.log('[Next]'.next, ' collect phase next player pos :', nextPlayerPos)
+  console.log('[Next]'.next, 'Collect phase next player pos :', nextPlayerPos)
   return nextPlayerPos
 }
 
@@ -699,15 +731,14 @@ const checkAllCollectsReady = (G, ctx) => {
     console.log('[endPhaseIf]'.endPhaseIf, 'G.publicData.players[i].status', i, G.publicData.players[i].status)
     playersReady =
       playersReady &&
-      (G.publicData.players[i].status === 'READY' || G.publicData.players[i].status === 'NOTHING_TO_COLLECT')
+      (G.publicData.players[i].status === 'COLLECT_READY' || G.publicData.players[i].status === 'NOTHING_TO_COLLECT')
   }
   if (playersReady) {
     console.log('[endPhaseIf]'.endPhaseIf, ' All players are ready, return true')
-    return true
   } else {
     console.log('[endPhaseIf]'.endPhaseIf, ' One player at least is not ready, return false')
-    return false
   }
+  return playersReady
 }
 
 /**
@@ -715,7 +746,7 @@ const checkAllCollectsReady = (G, ctx) => {
  * Define the turn order for the collect phase.
  */
 const getCollectPhaseTurnOrder = (G, ctx) => {
-  console.log('[playOrder]'.playOrder, 'getCollectPhaseTurnOrder()')
+  console.log('[playOrder] getCollectPhaseTurnOrder()'.playOrder)
   let firstPlayer = G.publicData.firstPlayer
   let order = []
 
@@ -751,7 +782,7 @@ const getCollectPhaseTurnOrder = (G, ctx) => {
       order.push(nextPlayerId.toString())
     }
   }
-  console.log('[playOrder]'.playOrder, ' Collect phase order :', order)
+  console.log('[playOrder]'.playOrder, 'Collect phase order :', order)
   return order
 }
 
@@ -1051,7 +1082,8 @@ const placeComponent = (G, ctx, type, id, essenceList) => {
  */
 const getActionPhaseTurnOrder = (G, ctx) => {
   const order = getTurnOrder(G, ctx)
-  console.log('[playOrder]'.playOrder, ' Action phase order :', order)
+  console.log('[playOrder] getActionPhaseTurnOrder()'.playOrder)
+  console.log('[playOrder]'.playOrder, 'Action phase order :', order)
   return order
 }
 
@@ -1090,7 +1122,7 @@ const checkMoveCompleted = (G, ctx) => {
  * or undefined if all players have passed.
  */
 const getNextPlayerActionPhase = (G, ctx) => {
-  console.log('[Next]'.next, 'getNextPlayerActionPhase()')
+  console.log('[Next] getNextPlayerActionPhase()'.next)
   let nextPlayerId = undefined
   for (let i = 1; i <= ctx.numPlayers; i++) {
     // compute the next position
@@ -1103,6 +1135,7 @@ const getNextPlayerActionPhase = (G, ctx) => {
       break
     }
   }
+  console.log('[Next]'.next, 'Action phase next player pos :', nextPlayerId)
   return nextPlayerId
 }
 
@@ -1159,7 +1192,7 @@ const checkAllPlayerReacted = G => {
 }
 
 const getCheckVictoryPhaseTurnOrder = (G, ctx, source) => {
-  console.log('[playOrder]'.playOrder, 'getCheckVictoryPhaseTurnOrder() by', source)
+  console.log('[playOrder] getCheckVictoryPhaseTurnOrder()'.playOrder, 'by', source)
   let firstPlayer = G.publicData.firstPlayer
   let order = []
   for (let i = 0; i < ctx.numPlayers; i++) {
@@ -1239,6 +1272,7 @@ const checkWinner = (G, ctx) => {
  */
 const getFirstPlayer = (G, ctx, phase) => {
   console.log('[first] getFirstPlayer()'.first, ' - [phase]', phase)
+  console.log('[first]'.first, ' return', 0)
   return 0
 }
 
@@ -1265,7 +1299,7 @@ export const ResArcanaGame = {
   phases: {
     draftPhase: {
       start: true,
-      moves: { pickArtefact, pickMage },
+      moves: { drawStartingCards, pickArtefact, pickMage },
       onBegin: (G, ctx) => initDraftPhase(G, ctx),
       endIf: (G, ctx) => checkAllCardsDrafted(G, ctx),
       next: 'pickMagicItemPhase',

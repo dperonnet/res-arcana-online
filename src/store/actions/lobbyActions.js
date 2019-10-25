@@ -39,7 +39,7 @@ export const createGameLobby = gameOptions => {
         })
         dispatch({ type: 'CREATE_GAME_LOBBY', gameLobby })
         dispatch(createChat(gameLobby.id, newGameLobby.gameDisplayName + ' Chat'))
-        dispatch(takeSeat(gameLobby.id))
+        dispatch(takeSeat(gameLobby.id, 0))
       })
       .catch(err => {
         dispatch({ type: 'CREATE_GAME_LOBBY_ERROR', err })
@@ -169,9 +169,11 @@ export const joinLobby = (lobbyId, takeSeat, seatIndex) => {
             ready: true,
           }
 
-          canTakeSeat = gameNotStarted && gameIsNotFull && takeSeat
+          canTakeSeat = gameNotStarted && gameIsNotFull
 
-          if (playerId !== lobby.creatorId) {
+          // If the player is not the lobby creator, remove the player from seats.
+          // If the player is the lobby creator, only accept seat change.
+          if (playerId !== lobby.creatorId || (playerId === lobby.creatorId && canTakeSeat)) {
             // remove the player from seats
             for (let i = 0; i < seats.length; i++) {
               if (seats[i] === playerId) {
@@ -180,7 +182,7 @@ export const joinLobby = (lobbyId, takeSeat, seatIndex) => {
             }
           }
 
-          if (canTakeSeat) {
+          if (canTakeSeat && takeSeat) {
             // if player want an available seat
             if (seatIndex && seats[seatIndex] === -1) {
               seats[seatIndex] = playerId
