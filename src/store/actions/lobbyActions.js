@@ -314,12 +314,13 @@ export const leaveLobby = lobbyId => {
       }
 
       delete gameCredentials[lobby.boardGameId]
-      let lobbyId = null
-      transaction.update(currentLobbyRef, { gameCredentials, lobbyId })
+      let newlobbyId = null
+      transaction.update(currentLobbyRef, { gameCredentials, lobbyId: newlobbyId })
 
       if (Object.values(players).filter(player => player.inLobby).length === 0) {
         console.log('players in game:', players)
-        transaction.delete(lobbyRef)
+        await transaction.delete(lobbyRef)
+        dispatch(deleteChat(lobbyId))
       } else {
         console.log('players list is empty')
         transaction.update(lobbyRef, { players, seats })
@@ -410,7 +411,8 @@ export const startGame = lobbyId => {
       let gameData = await createResp.json()
       let boardGameId = gameData.gameID
 
-      const credentials = seats.map(async (playerId, seatId) => {
+      let refs = []
+      let credentials = seats.map(async (playerId, seatId) => {
         console.log('playerId', playerId, 'seatId', seatId)
         let joinResp = await fetch(gameServerUrl + '/games/' + lobby.gameName + '/' + boardGameId + '/join', {
           method: 'POST',
@@ -432,11 +434,17 @@ export const startGame = lobbyId => {
           gameCredentials[boardGameId].gameDisplayName = lobby.gameDisplayName
           gameCredentials[boardGameId].id = seatId
           gameCredentials[boardGameId].name = players[playerId].name
-          return transaction.update(currentLobbyRef, { gameCredentials })
+          refs.push({ ref: currentLobbyRef, credentials: gameCredentials })
         })
       })
 
-      await Promise.all(credentials)
+      await Promise.all(credentials).then(() => {
+        console.log('refs', refs)
+        refs.map(async res => {
+          let gameCredentials = res.credentials
+          await transaction.update(res.ref, { gameCredentials })
+        })
+      })
 
       let status = 'STARTED'
       return transaction.update(lobbyRef, { boardGameId, numberOfPlayers, seats, status })

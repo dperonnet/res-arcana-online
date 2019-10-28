@@ -368,7 +368,7 @@ const pickArtefact = (G, ctx, playerID, cardId) => {
   if (G.players[playerID].draftCards.length === 0) {
     G.publicData.waitingFor.splice(G.publicData.waitingFor.indexOf(parseInt(playerID)), 1)
   }
-  if (G.publicData.players[playerID].handSize) {
+  if (G.publicData.players[playerID].handSize === 8) {
     G.publicData.players[playerID].status = 'CARD_OVERVIEW'
   }
   return G
@@ -414,7 +414,7 @@ const checkAllCardsDrafted = (G, ctx) => {
     needDealCards = needDealCards && G.players[i].hand.length === 4 && G.players[i].draftCards.length === 0
     playersReady = playersReady && G.publicData.players[i].status === 'DRAFT_READY'
     needStartingCards =
-      needStartingCards || (G.players[i].hand.length === 8 && G.publicData.players[i].status === 'DRAFTING_ARTEFACTS')
+      needStartingCards || (G.players[i].hand.length === 8 && G.publicData.players[i].status === 'CARD_OVERVIEW')
   }
   if (playersReady) {
     console.log('[endPhaseIf]'.endPhaseIf, 'All players are ready, set phase to "pickMagicItemPhase"')
@@ -498,36 +498,44 @@ const pickMagicItem = (G, ctx, magicItemId) => {
 const checkAllMagicItemsReady = (G, ctx) => {
   console.log('[endPhaseIf] checkAllMagicItemsReady()'.endPhaseIf)
   let magicItemsReady = true
-  let playersReady = true
   for (let i = 0; i < ctx.numPlayers; i++) {
-    magicItemsReady = magicItemsReady && G.publicData.players[i].magicItem
-    playersReady = playersReady && G.publicData.players[i].status === 'MAGIC_ITEM_READY'
+    magicItemsReady = magicItemsReady && G.publicData.players[i].status === 'MAGIC_ITEM_READY'
   }
-  if (magicItemsReady && playersReady) {
-    console.log('[endPhaseIf]'.endPhaseIf, ' All players are ready, got to next phase')
+  if (magicItemsReady) {
+    console.log('[endPhaseIf]'.endPhaseIf, 'All players are ready, return', magicItemsReady)
   } else {
-    console.log('[endPhaseIf]'.endPhaseIf, ' One player at least is not ready, stay in "pickMagicItemPhase"')
+    console.log('[endPhaseIf]'.endPhaseIf, 'One player at least is not ready, return', magicItemsReady)
   }
-  return magicItemsReady && playersReady
+  return magicItemsReady
 }
 
 /**
  * Role: TurnOrder.playOrder
  * Define the turn order counter-clockwise starting from the last player.
  */
-const getPickMagicItemPhaseTurnOrder = (G, ctx) => {
-  let order = getTurnOrder(G, ctx).reverse()
-  console.log('[playOrder] getPickMagicItemPhaseTurnOrder()'.playOrder)
+const getTurnOrderPickMagicItemPhase = (G, ctx) => {
+  let order = getTurnOrder(G, ctx)
+  console.log('[playOrder] getTurnOrderPickMagicItemPhase()'.playOrder)
   console.log('[playOrder]'.playOrder, 'Pick Magic Item phase order :', order)
   return order
 }
 
 /**
+ * Role: first
+ * Define the first player
+ * @param {*} source phase calling the function
+ */
+const getFirstPlayerPickMagicItemPhase = (G, ctx, phase) => {
+  console.log('[first] getFirstPlayer()'.first, ' - [phase]', phase)
+  console.log('[first]'.first, ' return', ctx.numPlayers - 1)
+  return ctx.numPlayers - 1
+}
+/**
  * Role: TurnOrder.next
  * During pick magic item phase, return the next player's id.
  */
 const getNextPlayerPickMagicItemPhase = (G, ctx) => {
-  let nextPlayerPos = (ctx.playOrderPos + 1) % ctx.numPlayers
+  let nextPlayerPos = (ctx.numPlayers + ctx.playOrderPos - 1) % ctx.numPlayers
   console.log('[Next] getNextPlayerPickMagicItemPhase()'.next)
   console.log('[Next]'.next, 'Pick magic item next player pos :', nextPlayerPos)
   return nextPlayerPos
@@ -546,62 +554,60 @@ const getNextPlayerPickMagicItemPhase = (G, ctx) => {
  */
 const initCollectPhase = (G, ctx) => {
   console.log('[onPhaseBegin] initCollectPhase()'.onPhaseBegin)
-  if (G.phase !== 'COLLECT_PHASE') {
-    G.passOrder = []
-    G.allPassed = false
-    computeVictoryPoints(G, ctx)
-    G.publicData.turnedComponents = {}
+  G.phase = 'COLLECT_PHASE'
+  G.passOrder = []
+  G.allPassed = false
+  G.publicData.turnedComponents = {}
 
-    G.phase = 'COLLECT_PHASE'
+  computeVictoryPoints(G, ctx)
 
-    for (let i = 0; i < ctx.numPlayers; i++) {
-      const collectActions = []
-      G.players[i].uiTemp = {
-        essencesOnComponent: {},
-      }
-      let status = 'NOTHING_TO_COLLECT'
-      let hasFixedCollectAction = false
-      if (Object.keys(G.publicData.players[i].essencesOnComponent).length > 0) {
-        status = 'COLLECT_ACTION_REQUIRED'
-        G.players[i].uiTemp.essencesOnComponent = copy(G.publicData.players[i].essencesOnComponent)
-      }
-
-      G.publicData.players[i].inPlay.forEach(component => {
-        if (component.hasStandardCollectAbility) {
-          const collectAction = {
-            id: component.id,
-            name: component.name,
-            essences: component.standardCollectAbility.essenceList,
-            from: 'COLLECT_ABILITY',
-            type: 'GAIN',
-          }
-          collectActions.push(collectAction)
-          hasFixedCollectAction = true
-        }
-
-        if (component.hasSpecificCollectAbility) {
-          let essences
-          switch (component.id) {
-            case 'coffreFort':
-              essences = G.publicData.players[i].essencesOnComponent[component.id]
-              if (essences && essences.filter(essence => essence.type === 'gold').length > 0) {
-                status = 'COLLECT_ACTION_REQUIRED'
-              }
-              break
-            case 'forgeMaudite':
-            default:
-              status = 'COLLECT_ACTION_REQUIRED'
-          }
-        }
-      })
-
-      if (status === 'NOTHING_TO_COLLECT' && hasFixedCollectAction) {
-        status = 'COLLECT_ACTION_FIXED'
-      }
-
-      G.publicData.players[i].status = status
-      G.publicData.players[i].collectActions = collectActions
+  for (let i = 0; i < ctx.numPlayers; i++) {
+    const collectActions = []
+    G.players[i].uiTemp = {
+      essencesOnComponent: {},
     }
+    let status = 'NOTHING_TO_COLLECT'
+    let hasFixedCollectAction = false
+    if (Object.keys(G.publicData.players[i].essencesOnComponent).length > 0) {
+      status = 'COLLECT_ACTION_REQUIRED'
+      G.players[i].uiTemp.essencesOnComponent = copy(G.publicData.players[i].essencesOnComponent)
+    }
+
+    G.publicData.players[i].inPlay.forEach(component => {
+      if (component.hasStandardCollectAbility) {
+        const collectAction = {
+          id: component.id,
+          name: component.name,
+          essences: component.standardCollectAbility.essenceList,
+          from: 'COLLECT_ABILITY',
+          type: 'GAIN',
+        }
+        collectActions.push(collectAction)
+        hasFixedCollectAction = true
+      }
+
+      if (component.hasSpecificCollectAbility) {
+        let essences
+        switch (component.id) {
+          case 'coffreFort':
+            essences = G.publicData.players[i].essencesOnComponent[component.id]
+            if (essences && essences.filter(essence => essence.type === 'gold').length > 0) {
+              status = 'COLLECT_ACTION_REQUIRED'
+            }
+            break
+          case 'forgeMaudite':
+          default:
+            status = 'COLLECT_ACTION_REQUIRED'
+        }
+      }
+    })
+
+    if (status === 'NOTHING_TO_COLLECT' && hasFixedCollectAction) {
+      status = 'COLLECT_ACTION_FIXED'
+    }
+
+    G.publicData.players[i].status = status
+    G.publicData.players[i].collectActions = collectActions
   }
   return G
 }
@@ -728,15 +734,15 @@ const checkAllCollectsReady = (G, ctx) => {
   console.log('[endPhaseIf] checkAllCollectsReady()'.endPhaseIf)
   let playersReady = true
   for (let i = 0; i < ctx.numPlayers; i++) {
-    console.log('[endPhaseIf]'.endPhaseIf, 'G.publicData.players[i].status', i, G.publicData.players[i].status)
+    //console.log('[endPhaseIf]'.endPhaseIf, 'G.publicData.players[i].status', i, G.publicData.players[i].status)
     playersReady =
       playersReady &&
       (G.publicData.players[i].status === 'COLLECT_READY' || G.publicData.players[i].status === 'NOTHING_TO_COLLECT')
   }
   if (playersReady) {
-    console.log('[endPhaseIf]'.endPhaseIf, ' All players are ready, return true')
+    console.log('[endPhaseIf]'.endPhaseIf, 'All players are ready, return', playersReady)
   } else {
-    console.log('[endPhaseIf]'.endPhaseIf, ' One player at least is not ready, return false')
+    console.log('[endPhaseIf]'.endPhaseIf, 'One player at least is not ready, return', playersReady)
   }
   return playersReady
 }
@@ -745,8 +751,8 @@ const checkAllCollectsReady = (G, ctx) => {
  * Role: TurnOrder.playOrder
  * Define the turn order for the collect phase.
  */
-const getCollectPhaseTurnOrder = (G, ctx) => {
-  console.log('[playOrder] getCollectPhaseTurnOrder()'.playOrder)
+const getTurnOrderCollectPhase = (G, ctx) => {
+  console.log('[playOrder] getTurnOrderCollectPhase()'.playOrder)
   let firstPlayer = G.publicData.firstPlayer
   let order = []
 
@@ -1080,9 +1086,9 @@ const placeComponent = (G, ctx, type, id, essenceList) => {
  * Role: turnOrder
  * Define the turn order for the action phase.
  */
-const getActionPhaseTurnOrder = (G, ctx) => {
+const getTurnOrderActionPhase = (G, ctx) => {
   const order = getTurnOrder(G, ctx)
-  console.log('[playOrder] getActionPhaseTurnOrder()'.playOrder)
+  console.log('[playOrder] getTurnOrderActionPhase()'.playOrder)
   console.log('[playOrder]'.playOrder, 'Action phase order :', order)
   return order
 }
@@ -1159,7 +1165,7 @@ const initVictoryCheckPhase = (G, ctx) => {
   if (G.phase !== 'VICTORY_CHECK_PHASE') {
     G.phase = 'VICTORY_CHECK_PHASE'
     G.passOrder = []
-    let turnOrder = getCheckVictoryPhaseTurnOrder(G, ctx, 'by initVictoryCheckPhase')
+    let turnOrder = getTurnOrderCheckVictoryPhase(G, ctx, 'by initVictoryCheckPhase')
     if (turnOrder.length === 0) {
       console.log('[onPhaseBegin]'.onPhaseBegin, 'No one have react power, compute victory points and endPhase.')
       G.allPassed = true
@@ -1191,8 +1197,8 @@ const checkAllPlayerReacted = G => {
   return G
 }
 
-const getCheckVictoryPhaseTurnOrder = (G, ctx, source) => {
-  console.log('[playOrder] getCheckVictoryPhaseTurnOrder()'.playOrder, 'by', source)
+const getTurnOrderCheckVictoryPhase = (G, ctx, source) => {
+  console.log('[playOrder] getTurnOrderCheckVictoryPhase()'.playOrder, 'by', source)
   let firstPlayer = G.publicData.firstPlayer
   let order = []
   for (let i = 0; i < ctx.numPlayers; i++) {
@@ -1315,9 +1321,9 @@ export const ResArcanaGame = {
       next: 'collectPhase',
       turn: {
         order: {
-          first: (G, ctx) => getFirstPlayer(G, ctx, 'pickMagicItemPhase'),
+          first: (G, ctx) => getFirstPlayerPickMagicItemPhase(G, ctx, 'pickMagicItemPhase'),
           next: (G, ctx) => getNextPlayerPickMagicItemPhase(G, ctx),
-          playOrder: (G, ctx) => getPickMagicItemPhaseTurnOrder(G, ctx),
+          playOrder: (G, ctx) => getTurnOrderPickMagicItemPhase(G, ctx),
         },
       },
     },
@@ -1330,7 +1336,7 @@ export const ResArcanaGame = {
         order: {
           first: (G, ctx) => getFirstPlayer(G, ctx, 'collectPhase'),
           next: (G, ctx) => getNextPlayerCollectPhase(G, ctx),
-          playOrder: (G, ctx) => getCollectPhaseTurnOrder(G, ctx),
+          playOrder: (G, ctx) => getTurnOrderCollectPhase(G, ctx),
         },
       },
     },
@@ -1345,7 +1351,7 @@ export const ResArcanaGame = {
         order: {
           first: (G, ctx) => getFirstPlayer(G, ctx, 'actionPhase'),
           next: (G, ctx) => getNextPlayerActionPhase(G, ctx),
-          playOrder: (G, ctx) => getActionPhaseTurnOrder(G, ctx),
+          playOrder: (G, ctx) => getTurnOrderActionPhase(G, ctx),
         },
       },
     },
@@ -1361,7 +1367,7 @@ export const ResArcanaGame = {
               return (ctx.playOrderPos + 1) % ctx.playOrder.length
             }
           },
-          playOrder: (G, ctx) => getCheckVictoryPhaseTurnOrder(G, ctx, 'flow.phases.checkVictoryPhase.turnOrder'),
+          playOrder: (G, ctx) => getTurnOrderCheckVictoryPhase(G, ctx, 'flow.phases.checkVictoryPhase.turnOrder'),
         },
       },
     },

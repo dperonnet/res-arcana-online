@@ -17,6 +17,10 @@ import Chat from '../../common/chat/Chat'
 import GameBoard from '../game/GameBoard'
 
 class GameLobby extends Component {
+  state = {
+    started: false,
+  }
+
   handleTakeSeat = (event, seatId) => {
     const { currentLobby, takeSeat } = this.props
     event.preventDefault()
@@ -35,6 +39,7 @@ class GameLobby extends Component {
 
   handleStartGame = () => {
     const { currentLobby, startGame } = this.props
+    this.setState({ started: true })
     startGame(currentLobby.lobbyId, `http://${process.env.REACT_APP_GAME_SERVER_URL}`)
   }
 
@@ -66,6 +71,7 @@ class GameLobby extends Component {
 
   renderPendingLobby = () => {
     const { auth, game } = this.props
+    const { started } = this.state
 
     const options = (
       <div>
@@ -161,7 +167,9 @@ class GameLobby extends Component {
               </h5>
               <div className="separator" />
               <div className="game-button">
-                {auth && auth.uid === game.creatorId ? (
+                {started ? (
+                  <div className="loading">Loading...</div>
+                ) : auth && auth.uid === game.creatorId ? (
                   <>
                     <Button variant="primary" size="sm" onClick={this.handleStartGame} disabled={!ready}>
                       Start
@@ -171,14 +179,26 @@ class GameLobby extends Component {
                     </Button>
                   </>
                 ) : (
-                  <>
-                    <Button variant="secondary" size="sm" disabled={isSpectator} onClick={this.handleWatchGame}>
-                      Watch
-                    </Button>
-                    <Button variant="secondary" size="sm" onClick={this.handleLeaveLobby}>
-                      Leave
-                    </Button>
-                  </>
+                  game.players[auth.uid] && (
+                    <>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        disabled={isSpectator || game.players[auth.uid].ready}
+                        onClick={this.handleWatchGame}
+                      >
+                        Watch
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        disabled={!isSpectator && game.players[auth.uid].ready}
+                        onClick={this.handleLeaveLobby}
+                      >
+                        Leave
+                      </Button>
+                    </>
+                  )
                 )}
               </div>
             </div>
@@ -201,8 +221,6 @@ class GameLobby extends Component {
 
     return game.status === 'PENDING' ? (
       this.renderPendingLobby()
-    ) : game.status === 'CONNECTING_TO_GAME_SERVER' ? (
-      this.renderLoadingLobby()
     ) : game.status === 'STARTED' ? (
       <GameBoard runningGame={runningGame} />
     ) : game.status === 'OVER' ? (
@@ -217,6 +235,7 @@ const mapStateToProps = state => {
     chat: state.firestore.ordered.chat && state.firestore.ordered.chat[0],
     currentLobby: state.firestore.data.currentLobby,
     game: state.firestore.ordered.game && state.firestore.ordered.game[0],
+    loading: state.ui.loading,
   }
 }
 

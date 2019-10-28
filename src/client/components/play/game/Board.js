@@ -75,7 +75,6 @@ class ResArcanaBoard extends Component {
   }
 
   componentDidMount = () => {
-    //console.log('componentDidMount')
     this.props.resetCollect()
   }
 
@@ -93,7 +92,7 @@ class ResArcanaBoard extends Component {
     const { ctx, game } = this.props
     let playersName = [ctx.numPlayers]
     Object.values(game.seats).forEach((playerId, seatId) => {
-      playersName[seatId] = game.players[playerId].name
+      playersName[seatId] = game.players[playerId] ? game.players[playerId].name : 'Unknown'
     })
     return playersName
   }
@@ -313,6 +312,7 @@ class ResArcanaBoard extends Component {
     const { isActive } = this.props
     if (isActive) {
       this.props.moves.discardArtefact(cardId, essenceList)
+      this.props.events.endTurn()
     }
     this.clearSelection()
   }
@@ -335,6 +335,7 @@ class ResArcanaBoard extends Component {
     const { isActive } = this.props
     if (isActive) {
       this.props.moves.pass(magicItemId)
+      this.props.events.endTurn()
     }
     this.clearSelection()
   }
@@ -525,14 +526,12 @@ class ResArcanaBoard extends Component {
   renderChat = () => {
     const { chat, game } = this.props
     return (
-      false && (
-        <>
-          <Chat chat={chat} chatId={game.id} chatName={game.name + ' Chat'} />
-          <div className="close close-chat" onClick={this.handleToggleChat}>
-            <FontAwesomeIcon icon={faTimes} size="lg" />
-          </div>
-        </>
-      )
+      <>
+        <Chat chat={chat} chatId={game.id} chatName={game.name + ' Chat'} />
+        <div className="close close-chat" onClick={this.handleToggleChat}>
+          <FontAwesomeIcon icon={faTimes} size="lg" />
+        </div>
+      </>
     )
   }
 
@@ -835,6 +834,7 @@ class ResArcanaBoard extends Component {
     let status = playerID !== 'Spectator' ? G.publicData.players[playerID].status : 'DRAFT_READY'
     switch (status) {
       case 'DRAFTING_ARTEFACTS':
+      case 'CARD_OVERVIEW':
       case 'SELECTING_MAGE':
         boards = othersId.map(id => {
           const playerRuban = this.renderPlayerRuban(id)
@@ -862,13 +862,17 @@ class ResArcanaBoard extends Component {
         boards = othersId.map(id => {
           const playerRuban = this.renderPlayerRuban(id)
           let cards = []
-          if (
+          let drafting =
             G.publicData.players[id].status === 'SELECTING_MAGE' ||
-            G.publicData.players[id].status === 'DRAFTING_ARTEFACTS'
-          ) {
+            G.publicData.players[id].status === 'DRAFTING_ARTEFACTS' ||
+            G.publicData.players[id].status === 'CARD_OVERVIEW'
+          let mageSelected = G.publicData.players[id].status === 'DRAFT_READY'
+          if (drafting || mageSelected) {
             let cardMage = copy(CARD_BACK_MAGE)
             cards.push(this.renderGameComponent({ ...cardMage, id: 'back_mage_1' }))
-            cards.push(this.renderGameComponent({ ...cardMage, id: '_back_mage_2' }))
+            if (!mageSelected) {
+              cards.push(this.renderGameComponent({ ...cardMage, id: '_back_mage_2' }))
+            }
           } else {
             cards = this.renderPlayerBoard(id)
           }
@@ -1076,7 +1080,14 @@ class ResArcanaBoard extends Component {
     const { G, ctx, playerID, profile, selectedComponent } = this.props
 
     const playersName = this.getPlayersName()
-    let title = 'Magic Item Selection Phase - ' + playersName[parseInt(ctx.currentPlayer)] + ' is playing.'
+    let title = 'Magic Item Selection Phase'
+
+    if (playerID === ctx.currentPlayer) {
+      title += ' - This is your turn.'
+    } else {
+      title += ' - ' + playersName[parseInt(ctx.currentPlayer)] + ' is playing.'
+    }
+
     let waiting = playerID !== ctx.currentPlayer
     let magicItems = G.publicData.magicItems.map(magicItem => {
       if (waiting) {
@@ -1130,9 +1141,11 @@ class ResArcanaBoard extends Component {
       </div>
     )
 
+    const activePlayer = playerID === ctx.currentPlayer ? ' active-player' : ''
+
     return (
       <>
-        <div className="dialog-panel">
+        <div className={'dialog-panel ' + activePlayer}>
           <h5>{title}</h5>
           <div className={'card-row ' + profile.cardSize}>{magicItems}</div>
           {waiting ? <h5 className="directive">{waitingFor}</h5> : <>{directive}</>}
@@ -1155,7 +1168,12 @@ class ResArcanaBoard extends Component {
 
     const playersName = this.getPlayersName()
     let title = 'Collect Phase'
-    let waitingFor = ' - ' + playersName[parseInt(ctx.currentPlayer)] + ' is playing.'
+
+    if (playerID === ctx.currentPlayer) {
+      title += ' - This is your turn.'
+    } else {
+      title += ' - ' + playersName[parseInt(ctx.currentPlayer)] + ' is playing.'
+    }
 
     if (playerID === 'Spectator') {
       return (
@@ -1163,7 +1181,6 @@ class ResArcanaBoard extends Component {
           <h5>
             <div className="collect-icon"></div>
             {title}
-            {waitingFor}
           </h5>
         </div>
       )
@@ -1297,13 +1314,14 @@ class ResArcanaBoard extends Component {
       </div>
     )
 
+    const activePlayer = playerID === ctx.currentPlayer ? ' active-player' : ''
+
     return (
       <>
-        <div className="dialog-panel">
+        <div className={'dialog-panel ' + activePlayer}>
           <h5>
             <div className="collect-icon"></div>
             {title}
-            {waitingFor}
           </h5>
           {collectComponents.length > 0 && <div className={'card-row ' + profile.cardSize}>{collectComponents}</div>}
           {directive}
@@ -2357,12 +2375,17 @@ class ResArcanaBoard extends Component {
    * When a component is selected the board show the selected component and the actions available for this component.
    */
   renderActionDialog = () => {
-    const { ctx, playerID, selectedComponent, selectAction, selectedAction } = this.props
+    const { G, ctx, playerID, selectedComponent, selectAction, selectedAction } = this.props
 
     const playersName = this.getPlayersName()
 
     let title = 'Play Phase'
-    let waitingFor = ' - ' + playersName[parseInt(ctx.currentPlayer)] + ' is playing.'
+    let waitingFor
+    if (playerID === ctx.currentPlayer) {
+      waitingFor = ' - This is your turn.'
+    } else {
+      waitingFor = ' - ' + playersName[parseInt(ctx.currentPlayer)] + ' is playing.'
+    }
     let playerView
 
     if (playerID !== 'Spectator') {
@@ -2381,9 +2404,13 @@ class ResArcanaBoard extends Component {
         </>
       )
     }
+
+    const activePlayer =
+      playerID === ctx.currentPlayer ? ' active-player' : G.passOrder.includes(playerID) ? ' passed' : ''
+
     return (
       <>
-        <div className="dialog-panel">
+        <div className={'dialog-panel ' + activePlayer}>
           <h5>
             <div className="dragon-icon"></div>
             {title}
