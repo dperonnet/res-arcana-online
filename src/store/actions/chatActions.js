@@ -23,12 +23,12 @@ export const sendMessage = (message, chatId) => {
             if (messages.length > threshold) {
               for (let i = 0; i <= 1; i++) {
                 transaction.update(chatRef, {
-                  messages: firestore.FieldValue.arrayRemove(messages[i]),
+                  messages: firebase.firestore.FieldValue.arrayRemove(messages[i]),
                 })
               }
             }
             transaction.update(chatRef, {
-              messages: firestore.FieldValue.arrayUnion(newMessage),
+              messages: firebase.firestore.FieldValue.arrayUnion(newMessage),
             })
           } else {
             messages = [newMessage]

@@ -1,9 +1,30 @@
 import { PlayerView, Stage, TurnOrder } from 'boardgame.io/core'
 import { GameComponents } from '../../../../database'
-import logger from 'redux-logger'
-import { applyMiddleware } from 'redux'
-import { sendMessage } from '../../../../store/actions/chatActions'
 import colors from 'colors'
+var serviceAccount = require('../../../../config/serviceAccountKey.json')
+var admin
+
+function moduleIsAvailable(path) {
+  try {
+    require.resolve(path)
+    return true
+  } catch (e) {
+    return false
+  }
+}
+
+if (moduleIsAvailable('firebase-admin')) {
+  admin = require('firebase-admin')
+  admin.initializeApp(
+    {
+      credential: admin.credential.cert(serviceAccount),
+      databaseURL: 'https://res-arcana-project.firebaseio.com',
+    },
+    'GAME_LOGGER'
+  )
+} else {
+  console.log('firebase-admin server side only')
+}
 
 colors.enable()
 colors.setTheme({
@@ -19,6 +40,7 @@ colors.setTheme({
   setup: 'brightCyan',
   alert: 'red',
 })
+
 /*
 var available = [
   'underline',
@@ -45,7 +67,39 @@ for (var color in available) {
 }
 /**/
 
+const sendMessage = (G, ctx, message, type) => {
+  console.log('G', G, 'ctx', ctx)
+
+  if (!G.secret || !admin) {
+    return
+  }
+  const firestore = admin.firestore()
+  const newMessage = {
+    creatorName: 'GAME_LOGGER',
+    creatorId: 'GAME_LOGGER',
+    createdAt: new Date(),
+    content: message,
+    messageType: type || 'EVENT',
+  }
+
+  const chatRef = firestore.collection('chats').doc(G.chatId)
+  firestore.runTransaction(transaction => {
+    return transaction.get(chatRef).then(chatDoc => {
+      let messages = chatDoc.data().messages
+      if (messages) {
+        transaction.update(chatRef, {
+          messages: admin.firestore.FieldValue.arrayUnion(newMessage),
+        })
+      } else {
+        messages = [newMessage]
+        transaction.update(chatRef, { messages })
+      }
+    })
+  })
+}
+
 const debug = false
+
 console.log('############## GAME #############'.bgMagenta.yellow.bold)
 
 /**
@@ -345,7 +399,6 @@ const drawStartingCards = (G, ctx, playerID) => {
  * @param {*} cardId id of the selected artefact.
  */
 const pickArtefact = (G, ctx, playerID, cardId) => {
-  sendMessage('player', playerID, ' picked', cardId)
   console.log('[move] pickArtefact()'.move)
   console.log('[move]'.move, 'The player', playerID, 'picked artefact', cardId)
   let selectedCards = Object.entries(G.players[playerID].draftCards[0]).filter(card => {
@@ -371,6 +424,7 @@ const pickArtefact = (G, ctx, playerID, cardId) => {
   if (G.publicData.players[playerID].handSize === 8) {
     G.publicData.players[playerID].status = 'CARD_OVERVIEW'
   }
+  sendMessage(G, ctx, 'test message')
   return G
 }
 
@@ -1372,7 +1426,5 @@ export const ResArcanaGame = {
       },
     },
   },
-
-  enhancer: applyMiddleware(logger),
   playerView: PlayerView.STRIP_SECRETS,
 }
