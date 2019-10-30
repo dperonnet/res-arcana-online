@@ -17,15 +17,14 @@ class Chat extends Component {
   }
 
   scrollDown() {
-    const { chatArea } = this.refs
-    if (chatArea) chatArea.scrollTop = chatArea.scrollHeight
+    if (this.chatArea) this.chatArea.scrollTop = this.chatArea.scrollHeight
   }
 
   componentDidMount() {
     this.scrollDown()
   }
 
-  componentDidUpdate(prevProps, prevState) {
+  componentDidUpdate() {
     this.scrollDown()
   }
 
@@ -64,7 +63,7 @@ class Chat extends Component {
       <div className="chat-container">
         <div className="chat-panel">
           <h5 className="chat-name">{chatName}</h5>
-          <div className="chat-area" ref="chatArea">
+          <div className="chat-area" ref={c => (this.chatArea = c)}>
             {messages}
           </div>
           <div className="send-form">
@@ -105,7 +104,7 @@ class Chat extends Component {
   }
 }
 
-const mapStateToProps = (state, props) => {
+const mapStateToProps = state => {
   return {
     auth: state.firebase.auth,
   }

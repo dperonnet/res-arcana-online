@@ -587,11 +587,11 @@ class ResArcanaBoard extends Component {
           <FontAwesomeIcon icon={faTimes} size="lg" />
         </div>
         <div className={'components' + (canPayCost.valid ? '' : ' invalid')}>
-          <h5>Places of power ({G.publicData.placesOfPowerInGame.length} left)</h5>
+          <h6>Places of power ({G.publicData.placesOfPowerInGame.length}/5)</h6>
           <div className="place-of-power-container">{placesOfPower}</div>
         </div>
         <div className={'components' + (canPayCost.valid ? '' : ' invalid')}>
-          <h5>Monuments ({G.publicData.monumentsStack.length + G.publicData.monumentsRevealed.length} left)</h5>
+          <h6>Monuments ({G.publicData.monumentsStack.length + G.publicData.monumentsRevealed.length}/10)</h6>
           {layout === 'horizontal' && (
             <div className="monument-container">
               {G.publicData.monumentsStack.length > 0 && monumentsStack}
@@ -606,7 +606,7 @@ class ResArcanaBoard extends Component {
           )}
         </div>
         <div className="components">
-          <h5>Magic Items</h5>
+          <h6>Magic Items</h6>
           <div className="magic-item-container">{magicItems}</div>
         </div>
       </>
@@ -950,7 +950,7 @@ class ResArcanaBoard extends Component {
           })
 
         let lastDraftCard =
-          G.players[playerID].draftCards.length && Object.values(G.players[playerID].draftCards[0]).length !== 1
+          G.players[playerID].draftCards.length === 1 && Object.values(G.players[playerID].draftCards[0]).length === 1
 
         directive = selectedComponent ? (
           <h5 className="directive">
@@ -1035,18 +1035,14 @@ class ResArcanaBoard extends Component {
     }
 
     const confirmButton = (
-      <div
-        className={'action-button' + (enableConfirm ? ' valid' : ' disabled')}
-        onClick={enableConfirm && handleConfirm}
-      >
+      <div className={'action-button' + (enableConfirm ? ' valid' : ' disabled')} onClick={handleConfirm}>
         Confirm
       </div>
     )
+    let handleCancel = enableCancel && selectedComponent ? event => this.handleClick(event) : null
+
     const cancelButton = (
-      <div
-        className={'action-button' + (enableCancel ? ' valid' : ' disabled')}
-        onClick={selectedComponent && (event => this.handleClick(event))}
-      >
+      <div className={'action-button' + (enableCancel ? ' valid' : ' disabled')} onClick={handleCancel}>
         Cancel
       </div>
     )
