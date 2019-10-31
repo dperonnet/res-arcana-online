@@ -524,10 +524,22 @@ class ResArcanaBoard extends Component {
    * Render the chat.
    */
   renderChat = () => {
-    const { chat, game } = this.props
+    const { G, chat, game } = this.props
+
+    let mixedChat = chat ? copy(chat) : {}
+    if (isLoaded(chat)) {
+      let mixedMessages = (G.log || []).concat(chat.messages || [])
+      mixedMessages.sort((a, b) => {
+        a = typeof a.createdAt === 'number' ? new Date(a.createdAt) : a.createdAt.toDate()
+        b = typeof b.createdAt === 'number' ? new Date(b.createdAt) : b.createdAt.toDate()
+        return a - b
+      })
+      mixedChat.messages = mixedMessages
+    }
+
     return (
       <>
-        <Chat chat={chat} chatId={game.id} chatName={game.name + ' Chat'} />
+        <Chat chat={mixedChat} chatId={game.id} chatName={game.name + ' Chat'} />
         <div className="close close-chat" onClick={this.handleToggleChat}>
           <FontAwesomeIcon icon={faTimes} size="lg" />
         </div>

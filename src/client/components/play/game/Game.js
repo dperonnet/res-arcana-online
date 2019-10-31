@@ -1,30 +1,6 @@
 import { PlayerView, Stage, TurnOrder } from 'boardgame.io/core'
 import { GameComponents } from '../../../../database'
 import colors from 'colors'
-var serviceAccount = require('../../../../config/serviceAccountKey.json')
-var admin
-
-function moduleIsAvailable(path) {
-  try {
-    require.resolve(path)
-    return true
-  } catch (e) {
-    return false
-  }
-}
-
-if (moduleIsAvailable('firebase-admin')) {
-  admin = require('firebase-admin')
-  admin.initializeApp(
-    {
-      credential: admin.credential.cert(serviceAccount),
-      databaseURL: 'https://res-arcana-project.firebaseio.com',
-    },
-    'GAME_LOGGER'
-  )
-} else {
-  console.log('firebase-admin server side only')
-}
 
 colors.enable()
 colors.setTheme({
@@ -67,35 +43,16 @@ for (var color in available) {
 }
 /**/
 
-const sendMessage = (G, ctx, message, type) => {
-  console.log('G', G, 'ctx', ctx)
-
-  if (!G.secret || !admin) {
-    return
-  }
-  const firestore = admin.firestore()
-  const newMessage = {
-    creatorName: 'GAME_LOGGER',
-    creatorId: 'GAME_LOGGER',
-    createdAt: new Date(),
+const logEvent = (G, message, type) => {
+  const newLog = {
     content: message,
+    createdAt: Date.now(),
+    creatorId: 'GAME_LOGGER',
+    creatorName: 'GAME_LOGGER',
     messageType: type || 'EVENT',
   }
-
-  const chatRef = firestore.collection('chats').doc(G.chatId)
-  firestore.runTransaction(transaction => {
-    return transaction.get(chatRef).then(chatDoc => {
-      let messages = chatDoc.data().messages
-      if (messages) {
-        transaction.update(chatRef, {
-          messages: admin.firestore.FieldValue.arrayUnion(newMessage),
-        })
-      } else {
-        messages = [newMessage]
-        transaction.update(chatRef, { messages })
-      }
-    })
-  })
+  console.log('newLog', newLog)
+  G.log.push(newLog)
 }
 
 const debug = false
@@ -124,6 +81,7 @@ const getInitialState = (ctx, setupData) => {
       waitingFor: [],
     },
     chatId: (setupData && setupData.chatId) || null,
+    log: [],
   }
   for (let i = 0; i < ctx.numPlayers; i++) {
     G.players[i] = {
@@ -400,6 +358,7 @@ const drawStartingCards = (G, ctx, playerID) => {
  */
 const pickArtefact = (G, ctx, playerID, cardId) => {
   console.log('[move] pickArtefact()'.move)
+  const move = '[move] The player' + playerID + ' picked artefact ' + cardId
   console.log('[move]'.move, 'The player', playerID, 'picked artefact', cardId)
   let selectedCards = Object.entries(G.players[playerID].draftCards[0]).filter(card => {
     return card[0] === cardId
@@ -424,7 +383,7 @@ const pickArtefact = (G, ctx, playerID, cardId) => {
   if (G.publicData.players[playerID].handSize === 8) {
     G.publicData.players[playerID].status = 'CARD_OVERVIEW'
   }
-  sendMessage(G, ctx, 'test message')
+  logEvent(G, move)
   return G
 }
 
@@ -438,6 +397,7 @@ const pickArtefact = (G, ctx, playerID, cardId) => {
 const pickMage = (G, ctx, playerID, mageId) => {
   console.log('[move] pickMage()'.move)
   console.log('[move]'.move, 'The player', playerID, 'picked mage', mageId)
+  const move = '[move] The player' + playerID + ' picked mage ' + mageId
   const selectedCard = copy(
     G.players[playerID].mages.filter(mage => {
       return mage.id === mageId
@@ -449,6 +409,7 @@ const pickMage = (G, ctx, playerID, mageId) => {
   }
   G.publicData.players[playerID].inPlay.push(selectedCard)
   G.publicData.players[playerID].status = 'DRAFT_READY'
+  logEvent(G, move)
   return G
 }
 
