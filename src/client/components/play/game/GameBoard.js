@@ -28,7 +28,7 @@ class GameBoard extends Component {
     const app = Client({
       game: ResArcanaGame,
       board: ResArcanaBoard,
-      debug: true,
+      debug: false,
       loading,
       numPlayers: game.numberOfPlayers,
       multiplayer: { server: gameServerUrl },

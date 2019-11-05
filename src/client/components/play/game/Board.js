@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPlus, faTimes } from '@fortawesome/free-solid-svg-icons'
+import { Modal } from 'react-bootstrap'
 import PropTypes from 'prop-types'
 import './board.scss'
 import './essence.scss'
@@ -72,6 +73,10 @@ class ResArcanaBoard extends Component {
     playerID: PropTypes.string,
     isActive: PropTypes.bool,
     isMultiplayer: PropTypes.bool,
+  }
+
+  state = {
+    showModal: false,
   }
 
   componentDidMount = () => {
@@ -338,6 +343,55 @@ class ResArcanaBoard extends Component {
       this.props.events.endTurn()
     }
     this.clearSelection()
+  }
+
+  /**
+   * Set the selected action power with the provided index and preselect the targetedComponent
+   * when there is only one available target to pay the action cost.
+   */
+  selectDefaultActionPower = (index = 0) => {
+    const { selectedComponent } = this.props
+    this.props.selectActionPower(index)
+    if (selectedComponent) {
+      const action = selectedComponent.actionPowerList && selectedComponent.actionPowerList[index]
+      if (action) {
+        let availableComponents = this.getAvailableComponents(action.cost)
+        this.props.targetComponent(availableComponents.length === 1 ? availableComponents[0] : undefined)
+      }
+    }
+  }
+
+  /**
+   * Get the available components corresponding to the require criteria.
+   */
+  getAvailableComponents = require => {
+    const { G, playerID, selectedComponent } = this.props
+    let availableComponents = []
+
+    if (!require) {
+      return availableComponents
+    } else if (require.turnCreature) {
+      availableComponents = G.publicData.players[playerID].inPlay.filter(
+        component => component.isCreature && !G.publicData.turnedComponents[component.id]
+      )
+    } else if (require.turnDragon) {
+      availableComponents = G.publicData.players[playerID].inPlay.filter(
+        component => component.isDragon && !G.publicData.turnedComponents[component.id]
+      )
+    } else if (require.destroyOneArtefact) {
+      availableComponents = G.publicData.players[playerID].inPlay.filter(component => component.type === 'artefact')
+    } else if (require.destroyAnotherArtefact) {
+      availableComponents = G.publicData.players[playerID].inPlay.filter(
+        component => component.type === 'artefact' && selectedComponent.id !== component.id
+      )
+    } else if (require.destroyOneDragonOrCreature) {
+      availableComponents = G.publicData.players[playerID].inPlay.filter(
+        component => component.type === 'artefact' && (component.isCreature || component.isDragon)
+      )
+    } else if (require.discardArtefact) {
+      availableComponents = G.players[playerID].hand
+    }
+    return availableComponents
   }
 
   activatePower = () => {
@@ -643,8 +697,10 @@ class ResArcanaBoard extends Component {
       <>
         <div className="board-container">
           {dialogBoard}
-          {playerRuban}
-          {playerBoard}
+          <div>
+            {playerRuban}
+            {playerBoard}
+          </div>
           {othersBoard}
         </div>
       </>
@@ -785,7 +841,7 @@ class ResArcanaBoard extends Component {
                   component.actionPowerList.length === 1 &&
                   this.isActionAvailable(component.actionPowerList[0], component)
                 ) {
-                  selectActionPower(0)
+                  this.selectDefaultActionPower()
                 } else {
                   selectActionPower()
                 }
@@ -1345,7 +1401,7 @@ class ResArcanaBoard extends Component {
   }
 
   actionPowerValidator = () => {
-    const { G, selectedComponent, selectedActionPower, essencePickerSelection } = this.props
+    const { G, selectedComponent, selectedActionPower, essencePickerSelection, targetedComponent } = this.props
     const action = selectedComponent.actionPowerList && selectedComponent.actionPowerList[selectedActionPower]
     const component = selectedComponent
     let isValid = true
@@ -1372,13 +1428,88 @@ class ResArcanaBoard extends Component {
       isValid = isValid && !G.publicData.turnedComponents[component.id]
     }
     if (action.cost.turnDragon) {
-      isValid = isValid && !G.publicData.turnedComponents[targetComponent.id]
+      isValid = isValid && targetedComponent && !G.publicData.turnedComponents[targetedComponent.id]
     }
     if (action.cost.turnCreature) {
-      isValid = isValid && !G.publicData.turnedComponents[targetComponent.id]
+      isValid = isValid && targetedComponent && !G.publicData.turnedComponents[targetedComponent.id]
     }
     console.log('action', selectedComponent, selectedActionPower, action, isValid)
     return isValid
+  }
+
+  /**
+   * Render the selection modal for action powers requiring a component target.
+   */
+  renderSelectionModal = () => {
+    const { G, playerID, profile, selectedComponent, selectedActionPower } = this.props
+
+    const action = selectedComponent.actionPowerList[selectedActionPower]
+    const { showModal } = this.state
+    const closeModal = () => this.setState({ showModal: false })
+
+    let directive,
+      selectionPanel,
+      availableComponents = []
+
+    if (action.cost.turnCreature) {
+      directive = <h5>Select a creature to turn</h5>
+      availableComponents = G.publicData.players[playerID].inPlay.filter(
+        component => component.isCreature && !G.publicData.turnedComponents[component.id]
+      )
+    } else if (action.cost.turnDragon) {
+      directive = <h5>Select a dragon to turn</h5>
+      availableComponents = G.publicData.players[playerID].inPlay.filter(
+        component => component.isDragon && !G.publicData.turnedComponents[component.id]
+      )
+    } else if (action.cost.destroyOneArtefact) {
+      directive = <h5>Select an artefact to destroy</h5>
+      availableComponents = G.publicData.players[playerID].inPlay.filter(component => component.type === 'artefact')
+    } else if (action.cost.destroyAnotherArtefact) {
+      directive = <h5>Select an artefact to destroy</h5>
+      availableComponents = G.publicData.players[playerID].inPlay.filter(
+        component => component.type === 'artefact' && selectedComponent.id !== component.id
+      )
+    } else if (action.cost.destroyOneDragonOrCreature) {
+      directive = <h5>Select a dragon or a creature to destroy</h5>
+      availableComponents = G.publicData.players[playerID].inPlay.filter(
+        component => component.type === 'artefact' && (component.isCreature || component.isDragon)
+      )
+    } else if (action.cost.discardArtefact) {
+      directive = <h5>Select an artefact to discard</h5>
+      availableComponents = G.players[playerID].hand
+    } else {
+      return null
+    }
+
+    let components = availableComponents.map(card => {
+      return this.renderGameComponent(card, {
+        onClick: () => {
+          targetComponent(card)
+          closeModal()
+        },
+      })
+    })
+
+    selectionPanel = (
+      <div className={'card-row flex-col ' + profile.cardSize}>
+        <div className="action-container">
+          <div className="action-component">{components}</div>
+        </div>
+      </div>
+    )
+
+    let dialog = (
+      <div>
+        {directive}
+        {selectionPanel}
+      </div>
+    )
+
+    return (
+      <Modal show={showModal} onHide={closeModal} animation={false} dialogClassName="target-selection-modal">
+        {dialog}
+      </Modal>
+    )
   }
 
   /**
@@ -1386,16 +1517,18 @@ class ResArcanaBoard extends Component {
    * Display essence pickers when an action power require to select essence as cost or gain.
    */
   renderActionPower = (action, component) => {
-    const { G, playerID, essencePickerSelection } = this.props
+    const { G, playerID, essencePickerSelection, targetedComponent } = this.props
+
+    const openModal = () => this.setState({ showModal: true })
     const selectedPower = (
       <ActionPower key={0} component={component} selected={true} action={action} index={0}></ActionPower>
     )
-    let cost, gain
-    const costAnyEssence =
+    let costAnyEssence =
       (action.cost.essenceList && action.cost.essenceList.filter(essence => essence.type.startsWith('any'))) || []
-    const gainAnyEssence =
+    let gainAnyEssence =
       (action.gain.essenceList && action.gain.essenceList.filter(essence => essence.type.startsWith('any'))) || []
-    const essencesPool = G.publicData.players[playerID].essencesPool
+    let essencesPool = G.publicData.players[playerID].essencesPool
+    let cost, gain, message
     let enabledEssencesList = []
     Object.entries(essencesPool).forEach(essence => {
       if (essence[1] > 0) {
@@ -1403,13 +1536,48 @@ class ResArcanaBoard extends Component {
       }
     })
 
+    if (action.cost.turnDragon) {
+      message = targetedComponent ? (
+        <h5 className="ml-2 directive">
+          <div className="inline-icons">
+            <div className="icons ">
+              <div className="icon turn-dragon-icon ml-1"></div>
+            </div>
+          </div>
+          <div className="inline-text">: {targetedComponent.name}</div>
+        </h5>
+      ) : (
+        <h5 className="ml-2">
+          <div className="target-button" onClick={openModal}>
+            Select <div className="icon turn-dragon-icon ml-1"></div>
+          </div>
+        </h5>
+      )
+    } else if (action.cost.turnCreature) {
+      message = (
+        <h5 className="ml-2">
+          <div className="target-button" onClick={openModal}>
+            Select <div className="icon turn-creature-icon ml-1"></div>
+          </div>
+        </h5>
+      )
+    } else if (action.cost.destroyOneArtefact || action.cost.destroyAnotherArtefact) {
+      message = (
+        <h5 className="ml-2">
+          <div className="target-button" onClick={openModal}>
+            Select artefact
+          </div>
+        </h5>
+      )
+    }
+
     if (costAnyEssence.length > 0) {
       let count = 0
       Object.values(essencePickerSelection.actionCost).forEach(value => (count = count + value))
       let isValid = costAnyEssence[0].quantity === count
       cost = (
         <>
-          <h5>Pay with : </h5>
+          <h5 className="ml-2">Pay cost with : </h5>
           <EssencePicker
             selectionType={'actionCost'}
             pickerType={costAnyEssence[0].type}
@@ -1422,10 +1590,11 @@ class ResArcanaBoard extends Component {
         </>
       )
     }
+
     if (gainAnyEssence.length > 0) {
       gain = (
         <>
-          <h5>Gain : </h5>
+          <h5 className="ml-2">Gain : </h5>
           <EssencePicker
             selectionType={'actionGain'}
             pickerType={gainAnyEssence[0].type}
@@ -1434,11 +1603,16 @@ class ResArcanaBoard extends Component {
         </>
       )
     }
+
     return (
       <>
-        {selectedPower}
-        {cost}
-        {gain}
+        <div className="action-list">
+          {selectedPower}
+          {cost}
+          {message}
+          {gain}
+        </div>
+        {this.renderSelectionModal()}
       </>
     )
   }
@@ -1449,7 +1623,7 @@ class ResArcanaBoard extends Component {
    * Also display the selected action once the player has selected one of the available actions.
    */
   renderInPlayActions = () => {
-    const { selectActionPower, selectedComponent, selectedActionPower } = this.props
+    const { selectActionPower, selectedComponent, selectedActionPower, targetedComponent } = this.props
 
     const noActionAvailable = <h5 className="directive">There is no action available for {selectedComponent.name}</h5>
     const chooseAction = <h5 className="directive">Choose an action for {selectedComponent.name}</h5>
@@ -1457,23 +1631,21 @@ class ResArcanaBoard extends Component {
       <h5 className="directive">Pay the action cost and confirm your action for {selectedComponent.name}</h5>
     )
 
-    let actionPanel
-    let directive
+    let actionPanel, directive
 
     // if an action power is selected render action dialog components
     if (selectedActionPower >= 0) {
       const action = selectedComponent.actionPowerList[selectedActionPower]
       actionPanel = this.renderActionPower(action, selectedComponent)
-
       directive = payActionCost
 
       // else if the component has action power, render the action power list
     } else if (selectedComponent.hasActionPower) {
-      actionPanel =
+      let powers =
         selectedComponent.hasActionPower &&
         selectedComponent.actionPowerList.map((action, index) => {
           let isActionAvailable = this.isActionAvailable(action, selectedComponent)
-          let onClick = isActionAvailable ? () => selectActionPower(index) : null
+          let onClick = isActionAvailable ? () => this.selectDefaultActionPower(index) : null
           return (
             <ActionPower
               key={index}
@@ -1485,6 +1657,7 @@ class ResArcanaBoard extends Component {
             ></ActionPower>
           )
         })
+      actionPanel = <div className="action-list">{powers}</div>
 
       let hasActionAvailable = false
       selectedComponent.actionPowerList.forEach(action => {
@@ -1497,17 +1670,44 @@ class ResArcanaBoard extends Component {
       directive = noActionAvailable
     }
 
-    return (
+    // define the action dialog content
+    let panel = (
       <>
         <div className="action-container">
           <div className="action-component in-hand">
             {this.renderGameComponent(selectedComponent)}
-            {actionPanel && <div className="action-list">{actionPanel}</div>}
+            {actionPanel}
           </div>
         </div>
         {directive}
       </>
     )
+
+    // define the action buttons
+    let handleCancel, handleConfirm, requireTarget
+
+    let actionValid = this.actionPowerValidator()
+
+    // when the selected power requires a target, set requireTarget to true
+    if (selectedActionPower >= 0) {
+      const action = selectedComponent.actionPowerList[selectedActionPower]
+      requireTarget =
+        action.cost.destroyOneArtefact ||
+        action.cost.destroyOneDragonOrCreature ||
+        action.cost.destroyAnotherArtefact ||
+        action.cost.discardArtefact
+    }
+
+    if (!targetedComponent && requireTarget) {
+      handleConfirm = actionValid ? () => this.activatePower() : null
+    }
+    handleConfirm = actionValid ? () => this.activatePower() : null
+
+    if (selectedComponent.hasActionPower && selectedComponent.actionPowerList.length > 1 && selectedActionPower >= 0) {
+      handleCancel = () => selectActionPower()
+    }
+
+    return { action: panel, handleCancel, handleConfirm }
   }
 
   /**
@@ -1526,7 +1726,8 @@ class ResArcanaBoard extends Component {
 
     let costFrameEssenceList = costEssenceList.map(essence => {
       let singleEssence = costEssenceList.length === 1 ? ' single-essence' : ''
-      let payOk = costValid[essence.type] || costValid.isValid ? <div className="pay-ok"></div> : null
+      let payOk =
+        costValid[essence.type] || costValid.isValid ? <div className="cost ok"></div> : <div className="cost ko"></div>
       return (
         <div key={essence.type} className={'essence ' + essence.type + singleEssence}>
           {payOk}
@@ -1817,7 +2018,7 @@ class ResArcanaBoard extends Component {
             costValid.isValid,
             costValid[essence.type] || costValid.isValid
           )
-        let payOk = costValid[essence.type] || costValid.isValid ? <div className="pay-ok"></div> : null
+        let payOk = costValid[essence.type] || costValid.isValid ? <div className="cost ok"></div> : null
         return (
           <div key={index} className={'essence ' + essence.type + singleEssence}>
             {payOk}
@@ -1828,7 +2029,7 @@ class ResArcanaBoard extends Component {
     } else {
       essences = (
         <div className={'essence zero-essence single-essence'}>
-          <div className="pay-ok"></div>0
+          <div className="cost ok"></div>0
         </div>
       )
     }
@@ -1869,7 +2070,7 @@ class ResArcanaBoard extends Component {
    * -enabledEssencesList : array containing the list of essences types allowed to pay the component placement cost.
    * -fixedCost : object containing the list of essences to pay if there is only one way to pay the component placement cost
    */
-  canPayPlacementCost = selectedComponent => {
+  canPayPlacementCost = (selectedComponent, essencePool) => {
     const { G, playerID } = this.props
     let sumDiscount = this.getDiscount(selectedComponent)
     let anyEssencePool
@@ -1879,7 +2080,7 @@ class ResArcanaBoard extends Component {
       return { valid }
     }
     const costEssenceList = copy(selectedComponent.costEssenceList)
-    const availableEssencePool = copy(G.publicData.players[playerID].essencesPool)
+    const availableEssencePool = essencePool ? essencePool : copy(G.publicData.players[playerID].essencesPool)
 
     // Object containing the minimum numbers for each essence the player have to pay to place the component.
     let minEssencePayList = { elan: 0, life: 0, calm: 0, death: 0, gold: 0 }
@@ -2246,15 +2447,12 @@ class ResArcanaBoard extends Component {
       playerID,
       profile,
       selectAction,
-      selectActionPower,
       selectedAction,
-      selectedActionPower,
       selectedComponent,
     } = this.props
 
     let availableActions
     let costValid
-    let actionValid
     let showConfirmButton = true
     let handleConfirm
     let handleCancel = event => {
@@ -2303,18 +2501,13 @@ class ResArcanaBoard extends Component {
         handleConfirm = () => this.discardArtefact(selectedComponent.id, essencePickerSelection.discardGain)
         handleCancel = () => selectAction('HAND')
         break
-      case 'PLAY':
-        actionValid = this.actionPowerValidator()
-        availableActions = this.renderInPlayActions()
-        if (
-          selectedComponent.hasActionPower &&
-          selectedComponent.actionPowerList.length > 1 &&
-          selectedActionPower >= 0
-        ) {
-          handleCancel = () => selectActionPower()
-        }
-        handleConfirm = actionValid ? () => this.activatePower() : null
+      case 'PLAY': {
+        let inPlayAction = this.renderInPlayActions()
+        availableActions = inPlayAction.action
+        if (inPlayAction.handleCancel) handleCancel = inPlayAction.handleCancel
+        handleConfirm = inPlayAction.handleConfirm
         break
+      }
       case 'CLAIM':
         costValid = this.placementCostComparator(
           essencePickerSelection.placementCost,

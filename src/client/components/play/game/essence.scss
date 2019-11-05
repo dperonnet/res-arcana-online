@@ -269,19 +269,13 @@
   background-size: 310px 38px;
   background-position: -190px -16px;
   background-repeat: no-repeat;
-}
 
-.pay-ok {
-  display: block;
-  position: absolute;
-  left: 2px;
-  bottom: 0;
-  height: 16px;
-  width: 16px;
-  background-image: url("../../../assets/image/game_icons.png");
-  background-size: 310px 38px;
-  background-position: -174px -16px;
-  background-repeat: no-repeat;
+  &.ok {
+    background-position: -174px -16px;
+  }  
+  &.ko {
+    background-position: -190px -16px;
+  }
 }
 
 .operator {

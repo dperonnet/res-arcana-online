@@ -103,11 +103,11 @@ class EssencePicker extends Component {
       if (isValid) {
         renderedCount = selection[type] ? renderedCount + 1 : renderedCount
         let refListLength = Object.values(selection).filter(value => value > 0).length
-        hidePlus = enabled && !fade && renderedCount === refListLength ? ' fade-option' : ''
+        hidePlus = (enabled && renderedCount === refListLength) || fade ? ' fade-option' : ''
       } else {
         if (index < essenceList.length - 1) {
           let nextEssenceInList = essenceList[index + 1]
-          hidePlus = enabled && !fade && !enabledEssences.includes(nextEssenceInList) ? ' fade-option' : ''
+          hidePlus = (enabled && !essenceList.includes(nextEssenceInList)) || fade ? ' fade-option' : ''
         }
       }
 

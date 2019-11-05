@@ -905,6 +905,11 @@ const drawCard = (G, ctx) => {
 /**
  * Role: Move
  * Activate the power of a component.
+ *
+ * @param {*} component the component carrying the activated power
+ * @param {*} actionId the id (index) of the activated power
+ * @param {*} selection selected essences required to activate the power
+ * @param {*} target targeted component required to activate the power
  */
 const activatePower = (G, ctx, component, actionId, selection, target) => {
   const playerID = ctx.currentPlayer
@@ -947,6 +952,21 @@ const activatePower = (G, ctx, component, actionId, selection, target) => {
             G.publicData.players[playerID].essencesPool[essence[0]] - essence[1]
         }
       })
+  }
+  if (action.cost.destroySelf) {
+    let selectedComponent = copy(
+      G.publicData.players[playerID].inPlay.filter(componentInPlay => {
+        return componentInPlay.id === component.id
+      })[0]
+    )
+
+    G.publicData.players[playerID].inPlay = copy(
+      G.publicData.players[playerID].inPlay.filter(componentInPlay => {
+        return componentInPlay.id !== component.id
+      })
+    )
+
+    G.publicData.players[playerID].discard.push(selectedComponent)
   }
 
   if (action.gain.essenceList) {
@@ -1009,6 +1029,7 @@ const activatePower = (G, ctx, component, actionId, selection, target) => {
           })
       })
   }
+
   G.publicData.players[playerID].status = 'ACTION_COMPLETED'
 
   return G

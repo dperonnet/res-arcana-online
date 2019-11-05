@@ -198,7 +198,7 @@
   text-align: center;
 }
 
-.dialog-panel {
+.dialog-panel, .modal-content {
   display: block;
   margin: 0 auto;
   padding: 8px;
@@ -360,6 +360,38 @@
       }
     }
 
+    .target-button {
+      width: fit-content;
+      height: auto;
+      margin: 0;
+      padding: 4px 8px;
+      display: inline-block;
+
+      background-color: rgba(244, 189, 115, 0.38);
+      border: 2px solid rgb(114, 72, 9);
+      border-radius: 4px;
+
+      color: #444;
+      font-weight: bold;
+      font-size: medium;
+
+      background-blend-mode: color-burn;
+      background-image: url('../../../assets/image/background_action.png');
+      background-repeat: repeat-x;
+      background-size: 400px 400px;
+      background-position: -42px;
+
+      align-items: center;
+      text-align: center;
+      justify-content: center;
+      cursor: pointer;
+
+      &:hover:not(.disabled),
+      &.valid:hover {
+        background-color: rgba(252, 209, 122, 0.7);
+      }
+    }
+
     .essence-picker {
       width: fit-content;
     }
@@ -464,13 +496,13 @@
   right: 16px;
 }
 .small .draw-pile {
-  margin-left: 62px;
+  margin-left: 64px;
 }
 .large .draw-pile {
-  margin-left: 80px;
+  margin-left: 82px;
 }
 .x-large .draw-pile {
-  margin-left: 86px;
+  margin-left: 88px;
 }
 
 .component-legend {
@@ -533,10 +565,11 @@
 
   .inline-icons {
     margin-left: 4px;
-    margin-top: -11px;
+    margin-top: -6px;
   }
 }
 .component-cost {
+  margin: 0 auto 20px;
   padding: 0 15px;
 }
 .cost-frame {
@@ -551,7 +584,7 @@
   position: relative;
 
   .single-essence.essence {
-    margin-left: 4px;
+    margin-left: 2px;
   }
 
   .cost-frame-content {
@@ -633,4 +666,21 @@
 .essence-picker {
   display: inline-block;
   vertical-align: top;
+}
+
+.target-selection-modal {
+  background-color: rgba(34, 34, 34, 0.8);
+  width: 100%;
+  max-width: 700px;
+  margin: 54px auto;
+  border: 1px solid #f5b041;
+
+  .modal-content {
+    color: #eee;
+    background-color: rgba(34, 34, 34, 0.8);
+    padding: 12px;
+    h5 {
+      text-align: center;
+    }
+  }
 }

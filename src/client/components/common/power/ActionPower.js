@@ -98,7 +98,7 @@ export default class ActionPower extends Component {
         {action.cost.destroyOneDragonOrCreature && (
           <>
             +
-            <div className="action-text">
+            <div className="action-text max-90">
               destroy one of your <i>dragons</i> or <i>creatures</i>
             </div>
           </>

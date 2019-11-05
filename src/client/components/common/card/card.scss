@@ -46,15 +46,15 @@ $xx-large: 241px;
 $zoom: 320px;
 
 @mixin aspect-ratio($height, $ratio) {
-  height: $height;
-  width: ($height * $ratio);
+  height: round($height);
+  width: round($height * $ratio);
 
   &.turned, &.discarded {
-    width: $height;
-    height: $height * $ratio;
+    width: round($height);
+    height: round($height * $ratio);
     img {
-      top: ($height * $ratio - $height) /2;
-      left: ($height - $height * $ratio) /2;
+      top: round(($height * $ratio - $height) /2);
+      left: round(($height - $height * $ratio) /2);
     }
   }
 }
